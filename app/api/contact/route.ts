@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const contactData = { name, phone, email, plz, service, message };
     const adminEmail = buildAdminNotificationEmail(contactData);
     const toEmail = process.env.CONTACT_EMAIL ?? siteConfig.contact.email;
-    const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <onboarding@resend.dev>";
+    const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
 
     const { error: adminError } = await resend.emails.send({
       from: fromEmail,
