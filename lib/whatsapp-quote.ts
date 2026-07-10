@@ -24,7 +24,7 @@ export function buildWhatsAppQuoteMessage(data: QuoteFormData) {
   const estimate = calculatePriceEstimate(data);
   const priceLine = estimate
     ? estimate.amount > 0
-      ? `Geschätzter Preis: ca. ${formatEuro(estimate.min)}–${formatEuro(estimate.max)}`
+      ? `${siteConfig.messaging.priceEstimateRowLabel}: ca. ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} (unverbindlich)`
       : `Preis: ${estimate.label}`
     : "";
 

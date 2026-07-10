@@ -32,7 +32,7 @@ export function WhyUs() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative overflow-hidden">
             <div className="bg-white rounded-3xl shadow-2xl shadow-primary/10 p-6 sm:p-8 border border-border">
               <div className="relative aspect-4/3 overflow-hidden rounded-2xl ring-1 ring-black/5">
                 <Image
@@ -86,9 +86,11 @@ export function WhyUs() {
               </div>
             </div>
 
-            <div className="absolute -bottom-4 -left-4 rounded-2xl bg-accent p-4 text-white shadow-xl">
-              <div className="text-2xl font-bold leading-none">100%</div>
-              <div className="mt-1 text-xs opacity-90">Zufriedenheit</div>
+            <div className="mt-4 sm:absolute sm:bottom-4 sm:left-4 sm:mt-0 inline-flex rounded-2xl bg-accent px-4 py-3 text-white shadow-xl">
+              <div>
+                <div className="text-2xl font-bold leading-none">100%</div>
+                <div className="mt-1 text-xs opacity-90">Zufriedenheit</div>
+              </div>
             </div>
           </div>
         </div>

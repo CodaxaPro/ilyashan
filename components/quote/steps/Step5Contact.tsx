@@ -64,8 +64,10 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
           <p className="text-primary font-bold mb-2">Anfrage-Nr.: {anfrageNr}</p>
         )}
         <p className="text-muted">
-          Ihre Anfrage wurde gesendet. Wir melden uns innerhalb von{" "}
-          {siteConfig.business.responseTime} mit Ihrem Festpreis-Angebot.
+          {siteConfig.messaging.submitSuccess.replace(
+            "24 Stunden",
+            siteConfig.business.responseTime
+          )}
           {data.email && (
             <> Die Eingangsbestätigung (PDF) wurde an {data.email} gesendet.</>
           )}
@@ -78,8 +80,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
     <div>
       <h2 className="text-2xl font-bold mb-2">Ihre Kontaktdaten</h2>
       <p className="text-muted mb-8">
-        Prüfen Sie Ihre Kalkulation und senden Sie die Anfrage – per E-Mail mit PDF oder direkt
-        per WhatsApp.
+        {siteConfig.messaging.wizardStep5Hint}
       </p>
 
       <div className="mb-8 max-w-md">

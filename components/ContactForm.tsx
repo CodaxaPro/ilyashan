@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { routes } from "@/lib/routes";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { Button, PhoneIcon, WhatsAppIcon } from "@/components/ui/Button";
+import Link from "next/link";
 import { useState } from "react";
 
 interface ContactFormProps {
@@ -56,8 +57,10 @@ export function ContactForm({ compact = false }: ContactFormProps) {
         </div>
         <h3 className="text-2xl font-bold mb-2">Vielen Dank!</h3>
         <p className="text-muted">
-          Ihre Anfrage wurde gesendet. Wir melden uns innerhalb von{" "}
-          {siteConfig.business.responseTime} bei Ihnen mit einem kostenlosen Angebot.
+          {siteConfig.messaging.submitSuccess.replace(
+            "24 Stunden",
+            siteConfig.business.responseTime
+          )}
         </p>
       </div>
     );
@@ -65,6 +68,17 @@ export function ContactForm({ compact = false }: ContactFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {!compact && (
+        <p className="text-sm text-muted leading-relaxed rounded-xl bg-primary-light/40 border border-primary/10 px-4 py-3">
+          {siteConfig.messaging.legacyFormHint.replace(
+            "24 Stunden",
+            siteConfig.business.responseTime
+          )}{" "}
+          <Link href={routes.angebot} className="text-primary font-semibold hover:underline">
+            {siteConfig.messaging.ctaPrimary} →
+          </Link>
+        </p>
+      )}
       <input
         type="text"
         name="website"
@@ -194,7 +208,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
       )}
 
       <Button type="submit" variant="primary" size="lg" className="w-full">
-        {loading ? "Wird gesendet..." : "Kostenloses Angebot anfordern"}
+        {loading ? "Wird gesendet..." : siteConfig.messaging.ctaSubmitSimple}
       </Button>
 
       {!compact && (

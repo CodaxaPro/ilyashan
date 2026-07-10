@@ -1,5 +1,4 @@
-"use client";
-
+import { siteConfig } from "@/lib/config";
 import type { QuoteFormData, QuoteServiceId } from "@/lib/quote-form";
 import { quoteServices } from "@/lib/quote-form";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
@@ -60,8 +59,7 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
         Welche Leistung dürfen wir für Sie ausführen?
       </h2>
       <p className="text-muted mb-8">
-        Wählen Sie Ihre Hauptleistung. Wartungsvertrag optional zusätzlich buchbar – der Preis
-        wird live nach NRW-Marktpreisen berechnet.
+        {siteConfig.messaging.wizardStep1Hint}
       </p>
 
       <div className="grid sm:grid-cols-3 gap-4">

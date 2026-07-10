@@ -121,7 +121,10 @@ export function buildCustomerConfirmationEmail(data: ContactEmailData) {
       Wir haben Ihre Nachricht erhalten und bearbeiten diese umgehend.
     </p>
     ${buildInfoBox(
-      `Wir melden uns innerhalb von <strong>${siteConfig.business.responseTime}</strong> mit einem kostenlosen, unverbindlichen Festpreis-Angebot bei Ihnen.`
+      siteConfig.messaging.emailFollowUp.replace(
+        "24 Stunden",
+        siteConfig.business.responseTime
+      )
     )}
   <p style="margin:20px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Anfrage im Überblick</p>
     ${buildDataTable([
@@ -132,12 +135,7 @@ export function buildCustomerConfirmationEmail(data: ContactEmailData) {
     ])}
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Vorteile</p>
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-      ${[
-        "Kostenloses & unverbindliches Angebot",
-        "Kein Anfahrtszuschlag in Baesweiler, Aachen & Umgebung",
-        "Streifenfrei garantiert – vollversichert",
-        "Festpreis ohne versteckte Kosten",
-      ]
+      ${siteConfig.messaging.emailBullets
         .map(
           (item) => `
       <tr>
@@ -163,7 +161,7 @@ export function buildCustomerConfirmationEmail(data: ContactEmailData) {
     `Guten Tag ${firstName},`,
     "",
     "vielen Dank für Ihre Anfrage bei Ilyashan Fensterreinigung.",
-    "Wir haben Ihre Nachricht erhalten und melden uns innerhalb von 24 Stunden mit einem kostenlosen Festpreis-Angebot.",
+    "Wir haben Ihre Nachricht erhalten und melden uns innerhalb von 24 Stunden mit Ihrem verbindlichen Festpreis-Angebot.",
     "",
     "Ihre Anfrage:",
     `Leistung: ${serviceLabel}`,

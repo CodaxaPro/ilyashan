@@ -12,8 +12,7 @@ export function CTABanner() {
           Bereit für strahlend saubere Fenster?
         </h2>
         <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-          Fordern Sie jetzt Ihr kostenloses Angebot an – wir melden uns innerhalb von{" "}
-          {siteConfig.business.responseTime}.
+          {siteConfig.messaging.contactIntro}
         </p>
         <CTAButtons className="justify-center" />
       </div>

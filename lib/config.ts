@@ -2,7 +2,7 @@ export const siteConfig = {
   name: "Ilyashan Fensterreinigung",
   tagline: "Professionelle Fensterreinigung",
   description:
-    "Streifenfreie Fensterreinigung für Privat- und Gewerbekunden in Baesweiler, Aachen und Umgebung. Kein Anfahrtszuschlag, kostenloses Angebot, versichert und zuverlässig.",
+    "Streifenfreie Fensterreinigung in Baesweiler, Aachen und Umgebung. Live-Preisschätzung im Angebots-Wizard – verbindliches Festpreis-Angebot in 24 Stunden. Kein Anfahrtszuschlag, versichert.",
   url: "https://ilyashan.de/de",
   locale: "de-DE",
 
@@ -55,6 +55,61 @@ export const siteConfig = {
     rating: 4.9,
     reviews: 9,
     responseTime: "24 Stunden",
+  },
+
+  /** Kundenkommunikation: Live-Schätzung vs. verbindliches Festpreis-Angebot */
+  messaging: {
+    livePricingBadge: "Live-Preisrechner · Sofort sichtbar",
+    navAngebot: "Preise",
+    heroLead:
+      "Professionelle Fensterreinigung für Privat- und Gewerbekunden. In unserem Angebots-Wizard sehen Sie sofort eine transparente Preisschätzung – berechnet nach Fensterflügeln, Etage, Verschmutzung und Extras.",
+    heroFollow:
+      "Nach dem Absenden erhalten Sie innerhalb von 24 Stunden Ihr verbindliches Festpreis-Angebot – versichert, pünktlich, streifenfrei garantiert.",
+    angebotIntro:
+      "In 5 Schritten zur Sofort-Kalkulation: Mit jeder Auswahl aktualisiert sich Ihr Preis live. Nach dem Absenden erhalten Sie innerhalb von 24 Stunden Ihr verbindliches Festpreis-Angebot – inkl. PDF-Eingangsbestätigung.",
+    contactIntro:
+      "Unser Angebots-Wizard zeigt Ihnen sofort eine transparente Preisschätzung. Nach dem Absenden bestätigen wir Ihre Anfrage und senden Ihr verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
+    servicesIntro:
+      "Von der Einzelwohnung bis zur Glasfassade – streifenfreie Ergebnisse mit Live-Preisschätzung und verbindlichem Festpreis-Angebot.",
+    servicesFootnote:
+      "Im Angebots-Wizard sehen Sie eine live aktualisierte Preisschätzung – Ihr verbindliches Festpreis-Angebot folgt innerhalb von 24 Stunden.",
+    footerTagline:
+      "Professionelle Fensterreinigung mit Live-Preisschätzung online. Verbindliches Festpreis-Angebot in 24 Stunden – kein Anfahrtszuschlag, versichert, streifenfrei.",
+    sectionTitle: "Jetzt Preis berechnen",
+    wizardCardTitle: "5-Schritte Preisrechner",
+    wizardCardDesc:
+      "Wählen Sie Leistungen und Objektdetails – die Preisschätzung aktualisiert sich bei jeder Auswahl live. Anschließend Termin und Kontaktdaten.",
+    wizardBenefits: [
+      "Live-Preisschätzung während der Eingabe",
+      "Verbindliches Festpreis-Angebot in 24 Stunden",
+      "PDF-Eingangsbestätigung per E-Mail",
+      "Alternativ per WhatsApp absenden",
+    ],
+    wizardStep1Hint:
+      "Wählen Sie Ihre Hauptleistung. Wartungsvertrag optional zusätzlich buchbar – der Preis wird live nach NRW-Marktpreisen berechnet.",
+    wizardStep5Hint:
+      "Prüfen Sie Ihre Live-Preisschätzung und senden Sie die Anfrage – per E-Mail mit PDF oder direkt per WhatsApp. Wir melden uns mit Ihrem verbindlichen Festpreis-Angebot.",
+    priceEstimateLabel: "Live-Preisschätzung",
+    priceEstimateRowLabel: "Live-Preisschätzung",
+    priceEstimateNote:
+      "Unverbindliche Schätzung – verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
+    priceEstimateEmailLabel: "Live-Preisschätzung (unverbindlich)",
+    submitSuccess:
+      "Ihre Anfrage wurde gesendet. Die angezeigte Preisschätzung diente als Orientierung – Ihr verbindliches Festpreis-Angebot erhalten Sie innerhalb von 24 Stunden.",
+    emailFollowUp:
+      "Wir melden uns innerhalb von 24 Stunden mit Ihrem verbindlichen Festpreis-Angebot – basierend auf Ihrer Anfrage und der angezeigten Live-Preisschätzung.",
+    emailBullets: [
+      "Live-Preisschätzung bereits im Wizard",
+      "Verbindliches Festpreis-Angebot in 24 Stunden",
+      "Festpreis ohne versteckte Kosten",
+      "Kein Anfahrtszuschlag in unserem Einsatzgebiet",
+    ],
+    legacyFormHint:
+      "Für eine Sofort-Preisschätzung empfehlen wir unseren Angebots-Wizard. Mit diesem Formular senden Sie eine allgemeine Anfrage – Ihr verbindliches Festpreis-Angebot folgt innerhalb von 24 Stunden.",
+    ctaSubmitSimple: "Anfrage absenden",
+    ctaPrimary: "Preis jetzt berechnen",
+    ctaSecondary: "Kostenloses Angebot",
+    trustLivePrice: "Sofort-Preisschätzung online",
   },
 
   services: [
@@ -118,8 +173,9 @@ export const siteConfig = {
       description: "Betriebshaftpflichtversicherung für Ihre Sicherheit und unser Vertrauen.",
     },
     {
-      title: "Festpreis-Angebot",
-      description: "Transparente Preise ohne versteckte Kosten. Kostenloses Angebot in 24h.",
+      title: "Transparente Preiskalkulation",
+      description:
+        "Sofort-Preisschätzung online – Ihr verbindliches Festpreis-Angebot folgt innerhalb von 24 Stunden.",
     },
     {
       title: "Pünktlich & zuverlässig",
@@ -130,13 +186,15 @@ export const siteConfig = {
   process: [
     {
       step: 1,
-      title: "Anfrage stellen",
-      description: "Formular ausfüllen oder anrufen – wir melden uns innerhalb von 24 Stunden.",
+      title: "Preis sofort berechnen",
+      description:
+        "Im Angebots-Wizard Flügel, Etage und Extras wählen – die Preisschätzung aktualisiert sich live.",
     },
     {
       step: 2,
-      title: "Kostenloses Angebot",
-      description: "Wir erstellen ein transparentes Festpreis-Angebot – unverbindlich und klar.",
+      title: "Festpreis erhalten",
+      description:
+        "Anfrage absenden – wir senden Ihr verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
     },
     {
       step: 3,
@@ -242,12 +300,17 @@ export const siteConfig = {
     {
       question: "Was kostet eine Fensterreinigung?",
       answer:
-        "Die Kosten hängen von Fensteranzahl, Größe, Zugänglichkeit und Reinigungsumfang ab. Orientierung für Baesweiler & Aachen: kleine Wohnung (ca. 8 Fenster, einseitig) ab 49 €, Wohnung beidseitig inkl. Rahmen ab 79 €, Einfamilienhaus ab 99 €. Pro Fenster liegt der Marktpreis bei ca. 2,50–5 €. Wir erstellen Ihnen ein kostenloses, unverbindliches Festpreis-Angebot – ohne versteckte Kosten.",
+        "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine transparente Preisschätzung – basierend auf Fensterflügeln, Reinigungsumfang, Etage und Extras. Die Kalkulation orientiert sich an NRW-Marktpreisen (ab 49 € Mindestauftrag Wohnung). Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot – ohne versteckte Kosten und ohne Anfahrtszuschlag in unserem Einsatzgebiet.",
+    },
+    {
+      question: "Was ist der Unterschied zwischen Preisschätzung und Festpreis-Angebot?",
+      answer:
+        "Die Live-Preisschätzung im Wizard gibt Ihnen sofort eine transparente Orientierung – sie aktualisiert sich bei jeder Auswahl und ist unverbindlich. Nach dem Absenden Ihrer Anfrage prüfen wir Ihre Angaben und senden Ihnen innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot per E-Mail. Erst dieses Angebot ist der offizielle, feste Preis für Ihren Auftrag.",
     },
     {
       question: "Wie schnell bekomme ich ein Angebot?",
       answer:
-        "In der Regel innerhalb von 24 Stunden nach Ihrer Anfrage. Bei dringenden Terminen rufen Sie uns direkt an.",
+        "Die Sofort-Preisschätzung sehen Sie direkt im Wizard – noch während Sie Ihre Angaben machen. Ihr verbindliches Festpreis-Angebot senden wir in der Regel innerhalb von 24 Stunden nach Ihrer Anfrage. Bei dringenden Terminen rufen Sie uns direkt an.",
     },
     {
       question: "Sind Sie versichert?",

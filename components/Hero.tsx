@@ -21,7 +21,7 @@ export function Hero() {
           <div>
             <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-2 text-white text-sm font-medium mb-6">
               <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Jetzt Termine verfügbar in {siteConfig.contact.region}
+              {siteConfig.messaging.livePricingBadge}
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6">
@@ -34,19 +34,41 @@ export function Hero() {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-white/90 mb-8 max-w-xl leading-relaxed">
-              Professionelle Fensterreinigung für Privat- und Gewerbekunden.
-              Kostenloses Festpreis-Angebot in {siteConfig.business.responseTime} – versichert, pünktlich, garantiert streifenfrei.
+            <p className="text-lg sm:text-xl text-white/90 mb-4 max-w-xl leading-relaxed">
+              {siteConfig.messaging.heroLead}
+            </p>
+            <p className="text-base sm:text-lg text-white/75 mb-8 max-w-xl leading-relaxed">
+              {siteConfig.messaging.heroFollow}
             </p>
 
-            <CTAButtons className="mb-10" />
+            <CTAButtons className="mb-8" />
+
+            <div className="lg:hidden grid grid-cols-2 gap-3 mb-8">
+              {[
+                { value: siteConfig.business.rating, label: "Google ★", suffix: "" },
+                { value: siteConfig.business.customers, label: "Kunden", suffix: "" },
+                { value: siteConfig.business.responseTime, label: "Antwortzeit", suffix: "" },
+                { value: "100%", label: "Zufriedenheit", suffix: "" },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-2xl bg-white/15 backdrop-blur border border-white/20 px-4 py-3 text-center"
+                >
+                  <div className="text-xl font-bold text-white">
+                    {stat.value}
+                    {stat.suffix}
+                  </div>
+                  <div className="text-white/75 text-[11px] mt-0.5">{stat.label}</div>
+                </div>
+              ))}
+            </div>
 
             <div className="flex flex-wrap gap-6 text-white/90 text-sm">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                 </svg>
-                Kostenloses Angebot
+                {siteConfig.messaging.trustLivePrice}
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">

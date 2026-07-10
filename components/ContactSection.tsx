@@ -16,14 +16,14 @@ export function ContactSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="text-primary font-semibold text-sm uppercase tracking-wider">Kostenloses Angebot</span>
+            <span className="text-primary font-semibold text-sm uppercase tracking-wider">
+              {siteConfig.messaging.livePricingBadge}
+            </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold mt-3 mb-4">
-              Jetzt unverbindlich anfragen
+              {siteConfig.messaging.sectionTitle}
             </h2>
             <p className="text-muted text-lg mb-8 leading-relaxed">
-              In 5 kurzen Schritten erhalten Sie innerhalb von{" "}
-              {siteConfig.business.responseTime} ein transparentes Festpreis-Angebot – inkl.
-              PDF-Eingangsbestätigung per E-Mail.
+              {siteConfig.messaging.contactIntro}
             </p>
 
             <div className="space-y-4 mb-8">
@@ -38,7 +38,7 @@ export function ContactSection() {
             </div>
 
             <Button href={routes.angebot} variant="primary" size="lg" className="w-full sm:w-auto">
-              Angebot-Wizard starten
+              {siteConfig.messaging.ctaPrimary}
             </Button>
 
             <div className="mt-8 p-6 bg-white rounded-2xl border border-border">
@@ -71,17 +71,12 @@ export function ContactSection() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
                 </svg>
               </div>
-              <h3 className="text-2xl font-bold mb-3">5-Schritte Angebot</h3>
+              <h3 className="text-2xl font-bold mb-3">{siteConfig.messaging.wizardCardTitle}</h3>
               <p className="text-muted mb-6 leading-relaxed">
-                Wählen Sie Leistungen, geben Sie Objektdetails an und erhalten Sie sofort eine
-                Preisschätzung – danach Termin und Kontaktdaten.
+                {siteConfig.messaging.wizardCardDesc}
               </p>
               <ul className="text-left space-y-2 mb-8 text-sm">
-                {[
-                  "Live-Preisschätzung während der Eingabe",
-                  "PDF-Eingangsbestätigung per E-Mail",
-                  "Alternativ per WhatsApp absenden",
-                ].map((item) => (
+                {siteConfig.messaging.wizardBenefits.map((item) => (
                   <li key={item} className="flex items-start gap-2">
                     <span className="text-accent font-bold mt-0.5">✓</span>
                     {item}
@@ -89,7 +84,7 @@ export function ContactSection() {
                 ))}
               </ul>
               <Button href={routes.angebot} variant="primary" size="lg" className="w-full">
-                Jetzt Angebot anfordern
+                {siteConfig.messaging.ctaPrimary}
               </Button>
             </div>
           </div>

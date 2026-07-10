@@ -16,8 +16,10 @@ export function Footer() {
               <span className="font-bold text-white text-lg">{siteConfig.name}</span>
             </div>
             <p className="text-sm leading-relaxed">
-              Professionelle Fensterreinigung in {siteConfig.contact.region}.
-              Kein Anfahrtszuschlag – streifenfrei, versichert, zuverlässig.
+              {siteConfig.messaging.footerTagline.replace(
+                "24 Stunden",
+                siteConfig.business.responseTime
+              )}
             </p>
           </div>
 

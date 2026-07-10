@@ -105,7 +105,9 @@ function DataTable({ rows }: { rows: [string, string][] }) {
 export function QuoteConfirmationDocument({ data, anfrageNr }: QuoteConfirmationDocumentProps) {
   const name = getQuoteContactName(data);
   const date = new Date().toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(([k]) => k === "Geschätzter Preis");
+  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
+    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
+  );
 
   return (
     <Document>
@@ -125,19 +127,19 @@ export function QuoteConfirmationDocument({ data, anfrageNr }: QuoteConfirmation
         <Text style={{ fontSize: 11, marginBottom: 12, lineHeight: 1.5 }}>
           Guten Tag {name || "Kunde/in"},{"\n"}
           vielen Dank für Ihre Anfrage. Wir haben Ihre Angaben erhalten und melden uns
-          innerhalb von {siteConfig.business.responseTime} mit einem verbindlichen Festpreis-Angebot.
+          innerhalb von {siteConfig.business.responseTime} mit Ihrem verbindlichen Festpreis-Angebot.
         </Text>
 
         <Text style={styles.sectionTitle}>Kontakt</Text>
         <DataTable rows={buildQuoteContactRows(data)} />
 
         <Text style={styles.sectionTitle}>Anfragedetails</Text>
-        <DataTable rows={buildQuoteTableRows(data, anfrageNr).filter(([k]) => k !== "Geschätzter Preis")} />
+        <DataTable rows={buildQuoteTableRows(data, anfrageNr).filter(([k]) => k !== siteConfig.messaging.priceEstimateRowLabel)} />
 
         {priceRow && (
           <View style={styles.priceBox}>
             <Text style={{ fontSize: 9, color: "#64748b", marginBottom: 4 }}>
-              Geschätzter Festpreis (unverbindlich)
+              {siteConfig.messaging.priceEstimateEmailLabel}
             </Text>
             <Text style={styles.priceText}>{priceRow[1]}</Text>
           </View>
@@ -154,7 +156,7 @@ export function QuoteConfirmationDocument({ data, anfrageNr }: QuoteConfirmation
             Tel: {siteConfig.contact.phoneDisplay} · E-Mail: {siteConfig.contact.email} · ilyashan.de
           </Text>
           <Text style={{ marginTop: 8 }}>
-            Diese Eingangsbestätigung wurde automatisch erstellt. Der finale Festpreis wird separat mitgeteilt.
+            Diese Eingangsbestätigung wurde automatisch erstellt. Die Live-Preisschätzung war unverbindlich – Ihr verbindlicher Festpreis folgt innerhalb von {siteConfig.business.responseTime}.
           </Text>
         </View>
       </Page>

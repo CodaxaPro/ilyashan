@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import { GoogleAdsTag } from "@/components/GoogleAdsTag";
+import { CookieConsent } from "@/components/CookieConsent";
 import { siteConfig } from "@/lib/config";
 import { getLocalBusinessSchema, getFAQSchema, getServiceSchema } from "@/lib/schema";
 import "./globals.css";
@@ -56,6 +56,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,7 +72,6 @@ export default function RootLayout({
   return (
     <html lang="de">
       <head>
-        <GoogleAdsTag />
         {schemas.map((schema, i) => (
           <script
             key={i}
@@ -77,6 +82,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} antialiased`}>
         {children}
+        <CookieConsent />
       </body>
     </html>
   );

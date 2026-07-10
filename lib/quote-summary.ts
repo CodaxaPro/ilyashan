@@ -1,3 +1,4 @@
+import { siteConfig } from "@/lib/config";
 import type { QuoteFormData } from "@/lib/quote-form";
 import {
   cleaningSideLabels,
@@ -87,7 +88,7 @@ export function buildQuoteTableRows(data: QuoteFormData, anfrageNr: string): [st
     ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide]],
     ["Reinigungswünsche", getReinigungswünscheLabel(data)],
     ["Wunschtermin", getTerminLabel(data)],
-    ["Geschätzter Preis", getPriceLabel(data)],
+    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data)],
   ];
 
   if (data.narrowStairs) rows.push(["Zugang", "Enge Treppe (+15 €)"]);

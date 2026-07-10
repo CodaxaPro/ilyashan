@@ -96,7 +96,7 @@ export function CTAButtons({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
       <Button href={routes.angebot} variant="primary" size="lg">
-        Kostenloses Angebot
+        {siteConfig.messaging.ctaPrimary}
       </Button>
       <Button href={`tel:${siteConfig.contact.phone}`} variant="outline" size="lg">
         <PhoneIcon />

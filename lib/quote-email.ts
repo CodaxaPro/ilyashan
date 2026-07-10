@@ -44,7 +44,9 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string) {
   const services = getServicesLabel(data);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const phoneClean = cleanPhone(data.phone);
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(([k]) => k === "Geschätzter Preis");
+  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
+    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
+  );
   const price = priceRow?.[1] ?? "";
 
   const whatsappText = encodeURIComponent(
@@ -87,8 +89,12 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string) {
 export function buildQuoteCustomerEmail(data: QuoteFormData, anfrageNr: string) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
-  const detailRows = buildQuoteTableRows(data, anfrageNr).filter(([k]) => k !== "Geschätzter Preis");
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(([k]) => k === "Geschätzter Preis");
+  const detailRows = buildQuoteTableRows(data, anfrageNr).filter(
+    ([k]) => k !== siteConfig.messaging.priceEstimateRowLabel
+  );
+  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
+    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
+  );
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -99,9 +105,12 @@ export function buildQuoteCustomerEmail(data: QuoteFormData, anfrageNr: string) 
       Wir haben Ihre Angaben erhalten (<strong>${escapeHtml(anfrageNr)}</strong>) und bearbeiten diese umgehend.
     </p>
     ${buildInfoBox(
-      `Wir melden uns innerhalb von <strong>${siteConfig.business.responseTime}</strong> mit einem kostenlosen, unverbindlichen Festpreis-Angebot bei Ihnen.`
+      siteConfig.messaging.emailFollowUp.replace(
+        "24 Stunden",
+        siteConfig.business.responseTime
+      )
     )}
-    ${priceRow ? buildInfoBox(`Geschätzter Festpreis (unverbindlich): <strong>${escapeHtml(priceRow[1])}</strong>`) : ""}
+    ${priceRow ? buildInfoBox(`${siteConfig.messaging.priceEstimateEmailLabel}: <strong>${escapeHtml(priceRow[1])}</strong>`) : ""}
     <p style="margin:20px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Anfrage im Überblick</p>
     ${buildDataTable(detailRows)}
     <p style="margin:16px 0 0;font-size:13px;color:#64748b;line-height:1.6;">
@@ -109,12 +118,7 @@ export function buildQuoteCustomerEmail(data: QuoteFormData, anfrageNr: string) 
     </p>
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Vorteile</p>
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-      ${[
-        "Kostenloses & unverbindliches Angebot",
-        "Kein Anfahrtszuschlag in Baesweiler, Aachen & Umgebung",
-        "Streifenfrei garantiert – vollversichert",
-        "Festpreis ohne versteckte Kosten",
-      ]
+      ${siteConfig.messaging.emailBullets
         .map(
           (item) => `
       <tr>
@@ -140,10 +144,10 @@ export function buildQuoteCustomerEmail(data: QuoteFormData, anfrageNr: string) 
     `Guten Tag ${firstName},`,
     "",
     `vielen Dank für Ihre Anfrage (${anfrageNr}).`,
-    "Wir melden uns innerhalb von 24 Stunden mit Ihrem Festpreis-Angebot.",
+    "Wir melden uns innerhalb von 24 Stunden mit Ihrem verbindlichen Festpreis-Angebot.",
     "",
     ...detailRows.map(([k, v]) => `${k}: ${v}`),
-    priceRow ? `Geschätzter Preis: ${priceRow[1]}` : "",
+    priceRow ? `${siteConfig.messaging.priceEstimateRowLabel}: ${priceRow[1]}` : "",
     "",
     "Mit freundlichen Grüßen",
     siteConfig.name,

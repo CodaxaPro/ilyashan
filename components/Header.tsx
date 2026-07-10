@@ -14,7 +14,7 @@ const navLinks = [
   { href: "#ablauf", label: "Ablauf", isPage: false },
   { href: "#bewertungen", label: "Bewertungen", isPage: false },
   { href: "#faq", label: "FAQ", isPage: false },
-  { href: routes.angebot, label: "Angebot", isPage: true },
+  { href: routes.angebot, label: siteConfig.messaging.navAngebot, isPage: true },
 ];
 
 export function Header() {
@@ -23,6 +23,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const solid = !isHome || scrolled;
+  const showSolid = solid || menuOpen;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -30,10 +31,19 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [menuOpen]);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        solid
+        showSolid
           ? "bg-white/95 backdrop-blur-md shadow-md py-3"
           : "bg-transparent py-5"
       }`}
@@ -43,7 +53,7 @@ export function Header() {
           <Link href={routes.home} className="flex items-center gap-2 group">
             <div
               className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg transition-colors ${
-                solid
+                showSolid
                   ? "bg-primary text-white"
                   : "bg-white/20 text-white backdrop-blur"
               }`}
@@ -53,14 +63,14 @@ export function Header() {
             <div>
               <span
                 className={`font-bold text-lg leading-tight block ${
-                  solid ? "text-foreground" : "text-white"
+                  showSolid ? "text-foreground" : "text-white"
                 }`}
               >
                 {siteConfig.name}
               </span>
               <span
                 className={`text-xs ${
-                  solid ? "text-muted" : "text-white/80"
+                  showSolid ? "text-muted" : "text-white/80"
                 }`}
               >
                 {siteConfig.contact.region}
@@ -75,7 +85,7 @@ export function Header() {
                   key={link.href}
                   href={link.href}
                   className={`text-sm font-medium transition-colors hover:text-primary ${
-                    solid ? "text-foreground/80" : "text-white/90"
+                    showSolid ? "text-foreground/80" : "text-white/90"
                   }`}
                 >
                   {link.label}
@@ -85,7 +95,7 @@ export function Header() {
                   key={link.href}
                   href={isHome ? link.href : `${routes.home}${link.href}`}
                   className={`text-sm font-medium transition-colors hover:text-primary ${
-                    solid ? "text-foreground/80" : "text-white/90"
+                    showSolid ? "text-foreground/80" : "text-white/90"
                   }`}
                 >
                   {link.label}
@@ -98,23 +108,23 @@ export function Header() {
             <a
               href={`tel:${siteConfig.contact.phone}`}
               className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
-                solid ? "text-primary" : "text-white"
+                showSolid ? "text-primary" : "text-white"
               }`}
             >
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
             <Button href={routes.angebot} variant="primary" size="sm">
-              Angebot anfordern
+              {siteConfig.messaging.ctaPrimary}
             </Button>
           </div>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className={`lg:hidden p-2 rounded-lg ${
-              solid ? "text-foreground" : "text-white"
+              showSolid ? "text-foreground" : "text-white"
             }`}
-            aria-label="Menü öffnen"
+            aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"}
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               {menuOpen ? (
@@ -127,7 +137,11 @@ export function Header() {
         </div>
 
         {menuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 border-t border-white/20 pt-4 space-y-3">
+          <nav
+            className={`lg:hidden mt-4 pb-4 pt-4 space-y-3 ${
+              showSolid ? "border-t border-border" : "border-t border-white/20"
+            }`}
+          >
             {navLinks.map((link) =>
               link.isPage ? (
                 <Link
@@ -135,7 +149,7 @@ export function Header() {
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
                   className={`block text-sm font-medium py-2 ${
-                    solid ? "text-foreground" : "text-white"
+                    showSolid ? "text-foreground" : "text-white"
                   }`}
                 >
                   {link.label}
@@ -146,7 +160,7 @@ export function Header() {
                   href={isHome ? link.href : `${routes.home}${link.href}`}
                   onClick={() => setMenuOpen(false)}
                   className={`block text-sm font-medium py-2 ${
-                    solid ? "text-foreground" : "text-white"
+                    showSolid ? "text-foreground" : "text-white"
                   }`}
                 >
                   {link.label}
@@ -156,14 +170,14 @@ export function Header() {
             <a
               href={`tel:${siteConfig.contact.phone}`}
               className={`flex items-center gap-2 text-sm font-semibold py-2 ${
-                solid ? "text-primary" : "text-white"
+                showSolid ? "text-primary" : "text-white"
               }`}
             >
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
             <Button href={routes.angebot} variant="primary" size="md" className="w-full">
-              Angebot anfordern
+              {siteConfig.messaging.ctaPrimary}
             </Button>
           </nav>
         )}

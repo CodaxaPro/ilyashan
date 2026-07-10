@@ -3,6 +3,7 @@ import type {
   FloorLevel,
   QuoteFormData,
 } from "@/lib/quote-form";
+import { siteConfig } from "@/lib/config";
 import { RECOMMENDED_PRICING as P } from "@/lib/pricing-market-research";
 
 export interface PriceLineItem {
@@ -266,10 +267,10 @@ export function calculatePriceEstimate(data: Partial<QuoteFormData>): PriceEstim
     minimum,
     minimumApplied,
     breakdown,
-    "Geschätzter Festpreis",
+    siteConfig.messaging.priceEstimateLabel,
     minimumApplied
       ? `Berechnet: ${Math.round(calculatedSubtotal)} € – Mindestauftrag ${minimum} € greift.`
-      : "Unverbindliche Schätzung – verbindliches Angebot innerhalb von 24 Stunden."
+      : siteConfig.messaging.priceEstimateNote
   );
 }
 

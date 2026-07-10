@@ -4,6 +4,7 @@ import { routes } from "@/lib/routes";
 import Link from "next/link";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Datenschutzerklärung",
@@ -107,6 +108,7 @@ export default function DatenschutzPage() {
         </div>
       </main>
       <Footer />
+      <WhatsAppButton />
     </>
   );
 }

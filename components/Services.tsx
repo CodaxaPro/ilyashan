@@ -45,7 +45,7 @@ export function Services() {
             Professionelle Fensterreinigung für jeden Bedarf
           </h2>
           <p className="text-muted text-lg">
-            Von der Einzelwohnung bis zur Glasfassade – wir liefern streifenfreie Ergebnisse mit Festpreis-Garantie.
+            {siteConfig.messaging.servicesIntro}
           </p>
         </div>
 
@@ -71,8 +71,11 @@ export function Services() {
         </div>
 
         <p className="mt-10 text-center text-sm text-muted max-w-2xl mx-auto leading-relaxed">
-          Alle angegebenen Preise sind Richtwerte für {siteConfig.contact.region} (inkl. MwSt.).
-          Der finale Festpreis wird nach Fensteranzahl und Aufwand individuell kalkuliert – kostenlos und unverbindlich.
+          Alle angegebenen Preise sind Richtwerte für {siteConfig.contact.region} (inkl. MwSt.).{" "}
+          {siteConfig.messaging.servicesFootnote.replace(
+            "24 Stunden",
+            siteConfig.business.responseTime
+          )}
         </p>
       </div>
     </section>
