@@ -15,6 +15,9 @@ import {
 } from "@/lib/concierge/exit-intent";
 import { saveWizardPrefillFromSession } from "@/lib/concierge/wizard-bridge";
 import { routes } from "@/lib/routes";
+import { trackConciergeEvent } from "@/lib/concierge-analytics";
+import { PhotoUploader } from "@/components/PhotoUploader";
+import type { PhotoPayload } from "@/lib/photo-upload";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { siteConfig } from "@/lib/config";
 
@@ -106,10 +109,20 @@ export function ConciergeWidget() {
   const [leadLoading, setLeadLoading] = useState(false);
   const [leadSuccess, setLeadSuccess] = useState<string | null>(null);
   const [leadError, setLeadError] = useState<string | null>(null);
+  const [leadPhotos, setLeadPhotos] = useState<PhotoPayload[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
   const greeted = useRef(false);
 
   const showLeadForm = isHotLead(session) && !leadSuccess;
+
+  useEffect(() => {
+    if (showLeadForm) {
+      trackConciergeEvent("concierge_lead_shown", {
+        session_id: session.id,
+        page_path: pathname,
+      });
+    }
+  }, [showLeadForm, session.id, pathname]);
 
   useEffect(() => {
     setSession(loadSession());
@@ -128,6 +141,7 @@ export function ConciergeWidget() {
     const timer = window.setTimeout(() => {
       if (!sessionStorage.getItem(EXIT_INTENT_KEY)) {
         setNudge(getProactiveNudge(pathname));
+        trackConciergeEvent("concierge_proactive_nudge", { page_path: pathname });
       }
     }, PROACTIVE_DELAY_MS);
 
@@ -144,6 +158,10 @@ export function ConciergeWidget() {
       if (event.relatedTarget || event.clientY > 0) return;
       setExitNudge(getExitIntentMessage(pathname, session));
       setNudge(null);
+      trackConciergeEvent("concierge_exit_intent", {
+        session_id: session.id,
+        page_path: pathname,
+      });
       sessionStorage.setItem(EXIT_INTENT_KEY, "1");
       sessionStorage.setItem(NUDGE_KEY, "1");
       document.removeEventListener("mouseout", onMouseOut);
@@ -155,6 +173,10 @@ export function ConciergeWidget() {
 
   function handleWizardNavigation() {
     saveWizardPrefillFromSession(session);
+    trackConciergeEvent("concierge_wizard_handoff", {
+      session_id: session.id,
+      page_path: pathname,
+    });
     setOpen(false);
   }
 
@@ -195,7 +217,8 @@ export function ConciergeWidget() {
     setNudge(null);
     setExitNudge(null);
     sessionStorage.setItem(NUDGE_KEY, "1");
-  }, []);
+    trackConciergeEvent("concierge_open", { page_path: pathname });
+  }, [pathname]);
 
   const sendMessage = useCallback(
     async (text: string) => {
@@ -221,6 +244,23 @@ export function ConciergeWidget() {
         setSession(data.session);
         saveSession(data.session);
         setQuickReplies(data.quickReplies ?? []);
+        trackConciergeEvent("concierge_message", {
+          session_id: data.session.id,
+          intent: data.intent,
+          page_path: pathname,
+        });
+        if (data.intent === "unknown") {
+          trackConciergeEvent("concierge_unknown", {
+            session_id: data.session.id,
+            page_path: pathname,
+          });
+        }
+        if (data.intent) {
+          trackConciergeEvent("concierge_intent", {
+            session_id: data.session.id,
+            intent: data.intent,
+          });
+        }
 
         setMessages((prev) => [
           ...prev,
@@ -244,7 +284,7 @@ export function ConciergeWidget() {
         setLoading(false);
       }
     },
-    [loading, session]
+    [loading, session, pathname]
   );
 
   async function submitLead(e: React.FormEvent) {
@@ -256,12 +296,16 @@ export function ConciergeWidget() {
       const res = await fetch("/api/concierge/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: leadName, phone: leadPhone, session }),
+        body: JSON.stringify({ name: leadName, phone: leadPhone, session, photos: leadPhotos }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
       trackRequestQuoteConversion(`concierge-${session.id}`);
+      trackConciergeEvent("concierge_lead_submit", {
+        session_id: session.id,
+        photo_count: leadPhotos.length,
+      });
       setLeadSuccess(data.message);
       setMessages((prev) => [
         ...prev,
@@ -361,7 +405,12 @@ export function ConciergeWidget() {
                               : "bg-primary-light text-primary border border-primary/20"
                           }`}
                           onClick={() => {
-                            if (action.type === "whatsapp") trackRequestQuoteConversion(`wa-${session.id}`);
+                            if (action.type === "whatsapp") {
+                              trackRequestQuoteConversion(`wa-${session.id}`);
+                              trackConciergeEvent("concierge_whatsapp_click", {
+                                session_id: session.id,
+                              });
+                            }
                           }}
                         >
                           {action.label}
@@ -412,6 +461,11 @@ export function ConciergeWidget() {
                 required
                 className="w-full px-3 py-2 rounded-xl border border-border text-sm"
                 data-testid="concierge-lead-phone"
+              />
+              <PhotoUploader
+                photos={leadPhotos}
+                onChange={setLeadPhotos}
+                testId="concierge-lead-photos"
               />
               {leadError && <p className="text-xs text-red-600">{leadError}</p>}
               <button

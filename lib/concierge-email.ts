@@ -6,7 +6,8 @@ import { buildLeadSummaryRows, isHotLead } from "@/lib/concierge/lead";
 export function buildConciergeLeadAdminEmail(
   session: ConciergeSession,
   name: string,
-  phone: string
+  phone: string,
+  photoCount = 0
 ) {
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const hot = isHotLead(session);
@@ -19,6 +20,7 @@ export function buildConciergeLeadAdminEmail(
     ${buildDataTable([
       ["Name", name],
       ["Telefon", phone],
+      ...(photoCount > 0 ? ([["Fotos", `${photoCount} im Anhang`]] as [string, string][]) : []),
       ...rows,
     ])}
     <p style="margin:16px 0 0;font-size:13px;color:#64748b;">
@@ -33,6 +35,7 @@ export function buildConciergeLeadAdminEmail(
     "",
     `Name: ${name}`,
     `Telefon: ${phone}`,
+    ...(photoCount > 0 ? [`Fotos: ${photoCount}`] : []),
     ...rows.map(([k, v]) => `${k}: ${v}`),
     "",
     `Eingegangen: ${timestamp}`,

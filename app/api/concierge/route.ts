@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { processConciergeMessage, createSession } from "@/lib/concierge";
 import type { ConciergeSession } from "@/lib/concierge";
+import { recordUnknownMessage, shouldLogUnknownMessage } from "@/lib/concierge/unknown-queue";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,14 @@ export async function POST(request: Request) {
         : createSession(crypto.randomUUID());
 
     const reply = processConciergeMessage(message, session);
+
+    if (shouldLogUnknownMessage(reply.intent)) {
+      void recordUnknownMessage({
+        message,
+        intent: reply.intent,
+        sessionId: reply.session.id,
+      });
+    }
 
     return NextResponse.json({
       success: true,

@@ -11,6 +11,14 @@ import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { generateQuotePdfBuffer, pdfBufferToBase64 } from "@/lib/pdf/generate-quote-pdf";
 import { generateAnfrageNr } from "@/lib/quote-summary";
 import { isQuoteSubmissionValid } from "@/lib/quote-validation";
+import {
+  normalizePhotoPayloads,
+  photosToResendAttachments,
+  validatePhotos,
+  type PhotoPayload,
+} from "@/lib/photo-upload";
+import { saveLead } from "@/lib/leads-store";
+import { createQuoteStoredLead, createContactStoredLead } from "@/lib/lead-records";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -38,12 +46,18 @@ export async function POST(request: Request) {
     // ── Wizard quote flow (5-step form) ──
     if (isQuotePayload(body)) {
       const quote = mergeQuote(body.quote);
+      const photos = normalizePhotoPayloads((body as { photos?: PhotoPayload[] }).photos);
+      const photoError = validatePhotos(photos);
 
       if (!validateQuote(quote)) {
         return NextResponse.json(
           { error: "Bitte füllen Sie alle Pflichtfelder aus." },
           { status: 400 }
         );
+      }
+
+      if (photoError) {
+        return NextResponse.json({ error: photoError }, { status: 400 });
       }
 
       if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
@@ -63,8 +77,9 @@ export async function POST(request: Request) {
         filename: `Eingangsbestätigung-${anfrageNr}.pdf`,
         content: pdfBufferToBase64(pdfBuffer),
       };
+      const photoAttachments = photosToResendAttachments(photos);
 
-      const adminEmail = buildQuoteAdminEmail(quote, anfrageNr);
+      const adminEmail = buildQuoteAdminEmail(quote, anfrageNr, photos.length);
       const { error: adminError } = await resend.emails.send({
         from: fromEmail,
         to: [toEmail],
@@ -72,7 +87,7 @@ export async function POST(request: Request) {
         subject: adminEmail.subject,
         text: adminEmail.text,
         html: adminEmail.html,
-        attachments: [pdfAttachment],
+        attachments: [pdfAttachment, ...photoAttachments],
       });
 
       if (adminError) {
@@ -98,6 +113,8 @@ export async function POST(request: Request) {
           console.error("Resend customer confirmation error:", customerError);
         }
       }
+
+      await saveLead(createQuoteStoredLead(quote, anfrageNr, photos.length));
 
       return NextResponse.json({ success: true, anfrageNr });
     }
@@ -126,7 +143,13 @@ export async function POST(request: Request) {
     }
 
     const contactData: ContactEmailData = { name, phone, email, plz, service, message };
-    const adminEmail = buildAdminNotificationEmail(contactData);
+    const photos = normalizePhotoPayloads((body as { photos?: PhotoPayload[] }).photos);
+    const photoError = validatePhotos(photos);
+    if (photoError) {
+      return NextResponse.json({ error: photoError }, { status: 400 });
+    }
+
+    const adminEmail = buildAdminNotificationEmail(contactData, photos.length);
 
     const { error: adminError } = await resend.emails.send({
       from: fromEmail,
@@ -135,6 +158,7 @@ export async function POST(request: Request) {
       subject: adminEmail.subject,
       text: adminEmail.text,
       html: adminEmail.html,
+      attachments: photosToResendAttachments(photos),
     });
 
     if (adminError) {
@@ -160,6 +184,13 @@ export async function POST(request: Request) {
         console.error("Resend customer confirmation error:", customerError);
       }
     }
+
+    await saveLead(
+      createContactStoredLead(
+        { name, phone, email, plz, service, message },
+        photos.length
+      )
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

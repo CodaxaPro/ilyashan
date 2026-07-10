@@ -17,12 +17,12 @@ describe("concierge intent", () => {
   it("classifies services and area", () => {
     assert.equal(classifyIntent("Welche Leistungen bieten Sie?"), "services");
     assert.equal(classifyIntent("Einsatzgebiet Aachen"), "area");
-    assert.equal(classifyIntent("Fallen Anfahrtskosten an?"), "area");
+    assert.equal(classifyIntent("Fallen Anfahrtskosten an?"), "faq_match");
   });
 
   it("classifies process and festpreis", () => {
     assert.equal(classifyIntent("Wie funktioniert der Preisrechner?"), "process");
-    assert.equal(classifyIntent("Unterschied Preisschätzung und Festpreis"), "festpreis_info");
+    assert.equal(classifyIntent("Unterschied Preisschätzung und Festpreis"), "faq_match");
   });
 
   it("classifies fluegel help", () => {

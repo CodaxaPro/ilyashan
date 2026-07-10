@@ -38,7 +38,7 @@ function buildReplyBody(name: string, services: string, price: string) {
   ].join("\n");
 }
 
-export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string) {
+export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string, photoCount = 0) {
   const name = getQuoteContactName(data);
   const plzOrt = getQuotePlzOrt(data);
   const services = getServicesLabel(data);
@@ -63,7 +63,7 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string) {
     ${buildDataTable(buildQuoteContactRows(data))}
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Anfragedetails</p>
     ${buildDataTable(detailRows)}
-    <p style="margin:12px 0 0;font-size:12px;color:#64748b;">PDF-Eingangsbestätigung ist als Anhang beigefügt.</p>
+    <p style="margin:12px 0 0;font-size:12px;color:#64748b;">PDF-Eingangsbestätigung ist als Anhang beigefügt.${photoCount > 0 ? ` ${photoCount} Foto(s) im Anhang.` : ""}</p>
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Schnellantwort</p>
     <div>
       ${buildButton(`tel:${data.phone}`, "Anrufen", "#0369a1")}
@@ -71,7 +71,7 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string) {
       ${mailtoReply ? buildButton(mailtoReply, "Angebot senden", "#059669") : ""}
     </div>`;
 
-  const text = ["NEUE ANGEBOTSANFRAGE – ilyashan.de", "", `Anfrage-Nr.: ${anfrageNr}`, ...detailRows.map(([k, v]) => `${k}: ${v}`), "", `Eingegangen: ${timestamp}`].join("\n");
+  const text = ["NEUE ANGEBOTSANFRAGE – ilyashan.de", "", `Anfrage-Nr.: ${anfrageNr}`, ...detailRows.map(([k, v]) => `${k}: ${v}`), photoCount > 0 ? `Fotos: ${photoCount}` : "", "", `Eingegangen: ${timestamp}`].filter(Boolean).join("\n");
 
   return {
     subject: `Neue Anfrage ${anfrageNr}: ${name} – ${services} (${plzOrt})`,

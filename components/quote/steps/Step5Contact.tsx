@@ -7,6 +7,8 @@ import { getWhatsAppQuoteUrl } from "@/lib/whatsapp-quote";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
+import { PhotoUploader } from "@/components/PhotoUploader";
+import type { PhotoPayload } from "@/lib/photo-upload";
 import { useState } from "react";
 
 interface Step5ContactProps {
@@ -19,6 +21,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [anfrageNr, setAnfrageNr] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<PhotoPayload[]>([]);
 
   const canSubmit =
     data.firstName &&
@@ -36,7 +39,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quote: data }),
+        body: JSON.stringify({ quote: data, photos }),
       });
 
       const result = await response.json();
@@ -183,6 +186,10 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
             className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
         </div>
+      </div>
+
+      <div className="mb-8">
+        <PhotoUploader photos={photos} onChange={setPhotos} testId="quote-photos" />
       </div>
 
       <label className="flex items-start gap-2 mb-8">

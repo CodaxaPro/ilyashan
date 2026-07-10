@@ -1,7 +1,7 @@
 import type { ConciergeIntent } from "./types";
 import { isOutOfScope } from "./scope";
-import { siteConfig } from "@/lib/config";
 import { extractWindowCount } from "./extract";
+import { matchFaq } from "./faq-match";
 
 function matchesAny(text: string, patterns: RegExp[]): boolean {
   return patterns.some((p) => p.test(text));
@@ -13,25 +13,52 @@ export function classifyIntent(message: string): ConciergeIntent {
 
   if (isOutOfScope(message)) return "out_of_scope";
 
-  if (matchesAny(text, [/^(hallo|hi|hey|guten|moin|servus|grüß)/i, /guten tag/, /guten morgen/, /guten abend/])) {
+  if (matchesAny(text, [/^(hallo|hi|hey|guten|moin|servus|grüß|gruess)/i, /guten tag/, /guten morgen/, /guten abend/])) {
     return "greeting";
   }
 
-  if (matchesAny(text, [/^danke/, /vielen dank/, /super,? danke/, /perfekt,? danke/])) {
+  if (matchesAny(text, [/^danke/, /vielen dank/, /super,? danke/, /perfekt,? danke/, /dankeschoen/])) {
     return "thanks";
   }
 
-  if (matchesAny(text, [/flügel.*zähl/, /wie.*flügel/, /was ist ein flügel/, /fluegel.*zaehl/])) {
+  if (
+    matchesAny(text, [
+      /flügel.*zähl/,
+      /fluegel.*zaehl/,
+      /wie.*flügel/,
+      /wie.*fluegel/,
+      /was ist ein flügel/,
+      /was ist ein fluegel/,
+      /flügl/,
+      /fenster.*zaehl/,
+      /fenster.*zähl/,
+    ])
+  ) {
     return "fluegel_help";
   }
 
   const fluegelCount = extractWindowCount(message);
-  if (fluegelCount || (/\d/.test(text) && /flügel|fluegel|fenster/i.test(text))) {
+  if (fluegelCount || (/\d/.test(text) && /flügel|fluegel|fenster|fluegl/i.test(text))) {
     return "price_collect";
   }
 
-  if (matchesAny(text, [/^was kostet/, /^wie teuer/, /\bpreis\b/, /\bkosten\b/, /kalkulier/, /berechn/])) {
+  if (
+    matchesAny(text, [
+      /^was kostet/,
+      /^wie teuer/,
+      /\bpreis\b/,
+      /\bpreiß\b/,
+      /\bkosten\b/,
+      /kalkulier/,
+      /berechn/,
+      /was kostet das/,
+    ])
+  ) {
     return "price";
+  }
+
+  if (matchFaq(message)) {
+    return "faq_match";
   }
 
   if (
@@ -39,9 +66,11 @@ export function classifyIntent(message: string): ConciergeIntent {
       /verbindlich/,
       /festpreis.*angebot/,
       /unterschied.*schätz/,
+      /unterschied.*schaetz/,
       /live.*preis/,
       /sofort.*preis/,
       /preisschätzung/,
+      /preisschaetzung/,
     ])
   ) {
     return "festpreis_info";
@@ -55,6 +84,7 @@ export function classifyIntent(message: string): ConciergeIntent {
       /preisrechner/,
       /schritte/,
       /wie läuft/,
+      /wie laeuft/,
       /wie geht das/,
     ])
   ) {
@@ -100,6 +130,9 @@ export function classifyIntent(message: string): ConciergeIntent {
       /rahmen/,
       /wartung/,
       /wintergarten/,
+      /rollladen/,
+      /rolladen/,
+      /jalousie/,
     ]) &&
     !matchesAny(text, [/preis/, /kost/])
   ) {
@@ -110,15 +143,15 @@ export function classifyIntent(message: string): ConciergeIntent {
     return "insurance";
   }
 
-  if (matchesAny(text, [/winter/, /kalt/, /minus/, /frost/])) {
+  if (matchesAny(text, [/winter/, /kalt/, /minus/, /frost/, /kaelte/])) {
     return "winter";
   }
 
-  if (matchesAny(text, [/termin/, /wann.*komm/, /verfügbar/, /dringend/, /schnell/])) {
+  if (matchesAny(text, [/termin/, /wann.*komm/, /verfügbar/, /verfuegbar/, /dringend/, /schnell/])) {
     return "appointment";
   }
 
-  if (matchesAny(text, [/anruf/, /rückruf/, /zurückruf/, /callback/, /persönlich sprechen/, /rückruf anfordern/])) {
+  if (matchesAny(text, [/anruf/, /rückruf/, /rueckruf/, /zurückruf/, /zurueckruf/, /callback/, /persönlich sprechen/, /persoenlich sprechen/, /rückruf anfordern/])) {
     return "callback";
   }
 
@@ -130,33 +163,9 @@ export function classifyIntent(message: string): ConciergeIntent {
     return "wizard";
   }
 
-  for (const item of siteConfig.faq) {
-    const q = item.question.toLowerCase();
-    const keywords = q.split(/\s+/).filter((w) => w.length > 4);
-    const hits = keywords.filter((k) => text.includes(k)).length;
-    if (hits >= 2 || text.includes(q.slice(0, 20))) {
-      return "faq_match";
-    }
-  }
-
   if (/\d/.test(text)) return "price_collect";
 
   return "unknown";
 }
 
-export function findFaqAnswer(message: string): string | null {
-  const text = message.trim().toLowerCase();
-  let best: { score: number; answer: string } | null = null;
-
-  for (const item of siteConfig.faq) {
-    const words = item.question
-      .toLowerCase()
-      .split(/\W+/)
-      .filter((w) => w.length > 3);
-    const score = words.filter((w) => text.includes(w)).length;
-    if (score >= 2 && (!best || score > best.score)) {
-      best = { score, answer: item.answer };
-    }
-  }
-  return best?.answer ?? null;
-}
+export { findFaqAnswer, matchFaq, suggestFaqForUnknown } from "./faq-match";

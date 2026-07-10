@@ -52,7 +52,7 @@ function buildReplyBody(name: string, serviceLabel: string) {
   ].join("\n");
 }
 
-export function buildAdminNotificationEmail(data: ContactEmailData) {
+export function buildAdminNotificationEmail(data: ContactEmailData, photoCount = 0) {
   const serviceLabel = getServiceLabel(data.service);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const phoneClean = cleanPhone(data.phone);
@@ -73,6 +73,7 @@ export function buildAdminNotificationEmail(data: ContactEmailData) {
       ["PLZ / Ort", data.plz],
       ["Leistung", serviceLabel],
       ["Nachricht", data.message || "–"],
+      ...(photoCount > 0 ? ([["Fotos", `${photoCount} im Anhang`]] as [string, string][]) : []),
     ])}
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Schnellantwort</p>
   <div>
@@ -90,6 +91,7 @@ export function buildAdminNotificationEmail(data: ContactEmailData) {
     `PLZ/Ort: ${data.plz}`,
     `Leistung: ${serviceLabel}`,
     `Nachricht: ${data.message || "–"}`,
+    ...(photoCount > 0 ? [`Fotos: ${photoCount}`] : []),
     "",
     `Eingegangen: ${timestamp}`,
   ].join("\n");

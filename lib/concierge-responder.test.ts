@@ -34,7 +34,7 @@ describe("concierge responder", () => {
 
   it("explains festpreis vs schätzung", () => {
     const reply = processConciergeMessage("Unterschied Live-Preisschätzung und Festpreis-Angebot");
-    assert.equal(reply.intent, "festpreis_info");
+    assert.equal(reply.intent, "faq_match");
     assert.match(reply.text, /unverbindlich/i);
     assert.match(reply.text, /verbindlich/i);
   });
@@ -91,8 +91,8 @@ describe("concierge responder", () => {
 
   it("answers winter question", () => {
     const reply = processConciergeMessage("Reinigen Sie im Winter?");
-    assert.equal(reply.intent, "winter");
-    assert.match(reply.text, /5\s*°C/);
+    assert.equal(reply.intent, "faq_match");
+    assert.match(reply.text, /5\s*°C|-5/);
   });
 
   it("includes trust signals in price response", () => {

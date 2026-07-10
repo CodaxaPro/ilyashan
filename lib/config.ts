@@ -298,42 +298,107 @@ export const siteConfig = {
 
   faq: [
     {
+      id: "cost",
       question: "Was kostet eine Fensterreinigung?",
+      aliases: [
+        "was kostet fenster",
+        "wie teuer fensterreinigung",
+        "preis fenster",
+        "kosten fenster putzen",
+        "was kostet fenster putzen",
+        "wie viel kostet fensterreinigung",
+        "preise fensterreinigung",
+      ],
       answer:
         "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine transparente Preisschätzung – basierend auf Fensterflügeln, Reinigungsumfang, Etage und Extras. Die Kalkulation orientiert sich an NRW-Marktpreisen (ab 49 € Mindestauftrag Wohnung). Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot – ohne versteckte Kosten und ohne Anfahrtszuschlag in unserem Einsatzgebiet.",
     },
     {
+      id: "festpreis-vs-schaetzung",
       question: "Was ist der Unterschied zwischen Preisschätzung und Festpreis-Angebot?",
+      aliases: [
+        "unterschied schaetzung festpreis",
+        "live preis oder festpreis",
+        "ist die schaetzung verbindlich",
+        "was bedeutet festpreis angebot",
+        "preisschaetzung festpreis",
+      ],
       answer:
         "Die Live-Preisschätzung im Wizard gibt Ihnen sofort eine transparente Orientierung – sie aktualisiert sich bei jeder Auswahl und ist unverbindlich. Nach dem Absenden Ihrer Anfrage prüfen wir Ihre Angaben und senden Ihnen innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot per E-Mail. Erst dieses Angebot ist der offizielle, feste Preis für Ihren Auftrag.",
     },
     {
+      id: "angebot-speed",
       question: "Wie schnell bekomme ich ein Angebot?",
+      aliases: [
+        "wie schnell antwort",
+        "wann bekomme ich angebot",
+        "wie lange dauert angebot",
+        "wann melden sie sich",
+        "reaktionszeit angebot",
+      ],
       answer:
         "Die Sofort-Preisschätzung sehen Sie direkt im Wizard – noch während Sie Ihre Angaben machen. Ihr verbindliches Festpreis-Angebot senden wir in der Regel innerhalb von 24 Stunden nach Ihrer Anfrage. Bei dringenden Terminen rufen Sie uns direkt an.",
     },
     {
+      id: "insurance",
       question: "Sind Sie versichert?",
+      aliases: [
+        "haben sie versicherung",
+        "betriebshaftpflicht",
+        "sind sie haftpflicht versichert",
+        "versicherung vorhanden",
+      ],
       answer:
         "Ja, wir verfügen über eine umfassende Betriebshaftpflichtversicherung. Ihr Eigentum ist bei uns in sicheren Händen.",
     },
     {
+      id: "winter",
       question: "Reinigen Sie auch im Winter?",
+      aliases: [
+        "fensterreinigung winter",
+        "bei kaelte reinigen",
+        "bei frost moeglich",
+        "im winter auch",
+        "minus grade fenster",
+      ],
       answer:
         "Ja, bei Temperaturen über -5 °C führen wir Fensterreinigungen das ganze Jahr über durch.",
     },
     {
+      id: "anwesend",
       question: "Muss ich beim Termin anwesend sein?",
+      aliases: [
+        "muss ich zuhause sein",
+        "muss ich da sein",
+        "schluessel hinterlassen",
+        "anwesenheit noetig",
+        "muss ich anwesend sein",
+      ],
       answer:
         "Nicht zwingend. Viele Kunden hinterlassen einen Schlüssel oder sind nur kurz anwesend. Wir besprechen das individuell.",
     },
     {
+      id: "anfahrt-aachen",
       question: "Fallen Anfahrtskosten für Aachen an?",
+      aliases: [
+        "anfahrtskosten aachen",
+        "fahrtkosten baesweiler",
+        "kommen sie nach aachen",
+        "anfahrt kostenlos",
+        "anfahrtspauschale",
+      ],
       answer:
         "Nein. Für alle aufgeführten Gebiete in Baesweiler, Aachen (alle Stadtteile) und der weiteren Umgebung berechnen wir keinen Anfahrtszuschlag. Der vereinbarte Festpreis gilt – ohne versteckte Kosten.",
     },
     {
+      id: "zahlung",
       question: "Welche Zahlungsmethoden akzeptieren Sie?",
+      aliases: [
+        "kann ich bar zahlen",
+        "zahlung per rechnung",
+        "ec karte moeglich",
+        "wie kann ich zahlen",
+        "zahlungsmoeglichkeiten",
+      ],
       answer:
         "Barzahlung, Überweisung und EC-Karte. Für Gewerbekunden bieten wir auch Rechnungsstellung mit Zahlungsziel.",
     },
@@ -345,6 +410,13 @@ export const siteConfig = {
     requestQuoteSendTo: "",
   },
 } as const;
+
+export type FaqItem = {
+  id: string;
+  question: string;
+  answer: string;
+  aliases?: readonly string[];
+};
 
 export type Testimonial = {
   id: string;
