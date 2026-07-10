@@ -2,6 +2,8 @@ import { siteConfig } from "@/lib/config";
 import { quoteServices } from "@/lib/quote-form";
 import { routes } from "@/lib/routes";
 import type { ConciergeAction } from "./types";
+import type { ConciergeSession } from "./types";
+import { getConciergeWhatsAppUrl } from "./whatsapp-handoff";
 
 export function wizardAction(): ConciergeAction {
   return {
@@ -16,6 +18,14 @@ export function phoneAction(): ConciergeAction {
     type: "phone",
     label: siteConfig.contact.phoneDisplay,
     href: `tel:${siteConfig.contact.phone}`,
+  };
+}
+
+export function whatsappActionFromSession(session: ConciergeSession): ConciergeAction {
+  return {
+    type: "whatsapp",
+    label: "WhatsApp mit Kalkulation",
+    href: getConciergeWhatsAppUrl(session),
   };
 }
 

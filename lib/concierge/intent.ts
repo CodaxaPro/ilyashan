@@ -118,7 +118,7 @@ export function classifyIntent(message: string): ConciergeIntent {
     return "appointment";
   }
 
-  if (matchesAny(text, [/anruf/, /rückruf/, /zurückruf/, /callback/, /persönlich sprechen/])) {
+  if (matchesAny(text, [/anruf/, /rückruf/, /zurückruf/, /callback/, /persönlich sprechen/, /rückruf anfordern/])) {
     return "callback";
   }
 

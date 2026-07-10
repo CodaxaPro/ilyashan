@@ -24,6 +24,7 @@ import {
   wizardAction,
   phoneAction,
   whatsappAction,
+  whatsappActionFromSession,
 } from "./knowledge";
 import {
   mergeQuoteFromMessage,
@@ -73,8 +74,8 @@ function handlePriceFlow(
         text: priceText,
         intent: intent === "price_collect" ? "price_collect" : "price",
         session: { ...updated, stage: "price_ready", lastIntent: "price" },
-        actions: withWizard([wizardAction(), whatsappAction(), phoneAction()]),
-        quickReplies: ["Verbindliches Angebot anfordern", "Wie zähle ich Flügel?", "Einsatzgebiet"],
+        actions: withWizard([wizardAction(), whatsappActionFromSession({ ...updated, stage: "price_ready" }), phoneAction()]),
+        quickReplies: ["Rückruf anfordern", "Verbindliches Angebot anfordern", "Einsatzgebiet"],
       };
     }
   }
@@ -240,11 +241,11 @@ export function processConciergeMessage(
 
     case "callback":
       return {
-        text: `Sehr gerne! Rufen Sie uns direkt an unter **${siteConfig.contact.phoneDisplay}** – oder starten Sie den Preisrechner und hinterlassen Sie Ihre Nummer. Wir melden uns innerhalb von **${siteConfig.business.responseTime}** mit Ihrem verbindlichen Festpreis-Angebot.`,
+        text: `Sehr gerne! Hinterlassen Sie unten **Name und Telefonnummer** – wir rufen Sie innerhalb von **${siteConfig.business.responseTime}** zurück.\n\nOder rufen Sie direkt an: **${siteConfig.contact.phoneDisplay}**`,
         intent,
         session: baseSession,
-        actions: [phoneAction(), wizardAction(), whatsappAction()],
-        quickReplies: ["Preisrechner", "WhatsApp"],
+        actions: [phoneAction(), whatsappActionFromSession(baseSession), wizardAction()],
+        quickReplies: ["Rückruf anfordern", "Preisrechner"],
       };
 
     case "contact":
