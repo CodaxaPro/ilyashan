@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
-import { routes } from "@/lib/routes";
 import { QuoteWizard } from "@/components/quote/QuoteWizard";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";

@@ -57,6 +57,13 @@ export const siteConfig = {
     responseTime: "24 Stunden",
   },
 
+  legal: {
+    /** Umsatzsteuer-ID – leer lassen bis vorhanden; Impressum blendet Abschnitt dann aus */
+    vatId: "",
+    /** z. B. IHK Aachen – optional */
+    tradeChamber: "",
+  },
+
   /** Kundenkommunikation: Live-Schätzung vs. verbindliches Festpreis-Angebot */
   messaging: {
     livePricingBadge: "Live-Preisrechner · Sofort sichtbar",

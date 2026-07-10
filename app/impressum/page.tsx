@@ -37,20 +37,29 @@ export default function ImpressumPage() {
               </p>
             </section>
 
-            <section>
-              <h2 className="text-xl font-bold text-foreground">Umsatzsteuer-ID</h2>
-              <p>
-                Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:<br />
-                [USt-IdNr. hier eintragen]
-              </p>
-            </section>
+            {siteConfig.legal.vatId && (
+              <section>
+                <h2 className="text-xl font-bold text-foreground">Umsatzsteuer-ID</h2>
+                <p>
+                  Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:
+                  <br />
+                  {siteConfig.legal.vatId}
+                </p>
+              </section>
+            )}
 
             <section>
-              <h2 className="text-xl font-bold text-foreground">Berufsbezeichnung und berufsrechtliche Regelungen</h2>
+              <h2 className="text-xl font-bold text-foreground">Berufsbezeichnung</h2>
               <p>
-                Berufsbezeichnung: Fensterreinigung / Gebäudereinigung<br />
-                Zuständige Kammer: [falls zutreffend]<br />
+                Berufsbezeichnung: Fensterreinigung / Gebäudereinigung
+                <br />
                 Verliehen in: Deutschland
+                {siteConfig.legal.tradeChamber && (
+                  <>
+                    <br />
+                    Zuständige Kammer: {siteConfig.legal.tradeChamber}
+                  </>
+                )}
               </p>
             </section>
 
