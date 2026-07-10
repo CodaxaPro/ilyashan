@@ -2,6 +2,7 @@
 
 import { siteConfig } from "@/lib/config";
 import { routes } from "@/lib/routes";
+import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { Button, PhoneIcon, WhatsAppIcon } from "@/components/ui/Button";
 import { useState } from "react";
 
@@ -35,10 +36,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
         throw new Error(result.error ?? "Senden fehlgeschlagen");
       }
 
-      // Google Ads Conversion Tracking hier einfügen:
-      // if (typeof gtag !== 'undefined') {
-      //   gtag('event', 'conversion', { send_to: 'AW-XXXXX/XXXXX' });
-      // }
+      trackRequestQuoteConversion();
 
       setSubmitted(true);
     } catch (err) {

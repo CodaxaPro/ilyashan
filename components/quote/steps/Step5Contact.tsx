@@ -4,6 +4,7 @@ import { siteConfig } from "@/lib/config";
 import { routes } from "@/lib/routes";
 import type { QuoteFormData } from "@/lib/quote-form";
 import { getWhatsAppQuoteUrl } from "@/lib/whatsapp-quote";
+import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
 import { useState } from "react";
@@ -40,6 +41,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Senden fehlgeschlagen");
+      trackRequestQuoteConversion(result.anfrageNr ?? undefined);
       setAnfrageNr(result.anfrageNr ?? null);
       setSubmitted(true);
     } catch (err) {
@@ -217,6 +219,9 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
         </Button>
         <Button
           href={canSubmit ? getWhatsAppQuoteUrl(data) : undefined}
+          onClick={() => {
+            if (canSubmit) trackRequestQuoteConversion();
+          }}
           variant="whatsapp"
           size="lg"
           className={`w-full ${!canSubmit ? "opacity-50 pointer-events-none" : ""}`}

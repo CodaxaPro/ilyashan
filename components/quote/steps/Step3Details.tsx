@@ -10,6 +10,7 @@ import {
   quoteServiceLabels,
 } from "@/lib/quote-form";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 interface Step3DetailsProps {
   data: QuoteFormData;
@@ -56,6 +57,7 @@ function Stepper({
         <button
           type="button"
           onClick={decrement}
+          onMouseDown={preventChoiceButtonScroll}
           disabled={value <= min}
           className="w-11 h-11 rounded-xl border-2 border-border bg-white text-lg font-bold hover:border-primary/30 disabled:opacity-40 transition-colors"
           aria-label="Verringern"
@@ -72,6 +74,7 @@ function Stepper({
         <button
           type="button"
           onClick={increment}
+          onMouseDown={preventChoiceButtonScroll}
           disabled={value >= max}
           aria-label="Erhöhen"
           data-testid={testIdPrefix ? `${testIdPrefix}-increase` : undefined}
@@ -142,7 +145,13 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
       </p>
 
       <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
-        <div className="lg:col-span-2 space-y-10">
+        <div className="lg:col-span-1 order-1 lg:order-2">
+          <div className="lg:sticky lg:top-28 mb-8 lg:mb-0">
+            <PriceEstimateCard data={data} />
+          </div>
+        </div>
+
+        <div className="lg:col-span-2 order-2 lg:order-1 space-y-10">
           <section className="rounded-2xl border border-border p-6 bg-card/50">
             <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
@@ -185,6 +194,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       key={value}
                       type="button"
                       data-testid={`dirt-${value}`}
+                      onMouseDown={preventChoiceButtonScroll}
                       onClick={() => onChange({ dirtLevel: value })}
                       className={`px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all ${
                         data.dirtLevel === value
@@ -226,6 +236,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                     <button
                       key={value}
                       type="button"
+                      onMouseDown={preventChoiceButtonScroll}
                       onClick={() => onChange({ cleaningSide: value })}
                       className={`px-4 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
                         data.cleaningSide === value
@@ -375,12 +386,6 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none text-sm"
             />
           </section>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="lg:sticky lg:top-28">
-            <PriceEstimateCard data={data} />
-          </div>
         </div>
       </div>
     </div>

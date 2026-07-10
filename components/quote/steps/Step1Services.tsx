@@ -2,6 +2,7 @@
 
 import type { QuoteFormData, QuoteServiceId } from "@/lib/quote-form";
 import { quoteServices } from "@/lib/quote-form";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 const serviceIcons: Record<string, React.ReactNode> = {
   home: (
@@ -72,6 +73,7 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
               key={service.id}
               type="button"
               data-testid={`service-${service.id}`}
+              onMouseDown={preventChoiceButtonScroll}
               onClick={() => toggleService(service.id)}
               className={`group text-left rounded-2xl border-2 p-6 transition-all duration-200 ${
                 selected

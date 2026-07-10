@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { QuoteFormData, ScheduleOption } from "@/lib/quote-form";
 import { formatGermanDate, scheduleOptionLabels } from "@/lib/quote-form";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 interface Step4ScheduleProps {
   data: QuoteFormData;
@@ -217,6 +218,7 @@ export function Step4Schedule({ data, onChange }: Step4ScheduleProps) {
             <button
               key={opt.value}
               type="button"
+              onMouseDown={preventChoiceButtonScroll}
               onClick={() => selectOption(opt.value)}
               className={`w-full text-left rounded-2xl border-2 p-5 transition-all ${
                 selected

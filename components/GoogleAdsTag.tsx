@@ -11,12 +11,13 @@ export function GoogleAdsTag() {
       <Script
         async
         src={`https://www.googletagmanager.com/gtag/js?id=${tagId}`}
-        strategy="afterInteractive"
+        strategy="beforeInteractive"
       />
-      <Script id="google-ads-gtag" strategy="afterInteractive">
+      <Script id="google-ads-gtag" strategy="beforeInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
           gtag('js', new Date());
           gtag('config', '${tagId}');
         `}

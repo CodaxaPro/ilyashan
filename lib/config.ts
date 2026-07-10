@@ -278,6 +278,8 @@ export const siteConfig = {
 
   googleAds: {
     tagId: "AW-18191480247",
+    /** Optional: full send_to from Google Ads → request_quote → Event snippet */
+    requestQuoteSendTo: "",
   },
 } as const;
 

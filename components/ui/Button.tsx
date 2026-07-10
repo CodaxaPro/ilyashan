@@ -5,6 +5,7 @@ import Link from "next/link";
 interface ButtonProps {
   href?: string;
   onClick?: () => void;
+  onMouseDown?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
   variant?: "primary" | "secondary" | "outline" | "whatsapp";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
@@ -34,6 +35,7 @@ const sizes = {
 export function Button({
   href,
   onClick,
+  onMouseDown,
   variant = "primary",
   size = "md",
   children,
@@ -48,13 +50,13 @@ export function Button({
     const isExternal = href.startsWith("http") || href.startsWith("tel:") || href.startsWith("mailto:");
     if (isExternal) {
       return (
-        <a href={href} className={classes}>
+        <a href={href} className={classes} onClick={onClick} onMouseDown={onMouseDown}>
           {children}
         </a>
       );
     }
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} onClick={onClick} onMouseDown={onMouseDown}>
         {children}
       </Link>
     );
@@ -64,6 +66,7 @@ export function Button({
     <button
       type={type}
       onClick={onClick}
+      onMouseDown={onMouseDown}
       disabled={disabled}
       className={classes}
       data-testid={dataTestId}

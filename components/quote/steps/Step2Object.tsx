@@ -7,6 +7,7 @@ import {
   objectTypeLabels,
   quoteServiceLabels,
 } from "@/lib/quote-form";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 interface Step2ObjectProps {
   data: QuoteFormData;
@@ -37,6 +38,7 @@ function ToggleGroup<T extends string>({
           <button
             key={opt.value}
             type="button"
+            onMouseDown={preventChoiceButtonScroll}
             onClick={() => onChange(opt.value)}
             className={`px-5 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
               value === opt.value
