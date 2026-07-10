@@ -4,11 +4,21 @@ import { routes } from "@/lib/routes";
 import type { ConciergeAction } from "./types";
 import type { ConciergeSession } from "./types";
 import { getConciergeWhatsAppUrl } from "./whatsapp-handoff";
+import { hasTransferableQuoteData } from "./wizard-bridge";
 
 export function wizardAction(): ConciergeAction {
   return {
     type: "link",
     label: siteConfig.messaging.ctaPrimary,
+    href: routes.angebot,
+  };
+}
+
+export function wizardActionFromSession(session: ConciergeSession): ConciergeAction {
+  const hasData = hasTransferableQuoteData(session);
+  return {
+    type: "link",
+    label: hasData ? "Angaben übernehmen & berechnen" : siteConfig.messaging.ctaPrimary,
     href: routes.angebot,
   };
 }

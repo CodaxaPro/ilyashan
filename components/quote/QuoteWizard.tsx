@@ -8,6 +8,7 @@ import {
   syncObjectTypeWithService,
   validateQuoteStep,
 } from "@/lib/quote-validation";
+import { applyConciergePrefillToWizard } from "@/lib/concierge/wizard-bridge";
 import { QuoteProgress } from "@/components/quote/QuoteProgress";
 import { scrollToQuoteWizardTop } from "@/components/quote/quote-wizard-scroll";
 import { Step1Services } from "@/components/quote/steps/Step1Services";
@@ -24,6 +25,15 @@ export function QuoteWizard() {
   const wizardAnchorRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState(1);
   const [data, setData] = useState<QuoteFormData>(initialQuoteFormData);
+  const [prefillBanner, setPrefillBanner] = useState(false);
+
+  useEffect(() => {
+    const applied = applyConciergePrefillToWizard();
+    if (!applied) return;
+    setData(applied.data);
+    setStep(applied.step);
+    if (applied.fromConcierge) setPrefillBanner(true);
+  }, []);
 
   useEffect(() => {
     scrollToQuoteWizardTop(wizardAnchorRef.current);
@@ -58,6 +68,18 @@ export function QuoteWizard() {
 
   return (
     <div ref={wizardAnchorRef} id="quote-wizard" className="scroll-mt-24">
+      {prefillBanner && (
+        <div
+          data-testid="wizard-prefill-banner"
+          className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-foreground/90 leading-relaxed"
+        >
+          <strong className="text-emerald-800">Angaben aus Assistent übernommen</strong>
+          <p className="mt-1">
+            Ihre bisherigen Eingaben aus dem Chat wurden übernommen. Prüfen Sie die Angaben und
+            schließen Sie die Anfrage ab.
+          </p>
+        </div>
+      )}
       <QuoteProgress currentStep={step} />
 
       {step === 1 && <Step1Services data={data} onChange={handleServicesChange} />}

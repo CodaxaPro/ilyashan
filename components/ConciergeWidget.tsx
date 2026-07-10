@@ -7,6 +7,14 @@ import type { ConciergeAction, ConciergeSession } from "@/lib/concierge/types";
 import { createSession, CONCIERGE_QUICK_REPLIES } from "@/lib/concierge/types";
 import { isHotLead } from "@/lib/concierge/lead";
 import { getProactiveNudge, PROACTIVE_DELAY_MS } from "@/lib/concierge/proactive";
+import {
+  EXIT_INTENT_KEY,
+  getExitIntentMessage,
+  isDesktopPointerFine,
+  shouldShowExitIntent,
+} from "@/lib/concierge/exit-intent";
+import { saveWizardPrefillFromSession } from "@/lib/concierge/wizard-bridge";
+import { routes } from "@/lib/routes";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { siteConfig } from "@/lib/config";
 
@@ -92,6 +100,7 @@ export function ConciergeWidget() {
   const [quickReplies, setQuickReplies] = useState<string[]>([]);
   const [ready, setReady] = useState(false);
   const [nudge, setNudge] = useState<string | null>(null);
+  const [exitNudge, setExitNudge] = useState<string | null>(null);
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
   const [leadLoading, setLeadLoading] = useState(false);
@@ -117,11 +126,37 @@ export function ConciergeWidget() {
     if (sessionStorage.getItem(NUDGE_KEY)) return;
 
     const timer = window.setTimeout(() => {
-      setNudge(getProactiveNudge(pathname));
+      if (!sessionStorage.getItem(EXIT_INTENT_KEY)) {
+        setNudge(getProactiveNudge(pathname));
+      }
     }, PROACTIVE_DELAY_MS);
 
     return () => window.clearTimeout(timer);
   }, [ready, open, pathname]);
+
+  useEffect(() => {
+    if (!ready || open) return;
+    if (sessionStorage.getItem(EXIT_INTENT_KEY)) return;
+    if (!shouldShowExitIntent(pathname)) return;
+    if (!isDesktopPointerFine()) return;
+
+    const onMouseOut = (event: MouseEvent) => {
+      if (event.relatedTarget || event.clientY > 0) return;
+      setExitNudge(getExitIntentMessage(pathname, session));
+      setNudge(null);
+      sessionStorage.setItem(EXIT_INTENT_KEY, "1");
+      sessionStorage.setItem(NUDGE_KEY, "1");
+      document.removeEventListener("mouseout", onMouseOut);
+    };
+
+    document.addEventListener("mouseout", onMouseOut);
+    return () => document.removeEventListener("mouseout", onMouseOut);
+  }, [ready, open, pathname, session]);
+
+  function handleWizardNavigation() {
+    saveWizardPrefillFromSession(session);
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open || !ready || greeted.current) return;
@@ -158,6 +193,7 @@ export function ConciergeWidget() {
   const openChat = useCallback(() => {
     setOpen(true);
     setNudge(null);
+    setExitNudge(null);
     sessionStorage.setItem(NUDGE_KEY, "1");
   }, []);
 
@@ -306,7 +342,10 @@ export function ConciergeWidget() {
                           key={action.href}
                           href={action.href}
                           className="inline-flex items-center px-3 py-1.5 rounded-full bg-primary text-white text-xs font-semibold hover:bg-primary/90"
-                          onClick={() => setOpen(false)}
+                          onClick={() => {
+                            if (action.href.includes(routes.angebot)) handleWizardNavigation();
+                            else setOpen(false);
+                          }}
                         >
                           {action.label}
                         </Link>
@@ -435,13 +474,13 @@ export function ConciergeWidget() {
         </form>
       </div>
 
-      {nudge && !open && (
+      {(nudge || exitNudge) && !open && (
         <div
           className="fixed z-[56] max-w-[260px] rounded-2xl bg-white border border-border shadow-xl p-4 text-sm leading-relaxed
             bottom-[max(9.5rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]"
-          data-testid="concierge-nudge"
+          data-testid={exitNudge ? "concierge-exit-nudge" : "concierge-nudge"}
         >
-          <p className="text-foreground mb-3">{nudge}</p>
+          <p className="text-foreground mb-3">{exitNudge ?? nudge}</p>
           <div className="flex gap-2">
             <button
               type="button"
@@ -454,7 +493,9 @@ export function ConciergeWidget() {
               type="button"
               onClick={() => {
                 setNudge(null);
+                setExitNudge(null);
                 sessionStorage.setItem(NUDGE_KEY, "1");
+                sessionStorage.setItem(EXIT_INTENT_KEY, "1");
               }}
               className="px-3 py-2 rounded-xl border border-border text-xs text-muted"
               aria-label="Schließen"
@@ -472,7 +513,7 @@ export function ConciergeWidget() {
           bg-primary text-white hover:bg-primary/90
           bottom-[max(5.5rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]
           ${open ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100"}
-          ${nudge ? "ring-2 ring-accent ring-offset-2 animate-pulse" : ""}
+          ${nudge || exitNudge ? "ring-2 ring-accent ring-offset-2 animate-pulse" : ""}
           pl-4 pr-5 py-3`}
         aria-label="Ilyashan Assistent öffnen"
         data-testid="concierge-toggle"

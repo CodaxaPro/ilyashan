@@ -36,4 +36,20 @@ test.describe("Concierge Assistent", () => {
     await page.getByRole("button", { name: /Welche Leistungen/i }).click();
     await expect(page.getByText(/Privathaushalt/i).last()).toBeVisible({ timeout: 10000 });
   });
+
+  test("übernimmt Assistent-Angaben im Preisrechner", async ({ page }) => {
+    await page.getByTestId("concierge-toggle").click();
+    await page.getByTestId("concierge-input").fill("10 Flügel, 2. Stock, Baesweiler");
+    await page.getByTestId("concierge-send").click();
+    await expect(page.getByText(/€/).first()).toBeVisible({ timeout: 10000 });
+
+    const wizardLink = page.getByRole("link", { name: /übernehmen|berechnen/i }).first();
+    await expect(wizardLink).toBeVisible();
+    await wizardLink.click();
+
+    await expect(page).toHaveURL(/\/de\/angebot/);
+    await expect(page.getByTestId("wizard-prefill-banner")).toBeVisible();
+    await expect(page.getByTestId("window-count-display")).toHaveText("10");
+    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+  });
 });

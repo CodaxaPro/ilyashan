@@ -21,7 +21,7 @@ import {
   buildFluegelGuide,
   buildThanks,
   buildUnknown,
-  wizardAction,
+  wizardActionFromSession,
   phoneAction,
   whatsappAction,
   whatsappActionFromSession,
@@ -41,9 +41,12 @@ function defaultQuickReplies(): string[] {
   return [...CONCIERGE_QUICK_REPLIES];
 }
 
-function withWizard(actions: ConciergeReply["actions"]): ConciergeReply["actions"] {
+function withWizard(
+  session: ConciergeSession,
+  actions: ConciergeReply["actions"]
+): ConciergeReply["actions"] {
   if (actions.some((a) => a.href.includes("/angebot"))) return actions;
-  return [wizardAction(), ...actions];
+  return [wizardActionFromSession(session), ...actions];
 }
 
 function serviceDetailReply(message: string): string {
@@ -70,11 +73,16 @@ function handlePriceFlow(
   if (missing.length === 0) {
     const priceText = buildPriceResponse(updated.quote);
     if (priceText) {
+      const readySession = { ...updated, stage: "price_ready" as const, lastIntent: "price" as const };
       return {
         text: priceText,
         intent: intent === "price_collect" ? "price_collect" : "price",
-        session: { ...updated, stage: "price_ready", lastIntent: "price" },
-        actions: withWizard([wizardAction(), whatsappActionFromSession({ ...updated, stage: "price_ready" }), phoneAction()]),
+        session: readySession,
+        actions: withWizard(readySession, [
+          wizardActionFromSession(readySession),
+          whatsappActionFromSession(readySession),
+          phoneAction(),
+        ]),
         quickReplies: ["Rückruf anfordern", "Verbindliches Angebot anfordern", "Einsatzgebiet"],
       };
     }
@@ -85,7 +93,7 @@ function handlePriceFlow(
     text: askForMissingFields(missing),
     intent: "price_collect",
     session: { ...updated, stage, lastIntent: "price" },
-    actions: [wizardAction()],
+    actions: [wizardActionFromSession(updated)],
     quickReplies: ["Wie zähle ich Flügel?", "10 Flügel, 2. OG", "Was kostet eine Wohnung?"],
   };
 }
@@ -102,17 +110,18 @@ export function processConciergeMessage(
       text: buildUnknown(),
       intent: "unknown",
       session,
-      actions: [wizardAction()],
+      actions: [wizardActionFromSession(session)],
       quickReplies: defaultQuickReplies(),
     };
   }
 
   if (isOutOfScope(trimmed)) {
+    const scopedSession = { ...session, turns: session.turns + 1, lastIntent: "out_of_scope" as const };
     return {
       text: OUT_OF_SCOPE_REPLY,
       intent: "out_of_scope",
-      session: { ...session, turns: session.turns + 1, lastIntent: "out_of_scope" },
-      actions: [wizardAction()],
+      session: scopedSession,
+      actions: [wizardActionFromSession(scopedSession)],
       quickReplies: defaultQuickReplies(),
     };
   }
@@ -147,7 +156,7 @@ export function processConciergeMessage(
         text: buildGreeting(),
         intent,
         session: baseSession,
-        actions: [wizardAction(), phoneAction()],
+        actions: [wizardActionFromSession(baseSession), phoneAction()],
         quickReplies: defaultQuickReplies(),
       };
 
@@ -156,7 +165,7 @@ export function processConciergeMessage(
         text: buildThanks(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: ["Preis berechnen", "Kontakt"],
       };
 
@@ -165,7 +174,7 @@ export function processConciergeMessage(
         text: buildServicesOverview(),
         intent,
         session: baseSession,
-        actions: withWizard([whatsappAction()]),
+        actions: withWizard(baseSession, [whatsappAction()]),
         quickReplies: ["Was kostet Privat?", "Gewerbe", "Preisrechner starten"],
       };
 
@@ -174,7 +183,7 @@ export function processConciergeMessage(
         text: serviceDetailReply(trimmed),
         intent,
         session: baseSession,
-        actions: withWizard([]),
+        actions: withWizard(baseSession, []),
         quickReplies: ["Alle Leistungen", "Preis berechnen"],
       };
 
@@ -189,7 +198,7 @@ export function processConciergeMessage(
         text,
         intent,
         session: baseSession,
-        actions: [wizardAction(), phoneAction()],
+        actions: [wizardActionFromSession(baseSession), phoneAction()],
         quickReplies: ["Preis berechnen", "Termin"],
       };
     }
@@ -199,7 +208,7 @@ export function processConciergeMessage(
         text: buildProcessInfo(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: ["Festpreis vs. Schätzung?", "Jetzt starten"],
       };
 
@@ -208,7 +217,7 @@ export function processConciergeMessage(
         text: buildFestpreisInfo(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: ["Preis berechnen", "Wie schnell Antwort?"],
       };
 
@@ -217,7 +226,7 @@ export function processConciergeMessage(
         text: buildInsuranceInfo(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: defaultQuickReplies(),
       };
 
@@ -226,7 +235,7 @@ export function processConciergeMessage(
         text: buildWinterInfo(),
         intent,
         session: baseSession,
-        actions: [wizardAction(), phoneAction()],
+        actions: [wizardActionFromSession(baseSession), phoneAction()],
         quickReplies: ["Preis berechnen", "Termin"],
       };
 
@@ -235,7 +244,7 @@ export function processConciergeMessage(
         text: buildAppointmentInfo(),
         intent,
         session: baseSession,
-        actions: [phoneAction(), wizardAction(), whatsappAction()],
+        actions: [phoneAction(), wizardActionFromSession(baseSession), whatsappAction()],
         quickReplies: ["Preis berechnen", "Rückruf"],
       };
 
@@ -244,7 +253,7 @@ export function processConciergeMessage(
         text: `Sehr gerne! Hinterlassen Sie unten **Name und Telefonnummer** – wir rufen Sie innerhalb von **${siteConfig.business.responseTime}** zurück.\n\nOder rufen Sie direkt an: **${siteConfig.contact.phoneDisplay}**`,
         intent,
         session: baseSession,
-        actions: [phoneAction(), whatsappActionFromSession(baseSession), wizardAction()],
+        actions: [phoneAction(), whatsappActionFromSession(baseSession), wizardActionFromSession(baseSession)],
         quickReplies: ["Rückruf anfordern", "Preisrechner"],
       };
 
@@ -253,7 +262,7 @@ export function processConciergeMessage(
         text: buildContactInfo(),
         intent,
         session: baseSession,
-        actions: [phoneAction(), whatsappAction(), wizardAction()],
+        actions: [phoneAction(), whatsappAction(), wizardActionFromSession(baseSession)],
         quickReplies: ["Preis berechnen"],
       };
 
@@ -262,7 +271,7 @@ export function processConciergeMessage(
         text: `Unser **5-Schritte Preisrechner** führt Sie in unter 2 Minuten zur Live-Preisschätzung:\n\n${siteConfig.messaging.angebotIntro}\n\nKlicken Sie unten auf **„${siteConfig.messaging.ctaPrimary}"** – oder stellen Sie mir hier Ihre Fragen.`,
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: ["Was kostet 10 Flügel?", "Leistungen"],
       };
 
@@ -271,7 +280,7 @@ export function processConciergeMessage(
         text: buildFluegelGuide(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: ["12 Flügel, 2. OG", "Preis berechnen"],
       };
 
@@ -283,7 +292,7 @@ export function processConciergeMessage(
           : buildUnknown(),
         intent,
         session: baseSession,
-        actions: [wizardAction()],
+        actions: [wizardActionFromSession(baseSession)],
         quickReplies: defaultQuickReplies(),
       };
     }
@@ -295,7 +304,7 @@ export function processConciergeMessage(
           text: faq,
           intent: "faq_match",
           session: { ...baseSession, lastIntent: "faq_match" },
-          actions: [wizardAction()],
+          actions: [wizardActionFromSession(baseSession)],
           quickReplies: defaultQuickReplies(),
         };
       }
@@ -303,7 +312,7 @@ export function processConciergeMessage(
         text: buildUnknown(),
         intent: "unknown",
         session: baseSession,
-        actions: [wizardAction(), phoneAction()],
+        actions: [wizardActionFromSession(baseSession), phoneAction()],
         quickReplies: defaultQuickReplies(),
       };
     }
