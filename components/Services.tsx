@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/config";
+import { routes } from "@/lib/routes";
 import { Button } from "@/components/ui/Button";
 
 const serviceIcons: Record<string, React.ReactNode> = {
@@ -61,7 +62,7 @@ export function Services() {
               <p className="text-muted text-sm leading-relaxed mb-4">{service.description}</p>
               <div className="flex items-center justify-between">
                 <span className="text-primary font-bold text-lg">{service.priceFrom}</span>
-                <Button href="#angebot" variant="secondary" size="sm">
+                <Button href={routes.angebot} variant="secondary" size="sm">
                   Anfragen
                 </Button>
               </div>

@@ -8,13 +8,13 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navLinks = [
-  { href: "#einsatzgebiet", label: "Einsatzgebiet" },
-  { href: "#leistungen", label: "Leistungen" },
-  { href: "#vorteile", label: "Vorteile" },
-  { href: "#ablauf", label: "Ablauf" },
-  { href: "#bewertungen", label: "Bewertungen" },
-  { href: "#faq", label: "FAQ" },
-  { href: "#angebot", label: "Angebot" },
+  { href: "#einsatzgebiet", label: "Einsatzgebiet", isPage: false },
+  { href: "#leistungen", label: "Leistungen", isPage: false },
+  { href: "#vorteile", label: "Vorteile", isPage: false },
+  { href: "#ablauf", label: "Ablauf", isPage: false },
+  { href: "#bewertungen", label: "Bewertungen", isPage: false },
+  { href: "#faq", label: "FAQ", isPage: false },
+  { href: routes.angebot, label: "Angebot", isPage: true },
 ];
 
 export function Header() {
@@ -69,17 +69,29 @@ export function Header() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  solid ? "text-foreground/80" : "text-white/90"
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.isPage ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    solid ? "text-foreground/80" : "text-white/90"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={isHome ? link.href : `${routes.home}${link.href}`}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    solid ? "text-foreground/80" : "text-white/90"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              )
+            )}
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
@@ -92,7 +104,7 @@ export function Header() {
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
-            <Button href="#angebot" variant="primary" size="sm">
+            <Button href={routes.angebot} variant="primary" size="sm">
               Angebot anfordern
             </Button>
           </div>
@@ -116,18 +128,31 @@ export function Header() {
 
         {menuOpen && (
           <nav className="lg:hidden mt-4 pb-4 border-t border-white/20 pt-4 space-y-3">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className={`block text-sm font-medium py-2 ${
-                  solid ? "text-foreground" : "text-white"
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
+            {navLinks.map((link) =>
+              link.isPage ? (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className={`block text-sm font-medium py-2 ${
+                    solid ? "text-foreground" : "text-white"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={isHome ? link.href : `${routes.home}${link.href}`}
+                  onClick={() => setMenuOpen(false)}
+                  className={`block text-sm font-medium py-2 ${
+                    solid ? "text-foreground" : "text-white"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              )
+            )}
             <a
               href={`tel:${siteConfig.contact.phone}`}
               className={`flex items-center gap-2 text-sm font-semibold py-2 ${
@@ -137,7 +162,7 @@ export function Header() {
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
-            <Button href="#angebot" variant="primary" size="md" className="w-full">
+            <Button href={routes.angebot} variant="primary" size="md" className="w-full">
               Angebot anfordern
             </Button>
           </nav>

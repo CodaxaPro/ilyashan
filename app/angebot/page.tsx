@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
-import { ContactForm } from "@/components/ContactForm";
+import { routes } from "@/lib/routes";
+import { QuoteWizard } from "@/components/quote/QuoteWizard";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { CTAButtons } from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: `Kostenloses Angebot – Fensterreinigung ${siteConfig.contact.region}`,
@@ -25,17 +26,18 @@ export default function AngebotPage() {
               Transparentes Festpreis-Angebot in {siteConfig.business.responseTime}.
               Unverbindlich, versichert, streifenfrei garantiert.
             </p>
-            <CTAButtons className="justify-center" />
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button href={`tel:${siteConfig.contact.phone}`} variant="outline" size="lg">
+                {siteConfig.contact.phoneDisplay}
+              </Button>
+            </div>
           </div>
         </section>
 
         <section className="py-16 -mt-8">
-          <div className="max-w-xl mx-auto px-4 sm:px-6">
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-border">
-              <h2 className="text-2xl font-bold text-center mb-6">
-                Jetzt Angebot anfordern
-              </h2>
-              <ContactForm compact />
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="bg-white rounded-3xl p-8 sm:p-10 shadow-xl border border-border">
+              <QuoteWizard />
             </div>
           </div>
         </section>

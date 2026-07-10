@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/config";
+import { routes } from "@/lib/routes";
 import Link from "next/link";
 
 interface ButtonProps {
@@ -9,6 +10,8 @@ interface ButtonProps {
   children: React.ReactNode;
   className?: string;
   type?: "button" | "submit";
+  disabled?: boolean;
+  "data-testid"?: string;
 }
 
 const variants = {
@@ -36,6 +39,8 @@ export function Button({
   children,
   className = "",
   type = "button",
+  disabled = false,
+  "data-testid": dataTestId,
 }: ButtonProps) {
   const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 ${variants[variant]} ${sizes[size]} ${className}`;
 
@@ -56,7 +61,13 @@ export function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={classes}
+      data-testid={dataTestId}
+    >
       {children}
     </button>
   );
@@ -81,7 +92,7 @@ export function WhatsAppIcon({ className = "w-5 h-5" }: { className?: string }) 
 export function CTAButtons({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
-      <Button href="#angebot" variant="primary" size="lg">
+      <Button href={routes.angebot} variant="primary" size="lg">
         Kostenloses Angebot
       </Button>
       <Button href={`tel:${siteConfig.contact.phone}`} variant="outline" size="lg">
