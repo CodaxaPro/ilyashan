@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { GoogleAdsTag } from "@/components/GoogleAdsTag";
 import { siteConfig } from "@/lib/config";
 import { getLocalBusinessSchema, getFAQSchema, getServiceSchema } from "@/lib/schema";
 import "./globals.css";
@@ -65,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="de">
       <head>
+        <GoogleAdsTag />
         {schemas.map((schema, i) => (
           <script
             key={i}

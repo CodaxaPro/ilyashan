@@ -277,9 +277,7 @@ export const siteConfig = {
   ],
 
   googleAds: {
-  // Google Ads Conversion ID hier eintragen:
-  // conversionId: "AW-XXXXXXXXX",
-  // conversionLabel: "XXXXXXXXX",
+    tagId: "AW-18191480247",
   },
 } as const;
 
