@@ -4,10 +4,10 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   AdminAlert,
-  AdminLoginForm,
   AdminPanel,
   AdminShell,
 } from "@/components/admin/AdminShell";
+import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
 
@@ -43,9 +43,8 @@ function parseTab(param: string | null): AdminTab {
 function AdminPageContent() {
   const searchParams = useSearchParams();
   const tab = useMemo(() => parseTab(searchParams.get("tab")), [searchParams]);
+  const { logout, markUnauthenticated } = useAdminAuth();
 
-  const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
   const [leads, setLeads] = useState<StoredLead[]>([]);
   const [unknownItems, setUnknownItems] = useState<UnknownQueueItem[]>([]);
   const [conciergeSettings, setConciergeSettings] = useState<ConciergeAdminSettings | null>(null);
@@ -53,7 +52,6 @@ function AdminPageContent() {
   const [storageConfigured, setStorageConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loginLoading, setLoginLoading] = useState(false);
 
   const loadLeads = useCallback(async () => {
     const res = await fetch("/api/admin/leads");
@@ -96,45 +94,22 @@ function AdminPageContent() {
             ? await loadUnknown()
             : await loadSettings();
       if (ok === false) {
-        setAuthenticated(false);
+        markUnauthenticated();
         return;
       }
-      setAuthenticated(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Yükleme hatası");
     } finally {
       setLoading(false);
     }
-  }, [tab, loadLeads, loadUnknown, loadSettings]);
+  }, [tab, loadLeads, loadUnknown, loadSettings, markUnauthenticated]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Giriş başarısız");
-      setPassword("");
-      await loadData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Giriş başarısız");
-    } finally {
-      setLoginLoading(false);
-    }
-  }
-
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    setAuthenticated(false);
+    await logout();
     setLeads([]);
     setUnknownItems([]);
   }
@@ -179,19 +154,6 @@ function AdminPageContent() {
       : tab === "unknown"
         ? `${unknownItems.length} açık soru`
         : headerMeta.subtitle;
-
-  if (!authenticated) {
-    return (
-      <AdminLoginForm
-        password={password}
-        setPassword={setPassword}
-        error={error}
-        loading={loginLoading}
-        onSubmit={handleLogin}
-        subtitle="Leadler, fotoğraflar ve asistan sorularını yönetin"
-      />
-    );
-  }
 
   return (
     <AdminShell

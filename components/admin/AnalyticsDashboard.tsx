@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AdminLoginForm, AdminShell, StatCard } from "@/components/admin/AdminShell";
+import { AdminShell, StatCard } from "@/components/admin/AdminShell";
+import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { CHANNEL_LABELS_TR } from "@/lib/analytics/attribution";
 import type { AnalyticsEventRow, AnalyticsSessionRow } from "@/lib/analytics/types";
 
@@ -64,14 +65,12 @@ function formatDuration(sec: number) {
 }
 
 export function AnalyticsDashboard() {
-  const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
+  const { logout, markUnauthenticated } = useAdminAuth();
   const [tab, setTab] = useState<Tab>("overview");
   const [days, setDays] = useState(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [configured, setConfigured] = useState(true);
-  const [loginLoading, setLoginLoading] = useState(false);
 
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [live, setLive] = useState<AnalyticsSessionRow[]>([]);
@@ -107,12 +106,11 @@ export function AnalyticsDashboard() {
     try {
       const res = await fetch(`/api/admin/analytics?section=${tab}&days=${days}`);
       if (res.status === 401) {
-        setAuthenticated(false);
+        markUnauthenticated();
         return;
       }
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Veri yüklenemedi");
-      setAuthenticated(true);
       setConfigured(data.configured !== false);
 
       if (tab === "overview") setOverview(data.overview ?? null);
@@ -134,36 +132,14 @@ export function AnalyticsDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [tab, days]);
+  }, [tab, days, markUnauthenticated]);
 
   useEffect(() => {
     void loadSection();
   }, [loadSection]);
 
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setLoginLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Giriş başarısız");
-      setPassword("");
-      await loadSection();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Giriş başarısız");
-    } finally {
-      setLoginLoading(false);
-    }
-  }
-
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    setAuthenticated(false);
+    await logout();
   }
 
   async function openSession(id: string) {
@@ -174,19 +150,6 @@ export function AnalyticsDashboard() {
       return;
     }
     setSelectedSession(data);
-  }
-
-  if (!authenticated) {
-    return (
-      <AdminLoginForm
-        password={password}
-        setPassword={setPassword}
-        error={error}
-        loading={loginLoading}
-        onSubmit={handleLogin}
-        subtitle="Ziyaretçi analitiği, kanallar, huniler ve oturum detayları"
-      />
-    );
   }
 
   return (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdminAuthProvider } from "@/components/admin/AdminAuthProvider";
 
 export const metadata: Metadata = {
   title: "Yönetim – Ilyashan",
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <AdminAuthProvider>{children}</AdminAuthProvider>;
 }
