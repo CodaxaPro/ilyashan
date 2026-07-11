@@ -14,12 +14,11 @@ import {
   getBillingSubtotal,
 } from "./quote-pricing-context";
 import { buildQuoteAdminEmail, buildQuoteCustomerEmail } from "./quote-email";
-import { toWartungPricingConfig, DEFAULT_FENSTER_PRICING } from "./pricing-config";
+import { DEFAULT_FENSTER_PRICING } from "./pricing-config";
 import { initialQuoteFormData, type QuoteFormData } from "./quote-form";
 import { siteConfig } from "./config";
 import { compareWartungPackages } from "./wartung-pricing";
 
-const wartungConfig = toWartungPricingConfig(DEFAULT_FENSTER_PRICING);
 const ctx = createQuotePricingContext(DEFAULT_FENSTER_PRICING);
 
 function sampleQuote(overrides: Partial<QuoteFormData> = {}): QuoteFormData {

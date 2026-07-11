@@ -65,7 +65,7 @@ export function createConciergeStoredLead(
     hot: isHotLead(session),
     summary: buildConciergeLeadSummary(session, ctx),
     photoCount,
-    priceSnapshot,
+    priceSnapshot: priceSnapshot ?? undefined,
     session: {
       id: session.id,
       stage: session.stage,

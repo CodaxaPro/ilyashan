@@ -8,7 +8,7 @@ import {
   resolveLeadQuotePricing,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
-import { DEFAULT_FENSTER_PRICING, type FensterPricingConfig } from "@/lib/pricing-config";
+import { type FensterPricingConfig } from "@/lib/pricing-config";
 
 export function useLeadQuotePricing(lead: Pick<StoredLead, "priceSnapshot">): QuotePricingContext {
   const [liveConfig, setLiveConfig] = useState<FensterPricingConfig | null>(null);

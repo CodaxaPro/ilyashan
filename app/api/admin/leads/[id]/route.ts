@@ -19,6 +19,7 @@ import {
   updateLead,
   type LeadEmailAction,
   type LeadStatus,
+  type StoredLead,
 } from "@/lib/leads-store";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
@@ -56,7 +57,7 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
 
 async function sendLeadEmail(
   action: LeadEmailAction,
-  lead: { email?: string; anfrageNr?: string; id: string; quote?: Partial<QuoteFormData> },
+  lead: Pick<StoredLead, "email" | "anfrageNr" | "id" | "quote" | "priceSnapshot">,
   options: {
     confirmedDate?: string;
     previousConfirmedDate?: string;
