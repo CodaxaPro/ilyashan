@@ -139,13 +139,19 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
       )}
 
       <h2 className="text-2xl font-bold text-foreground mb-2">Leistungsdetails</h2>
-      <p className="text-muted mb-8">
+      <p className="text-muted mb-4">
         Basispreis 5,00 €/Flügel = Glas innen & außen (normal), ohne Rahmen. Multiplikatoren und
         Zuschläge werden live berechnet.
       </p>
 
+      <p className="lg:hidden text-sm text-foreground/90 mb-8 rounded-xl border border-primary/15 bg-primary-light/25 px-4 py-3 leading-relaxed">
+        <strong className="text-primary">Live-Preis unten fixiert:</strong> Die Schätzung bleibt beim
+        Scrollen sichtbar. Tippen Sie auf <strong>Details</strong> für Kalkulation, Wartung und
+        Hinweise.
+      </p>
+
       <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
-        <div className="lg:col-span-1 order-1 lg:order-2">
+        <div className="hidden lg:block lg:col-span-1 order-1 lg:order-2">
           <div className="lg:sticky lg:top-28 mb-8 lg:mb-0">
             <PriceEstimateCard data={data} />
           </div>

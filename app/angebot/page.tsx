@@ -37,7 +37,7 @@ export default function AngebotPage() {
           </div>
         </section>
 
-        <section className="py-16 -mt-8 pb-28 lg:pb-16">
+        <section className="py-16 -mt-8 pb-36 lg:pb-16">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="mb-6 rounded-2xl border border-primary/20 bg-primary-light/30 px-5 py-4 text-sm text-foreground/90 leading-relaxed">
               <strong className="text-primary">So funktioniert es:</strong> Die angezeigte{" "}

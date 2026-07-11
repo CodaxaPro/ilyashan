@@ -17,6 +17,8 @@ import { Step4Schedule } from "@/components/quote/steps/Step4Schedule";
 import { Step5Contact } from "@/components/quote/steps/Step5Contact";
 import { Button } from "@/components/ui/Button";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import { PriceEstimateMobileDock } from "@/components/quote/PriceEstimateMobileDock";
+import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
 
 const TOTAL_STEPS = 5;
 
@@ -57,6 +59,8 @@ export function QuoteWizard() {
   }
 
   const stepIssues = canProceed() ? [] : validateQuoteStep(step, data);
+  const priceEstimate = useQuotePriceEstimate(data);
+  const showMobilePriceDock = step >= 3 && Boolean(priceEstimate);
 
   return (
     <div ref={wizardAnchorRef} id="quote-wizard" className="scroll-mt-24">
@@ -124,6 +128,8 @@ export function QuoteWizard() {
           </Button>
         </div>
       )}
+
+      {showMobilePriceDock && <PriceEstimateMobileDock data={data} />}
     </div>
   );
 }

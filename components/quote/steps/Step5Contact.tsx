@@ -88,7 +88,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
         {siteConfig.messaging.wizardStep5Hint}
       </p>
 
-      <div className="mb-8 max-w-md">
+      <div className="mb-8 max-w-md hidden lg:block">
         <PriceEstimateCard data={data} compact />
       </div>
 
