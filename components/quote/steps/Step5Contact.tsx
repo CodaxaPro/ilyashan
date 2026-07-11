@@ -9,6 +9,8 @@ import { trackAnalytics } from "@/lib/analytics/client";
 import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
 import { PhotoUploader } from "@/components/PhotoUploader";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
+import { createQuotePricingContext } from "@/lib/quote-pricing-context";
 import type { PhotoPayload } from "@/lib/photo-upload";
 import { useState } from "react";
 
@@ -18,6 +20,8 @@ interface Step5ContactProps {
 }
 
 export function Step5Contact({ data, onChange }: Step5ContactProps) {
+  const { config } = usePricingConfig();
+  const quotePricing = createQuotePricingContext(config);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -228,7 +232,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
           {loading ? "Wird gesendet..." : "Per E-Mail senden"}
         </Button>
         <Button
-          href={canSubmit ? getWhatsAppQuoteUrl(data) : undefined}
+          href={canSubmit ? getWhatsAppQuoteUrl(data, quotePricing) : undefined}
           onClick={() => {
             if (canSubmit) trackRequestQuoteConversion();
           }}

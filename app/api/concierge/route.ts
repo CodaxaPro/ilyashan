@@ -3,6 +3,8 @@ import { processConciergeMessage, createSession } from "@/lib/concierge";
 import type { ConciergeSession } from "@/lib/concierge";
 import { recordUnknownMessage, shouldLogUnknownMessage } from "@/lib/concierge/unknown-queue";
 import { getConciergeEnabled } from "@/lib/concierge-settings";
+import { getFensterPricingConfig } from "@/lib/pricing-config";
+import { createQuotePricingContext } from "@/lib/quote-pricing-context";
 
 export const runtime = "nodejs";
 
@@ -40,7 +42,10 @@ export async function POST(request: Request) {
         ? body.session
         : createSession(crypto.randomUUID());
 
-    const reply = processConciergeMessage(message, session);
+    const pricingConfig = await getFensterPricingConfig();
+    const pricingCtx = createQuotePricingContext(pricingConfig);
+
+    const reply = processConciergeMessage(message, session, pricingCtx);
 
     if (shouldLogUnknownMessage(reply.intent)) {
       void recordUnknownMessage({

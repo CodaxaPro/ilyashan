@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { QuoteFormData, ScheduleOption } from "@/lib/quote-form";
 import { formatGermanDate, scheduleOptionLabels } from "@/lib/quote-form";
+import { siteConfig } from "@/lib/config";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 
@@ -276,7 +277,7 @@ export function Step4Schedule({ data, onChange }: Step4ScheduleProps) {
           <p className="text-sm text-primary-dark">
             <strong>{scheduleOptionLabels[data.scheduleOption]}:</strong>{" "}
             {data.scheduleOption === "1-2_wochen"
-              ? "Wir melden uns innerhalb von 24 Stunden mit Terminvorschlägen."
+              ? `Wir melden uns innerhalb von ${siteConfig.business.responseTime} mit Terminvorschlägen.`
               : "Kein Problem – wir besprechen den Termin persönlich mit Ihnen."}
           </p>
         </div>

@@ -4,6 +4,8 @@ import type { QuoteFormData } from "@/lib/quote-form";
 import { formatEuro, formatEuroExact } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
+import { formatPriceEstimateBasisLine } from "@/lib/pricing-display";
 
 interface PriceEstimateCardProps {
   data: QuoteFormData;
@@ -21,6 +23,7 @@ export function PriceEstimateCard({
   className = "",
 }: PriceEstimateCardProps) {
   const estimate = useQuotePriceEstimate(data);
+  const { config } = usePricingConfig();
 
   if (!estimate) return null;
 
@@ -127,7 +130,7 @@ export function PriceEstimateCard({
 
       {!compact && (
         <p className="mt-3 text-xs text-muted">
-          Basis: 5,00 €/Flügel (i+a, normal) · {siteConfig.contact.region}
+          {formatPriceEstimateBasisLine(config.basePerFluegel, siteConfig.contact.region)}
         </p>
       )}
     </div>

@@ -10,7 +10,12 @@ import {
   quoteServiceLabels,
 } from "@/lib/quote-form";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import {
+  formatBasePerFluegelDescription,
+  formatCanopyHint,
+} from "@/lib/pricing-display";
 
 interface Step3DetailsProps {
   data: QuoteFormData;
@@ -116,6 +121,7 @@ const reinigungswünsche: {
 ];
 
 export function Step3Details({ data, onChange }: Step3DetailsProps) {
+  const { config } = usePricingConfig();
   const selectedExtras = reinigungswünsche.filter((item) => data[item.key]).length;
 
   return (
@@ -140,8 +146,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
 
       <h2 className="text-2xl font-bold text-foreground mb-2">Leistungsdetails</h2>
       <p className="text-muted mb-4">
-        Basispreis 5,00 €/Flügel = Glas innen & außen (normal), ohne Rahmen. Multiplikatoren und
-        Zuschläge werden live berechnet.
+        {formatBasePerFluegelDescription(config.basePerFluegel)}
       </p>
 
       <p className="lg:hidden text-sm text-foreground/90 mb-8 rounded-xl border border-primary/15 bg-primary-light/25 px-4 py-3 leading-relaxed">
@@ -290,7 +295,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               <div className="mt-4 ml-1">
                 <Stepper
                   label="Vordach-Fläche"
-                  hint="5,00 €/m² · mindestens 25 €"
+                  hint={formatCanopyHint()}
                   value={data.canopySqm || 5}
                   min={1}
                   max={50}

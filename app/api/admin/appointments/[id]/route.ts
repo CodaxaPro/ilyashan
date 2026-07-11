@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import { buildLeadStatusEmail } from "@/lib/appointment-email";
+import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import { canRescheduleAppointment } from "@/lib/calendar/appointment-from-lead";
 import {
   getAppointmentById,
@@ -131,11 +132,12 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     } else if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
       emailError = "E-Mail nicht konfiguriert.";
     } else {
+      const ctx = await resolveServerQuotePricing(lead);
       const mail = buildLeadStatusEmail("update", quote, lead.anfrageNr ?? lead.id, {
         confirmedDate: body.eventDate,
         previousConfirmedDate: previousDate,
         note: appointmentPatch.note,
-      });
+      }, ctx);
       const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
       const { error } = await resend.emails.send({
         from: fromEmail,

@@ -2,6 +2,10 @@ import type { QuoteFormData, QuoteServiceId } from "@/lib/quote-form";
 import { getFloorLabel, initialQuoteFormData } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro, formatEuroExact } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 import { buildTrustFooter } from "./knowledge";
 
 export function quoteDataForEstimate(partial: Partial<QuoteFormData>): QuoteFormData | null {
@@ -30,11 +34,14 @@ export function quoteDataForEstimate(partial: Partial<QuoteFormData>): QuoteForm
   };
 }
 
-export function buildPriceResponse(partial: Partial<QuoteFormData>): string | null {
+export function buildPriceResponse(
+  partial: Partial<QuoteFormData>,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): string | null {
   const data = quoteDataForEstimate(partial);
   if (!data) return null;
 
-  const estimate = calculatePriceEstimate(data);
+  const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
   if (!estimate) return null;
 
   const floor = getFloorLabel(data);

@@ -11,8 +11,15 @@ import {
 } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
-export function buildWhatsAppQuoteMessage(data: QuoteFormData) {
+export function buildWhatsAppQuoteMessage(
+  data: QuoteFormData,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+) {
   const services = data.services.map((s) => quoteServiceLabels[s]).join(", ") || "–";
   const addonParts: string[] = [];
   if (data.includeSolar && data.solarSqm) addonParts.push(`Solar ${data.solarSqm} m²`);
@@ -21,7 +28,7 @@ export function buildWhatsAppQuoteMessage(data: QuoteFormData) {
   const serviceLine = addonParts.length
     ? `${services}${services !== "–" ? ", " : ""}${addonParts.join(", ")}`
     : services;
-  const estimate = calculatePriceEstimate(data);
+  const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
   const priceLine = estimate
     ? estimate.amount > 0
       ? `${siteConfig.messaging.priceEstimateRowLabel}: ca. ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} (unverbindlich)`
@@ -72,7 +79,10 @@ export function buildWhatsAppQuoteMessage(data: QuoteFormData) {
   return lines.join("\n");
 }
 
-export function getWhatsAppQuoteUrl(data: QuoteFormData) {
-  const text = encodeURIComponent(buildWhatsAppQuoteMessage(data));
+export function getWhatsAppQuoteUrl(
+  data: QuoteFormData,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+) {
+  const text = encodeURIComponent(buildWhatsAppQuoteMessage(data, ctx));
   return `https://wa.me/${siteConfig.contact.whatsapp}?text=${text}`;
 }

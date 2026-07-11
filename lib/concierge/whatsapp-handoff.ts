@@ -9,8 +9,15 @@ import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import type { ConciergeSession } from "./types";
 import { quoteDataForEstimate } from "./pricing-response";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
-export function buildConciergeWhatsAppMessage(session: ConciergeSession): string {
+export function buildConciergeWhatsAppMessage(
+  session: ConciergeSession,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): string {
   const q = session.quote;
   const lines: string[] = [
     "Guten Tag, ich habe über den Ilyashan Website-Assistenten eine Anfrage:",
@@ -38,7 +45,11 @@ export function buildConciergeWhatsAppMessage(session: ConciergeSession): string
 
   const estimateData = quoteDataForEstimate(q);
   if (estimateData) {
-    const estimate = calculatePriceEstimate(estimateData);
+    const estimate = calculatePriceEstimate(
+      estimateData,
+      ctx.pricingOverrides,
+      ctx.wartungConfig
+    );
     if (estimate && estimate.amount > 0) {
       lines.push(
         `${siteConfig.messaging.priceEstimateRowLabel}: ca. ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} (unverbindlich)`
@@ -50,7 +61,10 @@ export function buildConciergeWhatsAppMessage(session: ConciergeSession): string
   return lines.join("\n");
 }
 
-export function getConciergeWhatsAppUrl(session: ConciergeSession): string {
-  const text = encodeURIComponent(buildConciergeWhatsAppMessage(session));
+export function getConciergeWhatsAppUrl(
+  session: ConciergeSession,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): string {
+  const text = encodeURIComponent(buildConciergeWhatsAppMessage(session, ctx));
   return `https://wa.me/${siteConfig.contact.whatsapp}?text=${text}`;
 }

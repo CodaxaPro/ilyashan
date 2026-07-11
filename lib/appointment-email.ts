@@ -9,24 +9,36 @@ import {
 } from "@/lib/email-templates";
 import type { LeadEmailAction } from "@/lib/leads-store";
 import {
-  buildQuoteTableRows,
+  buildQuoteTableRowsFromContext,
   getQuoteContactName,
   getServicesLabel,
 } from "@/lib/quote-summary";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
-function quoteEmailContext(data: QuoteFormData, anfrageNr: string) {
+function quoteEmailContext(
+  data: QuoteFormData,
+  anfrageNr: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
   const services = getServicesLabel(data);
-  const summaryRows = buildQuoteTableRows(data, anfrageNr)
+  const summaryRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx)
     .filter(([k]) => !["Anfrage-Nr."].includes(k))
     .slice(0, 6);
 
   return { name, firstName, services, summaryRows };
 }
 
-function quoteSummaryBlock(data: QuoteFormData, anfrageNr: string) {
-  const { summaryRows } = quoteEmailContext(data, anfrageNr);
+function quoteSummaryBlock(
+  data: QuoteFormData,
+  anfrageNr: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+) {
+  const { summaryRows } = quoteEmailContext(data, anfrageNr, ctx);
   return `
     <p style="margin:20px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Anfrage</p>
     ${buildDataTable(summaryRows)}`;
@@ -47,9 +59,10 @@ export function buildAppointmentConfirmationEmail(
   data: QuoteFormData,
   anfrageNr: string,
   confirmedDate: string,
-  note?: string
+  note?: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr);
+  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
 
   const body = `
@@ -62,7 +75,7 @@ export function buildAppointmentConfirmationEmail(
     </p>
     ${buildInfoBox(`<strong>Bestätigter Termin:</strong> ${escapeHtml(dateLabel)}`)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
-    ${quoteSummaryBlock(data, anfrageNr)}
+    ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
       Bitte stellen Sie sicher, dass die Fenster zugänglich sind. Bei Terminänderungen
       melden Sie sich bitte rechtzeitig bei uns.
@@ -101,9 +114,10 @@ export function buildAppointmentUpdateEmail(
   anfrageNr: string,
   confirmedDate: string,
   previousDate: string | undefined,
-  note?: string
+  note?: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr);
+  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const previousLabel = previousDate ? formatGermanDate(previousDate) : null;
 
@@ -118,7 +132,7 @@ export function buildAppointmentUpdateEmail(
     ${previousLabel ? buildInfoBox(`<strong>Bisheriger Termin:</strong> ${escapeHtml(previousLabel)}`) : ""}
     ${buildInfoBox(`<strong>Neuer Termin:</strong> ${escapeHtml(dateLabel)}`)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
-    ${quoteSummaryBlock(data, anfrageNr)}
+    ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${contactFooter()}`;
 
   const text = [
@@ -150,9 +164,10 @@ export function buildAppointmentProposalEmail(
   data: QuoteFormData,
   anfrageNr: string,
   proposedDate: string,
-  note?: string
+  note?: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr);
+  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(proposedDate);
 
   const body = `
@@ -165,7 +180,7 @@ export function buildAppointmentProposalEmail(
     </p>
     ${buildInfoBox(`<strong>Vorgeschlagener Termin:</strong> ${escapeHtml(dateLabel)}`)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
-    ${quoteSummaryBlock(data, anfrageNr)}
+    ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
       Bitte bestätigen Sie den Termin per Antwort auf diese E-Mail oder telefonisch.
     </p>
@@ -198,9 +213,10 @@ export function buildAppointmentProposalEmail(
 export function buildLeadRejectionEmail(
   data: QuoteFormData,
   anfrageNr: string,
-  note?: string
+  note?: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr);
+  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -211,7 +227,7 @@ export function buildLeadRejectionEmail(
       (${escapeHtml(services)}). Leider können wir Ihre Anfrage derzeit nicht annehmen.
     </p>
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
-    ${quoteSummaryBlock(data, anfrageNr)}
+    ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
       Für Rückfragen oder alternative Termine erreichen Sie uns jederzeit telefonisch.
     </p>
@@ -249,12 +265,13 @@ export function buildLeadStatusEmail(
     previousConfirmedDate?: string;
     proposedDate?: string;
     note?: string;
-  }
+  },
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
   switch (action) {
     case "confirm":
       if (!options.confirmedDate) throw new Error("confirmedDate required");
-      return buildAppointmentConfirmationEmail(data, anfrageNr, options.confirmedDate, options.note);
+      return buildAppointmentConfirmationEmail(data, anfrageNr, options.confirmedDate, options.note, ctx);
     case "update":
       if (!options.confirmedDate) throw new Error("confirmedDate required");
       return buildAppointmentUpdateEmail(
@@ -262,13 +279,14 @@ export function buildLeadStatusEmail(
         anfrageNr,
         options.confirmedDate,
         options.previousConfirmedDate,
-        options.note
+        options.note,
+        ctx
       );
     case "propose":
       if (!options.proposedDate) throw new Error("proposedDate required");
-      return buildAppointmentProposalEmail(data, anfrageNr, options.proposedDate, options.note);
+      return buildAppointmentProposalEmail(data, anfrageNr, options.proposedDate, options.note, ctx);
     case "reject":
-      return buildLeadRejectionEmail(data, anfrageNr, options.note);
+      return buildLeadRejectionEmail(data, anfrageNr, options.note, ctx);
     default:
       throw new Error(`Unknown email action: ${action satisfies never}`);
   }

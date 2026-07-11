@@ -1,5 +1,6 @@
 import type { ConciergeSession } from "@/lib/concierge/types";
 import type { QuoteFormData } from "@/lib/quote-form";
+import type { QuotePriceSnapshot } from "@/lib/quote-pricing-context";
 
 export type LeadSource = "quote" | "concierge" | "contact";
 
@@ -45,6 +46,8 @@ export interface StoredLead {
   appointment?: LeadAppointment;
   quote?: Partial<QuoteFormData>;
   session?: Partial<ConciergeSession>;
+  /** Price captured at submission – same numbers in email, PDF, admin. */
+  priceSnapshot?: QuotePriceSnapshot;
 }
 
 const LEADS_KEY = "ilyashan:leads";

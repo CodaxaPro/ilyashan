@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import { buildLeadStatusEmail } from "@/lib/appointment-email";
+import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import {
@@ -74,7 +75,8 @@ async function sendLeadEmail(
     return { emailSent: false, emailError: "E-Mail-Versand nicht konfiguriert." };
   }
 
-  const customerEmail = buildLeadStatusEmail(action, quote, lead.anfrageNr ?? lead.id, options);
+  const ctx = await resolveServerQuotePricing(lead);
+  const customerEmail = buildLeadStatusEmail(action, quote, lead.anfrageNr ?? lead.id, options, ctx);
   const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
 
   const { error } = await resend.emails.send({

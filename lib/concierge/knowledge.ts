@@ -5,6 +5,10 @@ import type { ConciergeAction } from "./types";
 import type { ConciergeSession } from "./types";
 import { getConciergeWhatsAppUrl } from "./whatsapp-handoff";
 import { hasTransferableQuoteData } from "./wizard-bridge";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
 export function wizardAction(): ConciergeAction {
   return {
@@ -31,11 +35,14 @@ export function phoneAction(): ConciergeAction {
   };
 }
 
-export function whatsappActionFromSession(session: ConciergeSession): ConciergeAction {
+export function whatsappActionFromSession(
+  session: ConciergeSession,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): ConciergeAction {
   return {
     type: "whatsapp",
     label: "WhatsApp mit Kalkulation",
-    href: getConciergeWhatsAppUrl(session),
+    href: getConciergeWhatsAppUrl(session, ctx),
   };
 }
 

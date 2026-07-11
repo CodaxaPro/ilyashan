@@ -13,6 +13,8 @@ import {
 import { saveLead } from "@/lib/leads-store";
 import { createConciergeStoredLead } from "@/lib/lead-records";
 import { getConciergeEnabled } from "@/lib/concierge-settings";
+import { getFensterPricingConfig } from "@/lib/pricing-config";
+import { createQuotePricingContext } from "@/lib/quote-pricing-context";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -66,7 +68,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const adminEmail = buildConciergeLeadAdminEmail(session, name, phone, photos.length);
+    const pricingConfig = await getFensterPricingConfig();
+    const pricingCtx = createQuotePricingContext(pricingConfig);
+    const adminEmail = buildConciergeLeadAdminEmail(session, name, phone, photos.length, pricingCtx);
     const contactEmail = process.env.CONTACT_EMAIL ?? siteConfig.contact.email;
     const fromEmail =
       process.env.FROM_EMAIL ?? `Ilyashan Fensterreinigung <${siteConfig.contact.email}>`;
@@ -81,7 +85,7 @@ export async function POST(request: Request) {
       attachments: photosToResendAttachments(photos),
     });
 
-    await saveLead(createConciergeStoredLead(session, name, phone, photos.length));
+    await saveLead(createConciergeStoredLead(session, name, phone, photos.length, pricingCtx));
 
     return NextResponse.json({
       success: true,

@@ -5,10 +5,11 @@ import type { LeadEmailAction, StoredLead, LeadStatus } from "@/lib/leads-store"
 import type { QuoteFormData } from "@/lib/quote-form";
 import { formatGermanDate, initialQuoteFormData } from "@/lib/quote-form";
 import {
-  buildQuoteTableRows,
+  buildQuoteTableRowsFromContext,
   getTerminLabel,
-  getPriceLabel,
+  getPriceLabelFromContext,
 } from "@/lib/quote-summary";
+import { useLeadQuotePricing } from "@/components/admin/useLeadQuotePricing";
 import {
   LEAD_EMAIL_ACTION_LABELS_TR,
   LEAD_STATUS_LABELS_TR,
@@ -62,6 +63,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
+  const quotePricing = useLeadQuotePricing(lead);
 
   useEffect(() => {
     const next = syncFormFromLead(lead);
@@ -143,7 +145,11 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     }
   }
 
-  const detailRows = quote && lead.anfrageNr ? buildQuoteTableRows(quote, lead.anfrageNr) : [];
+  const detailRows =
+    quote && lead.anfrageNr ? buildQuoteTableRowsFromContext(quote, lead.anfrageNr, quotePricing) : [];
+  const priceLabel =
+    lead.priceSnapshot?.priceLabel ??
+    (quote ? getPriceLabelFromContext(quote, quotePricing) : "–");
 
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
@@ -213,9 +219,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 <p className="mt-3 text-sm">
                   <strong>Wunschtermin:</strong> {getTerminLabel(quote)}
                 </p>
-                <p className="text-sm text-primary font-semibold">
-                  {getPriceLabel(quote)}
-                </p>
+                <p className="text-sm text-primary font-semibold">{priceLabel}</p>
               </AdminPanel>
             </section>
           )}

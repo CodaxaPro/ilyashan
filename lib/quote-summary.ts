@@ -12,6 +12,11 @@ import {
 } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
 import type { PricingOverrides, WartungPricingConfig } from "@/lib/pricing-config";
+import { formatNarrowStairsRowLabel } from "@/lib/pricing-display";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 import {
   preferredTimeSlotLabels,
   preferredWeekdayLabels,
@@ -89,6 +94,10 @@ export function getPriceLabel(
   return `${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} (${estimate.label})`;
 }
 
+export function getPriceLabelFromContext(data: QuoteFormData, ctx: QuotePricingContext) {
+  return getPriceLabel(data, ctx.pricingOverrides, ctx.wartungConfig);
+}
+
 export function getTerminLabel(data: QuoteFormData) {
   if (!data.scheduleOption) return "–";
   let label = scheduleOptionLabels[data.scheduleOption];
@@ -98,6 +107,20 @@ export function getTerminLabel(data: QuoteFormData) {
   return label;
 }
 
+export function buildQuoteTableRowsFromContext(
+  data: QuoteFormData,
+  anfrageNr: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): [string, string][] {
+  return buildQuoteTableRows(
+    data,
+    anfrageNr,
+    ctx.pricingOverrides,
+    ctx.wartungConfig,
+    ctx.wartungPackages
+  );
+}
+
 export function buildQuoteTableRows(
   data: QuoteFormData,
   anfrageNr: string,
@@ -105,6 +128,12 @@ export function buildQuoteTableRows(
   wartungConfig?: WartungPricingConfig,
   wartungPackages?: WartungPackage[]
 ): [string, string][] {
+  const ctx: QuotePricingContext = {
+    pricingOverrides: pricingOverrides ?? defaultQuotePricingContext().pricingOverrides,
+    wartungConfig: wartungConfig ?? defaultQuotePricingContext().wartungConfig,
+    wartungPackages: wartungPackages ?? defaultQuotePricingContext().wartungPackages,
+  };
+
   const rows: [string, string][] = [
     ["Anfrage-Nr.", anfrageNr],
     ["Leistungen", getServicesLabel(data)],
@@ -117,14 +146,14 @@ export function buildQuoteTableRows(
     ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide]],
     ["Reinigungswünsche", getReinigungswünscheLabel(data)],
     ["Wunschtermin", getTerminLabel(data)],
-    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data, pricingOverrides, wartungConfig)],
+    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabelFromContext(data, ctx)],
   ];
 
   if (data.services.includes("wartung")) {
-    rows.splice(2, 0, ["Wartungsplan", getWartungPlanLabel(data, wartungPackages ?? [])]);
+    rows.splice(2, 0, ["Wartungsplan", getWartungPlanLabel(data, ctx.wartungPackages)]);
   }
 
-  if (data.narrowStairs) rows.push(["Zugang", "Enge Treppe (+15 €)"]);
+  if (data.narrowStairs) rows.push(["Zugang", formatNarrowStairsRowLabel()]);
   if (data.accessTimesNote) rows.push(["Zugangszeiten", data.accessTimesNote]);
   if (data.specialNotes) rows.push(["Besonderheiten", data.specialNotes]);
   if (data.additionalInfo) rows.push(["Zusatzinfo", data.additionalInfo]);
@@ -142,7 +171,14 @@ export function buildQuoteContactRows(data: QuoteFormData): [string, string][] {
   ];
 }
 
-export function buildQuotePlainText(data: QuoteFormData, anfrageNr: string) {
-  const allRows = [...buildQuoteContactRows(data), ...buildQuoteTableRows(data, anfrageNr)];
+export function buildQuotePlainText(
+  data: QuoteFormData,
+  anfrageNr: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+) {
+  const allRows = [
+    ...buildQuoteContactRows(data),
+    ...buildQuoteTableRowsFromContext(data, anfrageNr, ctx),
+  ];
   return allRows.map(([k, v]) => `${k}: ${v}`).join("\n");
 }

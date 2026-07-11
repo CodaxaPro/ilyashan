@@ -7,12 +7,19 @@ import {
   quoteServiceLabels,
 } from "@/lib/quote-form";
 import type { QuoteFormData } from "@/lib/quote-form";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
 export function isHotLead(session: ConciergeSession): boolean {
   return session.stage === "price_ready" || (!!session.quote.windowCount && !!session.quote.floorLevel);
 }
 
-export function buildLeadSummaryRows(session: ConciergeSession): [string, string][] {
+export function buildLeadSummaryRows(
+  session: ConciergeSession,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
+): [string, string][] {
   const q = session.quote;
   const rows: [string, string][] = [["Session-ID", session.id]];
 
@@ -30,7 +37,7 @@ export function buildLeadSummaryRows(session: ConciergeSession): [string, string
 
   const data = quoteDataForEstimate(q);
   if (data) {
-    const est = calculatePriceEstimate(data);
+    const est = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
     if (est && est.amount > 0) {
       rows.push(["Live-Preisschätzung", `ca. ${formatEuro(est.min)}–${formatEuro(est.max)}`]);
     }

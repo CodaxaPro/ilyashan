@@ -5,7 +5,8 @@ import {
   preferredTimeSlotLabels,
   preferredWeekdayLabels,
 } from "@/lib/quote-form";
-import { formatEuro, calculatePriceEstimate } from "@/lib/pricing";
+import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
+import { getBillingSubtotal } from "@/lib/quote-pricing-context";
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import {
   filterWartungPackagesForAudience,
@@ -38,9 +39,10 @@ export function WartungPlanSelector({ data, onChange }: WartungPlanSelectorProps
 
   const singleVisitEstimate = calculatePriceEstimate(
     { ...data, services: data.services.filter((s) => s !== "wartung") },
-    pricingOverrides
+    pricingOverrides,
+    undefined
   );
-  const singleVisitPrice = singleVisitEstimate?.amount ?? 0;
+  const singleVisitPrice = singleVisitEstimate ? getBillingSubtotal(singleVisitEstimate) : 0;
 
   const comparisons =
     singleVisitPrice > 0

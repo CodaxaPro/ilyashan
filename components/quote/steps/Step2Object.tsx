@@ -8,6 +8,7 @@ import {
   quoteServiceLabels,
 } from "@/lib/quote-form";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import { formatNarrowStairsHint } from "@/lib/pricing-display";
 
 interface Step2ObjectProps {
   data: QuoteFormData;
@@ -150,7 +151,7 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
               />
               <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                 Enge Treppe
-                <span className="block text-xs text-muted font-normal mt-0.5">+15,00 € pauschal</span>
+                <span className="block text-xs text-muted font-normal mt-0.5">{formatNarrowStairsHint()}</span>
               </span>
             </label>
 

@@ -36,6 +36,10 @@ import {
   askForMissingFields,
 } from "./pricing-response";
 import { siteConfig } from "@/lib/config";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
 function defaultQuickReplies(): string[] {
   return [...CONCIERGE_QUICK_REPLIES];
@@ -65,13 +69,14 @@ Für Ihren genauen Preis nutzen Sie unseren Live-Preisrechner – Flügel, Etage
 function handlePriceFlow(
   session: ConciergeSession,
   message: string,
-  intent: ConciergeIntent
+  intent: ConciergeIntent,
+  pricingCtx: QuotePricingContext
 ): ConciergeReply {
   const updated = mergeQuoteFromMessage(session, message);
   const missing = missingPriceFields(updated.quote);
 
   if (missing.length === 0) {
-    const priceText = buildPriceResponse(updated.quote);
+    const priceText = buildPriceResponse(updated.quote, pricingCtx);
     if (priceText) {
       const readySession = { ...updated, stage: "price_ready" as const, lastIntent: "price" as const };
       return {
@@ -80,7 +85,7 @@ function handlePriceFlow(
         session: readySession,
         actions: withWizard(readySession, [
           wizardActionFromSession(readySession),
-          whatsappActionFromSession(readySession),
+          whatsappActionFromSession(readySession, pricingCtx),
           phoneAction(),
         ]),
         quickReplies: ["Rückruf anfordern", "Verbindliches Angebot anfordern", "Einsatzgebiet"],
@@ -100,7 +105,8 @@ function handlePriceFlow(
 
 export function processConciergeMessage(
   message: string,
-  sessionInput?: ConciergeSession
+  sessionInput?: ConciergeSession,
+  pricingCtx: QuotePricingContext = defaultQuotePricingContext()
 ): ConciergeReply {
   const session = sessionInput ?? createSession();
   const trimmed = message.trim();
@@ -139,7 +145,8 @@ export function processConciergeMessage(
     return handlePriceFlow(
       { ...session, turns: session.turns + 1 },
       trimmed,
-      intent
+      intent,
+      pricingCtx
     );
   }
 
@@ -253,7 +260,7 @@ export function processConciergeMessage(
         text: `Sehr gerne! Hinterlassen Sie unten **Name und Telefonnummer** – wir rufen Sie innerhalb von **${siteConfig.business.responseTime}** zurück.\n\nOder rufen Sie direkt an: **${siteConfig.contact.phoneDisplay}**`,
         intent,
         session: baseSession,
-        actions: [phoneAction(), whatsappActionFromSession(baseSession), wizardActionFromSession(baseSession)],
+        actions: [phoneAction(), whatsappActionFromSession(baseSession, pricingCtx), wizardActionFromSession(baseSession)],
         quickReplies: ["Rückruf anfordern", "Preisrechner"],
       };
 

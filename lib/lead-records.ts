@@ -1,4 +1,5 @@
 import type { ConciergeSession } from "@/lib/concierge/types";
+import { quoteDataForEstimate } from "@/lib/concierge/pricing-response";
 import { buildLeadSummaryRows } from "@/lib/concierge/lead";
 import type { QuoteFormData } from "@/lib/quote-form";
 import { buildQuotePlainText } from "@/lib/quote-summary";
@@ -6,9 +7,17 @@ import type { LeadSource, StoredLead } from "@/lib/leads-store";
 import { createLeadId } from "@/lib/leads-store";
 import { isHotLead } from "@/lib/concierge/lead";
 import { getQuoteContactName } from "@/lib/quote-summary";
+import {
+  captureQuotePriceSnapshot,
+  type QuotePriceSnapshot,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
-export function buildConciergeLeadSummary(session: ConciergeSession): string {
-  return buildLeadSummaryRows(session)
+export function buildConciergeLeadSummary(
+  session: ConciergeSession,
+  ctx?: QuotePricingContext
+): string {
+  return buildLeadSummaryRows(session, ctx)
     .map(([key, value]) => `${key}: ${value}`)
     .join("\n");
 }
@@ -16,7 +25,9 @@ export function buildConciergeLeadSummary(session: ConciergeSession): string {
 export function createQuoteStoredLead(
   quote: QuoteFormData,
   anfrageNr: string,
-  photoCount: number
+  photoCount: number,
+  ctx: QuotePricingContext,
+  priceSnapshot?: QuotePriceSnapshot | null
 ): StoredLead {
   return {
     id: createLeadId("quote"),
@@ -27,8 +38,9 @@ export function createQuoteStoredLead(
     email: quote.email || undefined,
     anfrageNr,
     status: "neu",
-    summary: buildQuotePlainText(quote, anfrageNr),
+    summary: buildQuotePlainText(quote, anfrageNr, ctx),
     photoCount,
+    priceSnapshot: priceSnapshot ?? undefined,
     quote,
   };
 }
@@ -37,8 +49,13 @@ export function createConciergeStoredLead(
   session: ConciergeSession,
   name: string,
   phone: string,
-  photoCount: number
+  photoCount: number,
+  ctx?: QuotePricingContext
 ): StoredLead {
+  const estimateData = ctx ? quoteDataForEstimate(session.quote) : null;
+  const priceSnapshot =
+    ctx && estimateData ? captureQuotePriceSnapshot(estimateData, ctx) : undefined;
+
   return {
     id: createLeadId("concierge"),
     source: "concierge",
@@ -46,8 +63,9 @@ export function createConciergeStoredLead(
     name,
     phone,
     hot: isHotLead(session),
-    summary: buildConciergeLeadSummary(session),
+    summary: buildConciergeLeadSummary(session, ctx),
     photoCount,
+    priceSnapshot,
     session: {
       id: session.id,
       stage: session.stage,

@@ -2,16 +2,21 @@ import { siteConfig } from "@/lib/config";
 import { buildDataTable, buildEmailLayout, buildInfoBox, escapeHtml } from "@/lib/email-templates";
 import type { ConciergeSession } from "@/lib/concierge/types";
 import { buildLeadSummaryRows, isHotLead } from "@/lib/concierge/lead";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
 export function buildConciergeLeadAdminEmail(
   session: ConciergeSession,
   name: string,
   phone: string,
-  photoCount = 0
+  photoCount = 0,
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const hot = isHotLead(session);
-  const rows = buildLeadSummaryRows(session);
+  const rows = buildLeadSummaryRows(session, ctx);
 
   const body = `
     ${buildInfoBox(

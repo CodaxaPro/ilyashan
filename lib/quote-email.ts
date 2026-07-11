@@ -9,13 +9,15 @@ import {
 } from "@/lib/email-templates";
 import {
   buildQuoteContactRows,
-  buildQuoteTableRows,
+  buildQuoteTableRowsFromContext,
   getQuoteContactName,
   getQuotePlzOrt,
   getServicesLabel,
 } from "@/lib/quote-summary";
-import type { PricingOverrides, WartungPricingConfig } from "@/lib/pricing-config";
-import type { WartungPackage } from "@/lib/wartung-packages";
+import {
+  defaultQuotePricingContext,
+  type QuotePricingContext,
+} from "@/lib/quote-pricing-context";
 
 function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
@@ -44,24 +46,15 @@ export function buildQuoteAdminEmail(
   data: QuoteFormData,
   anfrageNr: string,
   photoCount = 0,
-  pricingOverrides?: PricingOverrides,
-  wartungConfig?: WartungPricingConfig,
-  wartungPackages?: WartungPackage[]
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
   const name = getQuoteContactName(data);
   const plzOrt = getQuotePlzOrt(data);
   const services = getServicesLabel(data);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const phoneClean = cleanPhone(data.phone);
-  const priceRow = buildQuoteTableRows(
-    data,
-    anfrageNr,
-    pricingOverrides,
-    wartungConfig,
-    wartungPackages
-  ).find(
-    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
-  );
+  const detailRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
+  const priceRow = detailRows.find(([k]) => k === siteConfig.messaging.priceEstimateRowLabel);
   const price = priceRow?.[1] ?? "";
 
   const whatsappText = encodeURIComponent(
@@ -70,14 +63,6 @@ export function buildQuoteAdminEmail(
   const mailtoReply = data.email
     ? `mailto:${data.email}?subject=${encodeURIComponent(`Ihr Angebot ${anfrageNr} – Ilyashan Fensterreinigung`)}&body=${encodeURIComponent(buildReplyBody(name, services, price))}`
     : null;
-
-  const detailRows = buildQuoteTableRows(
-    data,
-    anfrageNr,
-    pricingOverrides,
-    wartungConfig,
-    wartungPackages
-  );
 
   const body = `
     ${buildInfoBox(`<strong>Neue Angebotsanfrage</strong> · ${escapeHtml(anfrageNr)} · ${escapeHtml(timestamp)}`)}
@@ -110,29 +95,16 @@ export function buildQuoteAdminEmail(
 export function buildQuoteCustomerEmail(
   data: QuoteFormData,
   anfrageNr: string,
-  pricingOverrides?: PricingOverrides,
-  wartungConfig?: WartungPricingConfig,
-  wartungPackages?: WartungPackage[]
+  ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
-  const detailRows = buildQuoteTableRows(
-    data,
-    anfrageNr,
-    pricingOverrides,
-    wartungConfig,
-    wartungPackages
-  ).filter(
-    ([k]) => k !== siteConfig.messaging.priceEstimateRowLabel
-  );
-  const priceRow = buildQuoteTableRows(
-    data,
-    anfrageNr,
-    pricingOverrides,
-    wartungConfig,
-    wartungPackages
-  ).find(
-    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
+  const tableRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
+  const detailRows = tableRows.filter(([k]) => k !== siteConfig.messaging.priceEstimateRowLabel);
+  const priceRow = tableRows.find(([k]) => k === siteConfig.messaging.priceEstimateRowLabel);
+  const followUpText = siteConfig.messaging.emailFollowUp.replace(
+    "24 Stunden",
+    siteConfig.business.responseTime
   );
 
   const body = `
@@ -143,12 +115,7 @@ export function buildQuoteCustomerEmail(
       vielen Dank für Ihre Anfrage bei <strong>Ilyashan Fensterreinigung</strong>.
       Wir haben Ihre Angaben erhalten (<strong>${escapeHtml(anfrageNr)}</strong>) und bearbeiten diese umgehend.
     </p>
-    ${buildInfoBox(
-      siteConfig.messaging.emailFollowUp.replace(
-        "24 Stunden",
-        siteConfig.business.responseTime
-      )
-    )}
+    ${buildInfoBox(followUpText)}
     ${priceRow ? buildInfoBox(`${siteConfig.messaging.priceEstimateEmailLabel}: <strong>${escapeHtml(priceRow[1])}</strong>`) : ""}
     <p style="margin:20px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Anfrage im Überblick</p>
     ${buildDataTable(detailRows)}
@@ -183,7 +150,7 @@ export function buildQuoteCustomerEmail(
     `Guten Tag ${firstName},`,
     "",
     `vielen Dank für Ihre Anfrage (${anfrageNr}).`,
-    "Wir melden uns innerhalb von 24 Stunden mit Ihrem verbindlichen Festpreis-Angebot.",
+    followUpText,
     "",
     ...detailRows.map(([k, v]) => `${k}: ${v}`),
     priceRow ? `${siteConfig.messaging.priceEstimateRowLabel}: ${priceRow[1]}` : "",

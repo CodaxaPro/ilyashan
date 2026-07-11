@@ -3,9 +3,10 @@ import { siteConfig } from "@/lib/config";
 import type { QuoteFormData } from "@/lib/quote-form";
 import {
   buildQuoteContactRows,
-  buildQuoteTableRows,
+  buildQuoteTableRowsFromContext,
   getQuoteContactName,
 } from "@/lib/quote-summary";
+import type { QuotePricingContext } from "@/lib/quote-pricing-context";
 
 const styles = StyleSheet.create({
   page: {
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
 interface QuoteConfirmationDocumentProps {
   data: QuoteFormData;
   anfrageNr: string;
+  ctx: QuotePricingContext;
 }
 
 function DataTable({ rows }: { rows: [string, string][] }) {
@@ -102,12 +104,11 @@ function DataTable({ rows }: { rows: [string, string][] }) {
   );
 }
 
-export function QuoteConfirmationDocument({ data, anfrageNr }: QuoteConfirmationDocumentProps) {
+export function QuoteConfirmationDocument({ data, anfrageNr, ctx }: QuoteConfirmationDocumentProps) {
   const name = getQuoteContactName(data);
   const date = new Date().toLocaleDateString("de-DE", { timeZone: "Europe/Berlin" });
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
-    ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
-  );
+  const tableRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
+  const priceRow = tableRows.find(([k]) => k === siteConfig.messaging.priceEstimateRowLabel);
 
   return (
     <Document>
@@ -134,7 +135,9 @@ export function QuoteConfirmationDocument({ data, anfrageNr }: QuoteConfirmation
         <DataTable rows={buildQuoteContactRows(data)} />
 
         <Text style={styles.sectionTitle}>Anfragedetails</Text>
-        <DataTable rows={buildQuoteTableRows(data, anfrageNr).filter(([k]) => k !== siteConfig.messaging.priceEstimateRowLabel)} />
+        <DataTable
+          rows={tableRows.filter(([k]) => k !== siteConfig.messaging.priceEstimateRowLabel)}
+        />
 
         {priceRow && (
           <View style={styles.priceBox}>
