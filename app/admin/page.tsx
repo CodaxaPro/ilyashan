@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  AdminAlert,
+  AdminLoginForm,
+  AdminPanel,
+  AdminShell,
+} from "@/components/admin/AdminShell";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
 
@@ -13,10 +20,32 @@ interface ConciergeAdminSettings {
   updatedAt?: string;
 }
 
-export default function AdminPage() {
+const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
+  leads: {
+    title: "Leadler",
+    subtitle: "Teklif ve iletişim talepleri",
+  },
+  unknown: {
+    title: "Bilinmeyen Sorular",
+    subtitle: "Asistanın yanıtlayamadığı sorular",
+  },
+  settings: {
+    title: "Asistan Ayarları",
+    subtitle: "Website asistanı ve sistem",
+  },
+};
+
+function parseTab(param: string | null): AdminTab {
+  if (param === "unknown" || param === "settings") return param;
+  return "leads";
+}
+
+function AdminPageContent() {
+  const searchParams = useSearchParams();
+  const tab = useMemo(() => parseTab(searchParams.get("tab")), [searchParams]);
+
   const [password, setPassword] = useState("");
   const [authenticated, setAuthenticated] = useState(false);
-  const [tab, setTab] = useState<AdminTab>("leads");
   const [leads, setLeads] = useState<StoredLead[]>([]);
   const [unknownItems, setUnknownItems] = useState<UnknownQueueItem[]>([]);
   const [conciergeSettings, setConciergeSettings] = useState<ConciergeAdminSettings | null>(null);
@@ -30,7 +59,7 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/leads");
     if (res.status === 401) return false;
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? "Leads laden fehlgeschlagen");
+    if (!res.ok) throw new Error(data.error ?? "Leadler yüklenemedi");
     setLeads(data.leads ?? []);
     setStorageConfigured(Boolean(data.storageConfigured));
     return true;
@@ -40,7 +69,7 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/unknown?status=open");
     if (res.status === 401) return false;
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? "Unbekannte Fragen laden fehlgeschlagen");
+    if (!res.ok) throw new Error(data.error ?? "Sorular yüklenemedi");
     setUnknownItems(data.items ?? []);
     setStorageConfigured(Boolean(data.storageConfigured));
     return true;
@@ -50,7 +79,7 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/settings");
     if (res.status === 401) return false;
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error ?? "Einstellungen laden fehlgeschlagen");
+    if (!res.ok) throw new Error(data.error ?? "Ayarlar yüklenemedi");
     setConciergeSettings(data.concierge ?? null);
     setStorageConfigured(Boolean(data.storageConfigured));
     return true;
@@ -72,7 +101,7 @@ export default function AdminPage() {
       }
       setAuthenticated(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Fehler beim Laden");
+      setError(err instanceof Error ? err.message : "Yükleme hatası");
     } finally {
       setLoading(false);
     }
@@ -93,11 +122,11 @@ export default function AdminPage() {
         body: JSON.stringify({ password }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Login fehlgeschlagen");
+      if (!res.ok) throw new Error(data.error ?? "Giriş başarısız");
       setPassword("");
       await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login fehlgeschlagen");
+      setError(err instanceof Error ? err.message : "Giriş başarısız");
     } finally {
       setLoginLoading(false);
     }
@@ -120,10 +149,10 @@ export default function AdminPage() {
         body: JSON.stringify({ conciergeEnabled: enabled }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Speichern fehlgeschlagen");
+      if (!res.ok) throw new Error(data.error ?? "Kaydedilemedi");
       setConciergeSettings(data.concierge ?? null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
+      setError(err instanceof Error ? err.message : "Kaydedilemedi");
     } finally {
       setConciergeSaving(false);
     }
@@ -137,341 +166,280 @@ export default function AdminPage() {
     });
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error ?? "Aktion fehlgeschlagen");
+      setError(data.error ?? "İşlem başarısız");
       return;
     }
     setUnknownItems((items) => items.filter((item) => item.fingerprint !== fingerprint));
   }
 
+  const headerMeta = TAB_TITLES[tab];
+  const dynamicSubtitle =
+    tab === "leads"
+      ? `${leads.length} kayıtlı lead`
+      : tab === "unknown"
+        ? `${unknownItems.length} açık soru`
+        : headerMeta.subtitle;
+
   if (!authenticated) {
     return (
-      <main className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
-        <form
-          onSubmit={handleLogin}
-          className="w-full max-w-md bg-white rounded-2xl border border-border shadow-lg p-8 space-y-4"
-          data-testid="admin-login-form"
-        >
-          <h1 className="text-2xl font-bold text-foreground">Ilyashan Admin</h1>
-          <p className="text-sm text-muted">
-            Leads, Fotos und unbeantwortete Assistent-Fragen verwalten
-          </p>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Admin-Passwort"
-            className="w-full px-4 py-3 rounded-xl border border-border"
-            data-testid="admin-password"
-            required
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loginLoading}
-            className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-50"
-            data-testid="admin-login-submit"
-          >
-            {loginLoading ? "Wird geprüft…" : "Anmelden"}
-          </button>
-        </form>
-      </main>
+      <AdminLoginForm
+        password={password}
+        setPassword={setPassword}
+        error={error}
+        loading={loginLoading}
+        onSubmit={handleLogin}
+        subtitle="Leadler, fotoğraflar ve asistan sorularını yönetin"
+      />
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <AdminShell
+      title={headerMeta.title}
+      subtitle={
+        !storageConfigured && tab !== "settings"
+          ? `${dynamicSubtitle} · KV depolama yapılandırılmadı`
+          : dynamicSubtitle
+      }
+      onRefresh={() => void loadData()}
+      onLogout={() => void handleLogout()}
+    >
+      {!storageConfigured && tab !== "settings" && (
+        <AdminAlert variant="warning">
+          Kalıcı depolama için Vercel&apos;de <strong>Upstash Redis</strong> bağlayın (
+          <strong>KV_REST_API_URL</strong>, <strong>KV_REST_API_TOKEN</strong>). E-posta ve asistan
+          çalışmaya devam eder.
+        </AdminAlert>
+      )}
+
+      {error && <AdminAlert variant="error">{error}</AdminAlert>}
+
+      {loading ? (
+        <div className="flex items-center gap-3 text-muted">
+          <span className="inline-block w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          Yükleniyor…
+        </div>
+      ) : tab === "settings" ? (
+        <AdminPanel className="p-6 space-y-6" data-testid="admin-settings-panel">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Ilyashan Admin</h1>
-            <p className="text-sm text-muted">
-              {tab === "leads"
-                ? `${leads.length} Leads`
-                : tab === "unknown"
-                  ? `${unknownItems.length} offene Assistent-Fragen`
-                  : "Assistent & System"}
-              {!storageConfigured && tab !== "settings" && " · KV-Speicher nicht konfiguriert"}
+            <h2 className="text-lg font-bold text-foreground">Website Asistanı</h2>
+            <p className="text-sm text-muted mt-1">
+              Varsayılan: <strong>kapalı</strong>. Testlerden sonra açın — ziyaretçiler chat
+              butonunu yalnızca asistan açıkken görür.
             </p>
           </div>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => void loadData()}
-              className="px-4 py-2 rounded-xl border border-border bg-white text-sm font-medium"
-            >
-              Aktualisieren
-            </button>
-            <button
-              type="button"
-              onClick={() => void handleLogout()}
-              className="px-4 py-2 rounded-xl bg-slate-800 text-white text-sm font-medium"
-            >
-              Abmelden
-            </button>
-          </div>
-        </div>
 
-        <div className="flex gap-2 mb-6">
-          <button
-            type="button"
-            onClick={() => setTab("leads")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-              tab === "leads" ? "bg-primary text-white" : "bg-white border border-border"
-            }`}
-            data-testid="admin-tab-leads"
-          >
-            Leads
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("unknown")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-              tab === "unknown" ? "bg-primary text-white" : "bg-white border border-border"
-            }`}
-            data-testid="admin-tab-unknown"
-          >
-            Unbekannte Fragen
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("settings")}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold ${
-              tab === "settings" ? "bg-primary text-white" : "bg-white border border-border"
-            }`}
-            data-testid="admin-tab-settings"
-          >
-            Einstellungen
-          </button>
-        </div>
+          {!storageConfigured && (
+            <AdminAlert variant="warning">
+              Production&apos;da anahtarı kullanmak için Vercel&apos;de <strong>Upstash Redis</strong>{" "}
+              bağlayın. Lokal test: <code>CONCIERGE_ENABLED=true</code> in{" "}
+              <code>.env.local</code>.
+            </AdminAlert>
+          )}
 
-        {!storageConfigured && (
-          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-            Für persistente Speicherung bitte <strong>Upstash Redis</strong> in Vercel verbinden (
-            <strong>KV_REST_API_URL</strong>, <strong>KV_REST_API_TOKEN</strong>). E-Mails und
-            Assistent funktionieren weiterhin.
-          </div>
-        )}
+          {conciergeSettings?.source === "env" && (
+            <AdminAlert variant="info">
+              <strong>CONCIERGE_ENABLED</strong> ortam değişkeni bu anahtarı geçersiz kılıyor (
+              {conciergeSettings.enabled ? "açık" : "kapalı"}).
+            </AdminAlert>
+          )}
 
-        {error && (
-          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
-
-        {loading ? (
-          <p className="text-muted">Lädt…</p>
-        ) : tab === "settings" ? (
-          <div className="bg-white rounded-2xl border border-border p-6 space-y-6" data-testid="admin-settings-panel">
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-slate-50 px-5 py-4">
             <div>
-              <h2 className="text-lg font-bold text-foreground">Website-Assistent</h2>
-              <p className="text-sm text-muted mt-1">
-                Standard: <strong>aus</strong>. Erst nach Tests aktivieren – Besucher sehen den Chat-Button nur
-                wenn er eingeschaltet ist.
+              <p className="font-semibold text-foreground">Sitede asistan</p>
+              <p className="text-sm text-muted mt-0.5">
+                Durum:{" "}
+                <span
+                  className={
+                    conciergeSettings?.enabled ? "text-emerald-700 font-semibold" : "text-slate-600"
+                  }
+                  data-testid="concierge-status-label"
+                >
+                  {conciergeSettings?.enabled ? "Açık" : "Kapalı"}
+                </span>
+                {conciergeSettings?.updatedAt && (
+                  <span className="text-muted">
+                    {" "}
+                    · son değişiklik{" "}
+                    {new Date(conciergeSettings.updatedAt).toLocaleString("tr-TR")}
+                  </span>
+                )}
               </p>
             </div>
-
-            {!storageConfigured && (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Für den Schalter in Production bitte <strong>Upstash Redis</strong> in Vercel verbinden.
-                Lokal testen: <code>CONCIERGE_ENABLED=true</code> in <code>.env.local</code>.
-              </div>
-            )}
-
-            {conciergeSettings?.source === "env" && (
-              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-                <strong>CONCIERGE_ENABLED</strong> ist in den Umgebungsvariablen gesetzt und überschreibt
-                diesen Schalter ({conciergeSettings.enabled ? "aktiv" : "inaktiv"}).
-              </div>
-            )}
-
-            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-slate-50 px-4 py-4">
-              <div>
-                <p className="font-semibold text-foreground">Assistent auf der Website</p>
-                <p className="text-sm text-muted mt-0.5">
-                  Status:{" "}
-                  <span
-                    className={
-                      conciergeSettings?.enabled ? "text-emerald-700 font-semibold" : "text-slate-600"
-                    }
-                    data-testid="concierge-status-label"
-                  >
-                    {conciergeSettings?.enabled ? "Aktiv" : "Inaktiv"}
-                  </span>
-                  {conciergeSettings?.updatedAt && (
-                    <span className="text-muted">
-                      {" "}
-                      · zuletzt geändert{" "}
-                      {new Date(conciergeSettings.updatedAt).toLocaleString("de-DE")}
-                    </span>
-                  )}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={
-                    conciergeSaving ||
-                    conciergeSettings?.source === "env" ||
-                    !storageConfigured ||
-                    conciergeSettings?.enabled === false
-                  }
-                  onClick={() => void updateConciergeEnabled(true)}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-40"
-                  data-testid="concierge-enable-btn"
-                >
-                  Aktivieren
-                </button>
-                <button
-                  type="button"
-                  disabled={
-                    conciergeSaving ||
-                    conciergeSettings?.source === "env" ||
-                    !storageConfigured ||
-                    conciergeSettings?.enabled === true
-                  }
-                  onClick={() => void updateConciergeEnabled(false)}
-                  className="px-4 py-2 rounded-xl border border-border bg-white text-sm font-semibold disabled:opacity-40"
-                  data-testid="concierge-disable-btn"
-                >
-                  Deaktivieren
-                </button>
-              </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={
+                  conciergeSaving ||
+                  conciergeSettings?.source === "env" ||
+                  !storageConfigured ||
+                  conciergeSettings?.enabled === true
+                }
+                onClick={() => void updateConciergeEnabled(true)}
+                className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-40 hover:bg-emerald-700 transition-colors"
+                data-testid="concierge-enable-btn"
+              >
+                Aç
+              </button>
+              <button
+                type="button"
+                disabled={
+                  conciergeSaving ||
+                  conciergeSettings?.source === "env" ||
+                  !storageConfigured ||
+                  conciergeSettings?.enabled === false
+                }
+                onClick={() => void updateConciergeEnabled(false)}
+                className="px-4 py-2 rounded-xl border border-border bg-white text-sm font-semibold disabled:opacity-40 hover:bg-slate-50 transition-colors"
+                data-testid="concierge-disable-btn"
+              >
+                Kapat
+              </button>
             </div>
-
-            <p className="text-xs text-muted">
-              API: <code>/api/concierge/status</code> · Assistent-APIs antworten mit 503 wenn inaktiv.
-            </p>
           </div>
-        ) : tab === "leads" ? (
-          leads.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-border p-8 text-center text-muted">
-              Noch keine gespeicherten Leads.
-            </div>
-          ) : (
-            <div className="bg-white rounded-2xl border border-border overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm" data-testid="admin-leads-table">
-                  <thead className="bg-slate-50 text-left">
-                    <tr>
-                      <th className="px-4 py-3 font-semibold">Datum</th>
-                      <th className="px-4 py-3 font-semibold">Quelle</th>
-                      <th className="px-4 py-3 font-semibold">Kontakt</th>
-                      <th className="px-4 py-3 font-semibold">Details</th>
-                      <th className="px-4 py-3 font-semibold">Fotos</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {leads.map((lead) => (
-                      <tr key={lead.id} className="border-t border-border align-top">
-                        <td className="px-4 py-3 whitespace-nowrap text-muted">
-                          {new Date(lead.createdAt).toLocaleString("de-DE")}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
-                              lead.hot
-                                ? "bg-red-100 text-red-700"
-                                : lead.source === "quote"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : "bg-emerald-100 text-emerald-700"
-                            }`}
-                          >
-                            {lead.hot ? "🔥 " : ""}
-                            {lead.source}
-                          </span>
-                          {lead.anfrageNr && (
-                            <p className="text-xs text-muted mt-1">{lead.anfrageNr}</p>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className="font-medium">{lead.name}</p>
-                          {lead.phone && <p className="text-muted">{lead.phone}</p>}
-                          {lead.email && <p className="text-muted">{lead.email}</p>}
-                        </td>
-                        <td className="px-4 py-3 max-w-md text-muted whitespace-pre-wrap">
-                          {lead.summary}
-                        </td>
-                        <td className="px-4 py-3">{lead.photoCount > 0 ? lead.photoCount : "–"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )
-        ) : unknownItems.length === 0 ? (
-          <div
-            className="bg-white rounded-2xl border border-border p-8 text-center text-muted"
-            data-testid="admin-unknown-empty"
-          >
-            Keine offenen unbekannten Fragen. Der Assistent beantwortet aktuelle Anfragen gut.
-          </div>
+
+          <p className="text-xs text-muted">
+            API: <code>/api/concierge/status</code> · Asistan kapalıyken API&apos;ler 503 döner.
+          </p>
+        </AdminPanel>
+      ) : tab === "leads" ? (
+        leads.length === 0 ? (
+          <AdminPanel className="p-10 text-center text-muted">Henüz kayıtlı lead yok.</AdminPanel>
         ) : (
-          <div className="bg-white rounded-2xl border border-border overflow-hidden">
+          <AdminPanel>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm" data-testid="admin-unknown-table">
-                <thead className="bg-slate-50 text-left">
+              <table className="w-full text-sm" data-testid="admin-leads-table">
+                <thead className="bg-slate-50 text-left border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 font-semibold">Frage</th>
-                    <th className="px-4 py-3 font-semibold">Häufigkeit</th>
-                    <th className="px-4 py-3 font-semibold">Zuletzt</th>
-                    <th className="px-4 py-3 font-semibold">FAQ-Vorschlag</th>
-                    <th className="px-4 py-3 font-semibold">Aktion</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">Tarih</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">Kaynak</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">İletişim</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">Detay</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">Foto</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {unknownItems.map((item) => (
-                    <tr key={item.id} className="border-t border-border align-top">
-                      <td className="px-4 py-3 max-w-sm">
-                        <p className="font-medium text-foreground">{item.message}</p>
-                        <p className="text-xs text-muted mt-1">Intent: {item.intent}</p>
+                  {leads.map((lead) => (
+                    <tr key={lead.id} className="border-t border-border align-top hover:bg-slate-50/50">
+                      <td className="px-5 py-4 whitespace-nowrap text-muted">
+                        {new Date(lead.createdAt).toLocaleString("tr-TR")}
                       </td>
-                      <td className="px-4 py-3 whitespace-nowrap">{item.count}×</td>
-                      <td className="px-4 py-3 whitespace-nowrap text-muted">
-                        {new Date(item.lastSeenAt).toLocaleString("de-DE")}
-                      </td>
-                      <td className="px-4 py-3 text-muted max-w-xs">
-                        {item.suggestedFaqQuestion ? (
-                          <>
-                            <span className="text-xs uppercase text-primary font-semibold">
-                              {item.suggestedFaqId}
-                            </span>
-                            <p className="mt-1">{item.suggestedFaqQuestion}</p>
-                          </>
-                        ) : (
-                          "–"
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            lead.hot
+                              ? "bg-red-100 text-red-700"
+                              : lead.source === "quote"
+                                ? "bg-blue-100 text-blue-700"
+                                : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          {lead.hot ? "🔥 " : ""}
+                          {lead.source}
+                        </span>
+                        {lead.anfrageNr && (
+                          <p className="text-xs text-muted mt-1">{lead.anfrageNr}</p>
                         )}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col gap-2">
-                          <button
-                            type="button"
-                            onClick={() => void updateUnknownStatus(item.fingerprint, "resolved")}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold"
-                          >
-                            Erledigt
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void updateUnknownStatus(item.fingerprint, "dismissed")}
-                            className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium"
-                          >
-                            Ignorieren
-                          </button>
-                        </div>
+                      <td className="px-5 py-4">
+                        <p className="font-medium">{lead.name}</p>
+                        {lead.phone && <p className="text-muted">{lead.phone}</p>}
+                        {lead.email && <p className="text-muted">{lead.email}</p>}
                       </td>
+                      <td className="px-5 py-4 max-w-md text-muted whitespace-pre-wrap">
+                        {lead.summary}
+                      </td>
+                      <td className="px-5 py-4">{lead.photoCount > 0 ? lead.photoCount : "–"}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="border-t border-border px-4 py-3 text-xs text-muted bg-slate-50">
-              Tipp: Häufige Fragen als Alias in <code>lib/config.ts</code> →{" "}
-              <code>siteConfig.faq</code> ergänzen, dann deployen.
-            </div>
+          </AdminPanel>
+        )
+      ) : unknownItems.length === 0 ? (
+        <AdminPanel className="p-10 text-center text-muted" data-testid="admin-unknown-empty">
+          Açık bilinmeyen soru yok. Asistan mevcut soruları iyi yanıtlıyor.
+        </AdminPanel>
+      ) : (
+        <AdminPanel>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm" data-testid="admin-unknown-table">
+              <thead className="bg-slate-50 text-left border-b border-border">
+                <tr>
+                  <th className="px-5 py-3.5 font-semibold text-muted">Soru</th>
+                  <th className="px-5 py-3.5 font-semibold text-muted">Sıklık</th>
+                  <th className="px-5 py-3.5 font-semibold text-muted">Son görülme</th>
+                  <th className="px-5 py-3.5 font-semibold text-muted">SSS önerisi</th>
+                  <th className="px-5 py-3.5 font-semibold text-muted">İşlem</th>
+                </tr>
+              </thead>
+              <tbody>
+                {unknownItems.map((item) => (
+                  <tr key={item.id} className="border-t border-border align-top hover:bg-slate-50/50">
+                    <td className="px-5 py-4 max-w-sm">
+                      <p className="font-medium text-foreground">{item.message}</p>
+                      <p className="text-xs text-muted mt-1">Intent: {item.intent}</p>
+                    </td>
+                    <td className="px-5 py-4 whitespace-nowrap">{item.count}×</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-muted">
+                      {new Date(item.lastSeenAt).toLocaleString("tr-TR")}
+                    </td>
+                    <td className="px-5 py-4 text-muted max-w-xs">
+                      {item.suggestedFaqQuestion ? (
+                        <>
+                          <span className="text-xs uppercase text-primary font-semibold">
+                            {item.suggestedFaqId}
+                          </span>
+                          <p className="mt-1">{item.suggestedFaqQuestion}</p>
+                        </>
+                      ) : (
+                        "–"
+                      )}
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex flex-col gap-2">
+                        <button
+                          type="button"
+                          onClick={() => void updateUnknownStatus(item.fingerprint, "resolved")}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
+                        >
+                          Çözüldü
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void updateUnknownStatus(item.fingerprint, "dismissed")}
+                          className="px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-slate-50 transition-colors"
+                        >
+                          Yoksay
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
-    </main>
+          <div className="border-t border-border px-5 py-3 text-xs text-muted bg-slate-50">
+            İpucu: Sık sorulanları <code>lib/config.ts</code> → <code>siteConfig.faq</code> içine alias
+            olarak ekleyin, ardından deploy edin.
+          </div>
+        </AdminPanel>
+      )}
+    </AdminShell>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-100 flex items-center justify-center text-muted">
+          Yükleniyor…
+        </main>
+      }
+    >
+      <AdminPageContent />
+    </Suspense>
   );
 }
