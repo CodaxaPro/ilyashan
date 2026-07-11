@@ -18,6 +18,7 @@ import {
   type PhotoPayload,
 } from "@/lib/photo-upload";
 import { saveLead } from "@/lib/leads-store";
+import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
 import { createQuoteStoredLead, createContactStoredLead } from "@/lib/lead-records";
 import { getFensterPricingConfig, toPricingOverrides, toWartungPricingConfig } from "@/lib/pricing-config";
 
@@ -131,7 +132,9 @@ export async function POST(request: Request) {
         }
       }
 
-      await saveLead(createQuoteStoredLead(quote, anfrageNr, photos.length));
+      const storedLead = createQuoteStoredLead(quote, anfrageNr, photos.length);
+      await saveLead(storedLead);
+      await syncLeadToCalendar(storedLead);
 
       return NextResponse.json({ success: true, anfrageNr });
     }

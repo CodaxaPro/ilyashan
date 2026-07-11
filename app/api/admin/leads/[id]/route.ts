@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import { buildLeadStatusEmail } from "@/lib/appointment-email";
+import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import {
   buildEmailNotificationRecord,
@@ -174,6 +175,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (!updated) {
     return NextResponse.json({ error: "Lead konnte nicht aktualisiert werden." }, { status: 500 });
   }
+
+  await syncLeadToCalendar(updated);
 
   return NextResponse.json({
     success: true,

@@ -5,7 +5,7 @@ export interface AdminNavItem {
   label: string;
   shortLabel?: string;
   section: AdminMainSection;
-  icon: "chart" | "users" | "inbox" | "help" | "settings" | "globe" | "pricing";
+  icon: "chart" | "users" | "inbox" | "help" | "settings" | "globe" | "pricing" | "calendar";
   match: (pathname: string, tab: string | null) => boolean;
 }
 
@@ -17,6 +17,14 @@ export const ADMIN_NAV: AdminNavItem[] = [
     section: "analytics",
     icon: "chart",
     match: (pathname) => pathname.startsWith("/admin/analytics"),
+  },
+  {
+    href: "/admin/calendar",
+    label: "Takvim",
+    shortLabel: "Takvim",
+    section: "operations",
+    icon: "calendar",
+    match: (pathname) => pathname.startsWith("/admin/calendar"),
   },
   {
     href: "/admin",
