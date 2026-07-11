@@ -9,9 +9,11 @@ interface CalendarStatsBarProps {
 }
 
 export function CalendarStatsBar({ stats, upcoming }: CalendarStatsBarProps) {
+  const capacityWarnings = stats.capacity?.warningCount ?? 0;
+
   return (
     <div
-      className="grid grid-cols-2 md:grid-cols-5 gap-3"
+      className="grid grid-cols-2 md:grid-cols-6 gap-3"
       data-testid="calendar-stats-bar"
     >
       <MiniStat label="Toplam" value={stats.total} />
@@ -19,6 +21,7 @@ export function CalendarStatsBar({ stats, upcoming }: CalendarStatsBarProps) {
       <MiniStat label="Önerilen" value={stats.byStatus.vorgeschlagen ?? 0} />
       <MiniStat label="Wartung" value={stats.byKind.wartung ?? 0} />
       <MiniStat label="Uyarı" value={upcoming.badgeCount} highlight={upcoming.badgeCount > 0} />
+      <MiniStat label="Kapasite" value={capacityWarnings} highlight={capacityWarnings > 0} />
     </div>
   );
 }

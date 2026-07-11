@@ -5,14 +5,20 @@ export type AppointmentKind = "single" | "wartung";
 
 export type AppointmentStatus = "vorgeschlagen" | "bestätigt" | "erledigt" | "storniert";
 
-export type AppointmentRole = "confirmed" | "proposed" | "preferred-0" | "preferred-1" | "preferred-2";
+export type AppointmentRole =
+  | "confirmed"
+  | "proposed"
+  | "preferred-0"
+  | "preferred-1"
+  | "preferred-2"
+  | `wartung-${number}`;
 
 export type CalendarTimeSlot = Exclude<PreferredTimeSlot, ""> | "ganztags";
 
 export interface CalendarAppointment {
   id: string;
   leadId: string;
-  role: AppointmentRole;
+  role: AppointmentRole | string;
   anfrageNr?: string;
   kind: AppointmentKind;
   status: AppointmentStatus;

@@ -1,12 +1,13 @@
 "use client";
 
 import {
-  APPOINTMENT_ROLE_COLORS,
-  APPOINTMENT_ROLE_LABELS_TR,
   APPOINTMENT_STATUS_COLORS,
   APPOINTMENT_STATUS_LABELS_TR,
+  appointmentRoleColorClass,
+  appointmentRoleLabelTr,
   TIME_SLOT_LABELS_TR,
 } from "@/lib/calendar/appointment-from-lead";
+import { buildGoogleCalendarAddUrl, isGoogleCalendarLinkVisible } from "@/lib/calendar/google-calendar";
 import type { CalendarAppointment } from "@/lib/calendar/types";
 import { formatGermanDate } from "@/lib/quote-form";
 
@@ -51,8 +52,8 @@ export function CalendarEventCard({
       </p>
 
       <div className="flex flex-wrap gap-1 mt-1.5">
-        <span className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${APPOINTMENT_ROLE_COLORS[item.role]}`}>
-          {APPOINTMENT_ROLE_LABELS_TR[item.role]}
+        <span className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${appointmentRoleColorClass(String(item.role))}`}>
+          {appointmentRoleLabelTr(String(item.role))}
         </span>
         {item.kind === "wartung" && (
           <span className="px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase bg-blue-50 text-blue-700 border-blue-200">
@@ -78,6 +79,18 @@ export function CalendarEventCard({
               className="text-primary font-semibold hover:underline"
             >
               {item.customerPhone}
+            </a>
+          )}
+          {isGoogleCalendarLinkVisible(item) && (
+            <a
+              href={buildGoogleCalendarAddUrl(item)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-blue-700 font-semibold hover:underline"
+              data-testid={`calendar-google-${item.id}`}
+            >
+              Google
             </a>
           )}
           {!compact && (

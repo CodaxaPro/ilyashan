@@ -1,7 +1,7 @@
 "use client";
 
 import type { CalendarAppointment } from "@/lib/calendar/types";
-import { APPOINTMENT_ROLE_LABELS_TR } from "@/lib/calendar/appointment-from-lead";
+import { appointmentRoleLabelTr } from "@/lib/calendar/appointment-from-lead";
 import { formatGermanDate } from "@/lib/quote-form";
 
 export interface PendingMove {
@@ -35,7 +35,7 @@ export function CalendarMoveModal({ pending, loading, onConfirm, onCancel }: Cal
             Termin taşınsın mı?
           </h2>
           <p className="text-sm text-muted mt-1">
-            <strong>{pending.item.customerName}</strong> · {APPOINTMENT_ROLE_LABELS_TR[pending.item.role]}
+            <strong>{pending.item.customerName}</strong> · {appointmentRoleLabelTr(String(pending.item.role))}
           </p>
         </div>
 

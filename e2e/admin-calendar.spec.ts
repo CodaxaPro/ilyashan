@@ -21,7 +21,8 @@ async function loginAsAdmin(page: Page) {
 
   if (await form.isVisible()) {
     await page.getByTestId("admin-password").fill(ADMIN_PASSWORD);
-    await page.getByTestId("admin-login-submit").click();
+    await dismissCookieBanner(page);
+    await page.getByTestId("admin-login-submit").click({ force: true });
     await expect(calendarHeading).toBeVisible({ timeout: 20_000 });
   }
 }
@@ -79,6 +80,22 @@ test.describe("Admin Takvim v2", () => {
       data: { eventDate: "2026-03-15" },
     });
     expect(res.status()).toBe(401);
+  });
+
+  test("ICS export yetkisiz reddedilir", async ({ request }) => {
+    const res = await request.get("/api/admin/appointments/export");
+    expect(res.status()).toBe(401);
+  });
+
+  test("ICS feed token olmadan reddedilir", async ({ request }) => {
+    const res = await request.get("/api/calendar/feed");
+    expect(res.status()).toBe(401);
+  });
+
+  test("export panel görünür", async ({ page }) => {
+    await loginAsAdmin(page);
+    await expect(page.getByTestId("calendar-export-panel")).toBeVisible();
+    await expect(page.getByTestId("calendar-export-ics")).toBeVisible();
   });
 
   test("PATCH geçersiz gövde reddedilir (auth sonrası)", async ({ page }) => {

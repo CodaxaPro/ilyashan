@@ -21,7 +21,7 @@ export const DEFAULT_CALENDAR_FILTERS: CalendarFilters = {
   role: "actionable",
 };
 
-export function isPreferredRole(role: AppointmentRole): boolean {
+export function isPreferredRole(role: string): boolean {
   return role.startsWith("preferred-");
 }
 

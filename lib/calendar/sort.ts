@@ -1,4 +1,5 @@
-import type { AppointmentRole, CalendarAppointment, CalendarTimeSlot } from "@/lib/calendar/types";
+import type { CalendarAppointment, CalendarTimeSlot } from "@/lib/calendar/types";
+import { isWartungSeriesRole } from "@/lib/calendar/wartung-series";
 
 const TIME_SLOT_ORDER: Record<CalendarTimeSlot, number> = {
   vormittag: 0,
@@ -7,13 +8,13 @@ const TIME_SLOT_ORDER: Record<CalendarTimeSlot, number> = {
   ganztags: 3,
 };
 
-const ROLE_ORDER: Record<AppointmentRole, number> = {
-  confirmed: 0,
-  proposed: 1,
-  "preferred-0": 2,
-  "preferred-1": 3,
-  "preferred-2": 4,
-};
+function roleOrder(role: string): number {
+  if (role === "confirmed") return 0;
+  if (role === "proposed") return 1;
+  if (role.startsWith("preferred-")) return 2 + Number.parseInt(role.split("-")[1] ?? "0", 10);
+  if (isWartungSeriesRole(role)) return 20 + Number.parseInt(role.replace("wartung-", ""), 10);
+  return 99;
+}
 
 const STATUS_ORDER = {
   bestätigt: 0,
@@ -30,7 +31,7 @@ export function compareAppointments(a: CalendarAppointment, b: CalendarAppointme
   const slotB = b.timeSlot ? TIME_SLOT_ORDER[b.timeSlot] : 99;
   if (slotA !== slotB) return slotA - slotB;
 
-  const roleCmp = ROLE_ORDER[a.role] - ROLE_ORDER[b.role];
+  const roleCmp = roleOrder(String(a.role)) - roleOrder(String(b.role));
   if (roleCmp !== 0) return roleCmp;
 
   const statusCmp = STATUS_ORDER[a.status] - STATUS_ORDER[b.status];

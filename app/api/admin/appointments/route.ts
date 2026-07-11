@@ -16,6 +16,11 @@ import { buildUpcomingSummary } from "@/lib/calendar/upcoming";
 import { sortAppointments, sortAppointmentsForDay } from "@/lib/calendar/sort";
 import { buildRangeStats } from "@/lib/calendar/stats";
 import { getWeekRange, toIsoDate } from "@/lib/calendar/week-range";
+import {
+  buildCalendarFeedUrl,
+  getCalendarIcsToken,
+  isCalendarFeedConfigured,
+} from "@/lib/calendar/feed-config";
 
 async function requireAdmin() {
   if (!isAdminConfigured()) {
@@ -54,6 +59,10 @@ export async function GET(request: Request) {
   const stats = buildRangeStats(filtered, dayKeys.length ? dayKeys : [...new Set(filtered.map((i) => i.eventDate))].sort());
   const upcoming = buildUpcomingSummary(filtered, today);
 
+  const origin = new URL(request.url).origin;
+  const icsToken = getCalendarIcsToken();
+  const icsFeedUrl = icsToken ? buildCalendarFeedUrl(origin, icsToken) : null;
+
   return NextResponse.json({
     appointments: filtered,
     byDay,
@@ -75,6 +84,10 @@ export async function GET(request: Request) {
         : undefined),
     storage,
     dbConfigured: isAppointmentsDbConfigured(),
+    icsFeed: {
+      configured: isCalendarFeedConfigured(),
+      subscribeUrl: icsFeedUrl,
+    },
   });
 }
 

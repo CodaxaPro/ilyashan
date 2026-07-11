@@ -1,7 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { buildRangeStats, statsForDay } from "./stats";
-import type { CalendarAppointment } from "./types";
 
 describe("calendar stats", () => {
   it("counts per day stats", () => {
@@ -68,5 +67,6 @@ describe("calendar stats", () => {
     const range = buildRangeStats(items, ["2026-03-10", "2026-03-11"]);
     assert.equal(range.busiestDay, "2026-03-11");
     assert.equal(range.byDay["2026-03-11"].total, 2);
+    assert.ok(range.capacity);
   });
 });

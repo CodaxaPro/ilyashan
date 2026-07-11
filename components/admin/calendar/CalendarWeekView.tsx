@@ -43,7 +43,11 @@ export function CalendarWeekView({
             key={day}
             data-testid={`calendar-day-${day}`}
             className={`min-h-[240px] rounded-2xl border p-3 flex flex-col gap-2 ${
-              isToday(day, today) ? "border-primary bg-primary/5" : "border-border bg-white"
+              stats?.overCapacity
+                ? "border-amber-400 bg-amber-50/60"
+                : isToday(day, today)
+                  ? "border-primary bg-primary/5"
+                  : "border-border bg-white"
             }`}
             onDragOver={(e) => {
               if (draggingId) e.preventDefault();
@@ -60,6 +64,7 @@ export function CalendarWeekView({
               <p className="text-[10px] text-muted">
                 {stats?.total ?? items.length} iş
                 {stats && stats.wartung > 0 ? ` · ${stats.wartung} Wartung` : ""}
+                {stats?.overCapacity ? " · Kapasite aşıldı" : ""}
               </p>
             </div>
 

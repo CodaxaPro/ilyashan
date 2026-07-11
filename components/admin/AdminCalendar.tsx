@@ -26,6 +26,7 @@ import { CalendarStatsBar } from "@/components/admin/calendar/CalendarStatsBar";
 import { CalendarToolbar } from "@/components/admin/calendar/CalendarToolbar";
 import { CalendarUpcomingPanel } from "@/components/admin/calendar/CalendarUpcomingPanel";
 import { CalendarWeekView } from "@/components/admin/calendar/CalendarWeekView";
+import { CalendarExportPanel } from "@/components/admin/calendar/CalendarExportPanel";
 
 interface CalendarApiResponse {
   appointments: CalendarAppointment[];
@@ -39,6 +40,7 @@ interface CalendarApiResponse {
   month?: { year: number; month: number };
   storage: "supabase" | "kv-fallback";
   dbConfigured: boolean;
+  icsFeed?: { configured: boolean; subscribeUrl: string | null };
 }
 
 function buildQuery(
@@ -79,6 +81,10 @@ export function AdminCalendar() {
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
 
   const monthGrid = useMemo(() => getMonthRange(monthYear, month), [monthYear, month]);
+  const exportUrl = useMemo(
+    () => `/api/admin/appointments/export?${buildQuery(view, weekStart, monthYear, month, filters)}`,
+    [view, weekStart, monthYear, month, filters]
+  );
   const week = useMemo(
     () => data?.week ?? getWeekRange(new Date(weekStart + "T12:00:00")),
     [data?.week, weekStart]
@@ -294,6 +300,12 @@ export function AdminCalendar() {
         />
 
         <CalendarFiltersBar filters={filters} onChange={setFilters} />
+
+        <CalendarExportPanel
+          exportUrl={exportUrl}
+          feedConfigured={data?.icsFeed?.configured ?? false}
+          subscribeUrl={data?.icsFeed?.subscribeUrl ?? null}
+        />
 
         {data && <CalendarStatsBar stats={data.stats} upcoming={data.upcoming} />}
 

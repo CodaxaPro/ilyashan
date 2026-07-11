@@ -1,4 +1,6 @@
 import type { CalendarAppointment } from "@/lib/calendar/types";
+import type { CapacityReport } from "@/lib/calendar/capacity";
+import { analyzeCapacity } from "@/lib/calendar/capacity";
 
 export interface CalendarDayStats {
   total: number;
@@ -6,6 +8,7 @@ export interface CalendarDayStats {
   vorgeschlagen: number;
   erledigt: number;
   wartung: number;
+  overCapacity?: boolean;
 }
 
 export interface CalendarRangeStats {
@@ -14,6 +17,7 @@ export interface CalendarRangeStats {
   byKind: Record<string, number>;
   byDay: Record<string, CalendarDayStats>;
   busiestDay: string | null;
+  capacity: CapacityReport;
 }
 
 export function statsForDay(items: CalendarAppointment[]): CalendarDayStats {
@@ -30,8 +34,12 @@ export function buildRangeStats(
   items: CalendarAppointment[],
   days: string[]
 ): CalendarRangeStats {
+  const dayKeys = days.length ? days : [...new Set(items.map((i) => i.eventDate))].sort();
+  const capacity = analyzeCapacity(items, dayKeys);
+  const overSet = new Set(capacity.overCapacityDays.map((d) => d.date));
+
   const byDay: Record<string, CalendarDayStats> = Object.fromEntries(
-    days.map((d) => [d, statsForDay([])])
+    dayKeys.map((d) => [d, statsForDay([])])
   );
 
   const byStatus: Record<string, number> = {};
@@ -42,13 +50,15 @@ export function buildRangeStats(
     byKind[item.kind] = (byKind[item.kind] ?? 0) + 1;
   }
 
-  for (const day of days) {
-    byDay[day] = statsForDay(items.filter((i) => i.eventDate === day));
+  for (const day of dayKeys) {
+    const dayStats = statsForDay(items.filter((i) => i.eventDate === day));
+    dayStats.overCapacity = overSet.has(day);
+    byDay[day] = dayStats;
   }
 
   let busiestDay: string | null = null;
   let max = 0;
-  for (const day of days) {
+  for (const day of dayKeys) {
     if (byDay[day].total > max) {
       max = byDay[day].total;
       busiestDay = day;
@@ -61,5 +71,6 @@ export function buildRangeStats(
     byKind,
     byDay,
     busiestDay,
+    capacity,
   };
 }

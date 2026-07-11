@@ -26,4 +26,12 @@ describe("parseLocalAppointmentId", () => {
     assert.equal(parseLocalAppointmentId("local-lead-unknown-role"), null);
     assert.equal(parseLocalAppointmentId("not-local-lead-confirmed"), null);
   });
+
+  it("parses wartung series roles", () => {
+    const leadId = "quote-1739123456-abc12";
+    assert.deepEqual(parseLocalAppointmentId(`local-${leadId}-wartung-3`), {
+      leadId,
+      role: "wartung-3",
+    });
+  });
 });

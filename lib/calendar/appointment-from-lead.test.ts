@@ -211,8 +211,42 @@ describe("deriveAppointmentsFromLead edge cases", () => {
     assert.match(item.title, /Baesweiler/);
   });
 
-  it("uses flexibel time slot for non-wartung quotes", () => {
-    assert.equal(deriveAppointmentsFromLead(quoteLead())[0]?.timeSlot, "flexibel");
+  it("generates wartung series after confirmed anchor", () => {
+    const items = deriveAppointmentsFromLead(
+      quoteLead({
+        status: "termin_bestaetigt",
+        appointment: { confirmedDate: "2026-03-10" },
+        quote: {
+          ...initialQuoteFormData,
+          services: ["privat", "wartung"],
+          windowCount: 8,
+          wartungPackageId: "quarterly",
+          wartungPreferredWeekday: "di",
+        },
+      })
+    );
+    const confirmed = items.find((i) => i.role === "confirmed");
+    const series = items.filter((i) => String(i.role).startsWith("wartung-"));
+    assert.ok(confirmed);
+    assert.equal(series.length, 4);
+    assert.equal(series[0].role, "wartung-0");
+    assert.equal(series[0].status, "bestätigt");
+  });
+
+  it("blocks wartung series drag reschedule", () => {
+    assert.equal(
+      canRescheduleAppointment({
+        id: "1",
+        leadId: "l",
+        role: "wartung-0",
+        kind: "wartung",
+        status: "bestätigt",
+        eventDate: "2026-04-01",
+        customerName: "A",
+        title: "T",
+      }),
+      false
+    );
   });
 });
 
