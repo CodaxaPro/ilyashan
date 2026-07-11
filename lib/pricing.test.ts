@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { calculatePriceEstimate } from "./pricing";
 import { RECOMMENDED_PRICING as P } from "./pricing-market-research";
 import { initialQuoteFormData, type QuoteFormData } from "./quote-form";
+import { toWartungPricingConfig, DEFAULT_FENSTER_PRICING } from "./pricing-config";
+
+const wartungConfig = toWartungPricingConfig(DEFAULT_FENSTER_PRICING);
 
 function base(overrides: Partial<QuoteFormData> = {}): QuoteFormData {
   return {
@@ -20,7 +23,7 @@ function base(overrides: Partial<QuoteFormData> = {}): QuoteFormData {
 }
 
 function breakdownTotal(data: QuoteFormData) {
-  const est = calculatePriceEstimate(data);
+  const est = calculatePriceEstimate(data, undefined, wartungConfig);
   assert.ok(est);
   return est;
 }
@@ -189,12 +192,40 @@ describe("calculatePriceEstimate – Mindest & Modelle", () => {
     assert.equal(privatObj.minimumAmount, P.minimumGewerbe);
   });
 
-  it("Wartung: Monatspreis mindestens 59 €", () => {
+  it("Wartung: Monatspreis mindestens 59 € (Vierteljährlich)", () => {
     const est = breakdownTotal(
-      base({ services: ["privat", "wartung"], windowCount: 8, objectType: "wohnung" })
+      base({
+        services: ["privat", "wartung"],
+        wartungPackageId: "quarterly",
+        wartungPreferredWeekday: "mo",
+        wartungPreferredTimeSlot: "flexibel",
+        windowCount: 8,
+        objectType: "wohnung",
+      })
     );
-    assert.ok(est.label.includes("Wartungsvertrag"));
-    assert.ok(est.amount >= P.wartungMinMonthly);
+    assert.ok(est.label.includes("Vierteljährlich"));
+    assert.ok(est.amount >= 59);
+    assert.ok(est.wartung);
+    assert.ok(est.wartung!.yearlySavings > 0);
+  });
+
+  it("Wartung: 4-wöchentlich teurer als vierteljährlich pro Monat", () => {
+    const quarterly = breakdownTotal(
+      base({
+        services: ["privat", "wartung"],
+        wartungPackageId: "quarterly",
+        windowCount: 20,
+      })
+    );
+    const fourWeekly = breakdownTotal(
+      base({
+        services: ["privat", "wartung"],
+        wartungPackageId: "four_weekly",
+        windowCount: 20,
+      })
+    );
+    assert.ok(fourWeekly.amount > quarterly.amount);
+    assert.ok(fourWeekly.wartung!.yearlySavings > quarterly.wartung!.yearlySavings);
   });
 });
 

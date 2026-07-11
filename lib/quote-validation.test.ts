@@ -6,7 +6,6 @@ import {
   hasPrimaryService,
   isQuoteSubmissionValid,
   normalizeServices,
-  syncObjectTypeWithService,
   validateQuoteStep,
 } from "./quote-validation";
 
@@ -21,9 +20,27 @@ describe("quote-validation – Services", () => {
     assert.deepEqual(normalizeServices(["privat", "wartung"]), ["privat", "wartung"]);
   });
 
-  it("syncObjectType: Gewerbe-Leistung → Objekt Gewerbe", () => {
-    assert.equal(syncObjectTypeWithService(["gewerbe"], "wohnung"), "gewerbe");
-    assert.equal(syncObjectTypeWithService(["privat"], "gewerbe"), "");
+  it("Wartung ohne Paket blockiert Schritt 1", () => {
+    assert.equal(
+      canProceedQuoteStep(1, {
+        ...initialQuoteFormData,
+        services: ["privat", "wartung"],
+      }),
+      false
+    );
+  });
+
+  it("Wartung mit Paket + Wochentag erlaubt Schritt 1", () => {
+    assert.equal(
+      canProceedQuoteStep(1, {
+        ...initialQuoteFormData,
+        services: ["privat", "wartung"],
+        wartungPackageId: "quarterly",
+        wartungPreferredWeekday: "di",
+        wartungPreferredTimeSlot: "vormittag",
+      }),
+      true
+    );
   });
 });
 

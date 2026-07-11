@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import {
   canProceedQuoteStep,
-  normalizeServices,
-  syncObjectTypeWithService,
   validateQuoteStep,
 } from "@/lib/quote-validation";
 import { trackAnalytics } from "@/lib/analytics/client";
@@ -45,14 +43,6 @@ export function QuoteWizard() {
     setData((prev) => ({ ...prev, ...updates }));
   }
 
-  function handleServicesChange(services: QuoteFormData["services"]) {
-    const normalized = normalizeServices(services);
-    updateData({
-      services: normalized,
-      objectType: syncObjectTypeWithService(normalized, data.objectType),
-    });
-  }
-
   function canProceed() {
     return canProceedQuoteStep(step, data);
   }
@@ -84,7 +74,7 @@ export function QuoteWizard() {
       )}
       <QuoteProgress currentStep={step} />
 
-      {step === 1 && <Step1Services data={data} onChange={handleServicesChange} />}
+      {step === 1 && <Step1Services data={data} onUpdate={updateData} />}
 
       {step === 2 && <Step2Object data={data} onChange={updateData} />}
 

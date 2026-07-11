@@ -43,7 +43,9 @@ test.describe("Concierge Assistent", () => {
     await page.getByTestId("concierge-send").click();
     await expect(page.getByText(/€/).first()).toBeVisible({ timeout: 10000 });
 
-    const wizardLink = page.getByRole("link", { name: /übernehmen|berechnen/i }).first();
+    const wizardLink = page
+      .getByTestId("concierge-panel")
+      .getByRole("link", { name: /übernehmen/i });
     await expect(wizardLink).toBeVisible();
     await wizardLink.click();
 

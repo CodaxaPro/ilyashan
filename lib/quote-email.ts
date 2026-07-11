@@ -14,7 +14,8 @@ import {
   getQuotePlzOrt,
   getServicesLabel,
 } from "@/lib/quote-summary";
-import type { PricingOverrides } from "@/lib/pricing-config";
+import type { PricingOverrides, WartungPricingConfig } from "@/lib/pricing-config";
+import type { WartungPackage } from "@/lib/wartung-packages";
 
 function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
@@ -43,14 +44,22 @@ export function buildQuoteAdminEmail(
   data: QuoteFormData,
   anfrageNr: string,
   photoCount = 0,
-  pricingOverrides?: PricingOverrides
+  pricingOverrides?: PricingOverrides,
+  wartungConfig?: WartungPricingConfig,
+  wartungPackages?: WartungPackage[]
 ) {
   const name = getQuoteContactName(data);
   const plzOrt = getQuotePlzOrt(data);
   const services = getServicesLabel(data);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const phoneClean = cleanPhone(data.phone);
-  const priceRow = buildQuoteTableRows(data, anfrageNr, pricingOverrides).find(
+  const priceRow = buildQuoteTableRows(
+    data,
+    anfrageNr,
+    pricingOverrides,
+    wartungConfig,
+    wartungPackages
+  ).find(
     ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
   );
   const price = priceRow?.[1] ?? "";
@@ -62,7 +71,13 @@ export function buildQuoteAdminEmail(
     ? `mailto:${data.email}?subject=${encodeURIComponent(`Ihr Angebot ${anfrageNr} – Ilyashan Fensterreinigung`)}&body=${encodeURIComponent(buildReplyBody(name, services, price))}`
     : null;
 
-  const detailRows = buildQuoteTableRows(data, anfrageNr, pricingOverrides);
+  const detailRows = buildQuoteTableRows(
+    data,
+    anfrageNr,
+    pricingOverrides,
+    wartungConfig,
+    wartungPackages
+  );
 
   const body = `
     ${buildInfoBox(`<strong>Neue Angebotsanfrage</strong> · ${escapeHtml(anfrageNr)} · ${escapeHtml(timestamp)}`)}
@@ -95,14 +110,28 @@ export function buildQuoteAdminEmail(
 export function buildQuoteCustomerEmail(
   data: QuoteFormData,
   anfrageNr: string,
-  pricingOverrides?: PricingOverrides
+  pricingOverrides?: PricingOverrides,
+  wartungConfig?: WartungPricingConfig,
+  wartungPackages?: WartungPackage[]
 ) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
-  const detailRows = buildQuoteTableRows(data, anfrageNr, pricingOverrides).filter(
+  const detailRows = buildQuoteTableRows(
+    data,
+    anfrageNr,
+    pricingOverrides,
+    wartungConfig,
+    wartungPackages
+  ).filter(
     ([k]) => k !== siteConfig.messaging.priceEstimateRowLabel
   );
-  const priceRow = buildQuoteTableRows(data, anfrageNr, pricingOverrides).find(
+  const priceRow = buildQuoteTableRows(
+    data,
+    anfrageNr,
+    pricingOverrides,
+    wartungConfig,
+    wartungPackages
+  ).find(
     ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
   );
 

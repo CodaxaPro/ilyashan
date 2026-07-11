@@ -2,6 +2,9 @@ import { siteConfig } from "@/lib/config";
 import type { QuoteFormData, QuoteServiceId } from "@/lib/quote-form";
 import { quoteServices } from "@/lib/quote-form";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
+import { WartungPlanSelector, pickDefaultWartungFields } from "@/components/quote/WartungPlanSelector";
+import { normalizeServices, syncObjectTypeWithService } from "@/lib/quote-validation";
 
 const serviceIcons: Record<string, React.ReactNode> = {
   home: (
@@ -23,16 +26,34 @@ const serviceIcons: Record<string, React.ReactNode> = {
 
 interface Step1ServicesProps {
   data: QuoteFormData;
-  onChange: (services: QuoteServiceId[]) => void;
+  onUpdate: (updates: Partial<QuoteFormData>) => void;
 }
 
-export function Step1Services({ data, onChange }: Step1ServicesProps) {
+export function Step1Services({ data, onUpdate }: Step1ServicesProps) {
+  const { config } = usePricingConfig();
+  const quarterly = config.wartungPackages.find((pkg) => pkg.id === "quarterly");
+  const wartungHint =
+    quarterly &&
+    `ab ${quarterly.minMonthly} €/Mo. · bis −${Math.round(
+      Math.max(...config.wartungPackages.map((pkg) => pkg.discountPercent)) * 100
+    )} %`;
+
+  function applyServices(services: QuoteServiceId[]) {
+    const normalized = normalizeServices(services);
+    const wartungDefaults = pickDefaultWartungFields(normalized, config.wartungPackages, data);
+    onUpdate({
+      services: normalized,
+      objectType: syncObjectTypeWithService(normalized, data.objectType),
+      ...wartungDefaults,
+    });
+  }
+
   function toggleService(id: QuoteServiceId) {
     if (id === "wartung") {
       if (data.services.includes("wartung")) {
-        onChange(data.services.filter((s) => s !== "wartung"));
+        applyServices(data.services.filter((s) => s !== "wartung"));
       } else {
-        onChange([...data.services, "wartung"]);
+        applyServices([...data.services, "wartung"]);
       }
       return;
     }
@@ -41,16 +62,16 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
     const selected = data.services.includes(id);
 
     if (selected && wartung) {
-      onChange(["wartung"]);
+      applyServices(["wartung"]);
       return;
     }
 
     if (selected) {
-      onChange(wartung ? ["wartung"] : []);
+      applyServices(wartung ? ["wartung"] : []);
       return;
     }
 
-    onChange(wartung ? [id, "wartung"] : [id]);
+    applyServices(wartung ? [id, "wartung"] : [id]);
   }
 
   return (
@@ -58,14 +79,15 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
       <h2 className="text-2xl font-bold text-foreground mb-2">
         Welche Leistung dürfen wir für Sie ausführen?
       </h2>
-      <p className="text-muted mb-8">
-        {siteConfig.messaging.wizardStep1Hint}
-      </p>
+      <p className="text-muted mb-8">{siteConfig.messaging.wizardStep1Hint}</p>
 
       <div className="grid sm:grid-cols-3 gap-4">
         {quoteServices.map((service) => {
           const selected = data.services.includes(service.id);
           const isPrimary = service.id !== "wartung" && selected;
+          const priceHint =
+            service.id === "wartung" && wartungHint ? `Live berechnet · ${wartungHint}` : service.priceHint;
+
           return (
             <button
               key={service.id}
@@ -101,10 +123,8 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
                     )}
                   </div>
                   <p className="text-sm text-muted mt-1 leading-relaxed">{service.description}</p>
-                  <p className="text-sm font-semibold text-primary mt-2">{service.priceHint}</p>
-                  {isPrimary && (
-                    <p className="text-xs text-muted mt-1">Hauptleistung</p>
-                  )}
+                  <p className="text-sm font-semibold text-primary mt-2">{priceHint}</p>
+                  {isPrimary && <p className="text-xs text-muted mt-1">Hauptleistung</p>}
                 </div>
               </div>
             </button>
@@ -138,6 +158,14 @@ export function Step1Services({ data, onChange }: Step1ServicesProps) {
           })}
         </div>
       )}
+
+      {data.services.includes("wartung") && hasPrimaryService(data.services) && (
+        <WartungPlanSelector data={data} onChange={onUpdate} />
+      )}
     </div>
   );
+}
+
+function hasPrimaryService(services: QuoteServiceId[]) {
+  return services.includes("privat") || services.includes("gewerbe");
 }

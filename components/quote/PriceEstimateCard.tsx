@@ -15,8 +15,8 @@ interface PriceEstimateCardProps {
 }
 
 export function PriceEstimateCard({ data, compact = false }: PriceEstimateCardProps) {
-  const { pricingOverrides } = usePricingConfig();
-  const estimate = calculatePriceEstimate(data, pricingOverrides);
+  const { pricingOverrides, wartungConfig } = usePricingConfig();
+  const estimate = calculatePriceEstimate(data, pricingOverrides, wartungConfig);
 
   if (!estimate) return null;
 
@@ -47,6 +47,17 @@ export function PriceEstimateCard({ data, compact = false }: PriceEstimateCardPr
           <strong>{formatEuro(estimate.minimumAmount)}</strong> greift. Extras und mehr Flügel erhöhen
           den Endpreis sichtbar.
         </p>
+      )}
+
+      {!compact && estimate.wartung && (
+        <div className="mt-4 pt-4 border-t border-border/60" data-testid="wartung-summary">
+          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
+            Wartungsvertrag ({estimate.wartung.packageLabel})
+          </p>
+          <p className="text-sm text-emerald-700 font-semibold">
+            Ersparnis ca. {formatEuro(estimate.wartung.yearlySavings)}/Jahr
+          </p>
+        </div>
       )}
 
       {!compact && estimate.breakdown.length > 0 && (

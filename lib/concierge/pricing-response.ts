@@ -1,5 +1,5 @@
 import type { QuoteFormData, QuoteServiceId } from "@/lib/quote-form";
-import { getFloorLabel } from "@/lib/quote-form";
+import { getFloorLabel, initialQuoteFormData } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro, formatEuroExact } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import { buildTrustFooter } from "./knowledge";
@@ -18,49 +18,15 @@ export function quoteDataForEstimate(partial: Partial<QuoteFormData>): QuoteForm
   }
 
   return {
+    ...initialQuoteFormData,
+    ...partial,
     services,
     objectType: partial.objectType || (services.includes("gewerbe") ? "gewerbe" : "wohnung"),
-    objectTypeOther: partial.objectTypeOther || "",
-    floorLevel,
     elevator: partial.elevator || "unbekannt",
-    narrowStairs: partial.narrowStairs ?? false,
-    accessTimes: partial.accessTimes ?? false,
-    accessTimesNote: partial.accessTimesNote || "",
-    specialFeatures: partial.specialFeatures ?? false,
-    specialNotes: partial.specialNotes || "",
     windowCount,
-    roomHeight: partial.roomHeight ?? 2.5,
+    floorLevel,
     dirtLevel: partial.dirtLevel ?? "normal",
     cleaningSide: partial.cleaningSide ?? "innen_aussen",
-    includeSolar: partial.includeSolar ?? false,
-    solarSqm: partial.solarSqm ?? 0,
-    includeWintergarden: partial.includeWintergarden ?? false,
-    wintergardenSqm: partial.wintergardenSqm ?? 0,
-    withFrame: partial.withFrame ?? false,
-    withFalz: partial.withFalz ?? false,
-    windowSills: partial.windowSills ?? false,
-    muntinWindows: partial.muntinWindows ?? false,
-    oldBuildingWindows: partial.oldBuildingWindows ?? false,
-    skylights: partial.skylights ?? false,
-    shutters: partial.shutters ?? false,
-    blinds: partial.blinds ?? false,
-    canopy: partial.canopy ?? false,
-    canopySqm: partial.canopySqm ?? 0,
-    flyScreens: partial.flyScreens ?? false,
-    additionalInfo: partial.additionalInfo || "",
-    scheduleOption: partial.scheduleOption || "",
-    preferredDates: partial.preferredDates ?? [],
-    salutation: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    company: "",
-    street: "",
-    houseNumber: "",
-    postalCode: partial.postalCode || "",
-    city: partial.city || "",
-    privacyAccepted: false,
   };
 }
 

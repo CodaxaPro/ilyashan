@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { FensterPricingConfig } from "@/lib/pricing-config";
 import { DEFAULT_FENSTER_PRICING } from "@/lib/pricing-config";
+import type { WartungPackage, WartungPackageId } from "@/lib/wartung-packages";
+import { WARTUNG_PACKAGE_IDS } from "@/lib/wartung-packages";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 
 interface AdminPricingPanelProps {
@@ -26,6 +28,16 @@ export function AdminPricingPanel({ storageConfigured }: AdminPricingPanelProps)
 
   function updateField<K extends keyof FensterPricingConfig>(key: K, value: FensterPricingConfig[K]) {
     setConfig((prev) => ({ ...prev, [key]: value }));
+    setSuccess(null);
+  }
+
+  function updatePackage(id: WartungPackageId, patch: Partial<WartungPackage>) {
+    setConfig((prev) => ({
+      ...prev,
+      wartungPackages: prev.wartungPackages.map((pkg) =>
+        pkg.id === id ? { ...pkg, ...patch } : pkg
+      ),
+    }));
     setSuccess(null);
   }
 
@@ -125,46 +137,154 @@ export function AdminPricingPanel({ storageConfigured }: AdminPricingPanelProps)
         </section>
 
         <section className="border-t border-border pt-8">
-          <h2 className="text-lg font-bold text-foreground">Wartungsvertrag</h2>
-          <p className="text-sm text-muted mt-1">Aylık abonelik fiyatı hesaplaması</p>
-          <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <h2 className="text-lg font-bold text-foreground">Wartungspakete</h2>
+          <p className="text-sm text-muted mt-1">
+            Sıklığa göre indirim, min. aylık fiyat ve Privat/Gewerbe görünürlüğü
+          </p>
+
+          <div className="mt-4 grid gap-4">
+            {WARTUNG_PACKAGE_IDS.map((id) => {
+              const pkg = config.wartungPackages.find((item) => item.id === id);
+              if (!pkg) return null;
+              return (
+                <div
+                  key={id}
+                  className="rounded-xl border border-border bg-slate-50/80 p-4 grid lg:grid-cols-[1.2fr,repeat(4,minmax(0,1fr)),auto] gap-3 items-end"
+                >
+                  <div>
+                    <p className="text-xs font-semibold text-muted uppercase">{id}</p>
+                    <input
+                      type="text"
+                      value={pkg.labelDe}
+                      onChange={(e) => updatePackage(id, { labelDe: e.target.value })}
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5 text-sm font-semibold"
+                    />
+                    <input
+                      type="text"
+                      value={pkg.subtitleDe}
+                      onChange={(e) => updatePackage(id, { subtitleDe: e.target.value })}
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5 text-xs"
+                    />
+                  </div>
+                  <label className="block text-xs">
+                    Ziyaret/yıl
+                    <input
+                      type="number"
+                      min={1}
+                      max={52}
+                      value={pkg.visitsPerYear}
+                      onChange={(e) => updatePackage(id, { visitsPerYear: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5"
+                    />
+                  </label>
+                  <label className="block text-xs">
+                    İndirim %
+                    <input
+                      type="number"
+                      min={0}
+                      max={50}
+                      value={Math.round(pkg.discountPercent * 100)}
+                      onChange={(e) =>
+                        updatePackage(id, { discountPercent: Number(e.target.value) / 100 })
+                      }
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5"
+                    />
+                  </label>
+                  <label className="block text-xs">
+                    Min €/Ay
+                    <input
+                      type="number"
+                      min={20}
+                      max={500}
+                      value={pkg.minMonthly}
+                      onChange={(e) => updatePackage(id, { minMonthly: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5"
+                    />
+                  </label>
+                  <label className="block text-xs">
+                    Sıra
+                    <input
+                      type="number"
+                      min={1}
+                      max={99}
+                      value={pkg.sortOrder}
+                      onChange={(e) => updatePackage(id, { sortOrder: Number(e.target.value) })}
+                      className="mt-1 w-full rounded-lg border border-border px-2 py-1.5"
+                    />
+                  </label>
+                  <div className="flex flex-col gap-2 text-xs">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={pkg.visiblePrivat}
+                        onChange={(e) => updatePackage(id, { visiblePrivat: e.target.checked })}
+                      />
+                      Privat
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={pkg.visibleGewerbe}
+                        onChange={(e) => updatePackage(id, { visibleGewerbe: e.target.checked })}
+                      />
+                      Gewerbe
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={pkg.enabled}
+                        onChange={(e) => updatePackage(id, { enabled: e.target.checked })}
+                      />
+                      Aktif
+                    </label>
+                    <select
+                      value={pkg.badge ?? ""}
+                      onChange={(e) =>
+                        updatePackage(id, {
+                          badge:
+                            e.target.value === "popular" || e.target.value === "best_value"
+                              ? e.target.value
+                              : null,
+                        })
+                      }
+                      className="rounded-lg border border-border px-2 py-1"
+                    >
+                      <option value="">Badge yok</option>
+                      <option value="popular">Beliebt</option>
+                      <option value="best_value">Bester Monatspreis</option>
+                    </select>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 grid sm:grid-cols-2 gap-4">
             <label className="block">
-              <span className="text-xs font-semibold text-muted uppercase">İndirim %</span>
-              <input
-                type="number"
-                min={0}
-                max={50}
-                value={Math.round(config.wartungDiscount * 100)}
-                onChange={(e) => updateField("wartungDiscount", Number(e.target.value) / 100)}
-                className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="block">
-              <span className="text-xs font-semibold text-muted uppercase">Ziyaret / yıl</span>
+              <span className="text-xs font-semibold text-muted uppercase">Min. sözleşme (Ay)</span>
               <input
                 type="number"
                 min={1}
-                max={52}
-                value={config.wartungVisitsPerYear}
-                onChange={(e) => updateField("wartungVisitsPerYear", Number(e.target.value))}
+                max={36}
+                value={config.wartungMinContractMonths}
+                onChange={(e) => updateField("wartungMinContractMonths", Number(e.target.value))}
                 className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold text-muted uppercase">Min. € / ay</span>
+              <span className="text-xs font-semibold text-muted uppercase">İlk ziyaret ek %</span>
               <input
                 type="number"
-                min={20}
-                max={300}
-                value={config.wartungMinMonthly}
-                onChange={(e) => updateField("wartungMinMonthly", Number(e.target.value))}
+                min={0}
+                max={100}
+                value={Math.round(config.wartungFirstVisitSurchargePercent * 100)}
+                onChange={(e) =>
+                  updateField("wartungFirstVisitSurchargePercent", Number(e.target.value) / 100)
+                }
                 className="mt-1 w-full rounded-xl border border-border px-3 py-2 text-sm"
               />
             </label>
           </div>
-          <p className="text-xs text-muted mt-3">
-            Formül: max(min €/ay, round(Einsatz × ziyaret × (1−indirim) / 12))
-          </p>
         </section>
 
         <section className="border-t border-border pt-8">

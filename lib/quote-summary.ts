@@ -11,7 +11,12 @@ import {
   scheduleOptionLabels,
 } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
-import type { PricingOverrides } from "@/lib/pricing-config";
+import type { PricingOverrides, WartungPricingConfig } from "@/lib/pricing-config";
+import {
+  preferredTimeSlotLabels,
+  preferredWeekdayLabels,
+} from "@/lib/quote-form";
+import { getWartungPackageById, type WartungPackage } from "@/lib/wartung-packages";
 
 const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "withFrame", label: "Mit Rahmen" },
@@ -58,8 +63,25 @@ export function getReinigungswünscheLabel(data: QuoteFormData) {
   return selected.length > 0 ? selected.join(", ") : "–";
 }
 
-export function getPriceLabel(data: QuoteFormData, pricingOverrides?: PricingOverrides) {
-  const estimate = calculatePriceEstimate(data, pricingOverrides);
+export function getWartungPlanLabel(data: QuoteFormData, packages: WartungPackage[] = []) {
+  if (!data.services.includes("wartung") || !data.wartungPackageId) return "–";
+  const pkg = getWartungPackageById(packages, data.wartungPackageId);
+  const weekday = data.wartungPreferredWeekday
+    ? preferredWeekdayLabels[data.wartungPreferredWeekday]
+    : "–";
+  const slot = data.wartungPreferredTimeSlot
+    ? preferredTimeSlotLabels[data.wartungPreferredTimeSlot]
+    : "–";
+  const pkgLabel = pkg?.labelDe ?? data.wartungPackageId;
+  return `${pkgLabel} · ${weekday} · ${slot}`;
+}
+
+export function getPriceLabel(
+  data: QuoteFormData,
+  pricingOverrides?: PricingOverrides,
+  wartungConfig?: WartungPricingConfig
+) {
+  const estimate = calculatePriceEstimate(data, pricingOverrides, wartungConfig);
   if (!estimate) return "–";
   if (estimate.amount > 0) {
     return `ca. ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)}`;
@@ -79,7 +101,9 @@ export function getTerminLabel(data: QuoteFormData) {
 export function buildQuoteTableRows(
   data: QuoteFormData,
   anfrageNr: string,
-  pricingOverrides?: PricingOverrides
+  pricingOverrides?: PricingOverrides,
+  wartungConfig?: WartungPricingConfig,
+  wartungPackages?: WartungPackage[]
 ): [string, string][] {
   const rows: [string, string][] = [
     ["Anfrage-Nr.", anfrageNr],
@@ -93,8 +117,12 @@ export function buildQuoteTableRows(
     ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide]],
     ["Reinigungswünsche", getReinigungswünscheLabel(data)],
     ["Wunschtermin", getTerminLabel(data)],
-    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data, pricingOverrides)],
+    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data, pricingOverrides, wartungConfig)],
   ];
+
+  if (data.services.includes("wartung")) {
+    rows.splice(2, 0, ["Wartungsplan", getWartungPlanLabel(data, wartungPackages ?? [])]);
+  }
 
   if (data.narrowStairs) rows.push(["Zugang", "Enge Treppe (+15 €)"]);
   if (data.accessTimesNote) rows.push(["Zugangszeiten", data.accessTimesNote]);

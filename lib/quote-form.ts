@@ -1,3 +1,5 @@
+import type { WartungPackageId } from "@/lib/wartung-packages";
+
 export const QUOTE_STEPS = [
   { id: 1, label: "Leistung" },
   { id: 2, label: "Objekt" },
@@ -9,6 +11,11 @@ export const QUOTE_STEPS = [
 /** Schritt 1: nur Hauptleistungen – Solar/Wintergarten in Schritt 3 */
 export type QuoteServiceId = "privat" | "gewerbe" | "wartung";
 
+export type { WartungPackageId };
+
+export type PreferredWeekday = "mo" | "di" | "mi" | "do" | "fr" | "sa" | "";
+export type PreferredTimeSlot = "vormittag" | "nachmittag" | "flexibel" | "";
+
 export type ObjectType = "wohnung" | "haus" | "gewerbe" | "sonstiges";
 export type ElevatorOption = "ja" | "nein" | "unbekannt";
 export type FloorLevel = "eg" | "og1" | "og2" | "og3" | "og4" | "og5plus" | "dg";
@@ -19,6 +26,9 @@ export type SubmitMethod = "email" | "whatsapp";
 
 export interface QuoteFormData {
   services: QuoteServiceId[];
+  wartungPackageId: WartungPackageId | "";
+  wartungPreferredWeekday: PreferredWeekday;
+  wartungPreferredTimeSlot: PreferredTimeSlot;
   objectType: ObjectType | "";
   objectTypeOther: string;
   floorLevel: FloorLevel | "";
@@ -65,6 +75,9 @@ export interface QuoteFormData {
 
 export const initialQuoteFormData: QuoteFormData = {
   services: [],
+  wartungPackageId: "",
+  wartungPreferredWeekday: "",
+  wartungPreferredTimeSlot: "",
   objectType: "",
   objectTypeOther: "",
   floorLevel: "",
@@ -133,8 +146,8 @@ export const quoteServices: {
   {
     id: "wartung",
     title: "Wartungsvertrag",
-    description: "Regelmäßige Reinigung mit −25 % Rabatt",
-    priceHint: "Live berechnet · ab 59 €/Mo.",
+    description: "Regelmäßige Fensterreinigung mit Rabatt – Intervall wählen",
+    priceHint: "Live berechnet · Pakete vergleichen",
     icon: "calendar",
   },
 ];
@@ -199,6 +212,21 @@ export const quoteServiceLabels: Record<QuoteServiceId, string> = {
   privat: "Privathaushalt",
   gewerbe: "Gewerbefenster",
   wartung: "Wartungsvertrag",
+};
+
+export const preferredWeekdayLabels: Record<Exclude<PreferredWeekday, "">, string> = {
+  mo: "Montag",
+  di: "Dienstag",
+  mi: "Mittwoch",
+  do: "Donnerstag",
+  fr: "Freitag",
+  sa: "Samstag",
+};
+
+export const preferredTimeSlotLabels: Record<Exclude<PreferredTimeSlot, "">, string> = {
+  vormittag: "Vormittag (8–12 Uhr)",
+  nachmittag: "Nachmittag (12–17 Uhr)",
+  flexibel: "Flexibel",
 };
 
 /** Aufschläge pro Flügel – aus Marktforschung */

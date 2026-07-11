@@ -5,7 +5,14 @@ import type {
 } from "@/lib/quote-form";
 import { siteConfig } from "@/lib/config";
 import { RECOMMENDED_PRICING } from "@/lib/pricing-market-research";
-import type { PricingOverrides } from "@/lib/pricing-config";
+import type { PricingOverrides, WartungPricingConfig } from "@/lib/pricing-config";
+import {
+  calculateWartungBreakdown,
+  compareWartungPackages,
+  resolveWartungPackageForQuote,
+  type WartungPriceBreakdown,
+} from "@/lib/wartung-pricing";
+import { getWartungAudience } from "@/lib/wartung-packages";
 
 export type PricingConstants = {
   -readonly [K in keyof typeof RECOMMENDED_PRICING]: typeof RECOMMENDED_PRICING[K] extends number
@@ -30,6 +37,8 @@ export interface PriceEstimate {
   calculatedSubtotal: number;
   minimumApplied: boolean;
   minimumAmount: number;
+  wartung?: WartungPriceBreakdown;
+  wartungComparisons?: WartungPriceBreakdown[];
 }
 
 function mergePricing(overrides?: PricingOverrides): PricingConstants {
@@ -231,7 +240,8 @@ function buildEstimate(
 
 export function calculatePriceEstimate(
   data: Partial<QuoteFormData>,
-  overrides?: PricingOverrides
+  overrides?: PricingOverrides,
+  wartungConfig?: WartungPricingConfig
 ): PriceEstimate | null {
   if (!data.windowCount || data.windowCount < 1) return null;
   if (!data.services?.length) return null;
@@ -260,25 +270,37 @@ export function calculatePriceEstimate(
 
   if (isWartungJob(full)) {
     const perVisit = subtotal;
-    const yearly = perVisit * P.wartungVisitsPerYear * (1 - P.wartungDiscount);
-    const monthly = Math.max(P.wartungMinMonthly, roundTo5(yearly / 12));
-    const discountLabel = Math.round(P.wartungDiscount * 100);
-    return buildEstimate(
-      monthly,
+    const packages = wartungConfig?.wartungPackages ?? [];
+    const pkg = resolveWartungPackageForQuote(full, packages);
+    if (!pkg) return null;
+
+    const wartung = calculateWartungBreakdown(perVisit, pkg);
+    const audience = getWartungAudience(full.services);
+    const wartungComparisons = compareWartungPackages(perVisit, packages, audience);
+    const discountLabel = Math.round(wartung.discountPercent * 100);
+
+    const estimate = buildEstimate(
+      wartung.monthlyPrice,
       calculatedSubtotal,
-      P.wartungMinMonthly,
-      monthly <= P.wartungMinMonthly,
+      wartung.minMonthly,
+      wartung.minimumMonthlyApplied,
       [
         ...breakdown,
         {
-          label: `Wartungsvertrag (−${discountLabel} %)`,
+          label: `Wartungsvertrag −${discountLabel} % (${pkg.labelDe})`,
           amount: 0,
-          detail: `${P.wartungVisitsPerYear}× jährlich, Monatsrate`,
+          detail: `${wartung.visitsPerYear}× jährlich · ${formatEuroExact(wartung.perVisitPrice)}/Einsatz`,
+        },
+        {
+          label: "Jahresersparnis vs. Einzelbuchung",
+          amount: -wartung.yearlySavings,
+          detail: `${formatEuroExact(wartung.yearlyTotal)}/Jahr`,
         },
       ],
-      "ca. Monatspreis (Wartungsvertrag)",
-      `Basierend auf ${formatEuroExact(perVisit)}/Einsatz, −${discountLabel} % Vertragsrabatt.`
+      `ca. Monatspreis (${pkg.labelDe})`,
+      `Basierend auf ${formatEuroExact(perVisit)}/Einsatz, −${discountLabel} % Vertragsrabatt, ${wartung.visitsPerYear}× jährlich. Sie sparen ca. ${formatEuro(wartung.yearlySavings)}/Jahr.`
     );
+    return { ...estimate, wartung, wartungComparisons };
   }
 
   return buildEstimate(

@@ -19,7 +19,7 @@ import {
 } from "@/lib/photo-upload";
 import { saveLead } from "@/lib/leads-store";
 import { createQuoteStoredLead, createContactStoredLead } from "@/lib/lead-records";
-import { getFensterPricingConfig, toPricingOverrides } from "@/lib/pricing-config";
+import { getFensterPricingConfig, toPricingOverrides, toWartungPricingConfig } from "@/lib/pricing-config";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       const anfrageNr = generateAnfrageNr();
       const pricingConfig = await getFensterPricingConfig();
       const pricingOverrides = toPricingOverrides(pricingConfig);
+      const wartungConfig = toWartungPricingConfig(pricingConfig);
       const pdfBuffer = await generateQuotePdfBuffer(quote, anfrageNr);
       const pdfAttachment = {
         filename: `Eingangsbestätigung-${anfrageNr}.pdf`,
@@ -82,7 +83,14 @@ export async function POST(request: Request) {
       };
       const photoAttachments = photosToResendAttachments(photos);
 
-      const adminEmail = buildQuoteAdminEmail(quote, anfrageNr, photos.length, pricingOverrides);
+      const adminEmail = buildQuoteAdminEmail(
+        quote,
+        anfrageNr,
+        photos.length,
+        pricingOverrides,
+        wartungConfig,
+        pricingConfig.wartungPackages
+      );
       const { error: adminError } = await resend.emails.send({
         from: fromEmail,
         to: [toEmail],
@@ -102,7 +110,13 @@ export async function POST(request: Request) {
       }
 
       if (quote.email?.trim()) {
-        const customerEmail = buildQuoteCustomerEmail(quote, anfrageNr, pricingOverrides);
+        const customerEmail = buildQuoteCustomerEmail(
+          quote,
+          anfrageNr,
+          pricingOverrides,
+          wartungConfig,
+          pricingConfig.wartungPackages
+        );
         const { error: customerError } = await resend.emails.send({
           from: fromEmail,
           to: [quote.email.trim()],

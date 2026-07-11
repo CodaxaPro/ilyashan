@@ -37,6 +37,48 @@ test.describe("Angebot Wizard – Validierung", () => {
     await expect(page.getByTestId("quote-next")).toBeDisabled();
   });
 
+  test("Schritt 1: Wartung + Privat erfordert Paketwahl", async ({ page }) => {
+    await page.goto(ANGEBOT);
+    await page.getByTestId("service-privat").click();
+    await page.getByTestId("service-wartung").click();
+    await expect(page.getByTestId("wartung-plan-selector")).toBeVisible();
+    await expect(page.getByTestId("quote-next")).toBeEnabled();
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: "Wohnung", exact: true }).click();
+    await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
+    await page.getByRole("button", { name: "Ja", exact: true }).click();
+    await page.getByTestId("quote-next").click();
+    await expect(page.getByTestId("window-count-display")).toBeVisible();
+    await expect(page.getByTestId("wartung-summary")).toBeVisible();
+  });
+
+  test("Wartung: häufigeres Intervall → höherer Monatspreis", async ({ page }) => {
+    await page.goto(ANGEBOT);
+    await page.getByTestId("service-privat").click();
+    await page.getByTestId("service-wartung").click();
+    await page.getByTestId("wartung-package-quarterly").click();
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: "Wohnung", exact: true }).click();
+    await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
+    await page.getByRole("button", { name: "Ja", exact: true }).click();
+    await page.getByTestId("quote-next").click();
+    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    const priceQuarterly = parsePrice(
+      (await page.getByTestId("price-estimate-amount").textContent()) ?? ""
+    );
+
+    await page.getByRole("button", { name: "← Zurück" }).click();
+    await page.getByRole("button", { name: "← Zurück" }).click();
+    await page.getByTestId("wartung-package-four_weekly").click();
+    await page.getByTestId("quote-next").click();
+    await page.getByTestId("quote-next").click();
+    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    const priceFourWeekly = parsePrice(
+      (await page.getByTestId("price-estimate-amount").textContent()) ?? ""
+    );
+    expect(priceFourWeekly).toBeGreaterThan(priceQuarterly);
+  });
+
   test("Schritt 2: Etage fehlt → Fehlermeldung", async ({ page }) => {
     await page.goto(ANGEBOT);
     await page.getByTestId("service-privat").click();

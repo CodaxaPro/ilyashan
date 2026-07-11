@@ -41,6 +41,26 @@ export function validateQuoteStep(step: number, data: QuoteFormData): QuoteValid
         message: "Privat und Gewerbe können nicht gleichzeitig gewählt werden.",
       });
     }
+    if (data.services.includes("wartung")) {
+      if (!data.wartungPackageId) {
+        issues.push({
+          field: "wartungPackageId",
+          message: "Bitte wählen Sie ein Wartungs-Intervall.",
+        });
+      }
+      if (!data.wartungPreferredWeekday) {
+        issues.push({
+          field: "wartungPreferredWeekday",
+          message: "Bitte bevorzugten Wochentag wählen.",
+        });
+      }
+      if (!data.wartungPreferredTimeSlot) {
+        issues.push({
+          field: "wartungPreferredTimeSlot",
+          message: "Bitte Zeitfenster wählen.",
+        });
+      }
+    }
   }
 
   if (step >= 2) {

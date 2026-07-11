@@ -11,14 +11,17 @@ import {
 import {
   DEFAULT_FENSTER_PRICING,
   toPricingOverrides,
+  toWartungPricingConfig,
   type FensterPricingConfig,
   type PricingOverrides,
   type ScheduleConfig,
+  type WartungPricingConfig,
 } from "@/lib/pricing-config";
 
 interface PricingConfigContextValue {
   config: FensterPricingConfig;
   pricingOverrides: PricingOverrides;
+  wartungConfig: WartungPricingConfig;
   schedule: ScheduleConfig;
   loaded: boolean;
 }
@@ -26,6 +29,7 @@ interface PricingConfigContextValue {
 const PricingConfigContext = createContext<PricingConfigContextValue>({
   config: DEFAULT_FENSTER_PRICING,
   pricingOverrides: toPricingOverrides(DEFAULT_FENSTER_PRICING),
+  wartungConfig: toWartungPricingConfig(DEFAULT_FENSTER_PRICING),
   schedule: {
     scheduleMinLeadDays: DEFAULT_FENSTER_PRICING.scheduleMinLeadDays,
     scheduleWeekdaysOnly: DEFAULT_FENSTER_PRICING.scheduleWeekdaysOnly,
@@ -60,6 +64,7 @@ export function PricingConfigProvider({ children }: { children: ReactNode }) {
     () => ({
       config,
       pricingOverrides: toPricingOverrides(config),
+      wartungConfig: toWartungPricingConfig(config),
       schedule: {
         scheduleMinLeadDays: config.scheduleMinLeadDays,
         scheduleWeekdaysOnly: config.scheduleWeekdaysOnly,
