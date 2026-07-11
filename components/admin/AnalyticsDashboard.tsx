@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AdminShell, StatCard } from "@/components/admin/AdminShell";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { CHANNEL_LABELS_TR } from "@/lib/analytics/attribution";
+import { formatFromLabel } from "@/lib/analytics/page-context";
 import type { AnalyticsEventRow, AnalyticsSessionRow } from "@/lib/analytics/types";
 
 type Tab =
@@ -64,6 +65,34 @@ function formatDuration(sec: number) {
   return `${Math.floor(sec / 60)} dk ${sec % 60} sn`;
 }
 
+function UrlText({ value }: { value: string | null | undefined }) {
+  if (!value || value === "—") return <span>—</span>;
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return (
+      <a
+        href={value}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline break-all"
+      >
+        {value}
+      </a>
+    );
+  }
+  return <span className="break-all">{value}</span>;
+}
+
+type PageviewPayload = {
+  referrer?: string;
+  referrerDomain?: string;
+  pageUrl?: string;
+  fromUrl?: string;
+  fromPath?: string;
+  fromType?: "external" | "internal" | "direct";
+  fbclid?: string;
+  gclid?: string;
+};
+
 export function AnalyticsDashboard() {
   const { logout, markUnauthenticated } = useAdminAuth();
   const [tab, setTab] = useState<Tab>("overview");
@@ -79,7 +108,7 @@ export function AnalyticsDashboard() {
   >([]);
   const [referrers, setReferrers] = useState<Array<{ label: string; channel: string; count: number }>>([]);
   const [pages, setPages] = useState<
-    Array<{ path: string; views: number; clicks: number; avgTimeSec: number }>
+    Array<{ path: string; views: number; clicks: number; avgTimeSec: number; topReferrer: string }>
   >([]);
   const [clicks, setClicks] = useState<
     Array<{ label: string; page: string; href: string; count: number }>
@@ -334,6 +363,7 @@ export function AnalyticsDashboard() {
                 <th className="px-4 py-3">Görüntüleme</th>
                 <th className="px-4 py-3">Tıklama</th>
                 <th className="px-4 py-3">Ort. süre</th>
+                <th className="px-4 py-3">En çok gelen kaynak</th>
               </tr>
             </thead>
             <tbody>
@@ -343,6 +373,9 @@ export function AnalyticsDashboard() {
                   <td className="px-4 py-3">{p.views}</td>
                   <td className="px-4 py-3">{p.clicks}</td>
                   <td className="px-4 py-3">{formatDuration(p.avgTimeSec)}</td>
+                  <td className="px-4 py-3 max-w-xs">
+                    <UrlText value={p.topReferrer} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -466,19 +499,43 @@ export function AnalyticsDashboard() {
                   <p className="text-sm text-muted mt-1">
                     {selectedSession.session.landing_path} → {selectedSession.session.exit_path ?? "—"}
                   </p>
-                  <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div className="mt-2 grid grid-cols-1 gap-2 text-xs">
+                    <span>
+                      Giriş URL: <UrlText value={selectedSession.session.landing_path} />
+                    </span>
+                    <span>
+                      Referrer:{" "}
+                      <UrlText
+                        value={
+                          selectedSession.session.referrer ||
+                          selectedSession.session.referrer_domain ||
+                          undefined
+                        }
+                      />
+                    </span>
                     <span>Ülke: {selectedSession.session.country ?? "—"}</span>
                     <span>Şehir: {selectedSession.session.city ?? "—"}</span>
                     <span>Tarayıcı: {selectedSession.session.browser ?? "—"}</span>
                     <span>OS: {selectedSession.session.os ?? "—"}</span>
                     <span>UTM: {selectedSession.session.utm_source ?? "—"}</span>
-                    <span>Referrer: {selectedSession.session.referrer_domain ?? "—"}</span>
                     <span>UTM Term: {selectedSession.session.utm_term ?? "—"}</span>
                     <span>GCLID: {selectedSession.session.gclid ? "Evet" : "—"}</span>
+                    <span>FBCLID: {selectedSession.session.fbclid ? "Evet" : "—"}</span>
                   </div>
                 </div>
                 <ol className="space-y-2 max-h-[480px] overflow-y-auto">
-                  {selectedSession.events.map((event) => (
+                  {selectedSession.events.map((event) => {
+                    const payload = (event.payload ?? {}) as PageviewPayload;
+                    const fromLabel =
+                      event.event_type === "pageview"
+                        ? formatFromLabel({
+                            fromType: payload.fromType ?? "direct",
+                            fromUrl: payload.fromUrl ?? "",
+                            fromPath: payload.fromPath ?? "",
+                            referrer: payload.referrer ?? "",
+                          })
+                        : "";
+                    return (
                     <li key={event.id} className="text-sm border-l-2 border-primary/30 pl-3 py-1">
                       <p className="font-medium">
                         {EVENT_LABELS_TR[event.event_type] ?? event.event_type}
@@ -487,6 +544,24 @@ export function AnalyticsDashboard() {
                         </span>
                       </p>
                       <p className="text-muted">{event.page_path}</p>
+                      {event.event_type === "pageview" && (
+                        <>
+                          <p className="text-xs mt-1">
+                            Gelen: <UrlText value={fromLabel === "Doğrudan" ? undefined : fromLabel} />
+                            {fromLabel === "Doğrudan" && "Doğrudan"}
+                          </p>
+                          {payload.pageUrl && (
+                            <p className="text-xs">
+                              Tam URL: <UrlText value={payload.pageUrl} />
+                            </p>
+                          )}
+                          {payload.referrer && payload.referrer !== payload.fromUrl && (
+                            <p className="text-xs">
+                              document.referrer: <UrlText value={payload.referrer} />
+                            </p>
+                          )}
+                        </>
+                      )}
                       {event.element_text && <p className="text-xs">{event.element_text}</p>}
                       {event.scroll_depth != null && (
                         <p className="text-xs">Kaydırma: %{event.scroll_depth}</p>
@@ -495,7 +570,8 @@ export function AnalyticsDashboard() {
                         <p className="text-xs">Süre: {formatDuration(Math.round(event.duration_ms / 1000))}</p>
                       )}
                     </li>
-                  ))}
+                    );
+                  })}
                 </ol>
               </div>
             )}

@@ -156,13 +156,20 @@ export async function getPageStats(days = 30) {
   const since = daysAgoIso(days);
   const { data } = await supabase
     .from("analytics_events")
-    .select("page_path, event_type, duration_ms")
+    .select("page_path, event_type, duration_ms, payload")
     .gte("created_at", since)
     .in("event_type", ["pageview", "page_leave", "click"]);
 
   const map = new Map<
     string,
-    { path: string; views: number; clicks: number; totalDurationMs: number; leaveCount: number }
+    {
+      path: string;
+      views: number;
+      clicks: number;
+      totalDurationMs: number;
+      leaveCount: number;
+      topFrom: Map<string, number>;
+    }
   >();
 
   for (const row of data ?? []) {
@@ -173,8 +180,22 @@ export async function getPageStats(days = 30) {
       clicks: 0,
       totalDurationMs: 0,
       leaveCount: 0,
+      topFrom: new Map<string, number>(),
     };
-    if (row.event_type === "pageview") entry.views += 1;
+    if (row.event_type === "pageview") {
+      entry.views += 1;
+      const payload = (row.payload ?? {}) as {
+        fromUrl?: string;
+        referrer?: string;
+        fromPath?: string;
+        fromType?: string;
+      };
+      const fromLabel =
+        payload.fromType === "internal" && payload.fromPath
+          ? payload.fromPath
+          : payload.fromUrl || payload.referrer || "Doğrudan";
+      entry.topFrom.set(fromLabel, (entry.topFrom.get(fromLabel) ?? 0) + 1);
+    }
     if (row.event_type === "click") entry.clicks += 1;
     if (row.event_type === "page_leave") {
       entry.leaveCount += 1;
@@ -184,14 +205,19 @@ export async function getPageStats(days = 30) {
   }
 
   return [...map.values()]
-    .map((entry) => ({
-      path: entry.path,
-      views: entry.views,
-      clicks: entry.clicks,
-      avgTimeSec: entry.leaveCount
-        ? Math.round(entry.totalDurationMs / entry.leaveCount / 1000)
-        : 0,
-    }))
+    .map((entry) => {
+      const topReferrer =
+        [...entry.topFrom.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
+      return {
+        path: entry.path,
+        views: entry.views,
+        clicks: entry.clicks,
+        avgTimeSec: entry.leaveCount
+          ? Math.round(entry.totalDurationMs / entry.leaveCount / 1000)
+          : 0,
+        topReferrer,
+      };
+    })
     .sort((a, b) => b.views - a.views);
 }
 
@@ -335,7 +361,7 @@ export async function getReferrerStats(days = 30, limit = 30) {
   const since = daysAgoIso(days);
   const { data } = await supabase
     .from("analytics_sessions")
-    .select("referrer_domain, utm_source, utm_term, channel")
+    .select("referrer, referrer_domain, utm_source, utm_term, channel, landing_path")
     .gte("started_at", since);
 
   const map = new Map<string, { label: string; channel: string; count: number }>();
@@ -343,7 +369,7 @@ export async function getReferrerStats(days = 30, limit = 30) {
     const label =
       row.utm_source && row.utm_term
         ? `${row.utm_source} / ${row.utm_term}`
-        : row.referrer_domain || row.utm_source || "Doğrudan";
+        : row.referrer || row.referrer_domain || row.landing_path || row.utm_source || "Doğrudan";
     const key = `${row.channel}::${label}`;
     const entry = map.get(key) ?? { label, channel: row.channel ?? "direct", count: 0 };
     entry.count += 1;

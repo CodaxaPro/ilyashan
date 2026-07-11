@@ -39,6 +39,7 @@ export function resolveChannel(input: {
   utmMedium?: string;
   utmSource?: string;
   gclid?: string;
+  fbclid?: string;
   referrerDomain?: string;
 }): AnalyticsChannel {
   const medium = (input.utmMedium ?? "").toLowerCase();
@@ -48,10 +49,10 @@ export function resolveChannel(input: {
   if (input.gclid || medium === "cpc" || medium === "ppc" || medium === "paid") {
     return "cpc";
   }
-  if (medium === "email" || source.includes("newsletter")) return "email";
-  if (medium === "social" || SOCIAL_DOMAINS.some((d) => referrerDomain.includes(d))) {
+  if (input.fbclid || medium === "social" || SOCIAL_DOMAINS.some((d) => referrerDomain.includes(d))) {
     return "social";
   }
+  if (medium === "email" || source.includes("newsletter")) return "email";
   if (
     medium === "organic" ||
     SEARCH_ENGINES.some((engine) => referrerDomain.includes(engine))
@@ -73,6 +74,7 @@ export function parseAttributionFromUrl(
   let utmTerm = "";
   let utmContent = "";
   let gclid = "";
+  let fbclid = "";
 
   try {
     const url = new URL(pageUrl);
@@ -82,6 +84,7 @@ export function parseAttributionFromUrl(
     utmTerm = url.searchParams.get("utm_term") ?? "";
     utmContent = url.searchParams.get("utm_content") ?? "";
     gclid = url.searchParams.get("gclid") ?? "";
+    fbclid = url.searchParams.get("fbclid") ?? "";
   } catch {
     /* ignore */
   }
@@ -91,6 +94,7 @@ export function parseAttributionFromUrl(
     utmMedium,
     utmSource,
     gclid,
+    fbclid,
     referrerDomain,
   });
 
@@ -103,6 +107,7 @@ export function parseAttributionFromUrl(
     utmTerm,
     utmContent,
     gclid,
+    fbclid,
     channel,
   };
 }

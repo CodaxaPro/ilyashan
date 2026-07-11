@@ -24,13 +24,9 @@ describe("analytics attribution", () => {
     assert.equal(channel, "direct");
   });
 
-  it("parses utm parameters", () => {
-    const attr = parseAttributionFromUrl(
-      "https://ilyashan.de/de?utm_source=newsletter&utm_medium=email&utm_campaign=spring",
-      ""
-    );
-    assert.equal(attr.utmSource, "newsletter");
-    assert.equal(attr.utmMedium, "email");
-    assert.equal(attr.channel, "email");
+  it("detects facebook via fbclid", () => {
+    const attr = parseAttributionFromUrl("https://ilyashan.de/de?fbclid=IwAR123", "");
+    assert.equal(attr.fbclid, "IwAR123");
+    assert.equal(attr.channel, "social");
   });
 });

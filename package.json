@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "test": "npx tsx --test lib/pricing.test.ts lib/quote-validation.test.ts lib/pricing-consistency.test.ts lib/google-ads.test.ts lib/concierge-scope.test.ts lib/concierge-extract.test.ts lib/concierge-intent.test.ts lib/concierge-responder.test.ts lib/concierge-faq.test.ts lib/concierge-faz2.test.ts lib/concierge-faz3.test.ts lib/concierge-faz4.test.ts lib/concierge-faz5.test.ts lib/concierge-settings.test.ts lib/analytics/attribution.test.ts lib/production-check.test.ts",
+    "test": "npx tsx --test lib/pricing.test.ts lib/quote-validation.test.ts lib/pricing-consistency.test.ts lib/google-ads.test.ts lib/concierge-scope.test.ts lib/concierge-extract.test.ts lib/concierge-intent.test.ts lib/concierge-responder.test.ts lib/concierge-faq.test.ts lib/concierge-faz2.test.ts lib/concierge-faz3.test.ts lib/concierge-faz4.test.ts lib/concierge-faz5.test.ts lib/concierge-settings.test.ts lib/analytics/attribution.test.ts lib/analytics/page-context.test.ts lib/production-check.test.ts",
     "test:e2e": "playwright test",
     "test:all": "npm run test && npm run test:e2e",
     "check:production": "npx tsx scripts/check-production.ts"

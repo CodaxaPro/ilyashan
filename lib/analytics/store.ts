@@ -88,6 +88,7 @@ async function ensureSession(
     utm_term: attribution.utmTerm ?? null,
     utm_content: attribution.utmContent ?? null,
     gclid: attribution.gclid ?? null,
+    fbclid: attribution.fbclid ?? null,
     channel: attribution.channel ?? "direct",
   });
 

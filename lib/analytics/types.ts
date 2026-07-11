@@ -54,6 +54,7 @@ export interface AnalyticsAttribution {
   utmTerm: string;
   utmContent: string;
   gclid: string;
+  fbclid: string;
   channel: AnalyticsChannel;
 }
 
@@ -108,6 +109,7 @@ export interface AnalyticsSessionRow {
   utm_term: string | null;
   utm_content: string | null;
   gclid: string | null;
+  fbclid: string | null;
   channel: string;
 }
 

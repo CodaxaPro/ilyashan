@@ -1,11 +1,14 @@
 "use client";
 
 import type { AnalyticsClientEvent, AnalyticsEventType } from "./types";
+import { parseAttributionFromUrl } from "./attribution";
+import { resolvePageviewContext } from "./page-context";
 
 const VISITOR_KEY = "ilyashan_vid";
 const SESSION_KEY = "ilyashan_sid";
 const SESSION_START_KEY = "ilyashan_sstart";
 const LANDING_KEY = "ilyashan_landing";
+const PREV_PATH_KEY = "ilyashan_prev_path";
 const QUEUE_KEY = "ilyashan_analytics_queue";
 
 let initialized = false;
@@ -43,7 +46,7 @@ function getSessionId(): string {
     id = uuid();
     sessionStorage.setItem(SESSION_KEY, id);
     sessionStorage.setItem(SESSION_START_KEY, new Date().toISOString());
-    sessionStorage.setItem(LANDING_KEY, `${window.location.pathname}${window.location.search}`);
+    sessionStorage.setItem(LANDING_KEY, window.location.href);
   }
   return id;
 }
@@ -78,38 +81,21 @@ function getDeviceInfo() {
 }
 
 function getAttribution() {
-  const params = new URLSearchParams(window.location.search);
-  const referrer = document.referrer ?? "";
-  let referrerDomain = "";
-  try {
-    referrerDomain = referrer ? new URL(referrer).hostname.replace(/^www\./, "") : "";
-  } catch {
-    referrerDomain = "";
-  }
+  return parseAttributionFromUrl(window.location.href, document.referrer ?? "");
+}
 
-  const utmSource = params.get("utm_source") ?? "";
-  const utmMedium = params.get("utm_medium") ?? "";
-  const gclid = params.get("gclid") ?? "";
-
-  let channel: "direct" | "organic" | "cpc" | "social" | "referral" | "email" | "other" = "direct";
-  if (gclid || utmMedium === "cpc" || utmMedium === "ppc") channel = "cpc";
-  else if (utmMedium === "email") channel = "email";
-  else if (utmMedium === "social") channel = "social";
-  else if (/google\.|bing\.|duckduckgo\./.test(referrerDomain)) channel = "organic";
-  else if (referrerDomain) channel = "referral";
-  else if (utmSource || utmMedium) channel = "other";
-
-  return {
-    referrer,
-    referrerDomain,
-    utmSource,
-    utmMedium,
-    utmCampaign: params.get("utm_campaign") ?? "",
-    utmTerm: params.get("utm_term") ?? "",
-    utmContent: params.get("utm_content") ?? "",
-    gclid,
-    channel,
-  };
+function getPageContext() {
+  const pagePathWithSearch = `${window.location.pathname}${window.location.search}`;
+  const previousPathWithSearch = sessionStorage.getItem(PREV_PATH_KEY) ?? "";
+  const context = resolvePageviewContext({
+    documentReferrer: document.referrer ?? "",
+    pageHref: window.location.href,
+    pagePathWithSearch,
+    previousPathWithSearch,
+    origin: window.location.origin,
+  });
+  sessionStorage.setItem(PREV_PATH_KEY, pagePathWithSearch);
+  return context;
 }
 
 function readQueue(): AnalyticsClientEvent[] {
@@ -145,6 +131,10 @@ export function trackAnalytics(
   data: Partial<AnalyticsClientEvent> = {}
 ) {
   if (typeof window === "undefined") return;
+  const payload = { ...(data.payload ?? {}) };
+  if (type === "pageview") {
+    Object.assign(payload, getPageContext());
+  }
   enqueue({
     type,
     pagePath: data.pagePath ?? window.location?.pathname ?? "/",
@@ -155,7 +145,7 @@ export function trackAnalytics(
     elementHref: data.elementHref,
     scrollDepth: data.scrollDepth,
     durationMs: data.durationMs,
-    payload: data.payload,
+    payload,
   });
 }
 
@@ -169,7 +159,7 @@ export async function flushAnalytics(useBeacon = false): Promise<void> {
     visitorId: getVisitorId(),
     sessionId: getSessionId(),
     sessionStart: sessionStorage.getItem(SESSION_START_KEY) ?? new Date().toISOString(),
-    landingPath: sessionStorage.getItem(LANDING_KEY) ?? window.location.pathname,
+    landingPath: sessionStorage.getItem(LANDING_KEY) ?? window.location.href,
     device: getDeviceInfo(),
     attribution: getAttribution(),
     events: queue,
