@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ADMIN_NAV, ADMIN_SECTION_LABELS, type AdminMainSection } from "./admin-nav";
 import { AdminNavIcon } from "./AdminIcons";
+import { useCalendarUpcoming } from "./calendar/useCalendarUpcoming";
 
 const SIDEBAR_KEY = "ilyashan-admin-sidebar-collapsed";
 
@@ -14,6 +15,7 @@ export function AdminSidebar({ onLogout }: { onLogout?: () => void }) {
   const tab = searchParams.get("tab");
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { summary: upcomingSummary } = useCalendarUpcoming(true);
 
   useEffect(() => {
     try {
@@ -73,7 +75,7 @@ export function AdminSidebar({ onLogout }: { onLogout?: () => void }) {
                         href={item.href}
                         onClick={() => setMobileOpen(false)}
                         title={collapsed ? item.label : undefined}
-                        className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+                        className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                           active
                             ? "bg-white text-slate-900 shadow-sm"
                             : "text-slate-300 hover:bg-white/10 hover:text-white"
@@ -81,6 +83,16 @@ export function AdminSidebar({ onLogout }: { onLogout?: () => void }) {
                       >
                         <AdminNavIcon name={item.icon} className="w-5 h-5 shrink-0" />
                         {!collapsed && <span className="truncate">{item.label}</span>}
+                        {item.icon === "calendar" && upcomingSummary.badgeCount > 0 && (
+                          <span
+                            className={`ml-auto inline-flex min-w-[20px] h-5 px-1.5 items-center justify-center rounded-full text-[10px] font-bold ${
+                              active ? "bg-red-500 text-white" : "bg-red-500/90 text-white"
+                            } ${collapsed ? "absolute -top-1 -right-1" : ""}`}
+                            data-testid="calendar-nav-badge"
+                          >
+                            {upcomingSummary.badgeCount}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   );

@@ -9,6 +9,7 @@ import {
   mapLeadStatusAfterMove,
   APPOINTMENT_STATUS_LABELS_TR,
   TIME_SLOT_LABELS_TR,
+  APPOINTMENT_ROLE_LABELS_TR,
 } from "./appointment-from-lead";
 import type { StoredLead } from "../leads-store";
 import { initialQuoteFormData } from "../quote-form";
@@ -246,5 +247,10 @@ describe("labels", () => {
   it("covers all calendar time slots in Turkish", () => {
     assert.equal(TIME_SLOT_LABELS_TR.vormittag, "Sabah");
     assert.equal(TIME_SLOT_LABELS_TR.ganztags, "Tüm gün");
+  });
+
+  it("covers role labels", () => {
+    assert.equal(APPOINTMENT_ROLE_LABELS_TR.confirmed, "Onaylı termin");
+    assert.equal(APPOINTMENT_ROLE_LABELS_TR["preferred-0"], "Wunsch 1");
   });
 });

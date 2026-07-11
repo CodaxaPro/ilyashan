@@ -4,52 +4,113 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   APPOINTMENT_STATUS_COLORS,
   APPOINTMENT_STATUS_LABELS_TR,
-  TIME_SLOT_LABELS_TR,
   canRescheduleAppointment,
 } from "@/lib/calendar/appointment-from-lead";
+import type { CalendarViewMode, CalendarFilters } from "@/lib/calendar/filters";
+import { DEFAULT_CALENDAR_FILTERS } from "@/lib/calendar/filters";
 import type { CalendarAppointment } from "@/lib/calendar/types";
-import { formatWeekLabel, getWeekRange, shiftWeek, weekdayLabelTr } from "@/lib/calendar/week-range";
+import type { MonthWeekRow } from "@/lib/calendar/month-range";
+import { getMonthRange, shiftMonth } from "@/lib/calendar/month-range";
+import type { CalendarRangeStats } from "@/lib/calendar/stats";
+import type { UpcomingGroup, UpcomingSummary } from "@/lib/calendar/upcoming";
+import { getWeekRange, shiftWeek } from "@/lib/calendar/week-range";
 import { AdminAlert, AdminPanel, AdminShell } from "@/components/admin/AdminShell";
 import { AdminLeadDetailPanel } from "@/components/admin/AdminLeadDetailPanel";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
-import { formatGermanDate } from "@/lib/quote-form";
+import { CalendarAgendaView } from "@/components/admin/calendar/CalendarAgendaView";
+import { CalendarFiltersBar } from "@/components/admin/calendar/CalendarFiltersBar";
+import { CalendarMonthView } from "@/components/admin/calendar/CalendarMonthView";
+import { CalendarMoveModal, type PendingMove } from "@/components/admin/calendar/CalendarMoveModal";
+import { CalendarStatsBar } from "@/components/admin/calendar/CalendarStatsBar";
+import { CalendarToolbar } from "@/components/admin/calendar/CalendarToolbar";
+import { CalendarUpcomingPanel } from "@/components/admin/calendar/CalendarUpcomingPanel";
+import { CalendarWeekView } from "@/components/admin/calendar/CalendarWeekView";
+
+interface CalendarApiResponse {
+  appointments: CalendarAppointment[];
+  byDay: Record<string, CalendarAppointment[]>;
+  range: { from: string; to: string; days: string[] };
+  stats: CalendarRangeStats;
+  upcoming: UpcomingSummary;
+  today: string;
+  view: CalendarViewMode;
+  week?: { start: string; end: string; days: string[] };
+  month?: { year: number; month: number };
+  storage: "supabase" | "kv-fallback";
+  dbConfigured: boolean;
+}
+
+function buildQuery(
+  view: CalendarViewMode,
+  weekStart: string,
+  monthYear: number,
+  month: number,
+  filters: CalendarFilters
+) {
+  const params = new URLSearchParams({ view });
+  if (view === "week") params.set("weekStart", weekStart);
+  if (view === "month") params.set("month", `${monthYear}-${String(month).padStart(2, "0")}`);
+  if (filters.search) params.set("search", filters.search);
+  if (filters.status !== "all") params.set("status", filters.status);
+  if (filters.kind !== "all") params.set("kind", filters.kind);
+  if (filters.role !== "actionable") params.set("role", filters.role);
+  return params.toString();
+}
 
 export function AdminCalendar() {
   const { logout, markUnauthenticated } = useAdminAuth();
+  const now = new Date();
+  const [view, setView] = useState<CalendarViewMode>("week");
   const [weekStart, setWeekStart] = useState(() => getWeekRange().start);
-  const [appointments, setAppointments] = useState<CalendarAppointment[]>([]);
-  const [storage, setStorage] = useState<"supabase" | "kv-fallback">("kv-fallback");
-  const [dbConfigured, setDbConfigured] = useState(false);
+  const [monthYear, setMonthYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [filters, setFilters] = useState<CalendarFilters>(DEFAULT_CALENDAR_FILTERS);
+  const [data, setData] = useState<CalendarApiResponse | null>(null);
+  const [upcomingGroups, setUpcomingGroups] = useState<UpcomingGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [moving, setMoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<StoredLead | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragItem, setDragItem] = useState<CalendarAppointment | null>(null);
+  const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
 
-  const week = useMemo(() => getWeekRange(new Date(weekStart + "T12:00:00")), [weekStart]);
+  const monthGrid = useMemo(() => getMonthRange(monthYear, month), [monthYear, month]);
+  const week = useMemo(
+    () => data?.week ?? getWeekRange(new Date(weekStart + "T12:00:00")),
+    [data?.week, weekStart]
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/appointments?weekStart=${weekStart}`);
-      if (res.status === 401) {
+      const qs = buildQuery(view, weekStart, monthYear, month, filters);
+      const [calRes, upRes] = await Promise.all([
+        fetch(`/api/admin/appointments?${qs}`),
+        fetch("/api/admin/appointments/upcoming"),
+      ]);
+      if (calRes.status === 401) {
         markUnauthenticated();
         return;
       }
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Takvim yüklenemedi");
-      setAppointments(data.appointments ?? []);
-      setStorage(data.storage ?? "kv-fallback");
-      setDbConfigured(Boolean(data.dbConfigured));
+      const calData = await calRes.json();
+      if (!calRes.ok) throw new Error(calData.error ?? "Takvim yüklenemedi");
+      setData(calData as CalendarApiResponse);
+
+      if (upRes.ok) {
+        const upData = await upRes.json();
+        setUpcomingGroups(upData.groups ?? []);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Yükleme hatası");
     } finally {
       setLoading(false);
     }
-  }, [weekStart, markUnauthenticated]);
+  }, [view, weekStart, monthYear, month, filters, markUnauthenticated]);
 
   useEffect(() => {
     void load();
@@ -64,9 +125,9 @@ export function AdminCalendar() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "sync-all" }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Senkron başarısız");
-      setFeedback(`${data.synced} lead takvime senkronlandı.`);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Senkron başarısız");
+      setFeedback(`${body.synced} lead takvime senkronlandı.`);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Senkron hatası");
@@ -78,47 +139,74 @@ export function AdminCalendar() {
   async function openLead(leadId: string) {
     const res = await fetch(`/api/admin/leads/${leadId}`);
     if (!res.ok) return;
-    const data = await res.json();
-    setSelectedLead(data.lead ?? null);
+    const body = await res.json();
+    setSelectedLead(body.lead ?? null);
   }
 
-  async function moveAppointment(item: CalendarAppointment, targetDate: string, notify: boolean) {
-    if (item.eventDate === targetDate) return;
+  function handleDragStart(item: CalendarAppointment, e: React.DragEvent) {
+    setDraggingId(item.id);
+    setDragItem(item);
+    e.dataTransfer.setData("text/appointment-id", item.id);
+  }
+
+  function handleDrop(targetDate: string) {
+    if (!dragItem || !canRescheduleAppointment(dragItem)) return;
+    if (dragItem.eventDate === targetDate) {
+      setDraggingId(null);
+      setDragItem(null);
+      return;
+    }
+    setPendingMove({ item: dragItem, targetDate });
+    setDraggingId(null);
+    setDragItem(null);
+  }
+
+  async function confirmMove(sendEmail: boolean) {
+    if (!pendingMove) return;
+    setMoving(true);
     setFeedback(null);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/appointments/${item.id}`, {
+      const res = await fetch(`/api/admin/appointments/${pendingMove.item.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ eventDate: targetDate, sendUpdateEmail: notify }),
+        body: JSON.stringify({
+          eventDate: pendingMove.targetDate,
+          sendUpdateEmail: sendEmail,
+        }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Taşıma başarısız");
-      if (data.emailSent) {
-        setFeedback("Termin taşındı — müşteriye güncelleme e-postası gönderildi.");
-      } else if (data.emailError) {
-        setFeedback("Termin taşındı, e-posta gönderilemedi: " + data.emailError);
-      } else {
-        setFeedback("Termin taşındı ve lead güncellendi.");
-      }
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Taşıma başarısız");
+      if (body.emailSent) setFeedback("Termin taşındı — müşteriye güncelleme e-postası gönderildi.");
+      else if (body.emailError) setFeedback("Termin taşındı, e-posta gönderilemedi: " + body.emailError);
+      else setFeedback("Termin taşındı ve lead güncellendi.");
+      setPendingMove(null);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Taşıma hatası");
+    } finally {
+      setMoving(false);
     }
   }
 
-  function appointmentsForDay(day: string) {
-    return appointments.filter((a) => a.eventDate === day);
+  function jumpToDate(iso: string) {
+    setView("week");
+    setWeekStart(getWeekRange(new Date(iso + "T12:00:00")).start);
+    const [y, m] = iso.split("-").map(Number);
+    setMonthYear(y);
+    setMonth(m);
   }
+
+  const monthWeeks: MonthWeekRow[] = monthGrid.weeks;
 
   return (
     <AdminShell
       title="Takvim"
-      subtitle="Onaylı ve önerilen terminler — sürükleyerek taşıyın"
+      subtitle="Haftalık, aylık ve liste görünümü · yaklaşan termin uyarıları"
       onRefresh={() => void load()}
       onLogout={logout}
       actions={
-        dbConfigured ? (
+        data?.dbConfigured ? (
           <button
             type="button"
             data-testid="calendar-sync-all"
@@ -134,133 +222,142 @@ export function AdminCalendar() {
       {error && <AdminAlert variant="error">{error}</AdminAlert>}
       {feedback && <AdminAlert variant="success">{feedback}</AdminAlert>}
 
-      {!dbConfigured && (
+      {data && !data.dbConfigured && (
         <AdminAlert variant="warning">
-          Supabase appointments tablosu yapılandırılmamış — takvim KV lead verisinden gösteriliyor.
-          Kalıcı takvim için <code>supabase/migrations/004_appointments.sql</code> çalıştırın.
+          Kalıcı takvim için Supabase <code>appointments</code> tablosu gerekli. Şu an lead verisinden
+          gösteriliyor.
         </AdminAlert>
       )}
 
-      {storage === "kv-fallback" && dbConfigured && (
+      {data && data.storage === "kv-fallback" && data.dbConfigured && (
         <AdminAlert variant="info">
-          Supabase bağlantısı var ancak bu hafta kayıt yok. &quot;Leadlerden senkronla&quot; ile
-          mevcut leadleri aktarın.
+          Bu aralıkta Supabase kaydı yok. Mevcut leadleri aktarmak için senkronlayın.
         </AdminAlert>
       )}
 
-      <AdminPanel className="p-4 mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              data-testid="calendar-prev-week"
-              onClick={() => setWeekStart(shiftWeek(weekStart, -1))}
-              className="px-3 py-2 rounded-lg border border-border hover:bg-slate-50 text-sm font-semibold"
-            >
-              ← Önceki
-            </button>
-            <button
-              type="button"
-              data-testid="calendar-today"
-              onClick={() => setWeekStart(getWeekRange().start)}
-              className="px-3 py-2 rounded-lg border border-border hover:bg-slate-50 text-sm font-semibold"
-            >
-              Bugün
-            </button>
-            <button
-              type="button"
-              data-testid="calendar-next-week"
-              onClick={() => setWeekStart(shiftWeek(weekStart, 1))}
-              className="px-3 py-2 rounded-lg border border-border hover:bg-slate-50 text-sm font-semibold"
-            >
-              Sonraki →
-            </button>
-          </div>
-          <p className="text-sm font-semibold text-foreground" data-testid="calendar-week-label">
-            {formatWeekLabel(week.start, week.end)}
-          </p>
-          <div className="flex flex-wrap gap-2 text-xs">
-            {(Object.keys(APPOINTMENT_STATUS_LABELS_TR) as Array<keyof typeof APPOINTMENT_STATUS_LABELS_TR>).map(
-              (key) => (
-                <span
-                  key={key}
-                  className={`px-2 py-1 rounded-full border ${APPOINTMENT_STATUS_COLORS[key]}`}
-                >
-                  {APPOINTMENT_STATUS_LABELS_TR[key]}
-                </span>
-              )
-            )}
-          </div>
+      {data && (
+        <AdminPanel className="p-4 mb-4 space-y-4">
+          <CalendarUpcomingPanel
+            summary={data.upcoming}
+            groups={upcomingGroups}
+            onOpenLead={(id) => void openLead(id)}
+            onJumpToDate={jumpToDate}
+          />
+        </AdminPanel>
+      )}
+
+      <AdminPanel className="p-4 mb-4 space-y-4">
+        <CalendarToolbar
+          view={view}
+          weekStart={week.start}
+          weekEnd={week.end}
+          monthYear={monthYear}
+          month={month}
+          onViewChange={setView}
+          onPrev={() => {
+            if (view === "month") {
+              const next = shiftMonth(monthYear, month, -1);
+              setMonthYear(next.year);
+              setMonth(next.month);
+            } else if (view === "week") {
+              setWeekStart(shiftWeek(weekStart, -1));
+            }
+          }}
+          onNext={() => {
+            if (view === "month") {
+              const next = shiftMonth(monthYear, month, 1);
+              setMonthYear(next.year);
+              setMonth(next.month);
+            } else if (view === "week") {
+              setWeekStart(shiftWeek(weekStart, 1));
+            }
+          }}
+          onToday={() => {
+            const todayWeek = getWeekRange();
+            setWeekStart(todayWeek.start);
+            const t = new Date();
+            setMonthYear(t.getFullYear());
+            setMonth(t.getMonth() + 1);
+          }}
+          onMonthYearChange={(y, m) => {
+            setMonthYear(y);
+            setMonth(m);
+            if (view === "month") return;
+            setWeekStart(getWeekRange(new Date(y, m - 1, 1)).start);
+          }}
+          onWeekJump={(iso) => {
+            setWeekStart(getWeekRange(new Date(iso + "T12:00:00")).start);
+            const [y, m] = iso.split("-").map(Number);
+            setMonthYear(y);
+            setMonth(m);
+          }}
+        />
+
+        <CalendarFiltersBar filters={filters} onChange={setFilters} />
+
+        {data && <CalendarStatsBar stats={data.stats} upcoming={data.upcoming} />}
+
+        <div className="flex flex-wrap gap-2 text-xs">
+          {(Object.keys(APPOINTMENT_STATUS_LABELS_TR) as Array<keyof typeof APPOINTMENT_STATUS_LABELS_TR>).map(
+            (key) => (
+              <span
+                key={key}
+                className={`px-2 py-1 rounded-full border ${APPOINTMENT_STATUS_COLORS[key]}`}
+              >
+                {APPOINTMENT_STATUS_LABELS_TR[key]}
+              </span>
+            )
+          )}
         </div>
       </AdminPanel>
 
       {loading ? (
-        <p className="text-muted text-sm px-2">Yükleniyor…</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {week.days.map((day) => (
-            <div
-              key={day}
-              data-testid={`calendar-day-${day}`}
-              className="min-h-[220px] rounded-2xl border border-border bg-white p-3 flex flex-col gap-2"
-              onDragOver={(e) => {
-                if (draggingId) e.preventDefault();
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                const id = e.dataTransfer.getData("text/appointment-id");
-                const notify = e.dataTransfer.getData("text/send-email") === "1";
-                const item = appointments.find((a) => a.id === id);
-                setDraggingId(null);
-                if (item && canRescheduleAppointment(item)) {
-                  void moveAppointment(item, day, notify);
-                }
-              }}
-            >
-              <div className="border-b border-border pb-2">
-                <p className="text-xs font-bold text-primary uppercase">{weekdayLabelTr(day)}</p>
-                <p className="text-sm font-semibold text-foreground">{formatGermanDate(day)}</p>
-                <p className="text-[10px] text-muted">{appointmentsForDay(day).length} iş</p>
-              </div>
-
-              <div className="flex-1 space-y-2">
-                {appointmentsForDay(day).map((item) => (
-                  <div
-                    key={item.id}
-                    data-testid={`calendar-event-${item.id}`}
-                    draggable={canRescheduleAppointment(item)}
-                    onDragStart={(e) => {
-                      setDraggingId(item.id);
-                      e.dataTransfer.setData("text/appointment-id", item.id);
-                      e.dataTransfer.setData(
-                        "text/send-email",
-                        item.role === "confirmed" && item.customerEmail ? "1" : "0"
-                      );
-                    }}
-                    onDragEnd={() => setDraggingId(null)}
-                    className={`rounded-xl border p-2 text-xs cursor-pointer transition-shadow hover:shadow-md ${APPOINTMENT_STATUS_COLORS[item.status]} ${draggingId === item.id ? "opacity-50" : ""}`}
-                    onClick={() => void openLead(item.leadId)}
-                  >
-                    <p className="font-bold truncate">{item.customerName}</p>
-                    <p className="text-[10px] opacity-80 truncate">{item.city || item.postalCode || "—"}</p>
-                    {item.timeSlot && (
-                      <p className="text-[10px] mt-1 font-medium">
-                        {TIME_SLOT_LABELS_TR[item.timeSlot] ?? item.timeSlot}
-                      </p>
-                    )}
-                    <p className="text-[10px] mt-1">{APPOINTMENT_STATUS_LABELS_TR[item.status]}</p>
-                    {item.kind === "wartung" && (
-                      <span className="inline-block mt-1 text-[9px] font-bold uppercase text-blue-700">
-                        Wartung
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 px-1">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-[240px] rounded-2xl bg-slate-200/70 animate-pulse" />
           ))}
         </div>
-      )}
+      ) : data ? (
+        <>
+          {view === "week" && (
+            <CalendarWeekView
+              days={week.days}
+              byDay={data.byDay}
+              dayStats={data.stats.byDay}
+              today={data.today}
+              draggingId={draggingId}
+              onOpenLead={(id) => void openLead(id)}
+              onDragStart={handleDragStart}
+              onDragEnd={() => {
+                setDraggingId(null);
+                setDragItem(null);
+              }}
+              onDrop={handleDrop}
+              setDraggingId={setDraggingId}
+            />
+          )}
+
+          {view === "month" && (
+            <CalendarMonthView
+              weeks={monthWeeks}
+              byDay={data.byDay}
+              today={data.today}
+              onSelectDay={jumpToDate}
+            />
+          )}
+
+          {view === "agenda" && (
+            <CalendarAgendaView items={data.appointments} onOpenLead={(id) => void openLead(id)} />
+          )}
+        </>
+      ) : null}
+
+      <CalendarMoveModal
+        pending={pendingMove}
+        loading={moving}
+        onConfirm={(sendEmail) => void confirmMove(sendEmail)}
+        onCancel={() => setPendingMove(null)}
+      />
 
       {selectedLead && (
         <AdminLeadDetailPanel

@@ -30,6 +30,22 @@ export const TIME_SLOT_LABELS_TR: Record<CalendarTimeSlot, string> = {
   ganztags: "Tüm gün",
 };
 
+export const APPOINTMENT_ROLE_LABELS_TR: Record<AppointmentRole, string> = {
+  confirmed: "Onaylı termin",
+  proposed: "Önerilen termin",
+  "preferred-0": "Wunsch 1",
+  "preferred-1": "Wunsch 2",
+  "preferred-2": "Wunsch 3",
+};
+
+export const APPOINTMENT_ROLE_COLORS: Record<AppointmentRole, string> = {
+  confirmed: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  proposed: "bg-sky-50 text-sky-800 border-sky-200",
+  "preferred-0": "bg-violet-50 text-violet-800 border-violet-200",
+  "preferred-1": "bg-violet-50 text-violet-700 border-violet-200",
+  "preferred-2": "bg-violet-50 text-violet-600 border-violet-200",
+};
+
 function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | null {
   if (!raw?.windowCount) return null;
   return { ...initialQuoteFormData, ...raw };

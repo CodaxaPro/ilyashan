@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
-import { getWeekRange } from "@/lib/calendar/week-range";
+import {
+  filterCalendarAppointments,
+  parseCalendarFilters,
+} from "@/lib/calendar/filters";
+import { formatMonthLabel } from "@/lib/calendar/month-range";
+import { resolveCalendarQueryRange } from "@/lib/calendar/query-range";
 import {
   fetchCalendarAppointments,
   syncAllLeadsToCalendar,
 } from "@/lib/calendar/calendar-service";
 import { isAppointmentsDbConfigured } from "@/lib/calendar/appointments-db";
+import { buildUpcomingSummary } from "@/lib/calendar/upcoming";
+import { sortAppointments, sortAppointmentsForDay } from "@/lib/calendar/sort";
+import { buildRangeStats } from "@/lib/calendar/stats";
+import { getWeekRange, toIsoDate } from "@/lib/calendar/week-range";
 
 async function requireAdmin() {
   if (!isAdminConfigured()) {
@@ -25,14 +34,45 @@ export async function GET(request: Request) {
   if (authError) return authError;
 
   const { searchParams } = new URL(request.url);
-  const weekStart = searchParams.get("weekStart");
-  const range = weekStart ? getWeekRange(new Date(weekStart + "T12:00:00")) : getWeekRange();
+  const range = resolveCalendarQueryRange(searchParams);
+  const filters = parseCalendarFilters(searchParams);
+  const today = toIsoDate(new Date());
 
-  const { items, storage } = await fetchCalendarAppointments(range.start, range.end);
+  const { items, storage } = await fetchCalendarAppointments(range.from, range.to);
+  const filtered = sortAppointments(filterCalendarAppointments(items, filters));
+  const byDay: Record<string, ReturnType<typeof sortAppointmentsForDay>> = {};
+
+  const dayKeys =
+    range.view === "agenda"
+      ? [...new Set(filtered.map((i) => i.eventDate))].sort()
+      : range.days;
+
+  for (const day of dayKeys) {
+    byDay[day] = sortAppointmentsForDay(filtered.filter((i) => i.eventDate === day));
+  }
+
+  const stats = buildRangeStats(filtered, dayKeys.length ? dayKeys : [...new Set(filtered.map((i) => i.eventDate))].sort());
+  const upcoming = buildUpcomingSummary(filtered, today);
 
   return NextResponse.json({
-    appointments: items,
-    week: range,
+    appointments: filtered,
+    byDay,
+    range,
+    filters,
+    stats,
+    upcoming,
+    today,
+    view: range.view,
+    week: range.week ?? (range.view === "week" ? getWeekRange() : undefined),
+    month:
+      range.month ??
+      (range.view === "month"
+        ? {
+            year: new Date().getFullYear(),
+            month: new Date().getMonth() + 1,
+            label: formatMonthLabel(new Date().getFullYear(), new Date().getMonth() + 1),
+          }
+        : undefined),
     storage,
     dbConfigured: isAppointmentsDbConfigured(),
   });

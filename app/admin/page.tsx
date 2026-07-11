@@ -9,6 +9,7 @@ import {
 } from "@/components/admin/AdminShell";
 import { AdminLeadDetailPanel, LeadStatusBadge } from "@/components/admin/AdminLeadDetailPanel";
 import { AdminPricingPanel } from "@/components/admin/AdminPricingPanel";
+import { AdminUpcomingWidget } from "@/components/admin/AdminUpcomingWidget";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
@@ -195,6 +196,8 @@ function AdminPageContent() {
       )}
 
       {error && <AdminAlert variant="error">{error}</AdminAlert>}
+
+      {!loading && tab === "leads" && <AdminUpcomingWidget />}
 
       {loading ? (
         <div className="flex items-center gap-3 text-muted">

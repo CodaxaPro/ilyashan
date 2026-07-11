@@ -55,6 +55,12 @@ export function isDateInRange(iso: string, start: string, end: string): boolean 
   return iso >= start && iso <= end;
 }
 
+export function addDaysIso(iso: string, days: number): string {
+  const d = parseIsoDate(iso);
+  d.setDate(d.getDate() + days);
+  return toIsoDate(d);
+}
+
 export function groupAppointmentsByDate<T extends { eventDate: string }>(
   items: T[],
   days: string[]
