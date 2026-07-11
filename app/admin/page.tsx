@@ -7,11 +7,13 @@ import {
   AdminPanel,
   AdminShell,
 } from "@/components/admin/AdminShell";
+import { AdminLeadDetailPanel, LeadStatusBadge } from "@/components/admin/AdminLeadDetailPanel";
+import { AdminPricingPanel } from "@/components/admin/AdminPricingPanel";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
 
-type AdminTab = "leads" | "unknown" | "settings";
+type AdminTab = "leads" | "unknown" | "pricing" | "settings";
 
 interface ConciergeAdminSettings {
   enabled: boolean;
@@ -29,6 +31,10 @@ const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
     title: "Bilinmeyen Sorular",
     subtitle: "Asistanın yanıtlayamadığı sorular",
   },
+  pricing: {
+    title: "Fenster Preise",
+    subtitle: "Canlı fiyat ve Wartung ayarları",
+  },
   settings: {
     title: "Asistan Ayarları",
     subtitle: "Website asistanı ve sistem",
@@ -36,7 +42,7 @@ const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
 };
 
 function parseTab(param: string | null): AdminTab {
-  if (param === "unknown" || param === "settings") return param;
+  if (param === "unknown" || param === "settings" || param === "pricing") return param;
   return "leads";
 }
 
@@ -52,6 +58,7 @@ function AdminPageContent() {
   const [storageConfigured, setStorageConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<StoredLead | null>(null);
 
   const loadLeads = useCallback(async () => {
     const res = await fetch("/api/admin/leads");
@@ -69,6 +76,15 @@ function AdminPageContent() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Sorular yüklenemedi");
     setUnknownItems(data.items ?? []);
+    setStorageConfigured(Boolean(data.storageConfigured));
+    return true;
+  }, []);
+
+  const loadPricing = useCallback(async () => {
+    const res = await fetch("/api/admin/pricing");
+    if (res.status === 401) return false;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Fiyatlar yüklenemedi");
     setStorageConfigured(Boolean(data.storageConfigured));
     return true;
   }, []);
@@ -92,7 +108,9 @@ function AdminPageContent() {
           ? await loadLeads()
           : tab === "unknown"
             ? await loadUnknown()
-            : await loadSettings();
+            : tab === "pricing"
+              ? await loadPricing()
+              : await loadSettings();
       if (ok === false) {
         markUnauthenticated();
         return;
@@ -102,7 +120,7 @@ function AdminPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [tab, loadLeads, loadUnknown, loadSettings, markUnauthenticated]);
+  }, [tab, loadLeads, loadUnknown, loadPricing, loadSettings, markUnauthenticated]);
 
   useEffect(() => {
     void loadData();
@@ -153,7 +171,9 @@ function AdminPageContent() {
       ? `${leads.length} kayıtlı lead`
       : tab === "unknown"
         ? `${unknownItems.length} açık soru`
-        : headerMeta.subtitle;
+        : tab === "pricing"
+          ? "Fensterreinigung fiyatlandırması"
+          : headerMeta.subtitle;
 
   return (
     <AdminShell
@@ -166,7 +186,7 @@ function AdminPageContent() {
       onRefresh={() => void loadData()}
       onLogout={() => void handleLogout()}
     >
-      {!storageConfigured && tab !== "settings" && (
+      {!storageConfigured && tab !== "settings" && tab !== "pricing" && (
         <AdminAlert variant="warning">
           Kalıcı depolama için Vercel&apos;de <strong>Upstash Redis</strong> bağlayın (
           <strong>KV_REST_API_URL</strong>, <strong>KV_REST_API_TOKEN</strong>). E-posta ve asistan
@@ -181,6 +201,8 @@ function AdminPageContent() {
           <span className="inline-block w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
           Yükleniyor…
         </div>
+      ) : tab === "pricing" ? (
+        <AdminPricingPanel storageConfigured={storageConfigured} />
       ) : tab === "settings" ? (
         <AdminPanel className="p-6 space-y-6" data-testid="admin-settings-panel">
           <div>
@@ -274,6 +296,7 @@ function AdminPageContent() {
                 <thead className="bg-slate-50 text-left border-b border-border">
                   <tr>
                     <th className="px-5 py-3.5 font-semibold text-muted">Tarih</th>
+                    <th className="px-5 py-3.5 font-semibold text-muted">Durum</th>
                     <th className="px-5 py-3.5 font-semibold text-muted">Kaynak</th>
                     <th className="px-5 py-3.5 font-semibold text-muted">İletişim</th>
                     <th className="px-5 py-3.5 font-semibold text-muted">Detay</th>
@@ -282,9 +305,16 @@ function AdminPageContent() {
                 </thead>
                 <tbody>
                   {leads.map((lead) => (
-                    <tr key={lead.id} className="border-t border-border align-top hover:bg-slate-50/50">
+                    <tr
+                      key={lead.id}
+                      className="border-t border-border align-top hover:bg-slate-50/50 cursor-pointer"
+                      onClick={() => setSelectedLead(lead)}
+                    >
                       <td className="px-5 py-4 whitespace-nowrap text-muted">
                         {new Date(lead.createdAt).toLocaleString("tr-TR")}
+                      </td>
+                      <td className="px-5 py-4">
+                        <LeadStatusBadge status={lead.status} />
                       </td>
                       <td className="px-5 py-4">
                         <span
@@ -387,6 +417,17 @@ function AdminPageContent() {
             olarak ekleyin, ardından deploy edin.
           </div>
         </AdminPanel>
+      )}
+
+      {selectedLead && (
+        <AdminLeadDetailPanel
+          lead={selectedLead}
+          onClose={() => setSelectedLead(null)}
+          onUpdated={(updated) => {
+            setLeads((items) => items.map((item) => (item.id === updated.id ? updated : item)));
+            setSelectedLead(updated);
+          }}
+        />
       )}
     </AdminShell>
   );

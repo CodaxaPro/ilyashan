@@ -7,6 +7,7 @@ import {
   formatEuroExact,
 } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 
 interface PriceEstimateCardProps {
   data: QuoteFormData;
@@ -14,7 +15,8 @@ interface PriceEstimateCardProps {
 }
 
 export function PriceEstimateCard({ data, compact = false }: PriceEstimateCardProps) {
-  const estimate = calculatePriceEstimate(data);
+  const { pricingOverrides } = usePricingConfig();
+  const estimate = calculatePriceEstimate(data, pricingOverrides);
 
   if (!estimate) return null;
 

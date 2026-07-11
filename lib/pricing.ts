@@ -4,7 +4,14 @@ import type {
   QuoteFormData,
 } from "@/lib/quote-form";
 import { siteConfig } from "@/lib/config";
-import { RECOMMENDED_PRICING as P } from "@/lib/pricing-market-research";
+import { RECOMMENDED_PRICING } from "@/lib/pricing-market-research";
+import type { PricingOverrides } from "@/lib/pricing-config";
+
+export type PricingConstants = {
+  -readonly [K in keyof typeof RECOMMENDED_PRICING]: typeof RECOMMENDED_PRICING[K] extends number
+    ? number
+    : typeof RECOMMENDED_PRICING[K];
+};
 
 export interface PriceLineItem {
   label: string;
@@ -25,11 +32,16 @@ export interface PriceEstimate {
   minimumAmount: number;
 }
 
+function mergePricing(overrides?: PricingOverrides): PricingConstants {
+  if (!overrides) return RECOMMENDED_PRICING as PricingConstants;
+  return { ...RECOMMENDED_PRICING, ...overrides } as PricingConstants;
+}
+
 function roundTo5(value: number) {
   return Math.round(value / 5) * 5;
 }
 
-function getMinimum(data: QuoteFormData) {
+function getMinimum(data: QuoteFormData, P: PricingConstants) {
   if (data.services.includes("gewerbe") || data.objectType === "gewerbe") {
     return P.minimumGewerbe;
   }
@@ -37,20 +49,23 @@ function getMinimum(data: QuoteFormData) {
   return P.minimumWohnung;
 }
 
-function getHeightMultiplier(height: number) {
+function getHeightMultiplier(height: number, P: PricingConstants) {
   if (height > 4) return P.heightMultipliers.above4m;
   if (height > 3) return P.heightMultipliers.above3m;
   return P.heightMultipliers.default;
 }
 
-function getAccessPercent(floorLevel: FloorLevel | "", elevator: ElevatorOption | "") {
+function getAccessPercent(
+  floorLevel: FloorLevel | "",
+  elevator: ElevatorOption | "",
+  P: PricingConstants
+) {
   if (!floorLevel || elevator === "ja" || floorLevel === "eg") return 0;
   const base = P.floorAccessPercent[floorLevel] ?? 0;
   const factor = elevator === "unbekannt" ? P.elevatorUnbekanntFactor : 1;
   return base * factor;
 }
 
-/** Gewerbe-Modell nur wenn Leistung „Gewerbe“ gewählt – nicht nur Objektart */
 function isGewerbePricing(data: QuoteFormData) {
   return data.services.includes("gewerbe");
 }
@@ -59,7 +74,7 @@ function isWartungJob(data: QuoteFormData) {
   return data.services.includes("wartung");
 }
 
-function calculateExtras(data: QuoteFormData): { total: number; items: PriceLineItem[] } {
+function calculateExtras(data: QuoteFormData, P: PricingConstants): { total: number; items: PriceLineItem[] } {
   const items: PriceLineItem[] = [];
   const n = data.windowCount;
 
@@ -113,7 +128,7 @@ function calculateExtras(data: QuoteFormData): { total: number; items: PriceLine
   };
 }
 
-function calculateAddonServices(data: QuoteFormData): { total: number; items: PriceLineItem[] } {
+function calculateAddonServices(data: QuoteFormData, P: PricingConstants): { total: number; items: PriceLineItem[] } {
   const items: PriceLineItem[] = [];
 
   if (data.includeSolar && data.solarSqm > 0) {
@@ -138,11 +153,11 @@ function calculateAddonServices(data: QuoteFormData): { total: number; items: Pr
   };
 }
 
-function calculateWindowLines(data: QuoteFormData): PriceLineItem[] {
+function calculateWindowLines(data: QuoteFormData, P: PricingConstants): PriceLineItem[] {
   const sideMul = P.sideMultipliers[data.cleaningSide ?? "innen_aussen"];
   const dirtMul = P.dirtMultipliers[data.dirtLevel ?? "normal"];
-  const heightMul = getHeightMultiplier(data.roomHeight ?? 2.5);
-  const accessPercent = getAccessPercent(data.floorLevel, data.elevator);
+  const heightMul = getHeightMultiplier(data.roomHeight ?? 2.5, P);
+  const accessPercent = getAccessPercent(data.floorLevel, data.elevator, P);
   const lines: PriceLineItem[] = [];
 
   let base: number;
@@ -214,19 +229,23 @@ function buildEstimate(
   };
 }
 
-export function calculatePriceEstimate(data: Partial<QuoteFormData>): PriceEstimate | null {
+export function calculatePriceEstimate(
+  data: Partial<QuoteFormData>,
+  overrides?: PricingOverrides
+): PriceEstimate | null {
   if (!data.windowCount || data.windowCount < 1) return null;
   if (!data.services?.length) return null;
 
+  const P = mergePricing(overrides);
   const full = data as QuoteFormData;
   const breakdown: PriceLineItem[] = [
-    ...calculateWindowLines(full),
-    ...calculateExtras(full).items,
-    ...calculateAddonServices(full).items,
+    ...calculateWindowLines(full, P),
+    ...calculateExtras(full, P).items,
+    ...calculateAddonServices(full, P).items,
   ];
 
   const calculatedSubtotal = sumLines(breakdown);
-  const minimum = getMinimum(full);
+  const minimum = getMinimum(full, P);
   const minimumApplied = calculatedSubtotal < minimum;
   let subtotal = calculatedSubtotal;
 
@@ -243,6 +262,7 @@ export function calculatePriceEstimate(data: Partial<QuoteFormData>): PriceEstim
     const perVisit = subtotal;
     const yearly = perVisit * P.wartungVisitsPerYear * (1 - P.wartungDiscount);
     const monthly = Math.max(P.wartungMinMonthly, roundTo5(yearly / 12));
+    const discountLabel = Math.round(P.wartungDiscount * 100);
     return buildEstimate(
       monthly,
       calculatedSubtotal,
@@ -251,13 +271,13 @@ export function calculatePriceEstimate(data: Partial<QuoteFormData>): PriceEstim
       [
         ...breakdown,
         {
-          label: "Wartungsvertrag (−25 %)",
+          label: `Wartungsvertrag (−${discountLabel} %)`,
           amount: 0,
           detail: `${P.wartungVisitsPerYear}× jährlich, Monatsrate`,
         },
       ],
       "ca. Monatspreis (Wartungsvertrag)",
-      `Basierend auf ${formatEuroExact(perVisit)}/Einsatz, −${Math.round(P.wartungDiscount * 100)} % Vertragsrabatt.`
+      `Basierend auf ${formatEuroExact(perVisit)}/Einsatz, −${discountLabel} % Vertragsrabatt.`
     );
   }
 

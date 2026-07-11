@@ -11,6 +11,7 @@ import {
   scheduleOptionLabels,
 } from "@/lib/quote-form";
 import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
+import type { PricingOverrides } from "@/lib/pricing-config";
 
 const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "withFrame", label: "Mit Rahmen" },
@@ -57,8 +58,8 @@ export function getReinigungswünscheLabel(data: QuoteFormData) {
   return selected.length > 0 ? selected.join(", ") : "–";
 }
 
-export function getPriceLabel(data: QuoteFormData) {
-  const estimate = calculatePriceEstimate(data);
+export function getPriceLabel(data: QuoteFormData, pricingOverrides?: PricingOverrides) {
+  const estimate = calculatePriceEstimate(data, pricingOverrides);
   if (!estimate) return "–";
   if (estimate.amount > 0) {
     return `ca. ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)}`;
@@ -75,7 +76,11 @@ export function getTerminLabel(data: QuoteFormData) {
   return label;
 }
 
-export function buildQuoteTableRows(data: QuoteFormData, anfrageNr: string): [string, string][] {
+export function buildQuoteTableRows(
+  data: QuoteFormData,
+  anfrageNr: string,
+  pricingOverrides?: PricingOverrides
+): [string, string][] {
   const rows: [string, string][] = [
     ["Anfrage-Nr.", anfrageNr],
     ["Leistungen", getServicesLabel(data)],
@@ -88,7 +93,7 @@ export function buildQuoteTableRows(data: QuoteFormData, anfrageNr: string): [st
     ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide]],
     ["Reinigungswünsche", getReinigungswünscheLabel(data)],
     ["Wunschtermin", getTerminLabel(data)],
-    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data)],
+    [siteConfig.messaging.priceEstimateRowLabel, getPriceLabel(data, pricingOverrides)],
   ];
 
   if (data.narrowStairs) rows.push(["Zugang", "Enge Treppe (+15 €)"]);

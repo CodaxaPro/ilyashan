@@ -14,6 +14,7 @@ import {
   getQuotePlzOrt,
   getServicesLabel,
 } from "@/lib/quote-summary";
+import type { PricingOverrides } from "@/lib/pricing-config";
 
 function cleanPhone(phone: string) {
   return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
@@ -38,13 +39,18 @@ function buildReplyBody(name: string, services: string, price: string) {
   ].join("\n");
 }
 
-export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string, photoCount = 0) {
+export function buildQuoteAdminEmail(
+  data: QuoteFormData,
+  anfrageNr: string,
+  photoCount = 0,
+  pricingOverrides?: PricingOverrides
+) {
   const name = getQuoteContactName(data);
   const plzOrt = getQuotePlzOrt(data);
   const services = getServicesLabel(data);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const phoneClean = cleanPhone(data.phone);
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
+  const priceRow = buildQuoteTableRows(data, anfrageNr, pricingOverrides).find(
     ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
   );
   const price = priceRow?.[1] ?? "";
@@ -56,7 +62,7 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string, pho
     ? `mailto:${data.email}?subject=${encodeURIComponent(`Ihr Angebot ${anfrageNr} – Ilyashan Fensterreinigung`)}&body=${encodeURIComponent(buildReplyBody(name, services, price))}`
     : null;
 
-  const detailRows = buildQuoteTableRows(data, anfrageNr);
+  const detailRows = buildQuoteTableRows(data, anfrageNr, pricingOverrides);
 
   const body = `
     ${buildInfoBox(`<strong>Neue Angebotsanfrage</strong> · ${escapeHtml(anfrageNr)} · ${escapeHtml(timestamp)}`)}
@@ -86,13 +92,17 @@ export function buildQuoteAdminEmail(data: QuoteFormData, anfrageNr: string, pho
   };
 }
 
-export function buildQuoteCustomerEmail(data: QuoteFormData, anfrageNr: string) {
+export function buildQuoteCustomerEmail(
+  data: QuoteFormData,
+  anfrageNr: string,
+  pricingOverrides?: PricingOverrides
+) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
-  const detailRows = buildQuoteTableRows(data, anfrageNr).filter(
+  const detailRows = buildQuoteTableRows(data, anfrageNr, pricingOverrides).filter(
     ([k]) => k !== siteConfig.messaging.priceEstimateRowLabel
   );
-  const priceRow = buildQuoteTableRows(data, anfrageNr).find(
+  const priceRow = buildQuoteTableRows(data, anfrageNr, pricingOverrides).find(
     ([k]) => k === siteConfig.messaging.priceEstimateRowLabel
   );
 

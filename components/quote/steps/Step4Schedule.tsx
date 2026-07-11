@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { QuoteFormData, ScheduleOption } from "@/lib/quote-form";
 import { formatGermanDate, scheduleOptionLabels } from "@/lib/quote-form";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 
 interface Step4ScheduleProps {
   data: QuoteFormData;
@@ -48,12 +49,19 @@ function toIsoDate(date: Date) {
 function DateCalendar({
   selected,
   onToggle,
+  minLeadDays,
+  weekdaysOnly,
 }: {
   selected: string[];
   onToggle: (iso: string) => void;
+  minLeadDays: number;
+  weekdaysOnly: boolean;
 }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  const earliest = new Date(today);
+  earliest.setDate(earliest.getDate() + minLeadDays);
 
   const [viewMonth, setViewMonth] = useState(today.getMonth());
   const [viewYear, setViewYear] = useState(today.getFullYear());
@@ -131,6 +139,10 @@ function DateCalendar({
           if (!date) return <div key={`empty-${i}`} />;
 
           const iso = toIsoDate(date);
+          const day = date.getDay();
+          const isWeekend = day === 0 || day === 6;
+          const isTooSoon = date < earliest;
+          const isBlocked = isTooSoon || (weekdaysOnly && isWeekend);
           const isPast = date < today;
           const isSelected = selected.includes(iso);
           const isToday = iso === toIsoDate(today);
@@ -139,12 +151,12 @@ function DateCalendar({
             <button
               key={iso}
               type="button"
-              disabled={isPast || (!isSelected && selected.length >= 3)}
+              disabled={isBlocked || isPast || (!isSelected && selected.length >= 3)}
               onClick={() => onToggle(iso)}
               className={`aspect-square rounded-xl text-sm font-semibold transition-all ${
                 isSelected
                   ? "bg-primary text-white shadow-md"
-                  : isPast
+                  : isBlocked || isPast
                     ? "text-muted/40 cursor-not-allowed"
                     : isToday
                       ? "border-2 border-primary text-primary hover:bg-primary-light/50"
@@ -188,6 +200,8 @@ function DateCalendar({
 }
 
 export function Step4Schedule({ data, onChange }: Step4ScheduleProps) {
+  const { schedule } = usePricingConfig();
+
   function selectOption(option: ScheduleOption) {
     onChange({
       scheduleOption: option,
@@ -249,7 +263,12 @@ export function Step4Schedule({ data, onChange }: Step4ScheduleProps) {
       </div>
 
       {data.scheduleOption === "wunschtermine" && (
-        <DateCalendar selected={data.preferredDates} onToggle={toggleDate} />
+        <DateCalendar
+          selected={data.preferredDates}
+          onToggle={toggleDate}
+          minLeadDays={schedule.scheduleMinLeadDays}
+          weekdaysOnly={schedule.scheduleWeekdaysOnly}
+        />
       )}
 
       {data.scheduleOption && data.scheduleOption !== "wunschtermine" && (

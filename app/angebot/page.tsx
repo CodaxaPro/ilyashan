@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
 import { QuoteWizard } from "@/components/quote/QuoteWizard";
+import { PricingConfigProvider } from "@/components/quote/PricingConfigProvider";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -46,7 +47,9 @@ export default function AngebotPage() {
               <strong>verbindliches Festpreis-Angebot</strong> per E-Mail.
             </div>
             <div className="bg-white rounded-3xl p-6 sm:p-8 lg:p-10 shadow-xl border border-border">
-              <QuoteWizard />
+              <PricingConfigProvider>
+                <QuoteWizard />
+              </PricingConfigProvider>
             </div>
           </div>
         </section>

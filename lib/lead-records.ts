@@ -26,15 +26,10 @@ export function createQuoteStoredLead(
     phone: quote.phone,
     email: quote.email || undefined,
     anfrageNr,
+    status: "neu",
     summary: buildQuotePlainText(quote, anfrageNr),
     photoCount,
-    quote: {
-      windowCount: quote.windowCount,
-      floorLevel: quote.floorLevel,
-      postalCode: quote.postalCode,
-      city: quote.city,
-      services: quote.services,
-    },
+    quote,
   };
 }
 
