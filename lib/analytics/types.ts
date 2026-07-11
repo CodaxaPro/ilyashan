@@ -101,6 +101,15 @@ export interface AnalyticsSessionRow {
   locale: string | null;
   country: string | null;
   city: string | null;
+  region: string | null;
+  region_code: string | null;
+  continent: string | null;
+  timezone: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  service_area_zone: string | null;
+  service_area_match: string | null;
+  in_service_area: boolean | null;
   referrer: string | null;
   referrer_domain: string | null;
   utm_source: string | null;

@@ -6,6 +6,7 @@ import {
   getClickStats,
   getConciergeStats,
   getFunnelStats,
+  getGeoStats,
   getLiveSessions,
   getPageStats,
   getReferrerStats,
@@ -64,6 +65,11 @@ export async function GET(request: Request) {
       return NextResponse.json({
         configured: true,
         concierge: await getConciergeStats(days),
+      });
+    case "locations":
+      return NextResponse.json({
+        configured: true,
+        geo: await getGeoStats(days),
       });
     case "sessions": {
       const limit = Math.min(100, Number(searchParams.get("limit") ?? "50"));

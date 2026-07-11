@@ -1,4 +1,9 @@
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import {
+  SERVICE_AREA_ZONE_LABELS_TR,
+  sessionRowToGeo,
+  type ServiceAreaZone,
+} from "./geo";
 import type { AnalyticsEventRow, AnalyticsSessionRow } from "./types";
 
 function daysAgoIso(days: number): string {
@@ -16,6 +21,8 @@ export interface AnalyticsOverview {
   bounceRate: number;
   conversions: number;
   conciergeOpens: number;
+  serviceAreaSessions: number;
+  topCity: string;
   daily: Array<{
     date: string;
     sessions: number;
@@ -63,6 +70,16 @@ export async function getAnalyticsOverview(days = 7): Promise<AnalyticsOverview 
     (e) => e.event_type === "wizard_submit" || e.event_type === "form_submit"
   ).length;
   const conciergeOpens = events.filter((e) => e.event_type === "concierge_open").length;
+  const serviceAreaSessions = rows.filter((s) => sessionRowToGeo(s).inServiceArea).length;
+
+  const cityCounts = new Map<string, number>();
+  for (const session of rows) {
+    const geo = sessionRowToGeo(session);
+    if (!geo.labelShort || geo.labelShort === "—") continue;
+    cityCounts.set(geo.labelShort, (cityCounts.get(geo.labelShort) ?? 0) + 1);
+  }
+  const topCity =
+    [...cityCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "—";
 
   const dailyMap = new Map<string, { sessions: number; pageviews: number; events: number }>();
   for (const session of rows) {
@@ -92,6 +109,8 @@ export async function getAnalyticsOverview(days = 7): Promise<AnalyticsOverview 
     bounceRate,
     conversions,
     conciergeOpens,
+    serviceAreaSessions,
+    topCity,
     daily,
   };
 }
@@ -377,4 +396,107 @@ export async function getReferrerStats(days = 30, limit = 30) {
   }
 
   return [...map.values()].sort((a, b) => b.count - a.count).slice(0, limit);
+}
+
+export async function getGeoStats(days = 30) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return {
+      countries: [],
+      cities: [],
+      zones: [],
+      totalSessions: 0,
+      locatedSessions: 0,
+      serviceAreaSessions: 0,
+    };
+  }
+
+  const since = daysAgoIso(days);
+  const { data } = await supabase
+    .from("analytics_sessions")
+    .select("*")
+    .gte("started_at", since);
+
+  const rows = (data ?? []) as AnalyticsSessionRow[];
+  const countryMap = new Map<
+    string,
+    { countryCode: string; countryName: string; sessions: number; inServiceArea: number }
+  >();
+  const cityMap = new Map<
+    string,
+    {
+      city: string;
+      regionName: string;
+      countryName: string;
+      sessions: number;
+      zone: ServiceAreaZone;
+      inServiceArea: number;
+      latitude: number | null;
+      longitude: number | null;
+      mapsUrl: string;
+    }
+  >();
+  const zoneMap = new Map<ServiceAreaZone, number>();
+
+  let locatedSessions = 0;
+  let serviceAreaSessions = 0;
+
+  for (const row of rows) {
+    const geo = sessionRowToGeo(row);
+    if (geo.city || geo.countryCode) locatedSessions += 1;
+    if (geo.inServiceArea) serviceAreaSessions += 1;
+
+    const zone = geo.serviceAreaZone;
+    zoneMap.set(zone, (zoneMap.get(zone) ?? 0) + 1);
+
+    if (geo.countryCode) {
+      const key = geo.countryCode;
+      const entry = countryMap.get(key) ?? {
+        countryCode: geo.countryCode,
+        countryName: geo.countryName,
+        sessions: 0,
+        inServiceArea: 0,
+      };
+      entry.sessions += 1;
+      if (geo.inServiceArea) entry.inServiceArea += 1;
+      countryMap.set(key, entry);
+    }
+
+    if (geo.city) {
+      const key = `${geo.countryCode}::${geo.city}`;
+      const entry = cityMap.get(key) ?? {
+        city: geo.city,
+        regionName: geo.regionName,
+        countryName: geo.countryName,
+        sessions: 0,
+        zone: geo.serviceAreaZone,
+        inServiceArea: 0,
+        latitude: geo.latitude,
+        longitude: geo.longitude,
+        mapsUrl: geo.mapsUrl,
+      };
+      entry.sessions += 1;
+      if (geo.inServiceArea) entry.inServiceArea += 1;
+      cityMap.set(key, entry);
+    }
+  }
+
+  const totalSessions = rows.length;
+  const zones = [...zoneMap.entries()]
+    .map(([zone, sessions]) => ({
+      zone,
+      label: SERVICE_AREA_ZONE_LABELS_TR[zone],
+      sessions,
+      percentage: totalSessions ? Math.round((sessions / totalSessions) * 100) : 0,
+    }))
+    .sort((a, b) => b.sessions - a.sessions);
+
+  return {
+    countries: [...countryMap.values()].sort((a, b) => b.sessions - a.sessions),
+    cities: [...cityMap.values()].sort((a, b) => b.sessions - a.sessions),
+    zones,
+    totalSessions,
+    locatedSessions,
+    serviceAreaSessions,
+  };
 }

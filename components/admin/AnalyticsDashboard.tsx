@@ -5,12 +5,14 @@ import { AdminShell, StatCard } from "@/components/admin/AdminShell";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { CHANNEL_LABELS_TR } from "@/lib/analytics/attribution";
 import { formatFromLabel } from "@/lib/analytics/page-context";
+import { SERVICE_AREA_ZONE_LABELS_TR, sessionRowToGeo } from "@/lib/analytics/geo";
 import type { AnalyticsEventRow, AnalyticsSessionRow } from "@/lib/analytics/types";
 
 type Tab =
   | "overview"
   | "live"
   | "channels"
+  | "locations"
   | "pages"
   | "funnel"
   | "clicks"
@@ -26,6 +28,8 @@ interface OverviewData {
   bounceRate: number;
   conversions: number;
   conciergeOpens: number;
+  serviceAreaSessions: number;
+  topCity: string;
   daily: Array<{ date: string; sessions: number; pageviews: number; events: number }>;
 }
 
@@ -33,6 +37,7 @@ const TAB_LABELS: Record<Tab, string> = {
   overview: "Genel Bakış",
   live: "Canlı",
   channels: "Kanallar",
+  locations: "Konum",
   pages: "Sayfalar",
   funnel: "Huni",
   clicks: "Tıklamalar",
@@ -82,6 +87,28 @@ function UrlText({ value }: { value: string | null | undefined }) {
   return <span className="break-all">{value}</span>;
 }
 
+function LocationBadge({ session }: { session: AnalyticsSessionRow }) {
+  const geo = sessionRowToGeo(session);
+  const zoneLabel = SERVICE_AREA_ZONE_LABELS_TR[geo.serviceAreaZone];
+  return (
+    <div className="space-y-1">
+      <p className="font-medium">{geo.labelShort}</p>
+      <p className="text-xs text-muted">{geo.label !== geo.labelShort ? geo.label : geo.regionName}</p>
+      <span
+        className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+          geo.inServiceArea
+            ? "bg-emerald-100 text-emerald-800"
+            : geo.serviceAreaZone === "unknown"
+              ? "bg-slate-100 text-slate-600"
+              : "bg-amber-100 text-amber-800"
+        }`}
+      >
+        {zoneLabel}
+      </span>
+    </div>
+  );
+}
+
 type PageviewPayload = {
   referrer?: string;
   referrerDomain?: string;
@@ -107,6 +134,24 @@ export function AnalyticsDashboard() {
     Array<{ channel: string; sessions: number; pageviews: number; avgDurationSec: number; bounceRate: number }>
   >([]);
   const [referrers, setReferrers] = useState<Array<{ label: string; channel: string; count: number }>>([]);
+  const [geoStats, setGeoStats] = useState<{
+    countries: Array<{ countryCode: string; countryName: string; sessions: number; inServiceArea: number }>;
+    cities: Array<{
+      city: string;
+      regionName: string;
+      countryName: string;
+      sessions: number;
+      zone: string;
+      inServiceArea: number;
+      latitude: number | null;
+      longitude: number | null;
+      mapsUrl: string;
+    }>;
+    zones: Array<{ zone: string; label: string; sessions: number; percentage: number }>;
+    totalSessions: number;
+    locatedSessions: number;
+    serviceAreaSessions: number;
+  } | null>(null);
   const [pages, setPages] = useState<
     Array<{ path: string; views: number; clicks: number; avgTimeSec: number; topReferrer: string }>
   >([]);
@@ -148,6 +193,7 @@ export function AnalyticsDashboard() {
         setChannels(data.channels ?? []);
         setReferrers(data.referrers ?? []);
       }
+      if (tab === "locations") setGeoStats(data.geo ?? null);
       if (tab === "pages") setPages(data.pages ?? []);
       if (tab === "clicks") setClicks(data.clicks ?? []);
       if (tab === "funnel") setFunnel(data.funnel ?? null);
@@ -244,6 +290,12 @@ export function AnalyticsDashboard() {
             <StatCard label="Hemen çıkma" value={`%${overview.bounceRate}`} />
             <StatCard label="Dönüşüm" value={overview.conversions} hint="Teklif / form gönderimi" />
             <StatCard label="Asistan açılışı" value={overview.conciergeOpens} />
+            <StatCard
+              label="Hizmet bölgesi"
+              value={overview.serviceAreaSessions}
+              hint="Baesweiler / Aachen çevresi"
+            />
+            <StatCard label="En çok şehir" value={overview.topCity} />
           </div>
           <div className="bg-white rounded-2xl border border-border p-5">
             <h2 className="font-bold mb-4">Günlük trend</h2>
@@ -284,6 +336,7 @@ export function AnalyticsDashboard() {
                 <tr>
                   <th className="px-4 py-3">Başlangıç</th>
                   <th className="px-4 py-3">Sayfa</th>
+                  <th className="px-4 py-3">Konum</th>
                   <th className="px-4 py-3">Kanal</th>
                   <th className="px-4 py-3">Cihaz</th>
                 </tr>
@@ -293,6 +346,9 @@ export function AnalyticsDashboard() {
                   <tr key={s.id} className="border-t border-border">
                     <td className="px-4 py-3">{new Date(s.started_at).toLocaleTimeString("tr-TR")}</td>
                     <td className="px-4 py-3">{s.landing_path}</td>
+                    <td className="px-4 py-3">
+                      <LocationBadge session={s} />
+                    </td>
                     <td className="px-4 py-3">
                       {CHANNEL_LABELS_TR[s.channel as keyof typeof CHANNEL_LABELS_TR] ?? s.channel}
                     </td>
@@ -348,6 +404,125 @@ export function AnalyticsDashboard() {
                       {CHANNEL_LABELS_TR[r.channel as keyof typeof CHANNEL_LABELS_TR] ?? r.channel}
                     </td>
                     <td className="px-4 py-3">{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : tab === "locations" && geoStats ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard label="Toplam oturum" value={geoStats.totalSessions} />
+            <StatCard label="Konumlu oturum" value={geoStats.locatedSessions} />
+            <StatCard
+              label="Hizmet bölgesi"
+              value={geoStats.serviceAreaSessions}
+              hint="Stammgebiet + Aachen + çevre"
+            />
+            <StatCard
+              label="Konum oranı"
+              value={
+                geoStats.totalSessions
+                  ? `%${Math.round((geoStats.locatedSessions / geoStats.totalSessions) * 100)}`
+                  : "—"
+              }
+            />
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl border border-border overflow-hidden lg:col-span-1">
+              <h2 className="font-bold px-5 py-4 border-b">Bölge dağılımı</h2>
+              <ul className="divide-y divide-border">
+                {geoStats.zones.map((zone) => (
+                  <li key={zone.zone} className="px-5 py-3 flex items-center justify-between text-sm">
+                    <span>{zone.label}</span>
+                    <span className="font-semibold">
+                      {zone.sessions} · %{zone.percentage}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-white rounded-2xl border border-border overflow-hidden lg:col-span-2">
+              <h2 className="font-bold px-5 py-4 border-b">Ülkeler</h2>
+              <table className="w-full text-sm">
+                <thead className="bg-slate-50 text-left">
+                  <tr>
+                    <th className="px-4 py-3">Ülke</th>
+                    <th className="px-4 py-3">Oturum</th>
+                    <th className="px-4 py-3">Hizmet bölgesi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {geoStats.countries.map((c) => (
+                    <tr key={c.countryCode} className="border-t border-border">
+                      <td className="px-4 py-3 font-medium">
+                        {c.countryName}{" "}
+                        <span className="text-muted text-xs">({c.countryCode})</span>
+                      </td>
+                      <td className="px-4 py-3">{c.sessions}</td>
+                      <td className="px-4 py-3">{c.inServiceArea}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-border overflow-x-auto">
+            <h2 className="font-bold px-5 py-4 border-b">Şehirler (tam konum)</h2>
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-left">
+                <tr>
+                  <th className="px-4 py-3">Şehir</th>
+                  <th className="px-4 py-3">Eyalet / Bölge</th>
+                  <th className="px-4 py-3">Ülke</th>
+                  <th className="px-4 py-3">Koordinat</th>
+                  <th className="px-4 py-3">Bölge tipi</th>
+                  <th className="px-4 py-3">Oturum</th>
+                  <th className="px-4 py-3">Harita</th>
+                </tr>
+              </thead>
+              <tbody>
+                {geoStats.cities.map((city) => (
+                  <tr key={`${city.countryName}-${city.city}`} className="border-t border-border align-top">
+                    <td className="px-4 py-3 font-medium">{city.city}</td>
+                    <td className="px-4 py-3">{city.regionName}</td>
+                    <td className="px-4 py-3">{city.countryName}</td>
+                    <td className="px-4 py-3 text-xs text-muted whitespace-nowrap">
+                      {city.latitude != null && city.longitude != null
+                        ? `${city.latitude.toFixed(4)}, ${city.longitude.toFixed(4)}`
+                        : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${
+                          city.inServiceArea
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        {SERVICE_AREA_ZONE_LABELS_TR[city.zone as keyof typeof SERVICE_AREA_ZONE_LABELS_TR] ??
+                          city.zone}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{city.sessions}</td>
+                    <td className="px-4 py-3">
+                      {city.mapsUrl ? (
+                        <a
+                          href={city.mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary underline text-xs"
+                        >
+                          Aç
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -481,6 +656,9 @@ export function AnalyticsDashboard() {
                 >
                   <p className="font-medium">{new Date(s.started_at).toLocaleString("tr-TR")}</p>
                   <p className="text-muted">{s.landing_path}</p>
+                  <div className="mt-1">
+                    <LocationBadge session={s} />
+                  </div>
                   <p className="text-xs text-primary mt-1">
                     {CHANNEL_LABELS_TR[s.channel as keyof typeof CHANNEL_LABELS_TR] ?? s.channel} ·{" "}
                     {formatDuration(Math.round((s.duration_ms ?? 0) / 1000))}
@@ -494,12 +672,58 @@ export function AnalyticsDashboard() {
               <p className="text-muted">Detay için soldan bir oturum seçin.</p>
             ) : (
               <div className="space-y-4">
+                {(() => {
+                  const geo = sessionRowToGeo(selectedSession.session);
+                  return (
                 <div>
                   <h2 className="font-bold">Oturum detayı</h2>
                   <p className="text-sm text-muted mt-1">
                     {selectedSession.session.landing_path} → {selectedSession.session.exit_path ?? "—"}
                   </p>
-                  <div className="mt-2 grid grid-cols-1 gap-2 text-xs">
+
+                  <div className="mt-4 rounded-xl border border-border bg-slate-50 p-4 space-y-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted font-semibold">Konum</p>
+                        <p className="font-semibold text-foreground mt-1">{geo.label}</p>
+                      </div>
+                      <span
+                        className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          geo.inServiceArea
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-amber-100 text-amber-800"
+                        }`}
+                      >
+                        {SERVICE_AREA_ZONE_LABELS_TR[geo.serviceAreaZone]} · {geo.serviceAreaMatch}
+                      </span>
+                    </div>
+                    <div className="grid sm:grid-cols-2 gap-2 text-xs">
+                      <span>Şehir: {geo.city || "—"}</span>
+                      <span>Eyalet: {geo.regionName}</span>
+                      <span>Ülke: {geo.countryName} ({geo.countryCode || "—"})</span>
+                      <span>Kıta: {geo.continentName || "—"}</span>
+                      <span>Saat dilimi: {geo.timezone || "—"}</span>
+                      <span>
+                        Koordinat:{" "}
+                        {geo.latitude != null && geo.longitude != null
+                          ? `${geo.latitude.toFixed(5)}, ${geo.longitude.toFixed(5)}`
+                          : "—"}
+                      </span>
+                      <span>Dil (cihaz): {selectedSession.session.locale ?? "—"}</span>
+                      <span>
+                        Harita:{" "}
+                        {geo.mapsUrl ? (
+                          <a href={geo.mapsUrl} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                            Google Maps
+                          </a>
+                        ) : (
+                          "—"
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-1 gap-2 text-xs">
                     <span>
                       Giriş URL: <UrlText value={selectedSession.session.landing_path} />
                     </span>
@@ -513,8 +737,6 @@ export function AnalyticsDashboard() {
                         }
                       />
                     </span>
-                    <span>Ülke: {selectedSession.session.country ?? "—"}</span>
-                    <span>Şehir: {selectedSession.session.city ?? "—"}</span>
                     <span>Tarayıcı: {selectedSession.session.browser ?? "—"}</span>
                     <span>OS: {selectedSession.session.os ?? "—"}</span>
                     <span>UTM: {selectedSession.session.utm_source ?? "—"}</span>
@@ -523,6 +745,8 @@ export function AnalyticsDashboard() {
                     <span>FBCLID: {selectedSession.session.fbclid ? "Evet" : "—"}</span>
                   </div>
                 </div>
+                  );
+                })()}
                 <ol className="space-y-2 max-h-[480px] overflow-y-auto">
                   {selectedSession.events.map((event) => {
                     const payload = (event.payload ?? {}) as PageviewPayload;

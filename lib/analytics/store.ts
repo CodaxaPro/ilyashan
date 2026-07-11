@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase/server";
+import { extractRequestGeo } from "@/lib/analytics/geo";
 import type {
   AnalyticsAttribution,
   AnalyticsClientEvent,
@@ -10,6 +11,8 @@ import type {
 export function isAnalyticsStoreConfigured(): boolean {
   return isSupabaseConfigured();
 }
+
+export { extractRequestGeo };
 
 function hashIp(ip: string): string {
   const salt = process.env.ANALYTICS_IP_SALT ?? process.env.ADMIN_PASSWORD ?? "ilyashan";
@@ -50,7 +53,8 @@ async function ensureVisitor(visitorId: string): Promise<boolean> {
 
 async function ensureSession(
   body: AnalyticsCollectBody,
-  geo: { country?: string; city?: string; ipHash?: string }
+  geo: ReturnType<typeof extractRequestGeo>,
+  ipHash?: string
 ): Promise<boolean> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return false;
@@ -77,9 +81,18 @@ async function ensureSession(
     screen_width: device?.screenWidth ?? null,
     screen_height: device?.screenHeight ?? null,
     locale: device?.locale ?? null,
-    country: geo.country ?? null,
-    city: geo.city ?? null,
-    ip_hash: geo.ipHash ?? null,
+    country: geo.countryCode || null,
+    city: geo.city || null,
+    region: geo.regionName || null,
+    region_code: geo.regionCode || null,
+    continent: geo.continent || null,
+    timezone: geo.timezone || null,
+    latitude: geo.latitude,
+    longitude: geo.longitude,
+    service_area_zone: geo.serviceAreaZone,
+    service_area_match: geo.serviceAreaMatch || null,
+    in_service_area: geo.inServiceArea,
+    ip_hash: ipHash ?? null,
     referrer: attribution.referrer ?? null,
     referrer_domain: attribution.referrerDomain ?? null,
     utm_source: attribution.utmSource ?? null,
@@ -140,7 +153,7 @@ async function updateSessionMetrics(
 
 export async function ingestAnalyticsBatch(
   body: AnalyticsCollectBody,
-  requestMeta: { ip?: string; country?: string; city?: string }
+  request: Request
 ): Promise<{ ok: boolean; error?: string }> {
   if (!isAnalyticsStoreConfigured()) {
     return { ok: false, error: "Analytics storage not configured" };
@@ -161,12 +174,9 @@ export async function ingestAnalyticsBatch(
   const visitorOk = await ensureVisitor(body.visitorId);
   if (!visitorOk) return { ok: false, error: "Visitor persist failed" };
 
-  const ipHash = requestMeta.ip ? hashIp(requestMeta.ip) : undefined;
-  const sessionOk = await ensureSession(body, {
-    country: requestMeta.country,
-    city: requestMeta.city,
-    ipHash,
-  });
+  const geo = extractRequestGeo(request);
+  const ipHash = geo.ip ? hashIp(geo.ip) : undefined;
+  const sessionOk = await ensureSession(body, geo, ipHash);
   if (!sessionOk) return { ok: false, error: "Session persist failed" };
 
   const supabase = getSupabaseAdmin();
@@ -193,20 +203,6 @@ export async function ingestAnalyticsBatch(
 
   await updateSessionMetrics(body.sessionId, body.events);
   return { ok: true };
-}
-
-export function extractRequestGeo(request: Request): {
-  ip?: string;
-  country?: string;
-  city?: string;
-} {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || undefined;
-  return {
-    ip,
-    country: request.headers.get("x-vercel-ip-country") ?? undefined,
-    city: request.headers.get("x-vercel-ip-city") ?? undefined,
-  };
 }
 
 export type { AnalyticsAttribution, AnalyticsDeviceInfo };
