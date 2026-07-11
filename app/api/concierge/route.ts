@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { processConciergeMessage, createSession } from "@/lib/concierge";
 import type { ConciergeSession } from "@/lib/concierge";
 import { recordUnknownMessage, shouldLogUnknownMessage } from "@/lib/concierge/unknown-queue";
+import { getConciergeEnabled } from "@/lib/concierge-settings";
 
 export const runtime = "nodejs";
 
@@ -17,6 +18,13 @@ export async function POST(request: Request) {
 
     if (body.website) {
       return NextResponse.json({ success: true });
+    }
+
+    if (!(await getConciergeEnabled())) {
+      return NextResponse.json(
+        { error: "Der Assistent ist derzeit nicht aktiv." },
+        { status: 503 }
+      );
     }
 
     const message = typeof body.message === "string" ? body.message.trim() : "";

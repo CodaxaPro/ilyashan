@@ -4,7 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
 
-type AdminTab = "leads" | "unknown";
+type AdminTab = "leads" | "unknown" | "settings";
+
+interface ConciergeAdminSettings {
+  enabled: boolean;
+  source: "env" | "kv" | "default";
+  storageConfigured: boolean;
+  updatedAt?: string;
+}
 
 export default function AdminPage() {
   const [password, setPassword] = useState("");
@@ -12,6 +19,8 @@ export default function AdminPage() {
   const [tab, setTab] = useState<AdminTab>("leads");
   const [leads, setLeads] = useState<StoredLead[]>([]);
   const [unknownItems, setUnknownItems] = useState<UnknownQueueItem[]>([]);
+  const [conciergeSettings, setConciergeSettings] = useState<ConciergeAdminSettings | null>(null);
+  const [conciergeSaving, setConciergeSaving] = useState(false);
   const [storageConfigured, setStorageConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,11 +46,26 @@ export default function AdminPage() {
     return true;
   }, []);
 
+  const loadSettings = useCallback(async () => {
+    const res = await fetch("/api/admin/settings");
+    if (res.status === 401) return false;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Einstellungen laden fehlgeschlagen");
+    setConciergeSettings(data.concierge ?? null);
+    setStorageConfigured(Boolean(data.storageConfigured));
+    return true;
+  }, []);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const ok = tab === "leads" ? await loadLeads() : await loadUnknown();
+      const ok =
+        tab === "leads"
+          ? await loadLeads()
+          : tab === "unknown"
+            ? await loadUnknown()
+            : await loadSettings();
       if (ok === false) {
         setAuthenticated(false);
         return;
@@ -52,7 +76,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [tab, loadLeads, loadUnknown]);
+  }, [tab, loadLeads, loadUnknown, loadSettings]);
 
   useEffect(() => {
     void loadData();
@@ -84,6 +108,25 @@ export default function AdminPage() {
     setAuthenticated(false);
     setLeads([]);
     setUnknownItems([]);
+  }
+
+  async function updateConciergeEnabled(enabled: boolean) {
+    setConciergeSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conciergeEnabled: enabled }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Speichern fehlgeschlagen");
+      setConciergeSettings(data.concierge ?? null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Speichern fehlgeschlagen");
+    } finally {
+      setConciergeSaving(false);
+    }
   }
 
   async function updateUnknownStatus(fingerprint: string, status: "resolved" | "dismissed") {
@@ -144,8 +187,10 @@ export default function AdminPage() {
             <p className="text-sm text-muted">
               {tab === "leads"
                 ? `${leads.length} Leads`
-                : `${unknownItems.length} offene Assistent-Fragen`}
-              {!storageConfigured && " · KV-Speicher nicht konfiguriert"}
+                : tab === "unknown"
+                  ? `${unknownItems.length} offene Assistent-Fragen`
+                  : "Assistent & System"}
+              {!storageConfigured && tab !== "settings" && " · KV-Speicher nicht konfiguriert"}
             </p>
           </div>
           <div className="flex gap-2">
@@ -187,6 +232,16 @@ export default function AdminPage() {
           >
             Unbekannte Fragen
           </button>
+          <button
+            type="button"
+            onClick={() => setTab("settings")}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold ${
+              tab === "settings" ? "bg-primary text-white" : "bg-white border border-border"
+            }`}
+            data-testid="admin-tab-settings"
+          >
+            Einstellungen
+          </button>
         </div>
 
         {!storageConfigured && (
@@ -205,6 +260,88 @@ export default function AdminPage() {
 
         {loading ? (
           <p className="text-muted">Lädt…</p>
+        ) : tab === "settings" ? (
+          <div className="bg-white rounded-2xl border border-border p-6 space-y-6" data-testid="admin-settings-panel">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">Website-Assistent</h2>
+              <p className="text-sm text-muted mt-1">
+                Standard: <strong>aus</strong>. Erst nach Tests aktivieren – Besucher sehen den Chat-Button nur
+                wenn er eingeschaltet ist.
+              </p>
+            </div>
+
+            {!storageConfigured && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Für den Schalter in Production bitte <strong>Upstash Redis</strong> in Vercel verbinden.
+                Lokal testen: <code>CONCIERGE_ENABLED=true</code> in <code>.env.local</code>.
+              </div>
+            )}
+
+            {conciergeSettings?.source === "env" && (
+              <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                <strong>CONCIERGE_ENABLED</strong> ist in den Umgebungsvariablen gesetzt und überschreibt
+                diesen Schalter ({conciergeSettings.enabled ? "aktiv" : "inaktiv"}).
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-slate-50 px-4 py-4">
+              <div>
+                <p className="font-semibold text-foreground">Assistent auf der Website</p>
+                <p className="text-sm text-muted mt-0.5">
+                  Status:{" "}
+                  <span
+                    className={
+                      conciergeSettings?.enabled ? "text-emerald-700 font-semibold" : "text-slate-600"
+                    }
+                    data-testid="concierge-status-label"
+                  >
+                    {conciergeSettings?.enabled ? "Aktiv" : "Inaktiv"}
+                  </span>
+                  {conciergeSettings?.updatedAt && (
+                    <span className="text-muted">
+                      {" "}
+                      · zuletzt geändert{" "}
+                      {new Date(conciergeSettings.updatedAt).toLocaleString("de-DE")}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={
+                    conciergeSaving ||
+                    conciergeSettings?.source === "env" ||
+                    !storageConfigured ||
+                    conciergeSettings?.enabled === false
+                  }
+                  onClick={() => void updateConciergeEnabled(true)}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold disabled:opacity-40"
+                  data-testid="concierge-enable-btn"
+                >
+                  Aktivieren
+                </button>
+                <button
+                  type="button"
+                  disabled={
+                    conciergeSaving ||
+                    conciergeSettings?.source === "env" ||
+                    !storageConfigured ||
+                    conciergeSettings?.enabled === true
+                  }
+                  onClick={() => void updateConciergeEnabled(false)}
+                  className="px-4 py-2 rounded-xl border border-border bg-white text-sm font-semibold disabled:opacity-40"
+                  data-testid="concierge-disable-btn"
+                >
+                  Deaktivieren
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted">
+              API: <code>/api/concierge/status</code> · Assistent-APIs antworten mit 503 wenn inaktiv.
+            </p>
+          </div>
         ) : tab === "leads" ? (
           leads.length === 0 ? (
             <div className="bg-white rounded-2xl border border-border p-8 text-center text-muted">

@@ -95,6 +95,7 @@ function renderMarkdownLite(text: string) {
 
 export function ConciergeWidget() {
   const pathname = usePathname();
+  const [enabled, setEnabled] = useState<boolean | null>(null);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -123,6 +124,21 @@ export function ConciergeWidget() {
       });
     }
   }, [showLeadForm, session.id, pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/concierge/status")
+      .then((res) => res.json())
+      .then((data: { enabled?: boolean }) => {
+        if (!cancelled) setEnabled(data.enabled === true);
+      })
+      .catch(() => {
+        if (!cancelled) setEnabled(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     setSession(loadSession());
@@ -322,18 +338,22 @@ export function ConciergeWidget() {
     }
   }
 
+  if (pathname.startsWith("/admin") || enabled !== true) {
+    return null;
+  }
+
   return (
     <>
       {open && (
         <div
-          className="fixed inset-0 z-[55] bg-black/40 lg:bg-black/20"
+          className="fixed inset-0 z-55 bg-black/40 lg:bg-black/20"
           aria-hidden
           onClick={() => setOpen(false)}
         />
       )}
 
       <div
-        className={`fixed z-[56] flex flex-col bg-white shadow-2xl border border-border transition-all duration-300 overflow-hidden
+        className={`fixed z-56 flex flex-col bg-white shadow-2xl border border-border transition-all duration-300 overflow-hidden
           bottom-0 left-0 right-0 h-[min(85dvh,640px)] rounded-t-3xl
           sm:left-auto sm:right-[max(1rem,env(safe-area-inset-right))] sm:bottom-[max(5.5rem,env(safe-area-inset-bottom))] sm:w-[400px] sm:h-[min(70dvh,600px)] sm:rounded-2xl
           ${open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"}`}
@@ -530,7 +550,7 @@ export function ConciergeWidget() {
 
       {(nudge || exitNudge) && !open && (
         <div
-          className="fixed z-[56] max-w-[260px] rounded-2xl bg-white border border-border shadow-xl p-4 text-sm leading-relaxed
+          className="fixed z-56 max-w-[260px] rounded-2xl bg-white border border-border shadow-xl p-4 text-sm leading-relaxed
             bottom-[max(9.5rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]"
           data-testid={exitNudge ? "concierge-exit-nudge" : "concierge-nudge"}
         >
@@ -563,7 +583,7 @@ export function ConciergeWidget() {
       <button
         type="button"
         onClick={() => (open ? setOpen(false) : openChat())}
-        className={`fixed z-[56] flex items-center gap-2 rounded-full shadow-lg transition-all duration-200
+        className={`fixed z-56 flex items-center gap-2 rounded-full shadow-lg transition-all duration-200
           bg-primary text-white hover:bg-primary/90
           bottom-[max(5.5rem,env(safe-area-inset-bottom))] right-[max(1rem,env(safe-area-inset-right))]
           ${open ? "scale-0 opacity-0 pointer-events-none" : "scale-100 opacity-100"}

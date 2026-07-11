@@ -12,6 +12,7 @@ import {
 } from "@/lib/photo-upload";
 import { saveLead } from "@/lib/leads-store";
 import { createConciergeStoredLead } from "@/lib/lead-records";
+import { getConciergeEnabled } from "@/lib/concierge-settings";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -29,6 +30,13 @@ export async function POST(request: Request) {
 
     if (body.website) {
       return NextResponse.json({ success: true });
+    }
+
+    if (!(await getConciergeEnabled())) {
+      return NextResponse.json(
+        { error: "Der Assistent ist derzeit nicht aktiv." },
+        { status: 503 }
+      );
     }
 
     const name = typeof body.name === "string" ? body.name.trim() : "";

@@ -28,5 +28,8 @@ export default defineConfig({
     url: `${baseURL}/de/angebot`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    env: {
+      CONCIERGE_ENABLED: "true",
+    },
   },
 });
