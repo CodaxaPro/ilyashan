@@ -20,6 +20,7 @@ import {
 import { saveLead } from "@/lib/leads-store";
 import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
 import { createQuoteStoredLead, createContactStoredLead } from "@/lib/lead-records";
+import { buildTerminPageUrl } from "@/lib/termin-token";
 import {
   getFensterPricingConfig,
 } from "@/lib/pricing-config";
@@ -109,8 +110,12 @@ export async function POST(request: Request) {
         );
       }
 
+      const storedLead = createQuoteStoredLead(quote, anfrageNr, photos.length, quotePricing, priceSnapshot);
+      const origin = new URL(request.url).origin;
+      const terminUrl = buildTerminPageUrl(origin, storedLead.id);
+
       if (quote.email?.trim()) {
-        const customerEmail = buildQuoteCustomerEmail(quote, anfrageNr, quotePricing);
+        const customerEmail = buildQuoteCustomerEmail(quote, anfrageNr, quotePricing, terminUrl);
         const { error: customerError } = await resend.emails.send({
           from: fromEmail,
           to: [quote.email.trim()],
@@ -125,7 +130,6 @@ export async function POST(request: Request) {
         }
       }
 
-      const storedLead = createQuoteStoredLead(quote, anfrageNr, photos.length, quotePricing, priceSnapshot);
       await saveLead(storedLead);
       await syncLeadToCalendar(storedLead);
 

@@ -5,6 +5,10 @@ import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/
 import { buildLeadStatusEmail } from "@/lib/appointment-email";
 import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
+import { buildTerminPageUrl } from "@/lib/termin-token";
+import { getStaffConfig } from "@/lib/staff/config";
+import { validateAdminSlotAssignment } from "@/lib/scheduling/booking";
+import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import {
   buildEmailNotificationRecord,
@@ -16,6 +20,7 @@ import {
 import {
   getLead,
   isLeadsStoreConfigured,
+  listLeads,
   updateLead,
   type LeadEmailAction,
   type LeadStatus,
@@ -63,6 +68,7 @@ async function sendLeadEmail(
     previousConfirmedDate?: string;
     proposedDate?: string;
     note?: string;
+    terminUrl?: string | null;
   }
 ) {
   const quote = mergeQuote(lead.quote);
@@ -95,7 +101,7 @@ async function sendLeadEmail(
   return { emailSent: true, emailError: null };
 }
 
-export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
   const authError = await requireAdmin();
   if (authError) return authError;
 
@@ -105,7 +111,10 @@ export async function GET(_request: Request, context: { params: Promise<{ id: st
     return NextResponse.json({ error: "Lead nicht gefunden." }, { status: 404 });
   }
 
-  return NextResponse.json({ lead, storageConfigured: isLeadsStoreConfigured() });
+  const origin = new URL(request.url).origin;
+  const terminUrl = buildTerminPageUrl(origin, lead.id);
+
+  return NextResponse.json({ lead, storageConfigured: isLeadsStoreConfigured(), terminUrl });
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -136,11 +145,37 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     adminNotes: body.adminNotes,
     proposedDate: body.proposedDate,
     confirmedDate: body.confirmedDate,
+    timeSlot: body.timeSlot,
+    staffId: body.staffId,
     appointmentNote: body.appointmentNote,
     emailAction:
       body.emailAction ??
       (body.sendConfirmationEmail ? "confirm" : "none"),
   };
+
+  const [staffConfig, allLeads] = await Promise.all([getStaffConfig(), listLeads(200)]);
+  const slotDate = patchInput.confirmedDate || patchInput.proposedDate;
+  const slotTime =
+    patchInput.timeSlot === "vormittag" || patchInput.timeSlot === "nachmittag" || patchInput.timeSlot === "flexibel"
+      ? patchInput.timeSlot
+      : (lead.appointment?.timeSlot as BookableTimeSlot | undefined) ?? "flexibel";
+
+  if (slotDate && lead.source === "quote") {
+    const capacity = validateAdminSlotAssignment(
+      lead,
+      staffConfig,
+      allLeads,
+      slotDate,
+      slotTime,
+      patchInput.staffId || lead.appointment?.staffId
+    );
+    if (!capacity.ok) {
+      return NextResponse.json({ error: capacity.error ?? "Kapazität voll." }, { status: 409 });
+    }
+    if (capacity.staffId && !patchInput.staffId) {
+      patchInput.staffId = capacity.staffId;
+    }
+  }
 
   const previousConfirmedDate = lead.appointment?.confirmedDate;
   const { status, appointment } = resolveLeadUpdate(lead, patchInput);
@@ -151,11 +186,14 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   let emailActionUsed: LeadEmailAction | null = null;
 
   if (emailAction && lead.source === "quote") {
+    const origin = new URL(request.url).origin;
+    const terminUrl = buildTerminPageUrl(origin, lead.id);
     const result = await sendLeadEmail(emailAction, lead, {
       confirmedDate: appointment.confirmedDate ?? patchInput.confirmedDate,
       previousConfirmedDate,
       proposedDate: appointment.proposedDate ?? patchInput.proposedDate,
       note: appointment.note,
+      terminUrl: emailAction === "propose" ? terminUrl : null,
     });
     emailSent = result.emailSent;
     emailError = result.emailError;

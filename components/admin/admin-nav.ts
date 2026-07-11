@@ -5,7 +5,7 @@ export interface AdminNavItem {
   label: string;
   shortLabel?: string;
   section: AdminMainSection;
-  icon: "chart" | "users" | "inbox" | "help" | "settings" | "globe" | "pricing" | "calendar";
+  icon: "chart" | "users" | "inbox" | "help" | "settings" | "globe" | "pricing" | "calendar" | "staff";
   match: (pathname: string, tab: string | null) => boolean;
 }
 
@@ -49,6 +49,14 @@ export const ADMIN_NAV: AdminNavItem[] = [
     section: "operations",
     icon: "pricing",
     match: (pathname, tab) => pathname === "/admin" && tab === "pricing",
+  },
+  {
+    href: "/admin?tab=staff",
+    label: "Ekip & Kapasite",
+    shortLabel: "Ekip",
+    section: "operations",
+    icon: "staff",
+    match: (pathname, tab) => pathname === "/admin" && tab === "staff",
   },
   {
     href: "/admin?tab=settings",

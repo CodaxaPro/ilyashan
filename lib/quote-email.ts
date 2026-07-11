@@ -95,7 +95,8 @@ export function buildQuoteAdminEmail(
 export function buildQuoteCustomerEmail(
   data: QuoteFormData,
   anfrageNr: string,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  terminUrl?: string | null
 ) {
   const name = getQuoteContactName(data);
   const firstName = data.firstName || name.split(" ")[0];
@@ -119,6 +120,14 @@ export function buildQuoteCustomerEmail(
     ${priceRow ? buildInfoBox(`${siteConfig.messaging.priceEstimateEmailLabel}: <strong>${escapeHtml(priceRow[1])}</strong>`) : ""}
     <p style="margin:20px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Ihre Anfrage im Überblick</p>
     ${buildDataTable(detailRows)}
+    ${
+      terminUrl
+        ? `<p style="margin:20px 0 12px;font-size:14px;color:#334155;line-height:1.6;">
+      Sobald wir Ihren Termin planen, können Sie ihn auch online bestätigen oder selbst wählen:
+    </p>
+    ${buildButton(terminUrl, "Termin online verwalten", "#0369a1")}`
+        : ""
+    }
     <p style="margin:16px 0 0;font-size:13px;color:#64748b;line-height:1.6;">
       Im Anhang finden Sie Ihre <strong>Eingangsbestätigung als PDF</strong> – zum Ausdrucken oder Archivieren.
     </p>
@@ -154,6 +163,7 @@ export function buildQuoteCustomerEmail(
     "",
     ...detailRows.map(([k, v]) => `${k}: ${v}`),
     priceRow ? `${siteConfig.messaging.priceEstimateRowLabel}: ${priceRow[1]}` : "",
+    terminUrl ? `Termin online: ${terminUrl}` : "",
     "",
     "Mit freundlichen Grüßen",
     siteConfig.name,

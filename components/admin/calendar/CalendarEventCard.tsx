@@ -65,6 +65,7 @@ export function CalendarEventCard({
       {item.timeSlot && (
         <p className="text-[10px] mt-1 font-medium">
           {TIME_SLOT_LABELS_TR[item.timeSlot] ?? item.timeSlot}
+          {item.staffId ? ` · ${item.staffId}` : ""}
         </p>
       )}
 

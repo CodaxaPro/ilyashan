@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { LeadEmailAction, StoredLead, LeadStatus } from "@/lib/leads-store";
+import type { LeadEmailAction, StoredLead, LeadStatus, LeadTimeSlot } from "@/lib/leads-store";
+import type { StaffMember } from "@/lib/staff/types";
+import { TIME_SLOT_LABELS_TR } from "@/lib/calendar/appointment-from-lead";
 import type { QuoteFormData } from "@/lib/quote-form";
 import { formatGermanDate, initialQuoteFormData } from "@/lib/quote-form";
 import {
@@ -47,6 +49,8 @@ function syncFormFromLead(lead: StoredLead) {
     proposedDate: lead.appointment?.proposedDate ?? "",
     confirmedDate: lead.appointment?.confirmedDate ?? "",
     appointmentNote: lead.appointment?.note ?? "",
+    timeSlot: lead.appointment?.timeSlot ?? "flexibel",
+    staffId: lead.appointment?.staffId ?? "",
   };
 }
 
@@ -59,6 +63,11 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   const [proposedDate, setProposedDate] = useState(lead.appointment?.proposedDate ?? "");
   const [confirmedDate, setConfirmedDate] = useState(lead.appointment?.confirmedDate ?? "");
   const [appointmentNote, setAppointmentNote] = useState(lead.appointment?.note ?? "");
+  const [timeSlot, setTimeSlot] = useState<LeadTimeSlot>(lead.appointment?.timeSlot ?? "flexibel");
+  const [staffId, setStaffId] = useState(lead.appointment?.staffId ?? "");
+  const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
+  const [terminUrl, setTerminUrl] = useState<string | null>(null);
+  const [capacityHint, setCapacityHint] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -72,7 +81,50 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     setProposedDate(next.proposedDate);
     setConfirmedDate(next.confirmedDate);
     setAppointmentNote(next.appointmentNote);
+    setTimeSlot(next.timeSlot as LeadTimeSlot);
+    setStaffId(next.staffId);
   }, [lead]);
+
+  useEffect(() => {
+    void fetch("/api/admin/staff")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setStaffMembers(data?.config?.members ?? []))
+      .catch(() => undefined);
+
+    void fetch(`/api/admin/leads/${lead.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setTerminUrl(data?.terminUrl ?? null))
+      .catch(() => undefined);
+  }, [lead.id]);
+
+  useEffect(() => {
+    const date = confirmedDate || proposedDate;
+    if (!date) {
+      setCapacityHint(null);
+      return;
+    }
+    const params = new URLSearchParams({
+      from: date,
+      to: date,
+      excludeLeadId: lead.id,
+    });
+    void fetch(`/api/calendar/availability?${params}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const day = data?.availability?.days?.[0];
+        const slot = day?.slots?.find((s: { timeSlot: string }) => s.timeSlot === timeSlot);
+        if (!day || !slot) {
+          setCapacityHint(null);
+          return;
+        }
+        setCapacityHint(
+          slot.available
+            ? `Kapasite uygun (${slot.remainingCapacity} slot kaldı)`
+            : "Kapasite dolu — başka tarih/saat seçin"
+        );
+      })
+      .catch(() => setCapacityHint(null));
+  }, [confirmedDate, proposedDate, timeSlot, lead.id]);
 
   const primaryEmailAction = getPrimaryEmailActionLabel(lead, status, confirmedDate, proposedDate);
 
@@ -112,6 +164,8 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           proposedDate: proposedDate || undefined,
           confirmedDate: confirmedDate || undefined,
           appointmentNote: appointmentNote || undefined,
+          timeSlot,
+          staffId: staffId || undefined,
           emailAction,
         }),
       });
@@ -125,6 +179,8 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
       setProposedDate(synced.proposedDate);
       setConfirmedDate(synced.confirmedDate);
       setAppointmentNote(synced.appointmentNote);
+      setTimeSlot(synced.timeSlot as LeadTimeSlot);
+      setStaffId(synced.staffId);
       onUpdated(updated);
 
       if (emailAction !== "none") {
@@ -316,6 +372,60 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                   className="mt-1 w-full rounded-xl border border-border px-3 py-2"
                 />
               </label>
+
+              <label className="block text-sm">
+                <span className="text-muted">Tageszeit</span>
+                <select
+                  value={timeSlot}
+                  onChange={(e) => setTimeSlot(e.target.value as LeadTimeSlot)}
+                  className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                >
+                  <option value="vormittag">{TIME_SLOT_LABELS_TR.vormittag}</option>
+                  <option value="nachmittag">{TIME_SLOT_LABELS_TR.nachmittag}</option>
+                  <option value="flexibel">{TIME_SLOT_LABELS_TR.flexibel}</option>
+                </select>
+              </label>
+
+              {staffMembers.length > 0 && (
+                <label className="block text-sm">
+                  <span className="text-muted">Ekip (opsiyonel — boş = otomatik)</span>
+                  <select
+                    value={staffId}
+                    onChange={(e) => setStaffId(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                  >
+                    <option value="">Otomatik ata</option>
+                    {staffMembers
+                      .filter((m) => m.active)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+
+              {capacityHint && (
+                <p
+                  className={`text-xs rounded-lg px-3 py-2 ${
+                    capacityHint.includes("dolu")
+                      ? "bg-red-50 text-red-800 border border-red-200"
+                      : "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                  }`}
+                >
+                  {capacityHint}
+                </p>
+              )}
+
+              {terminUrl && lead.email && (
+                <AdminPanel className="p-3 bg-slate-50 border-dashed text-sm">
+                  <p className="text-xs font-semibold text-muted uppercase mb-1">Müşteri booking linki</p>
+                  <a href={terminUrl} target="_blank" rel="noreferrer" className="text-primary break-all">
+                    {terminUrl}
+                  </a>
+                </AdminPanel>
+              )}
 
               <label className="block text-sm">
                 <span className="text-muted">Onaylanan termin (düzenlenebilir)</span>

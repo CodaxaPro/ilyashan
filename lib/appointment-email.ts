@@ -2,6 +2,7 @@ import { siteConfig } from "@/lib/config";
 import type { QuoteFormData } from "@/lib/quote-form";
 import { formatGermanDate } from "@/lib/quote-form";
 import {
+  buildButton,
   buildDataTable,
   buildEmailLayout,
   buildInfoBox,
@@ -165,7 +166,8 @@ export function buildAppointmentProposalEmail(
   anfrageNr: string,
   proposedDate: string,
   note?: string,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  terminUrl?: string | null
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(proposedDate);
@@ -181,9 +183,16 @@ export function buildAppointmentProposalEmail(
     ${buildInfoBox(`<strong>Vorgeschlagener Termin:</strong> ${escapeHtml(dateLabel)}`)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
-    <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
-      Bitte bestätigen Sie den Termin per Antwort auf diese E-Mail oder telefonisch.
+    ${
+      terminUrl
+        ? `<p style="margin:24px 0 12px;font-size:14px;color:#334155;line-height:1.6;">
+      Sie können den Termin online bestätigen oder einen Alternativtermin wählen:
     </p>
+    ${buildButton(terminUrl, "Termin online bestätigen", "#059669")}`
+        : `<p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
+      Bitte bestätigen Sie den Termin per Antwort auf diese E-Mail oder telefonisch.
+    </p>`
+    }
     ${contactFooter()}`;
 
   const text = [
@@ -192,6 +201,7 @@ export function buildAppointmentProposalEmail(
     `Wir schlagen folgenden Termin für Fensterreinigung (${services}) vor:`,
     dateLabel,
     note ? `Hinweis: ${note}` : "",
+    terminUrl ? `Online bestätigen: ${terminUrl}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
   ]
@@ -265,6 +275,7 @@ export function buildLeadStatusEmail(
     previousConfirmedDate?: string;
     proposedDate?: string;
     note?: string;
+    terminUrl?: string | null;
   },
   ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
@@ -284,7 +295,14 @@ export function buildLeadStatusEmail(
       );
     case "propose":
       if (!options.proposedDate) throw new Error("proposedDate required");
-      return buildAppointmentProposalEmail(data, anfrageNr, options.proposedDate, options.note, ctx);
+      return buildAppointmentProposalEmail(
+        data,
+        anfrageNr,
+        options.proposedDate,
+        options.note,
+        ctx,
+        options.terminUrl
+      );
     case "reject":
       return buildLeadRejectionEmail(data, anfrageNr, options.note, ctx);
     default:

@@ -85,7 +85,11 @@ function resolveKind(quote: QuoteFormData | null): AppointmentKind {
   return quote?.services.includes("wartung") ? "wartung" : "single";
 }
 
-function resolveTimeSlot(quote: QuoteFormData | null): CalendarTimeSlot | undefined {
+function resolveTimeSlot(lead: StoredLead, quote: QuoteFormData | null): CalendarTimeSlot | undefined {
+  const fromLead = lead.appointment?.timeSlot;
+  if (fromLead === "vormittag" || fromLead === "nachmittag" || fromLead === "flexibel") {
+    return fromLead;
+  }
   if (!quote) return undefined;
   if (quote.wartungPreferredTimeSlot) return quote.wartungPreferredTimeSlot;
   return "flexibel";
@@ -108,7 +112,8 @@ function baseFields(lead: StoredLead, quote: QuoteFormData | null) {
     leadId: lead.id,
     anfrageNr: lead.anfrageNr,
     kind: resolveKind(quote),
-    timeSlot: resolveTimeSlot(quote),
+    timeSlot: resolveTimeSlot(lead, quote),
+    staffId: lead.appointment?.staffId,
     customerName: lead.name,
     customerEmail: lead.email,
     customerPhone: lead.phone,

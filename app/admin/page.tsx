@@ -9,12 +9,13 @@ import {
 } from "@/components/admin/AdminShell";
 import { AdminLeadDetailPanel, LeadStatusBadge } from "@/components/admin/AdminLeadDetailPanel";
 import { AdminPricingPanel } from "@/components/admin/AdminPricingPanel";
+import { AdminStaffPanel } from "@/components/admin/AdminStaffPanel";
 import { AdminUpcomingWidget } from "@/components/admin/AdminUpcomingWidget";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
 
-type AdminTab = "leads" | "unknown" | "pricing" | "settings";
+type AdminTab = "leads" | "unknown" | "pricing" | "staff" | "settings";
 
 interface ConciergeAdminSettings {
   enabled: boolean;
@@ -36,6 +37,10 @@ const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
     title: "Fenster Preise",
     subtitle: "Canlı fiyat ve Wartung ayarları",
   },
+  staff: {
+    title: "Ekip & Kapasite",
+    subtitle: "Personel, slot limitleri ve otomatik atama",
+  },
   settings: {
     title: "Asistan Ayarları",
     subtitle: "Website asistanı ve sistem",
@@ -43,7 +48,7 @@ const TAB_TITLES: Record<AdminTab, { title: string; subtitle: string }> = {
 };
 
 function parseTab(param: string | null): AdminTab {
-  if (param === "unknown" || param === "settings" || param === "pricing") return param;
+  if (param === "unknown" || param === "settings" || param === "pricing" || param === "staff") return param;
   return "leads";
 }
 
@@ -90,6 +95,15 @@ function AdminPageContent() {
     return true;
   }, []);
 
+  const loadStaff = useCallback(async () => {
+    const res = await fetch("/api/admin/staff");
+    if (res.status === 401) return false;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "Ekip ayarları yüklenemedi");
+    setStorageConfigured(Boolean(data.storageConfigured));
+    return true;
+  }, []);
+
   const loadSettings = useCallback(async () => {
     const res = await fetch("/api/admin/settings");
     if (res.status === 401) return false;
@@ -111,7 +125,9 @@ function AdminPageContent() {
             ? await loadUnknown()
             : tab === "pricing"
               ? await loadPricing()
-              : await loadSettings();
+              : tab === "staff"
+                ? await loadStaff()
+                : await loadSettings();
       if (ok === false) {
         markUnauthenticated();
         return;
@@ -121,7 +137,7 @@ function AdminPageContent() {
     } finally {
       setLoading(false);
     }
-  }, [tab, loadLeads, loadUnknown, loadPricing, loadSettings, markUnauthenticated]);
+  }, [tab, loadLeads, loadUnknown, loadPricing, loadStaff, loadSettings, markUnauthenticated]);
 
   useEffect(() => {
     void loadData();
@@ -187,7 +203,7 @@ function AdminPageContent() {
       onRefresh={() => void loadData()}
       onLogout={() => void handleLogout()}
     >
-      {!storageConfigured && tab !== "settings" && tab !== "pricing" && (
+      {!storageConfigured && tab !== "settings" && tab !== "pricing" && tab !== "staff" && (
         <AdminAlert variant="warning">
           Kalıcı depolama için Vercel&apos;de <strong>Upstash Redis</strong> bağlayın (
           <strong>KV_REST_API_URL</strong>, <strong>KV_REST_API_TOKEN</strong>). E-posta ve asistan
@@ -206,6 +222,8 @@ function AdminPageContent() {
         </div>
       ) : tab === "pricing" ? (
         <AdminPricingPanel storageConfigured={storageConfigured} />
+      ) : tab === "staff" ? (
+        <AdminStaffPanel storageConfigured={storageConfigured} />
       ) : tab === "settings" ? (
         <AdminPanel className="p-6 space-y-6" data-testid="admin-settings-panel">
           <div>

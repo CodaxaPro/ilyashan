@@ -34,6 +34,7 @@ export interface CalendarAppointment {
   leadStatus?: LeadStatus;
   source?: LeadSource;
   windowCount?: number;
+  staffId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -57,6 +58,7 @@ export interface CalendarAppointmentRow {
   lead_status: string | null;
   source: string | null;
   window_count: number | null;
+  staff_id: string | null;
   created_at: string;
   updated_at: string;
 }

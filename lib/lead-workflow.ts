@@ -13,6 +13,8 @@ export interface LeadPatchInput {
   adminNotes?: string;
   proposedDate?: string;
   confirmedDate?: string;
+  timeSlot?: "vormittag" | "nachmittag" | "flexibel" | "";
+  staffId?: string;
   appointmentNote?: string;
   emailAction?: LeadEmailActionInput;
 }
@@ -37,6 +39,15 @@ export function mergeLeadAppointment(
   }
   if (input.appointmentNote !== undefined) {
     appointment.note = input.appointmentNote || undefined;
+  }
+  if (input.timeSlot !== undefined) {
+    appointment.timeSlot =
+      input.timeSlot === "vormittag" || input.timeSlot === "nachmittag" || input.timeSlot === "flexibel"
+        ? input.timeSlot
+        : undefined;
+  }
+  if (input.staffId !== undefined) {
+    appointment.staffId = input.staffId || undefined;
   }
 
   return appointment;

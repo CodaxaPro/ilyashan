@@ -31,6 +31,7 @@ function rowToAppointment(row: CalendarAppointmentRow): CalendarAppointment {
     leadStatus: (row.lead_status as CalendarAppointment["leadStatus"]) ?? undefined,
     source: (row.source as CalendarAppointment["source"]) ?? undefined,
     windowCount: row.window_count ?? undefined,
+    staffId: row.staff_id ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -55,6 +56,7 @@ function appointmentToRow(item: Omit<CalendarAppointment, "id" | "createdAt" | "
     lead_status: item.leadStatus ?? null,
     source: item.source ?? null,
     window_count: item.windowCount ?? null,
+    staff_id: item.staffId ?? null,
   };
 }
 

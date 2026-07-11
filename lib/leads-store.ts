@@ -12,10 +12,15 @@ export type LeadStatus =
   | "abgeschlossen"
   | "abgelehnt";
 
+export type LeadTimeSlot = "vormittag" | "nachmittag" | "flexibel";
+
 export interface LeadAppointment {
   proposedDate?: string;
   confirmedDate?: string;
   confirmedAt?: string;
+  timeSlot?: LeadTimeSlot;
+  staffId?: string;
+  customerBookedAt?: string;
   note?: string;
   lastEmail?: LeadEmailNotification;
 }
