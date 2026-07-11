@@ -2,9 +2,22 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
-import { buildAppointmentConfirmationEmail } from "@/lib/appointment-email";
+import { buildLeadStatusEmail } from "@/lib/appointment-email";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
-import { getLead, isLeadsStoreConfigured, updateLead, type LeadStatus } from "@/lib/leads-store";
+import {
+  buildEmailNotificationRecord,
+  resolveEmailActionForSave,
+  resolveLeadUpdate,
+  type LeadEmailActionInput,
+  type LeadPatchInput,
+} from "@/lib/lead-workflow";
+import {
+  getLead,
+  isLeadsStoreConfigured,
+  updateLead,
+  type LeadEmailAction,
+  type LeadStatus,
+} from "@/lib/leads-store";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -35,8 +48,47 @@ async function requireAdmin() {
 }
 
 function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | null {
-  if (!raw) return null;
+  if (!raw?.windowCount) return null;
   return { ...initialQuoteFormData, ...raw };
+}
+
+async function sendLeadEmail(
+  action: LeadEmailAction,
+  lead: { email?: string; anfrageNr?: string; id: string; quote?: Partial<QuoteFormData> },
+  options: {
+    confirmedDate?: string;
+    previousConfirmedDate?: string;
+    proposedDate?: string;
+    note?: string;
+  }
+) {
+  const quote = mergeQuote(lead.quote);
+  if (!quote) {
+    return { emailSent: false, emailError: "Vollständige Anfragedaten fehlen." };
+  }
+  if (!lead.email?.trim()) {
+    return { emailSent: false, emailError: "Müşteri e-postası yok." };
+  }
+  if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
+    return { emailSent: false, emailError: "E-Mail-Versand nicht konfiguriert." };
+  }
+
+  const customerEmail = buildLeadStatusEmail(action, quote, lead.anfrageNr ?? lead.id, options);
+  const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+
+  const { error } = await resend.emails.send({
+    from: fromEmail,
+    to: [lead.email.trim()],
+    subject: customerEmail.subject,
+    text: customerEmail.text,
+    html: customerEmail.html,
+  });
+
+  if (error) {
+    return { emailSent: false, emailError: error.message ?? "E-Mail konnte nicht gesendet werden." };
+  }
+
+  return { emailSent: true, emailError: null };
 }
 
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
@@ -66,82 +118,61 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "Lead nicht gefunden." }, { status: 404 });
   }
 
-  const body = (await request.json()) as {
-    status?: LeadStatus;
-    adminNotes?: string;
-    proposedDate?: string;
-    confirmedDate?: string;
-    appointmentNote?: string;
+  const body = (await request.json()) as LeadPatchInput & {
     sendConfirmationEmail?: boolean;
+    emailAction?: LeadEmailActionInput;
   };
 
   if (body.status && !VALID_STATUSES.includes(body.status)) {
     return NextResponse.json({ error: "Ungültiger Status." }, { status: 400 });
   }
 
-  const appointment = {
-    ...lead.appointment,
-    ...(body.proposedDate !== undefined ? { proposedDate: body.proposedDate || undefined } : {}),
-    ...(body.confirmedDate !== undefined
-      ? {
-          confirmedDate: body.confirmedDate || undefined,
-          confirmedAt: body.confirmedDate ? new Date().toISOString() : undefined,
-        }
-      : {}),
-    ...(body.appointmentNote !== undefined ? { note: body.appointmentNote || undefined } : {}),
+  const patchInput: LeadPatchInput = {
+    status: body.status,
+    adminNotes: body.adminNotes,
+    proposedDate: body.proposedDate,
+    confirmedDate: body.confirmedDate,
+    appointmentNote: body.appointmentNote,
+    emailAction:
+      body.emailAction ??
+      (body.sendConfirmationEmail ? "confirm" : "none"),
   };
 
-  let status = body.status ?? lead.status ?? "neu";
-  if (body.confirmedDate) status = "termin_bestaetigt";
-  else if (body.proposedDate) status = "termin_vorgeschlagen";
+  const previousConfirmedDate = lead.appointment?.confirmedDate;
+  const { status, appointment } = resolveLeadUpdate(lead, patchInput);
+  const emailAction = resolveEmailActionForSave(lead, patchInput);
+
+  let emailSent = false;
+  let emailError: string | null = null;
+  let emailActionUsed: LeadEmailAction | null = null;
+
+  if (emailAction && lead.source === "quote") {
+    const result = await sendLeadEmail(emailAction, lead, {
+      confirmedDate: appointment.confirmedDate ?? patchInput.confirmedDate,
+      previousConfirmedDate,
+      proposedDate: appointment.proposedDate ?? patchInput.proposedDate,
+      note: appointment.note,
+    });
+    emailSent = result.emailSent;
+    emailError = result.emailError;
+    emailActionUsed = emailSent ? emailAction : null;
+  }
+
+  const finalAppointment = emailActionUsed
+    ? {
+        ...appointment,
+        lastEmail: buildEmailNotificationRecord(emailActionUsed, status, appointment),
+      }
+    : appointment;
 
   const updated = await updateLead(id, {
     status,
     adminNotes: body.adminNotes ?? lead.adminNotes,
-    appointment,
+    appointment: finalAppointment,
   });
 
   if (!updated) {
     return NextResponse.json({ error: "Lead konnte nicht aktualisiert werden." }, { status: 500 });
-  }
-
-  let emailSent = false;
-  let emailError: string | null = null;
-
-  if (
-    body.sendConfirmationEmail &&
-    body.confirmedDate &&
-    lead.source === "quote" &&
-    lead.email?.trim()
-  ) {
-    const quote = mergeQuote(lead.quote);
-    if (!quote) {
-      emailError = "Vollständige Anfragedaten fehlen.";
-    } else if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
-      emailError = "E-Mail-Versand nicht konfiguriert.";
-    } else {
-      const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
-      const customerEmail = buildAppointmentConfirmationEmail(
-        quote,
-        lead.anfrageNr ?? id,
-        body.confirmedDate,
-        body.appointmentNote ?? appointment.note
-      );
-
-      const { error } = await resend.emails.send({
-        from: fromEmail,
-        to: [lead.email.trim()],
-        subject: customerEmail.subject,
-        text: customerEmail.text,
-        html: customerEmail.html,
-      });
-
-      if (error) {
-        emailError = error.message ?? "E-Mail konnte nicht gesendet werden.";
-      } else {
-        emailSent = true;
-      }
-    }
   }
 
   return NextResponse.json({
@@ -149,5 +180,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     lead: updated,
     emailSent,
     emailError,
+    emailAction: emailActionUsed,
   });
 }

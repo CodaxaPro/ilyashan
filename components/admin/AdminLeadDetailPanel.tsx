@@ -1,24 +1,23 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import type { StoredLead, LeadStatus } from "@/lib/leads-store";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { LeadEmailAction, StoredLead, LeadStatus } from "@/lib/leads-store";
 import type { QuoteFormData } from "@/lib/quote-form";
-import { initialQuoteFormData } from "@/lib/quote-form";
+import { formatGermanDate, initialQuoteFormData } from "@/lib/quote-form";
 import {
   buildQuoteTableRows,
   getTerminLabel,
   getPriceLabel,
 } from "@/lib/quote-summary";
+import {
+  LEAD_EMAIL_ACTION_LABELS_TR,
+  LEAD_STATUS_LABELS_TR,
+  getPrimaryEmailActionLabel,
+} from "@/lib/lead-workflow";
+import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 
-const STATUS_LABELS: Record<LeadStatus, string> = {
-  neu: "Yeni",
-  kontaktiert: "İletişim kuruldu",
-  termin_vorgeschlagen: "Termin önerildi",
-  termin_bestaetigt: "Termin onaylandı",
-  abgeschlossen: "Tamamlandı",
-  abgelehnt: "Reddedildi",
-};
+export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
 const STATUS_COLORS: Record<LeadStatus, string> = {
   neu: "bg-slate-100 text-slate-700",
@@ -40,6 +39,16 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
   return { ...initialQuoteFormData, ...raw };
 }
 
+function syncFormFromLead(lead: StoredLead) {
+  return {
+    status: lead.status ?? "neu",
+    adminNotes: lead.adminNotes ?? "",
+    proposedDate: lead.appointment?.proposedDate ?? "",
+    confirmedDate: lead.appointment?.confirmedDate ?? "",
+    appointmentNote: lead.appointment?.note ?? "",
+  };
+}
+
 export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDetailPanelProps) {
   const quote = useMemo(() => mergeQuote(lead.quote), [lead.quote]);
   const preferredDates = quote?.preferredDates ?? [];
@@ -52,8 +61,42 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
 
-  async function saveLead(options?: { sendConfirmationEmail?: boolean }) {
+  useEffect(() => {
+    const next = syncFormFromLead(lead);
+    setStatus(next.status);
+    setAdminNotes(next.adminNotes);
+    setProposedDate(next.proposedDate);
+    setConfirmedDate(next.confirmedDate);
+    setAppointmentNote(next.appointmentNote);
+  }, [lead]);
+
+  const primaryEmailAction = getPrimaryEmailActionLabel(lead, status, confirmedDate, proposedDate);
+
+  const emailPreview = primaryEmailAction
+    ? getCustomerEmailPreviewDe(primaryEmailAction.action, {
+        confirmedDate: confirmedDate || undefined,
+        previousConfirmedDate: lead.appointment?.confirmedDate,
+        proposedDate: proposedDate || undefined,
+        note: appointmentNote || undefined,
+      })
+    : null;
+
+  function showFeedback(message: string, type: "success" | "error") {
+    if (type === "success") {
+      setSuccess(message);
+      setError(null);
+    } else {
+      setError(message);
+      setSuccess(null);
+    }
+    requestAnimationFrame(() => {
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+  }
+
+  async function saveLead(emailAction: LeadEmailAction | "none" = "none") {
     setSaving(true);
     setError(null);
     setSuccess(null);
@@ -67,22 +110,34 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           proposedDate: proposedDate || undefined,
           confirmedDate: confirmedDate || undefined,
           appointmentNote: appointmentNote || undefined,
-          sendConfirmationEmail: options?.sendConfirmationEmail ?? false,
+          emailAction,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Kaydedilemedi");
 
-      onUpdated(data.lead);
-      if (data.emailSent) {
-        setSuccess("Termin onaylandı ve müşteriye e-posta gönderildi.");
-      } else if (data.emailError) {
-        setSuccess("Kaydedildi, ancak e-posta gönderilemedi: " + data.emailError);
+      const updated = data.lead as StoredLead;
+      const synced = syncFormFromLead(updated);
+      setStatus(synced.status);
+      setAdminNotes(synced.adminNotes);
+      setProposedDate(synced.proposedDate);
+      setConfirmedDate(synced.confirmedDate);
+      setAppointmentNote(synced.appointmentNote);
+      onUpdated(updated);
+
+      if (emailAction !== "none") {
+        if (data.emailSent && data.emailAction) {
+          showFeedback(LEAD_EMAIL_ACTION_LABELS_TR[data.emailAction as LeadEmailAction], "success");
+        } else if (data.emailError) {
+          showFeedback("Kaydedildi, ancak e-posta gönderilemedi: " + data.emailError, "error");
+        } else {
+          showFeedback("Kaydedildi, ancak e-posta gönderilemedi.", "error");
+        }
       } else {
-        setSuccess("Kaydedildi.");
+        showFeedback("Değişiklikler kaydedildi.", "success");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Kaydedilemedi");
+      showFeedback(err instanceof Error ? err.message : "Kaydedilemedi", "error");
     } finally {
       setSaving(false);
     }
@@ -115,9 +170,13 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          {error && <AdminAlert variant="error">{error}</AdminAlert>}
-          {success && <AdminAlert variant="info">{success}</AdminAlert>}
+        <div className="p-6 space-y-6 pb-28">
+          {error && lead.source !== "quote" && (
+            <AdminAlert variant="error" className="mb-4">{error}</AdminAlert>
+          )}
+          {success && lead.source !== "quote" && (
+            <AdminAlert variant="success" className="mb-4">{success}</AdminAlert>
+          )}
 
           <div className="flex flex-wrap gap-2">
             <span
@@ -174,10 +233,16 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 </option>
               ))}
             </select>
+            {status === "abgelehnt" && (
+              <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                Reddedildi seçildiğinde onaylı termin temizlenir. Müşteriye bildirmek için
+                &quot;Reddet + müşteriye bildir&quot; kullanın.
+              </p>
+            )}
             <textarea
               value={adminNotes}
               onChange={(e) => setAdminNotes(e.target.value)}
-              placeholder="Admin notları (iç kullanım)"
+              placeholder="Admin notları (sadece iç kullanım — müşteriye gitmez)"
               rows={3}
               className="w-full rounded-xl border border-border px-3 py-2 text-sm"
             />
@@ -186,6 +251,34 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           {lead.source === "quote" && (
             <section className="space-y-3">
               <h3 className="font-bold text-foreground">Termin yönetimi</h3>
+
+              {(lead.appointment?.confirmedDate || lead.appointment?.proposedDate) && (
+                <AdminPanel className="p-4 text-sm space-y-1">
+                  <p className="text-xs font-semibold text-muted uppercase">Kayıtlı termin</p>
+                  {lead.appointment?.confirmedDate && (
+                    <p>
+                      <strong>Onaylı:</strong>{" "}
+                      {formatGermanDate(lead.appointment.confirmedDate)}
+                    </p>
+                  )}
+                  {lead.appointment?.proposedDate && (
+                    <p>
+                      <strong>Önerilen:</strong>{" "}
+                      {formatGermanDate(lead.appointment.proposedDate)}
+                    </p>
+                  )}
+                  {lead.appointment?.lastEmail && (
+                    <p className="text-xs text-muted pt-1">
+                      Son e-posta:{" "}
+                      {LEAD_EMAIL_ACTION_LABELS_TR[lead.appointment.lastEmail.action].replace(
+                        " gönderildi.",
+                        ""
+                      )}{" "}
+                      · {new Date(lead.appointment.lastEmail.sentAt).toLocaleString("tr-TR")}
+                    </p>
+                  )}
+                </AdminPanel>
+              )}
 
               {preferredDates.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -197,10 +290,11 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                       onClick={() => {
                         setProposedDate(iso);
                         setConfirmedDate(iso);
+                        if (status !== "abgelehnt") setStatus("termin_bestaetigt");
                       }}
                       className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20"
                     >
-                      {iso}
+                      {formatGermanDate(iso)}
                     </button>
                   ))}
                 </div>
@@ -211,48 +305,74 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 <input
                   type="date"
                   value={proposedDate}
-                  onChange={(e) => setProposedDate(e.target.value)}
+                  onChange={(e) => {
+                    setProposedDate(e.target.value);
+                    if (e.target.value && status === "neu") setStatus("termin_vorgeschlagen");
+                  }}
                   className="mt-1 w-full rounded-xl border border-border px-3 py-2"
                 />
               </label>
 
               <label className="block text-sm">
-                <span className="text-muted">Onaylanan termin</span>
+                <span className="text-muted">Onaylanan termin (düzenlenebilir)</span>
                 <input
                   type="date"
                   value={confirmedDate}
-                  onChange={(e) => setConfirmedDate(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                  onChange={(e) => {
+                    setConfirmedDate(e.target.value);
+                    if (e.target.value && status !== "abgelehnt") {
+                      setStatus("termin_bestaetigt");
+                    }
+                  }}
+                  disabled={status === "abgelehnt"}
+                  className="mt-1 w-full rounded-xl border border-border px-3 py-2 disabled:opacity-50"
                 />
               </label>
 
               <textarea
                 value={appointmentNote}
                 onChange={(e) => setAppointmentNote(e.target.value)}
-                placeholder="Termin notu (müşteriye e-postada gider)"
+                placeholder="Müşteri notu (e-postada Almanca olarak gider)"
                 rows={2}
                 className="w-full rounded-xl border border-border px-3 py-2 text-sm"
               />
+
+              {emailPreview && primaryEmailAction && (
+                <AdminPanel className="p-3 bg-slate-50 border-dashed">
+                  <p className="text-xs font-semibold text-muted uppercase mb-1">
+                    Müşteriye gidecek e-posta özeti
+                  </p>
+                  <p className="text-sm text-foreground">{emailPreview}</p>
+                </AdminPanel>
+              )}
 
               <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   disabled={saving}
-                  onClick={() => void saveLead()}
+                  onClick={() => void saveLead("none")}
                   className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-slate-50 disabled:opacity-40"
                 >
-                  Kaydet
+                  {saving ? "Kaydediliyor…" : "Kaydet (e-posta gönderme)"}
                 </button>
-                <button
-                  type="button"
-                  disabled={saving || !confirmedDate || !lead.email}
-                  onClick={() => void saveLead({ sendConfirmationEmail: true })}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40"
-                >
-                  Termin onayla + e-posta gönder
-                </button>
+
+                {primaryEmailAction && (
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={() => void saveLead(primaryEmailAction.action)}
+                    className={`px-4 py-2 rounded-xl text-white text-sm font-semibold disabled:opacity-40 ${
+                      primaryEmailAction.action === "reject"
+                        ? "bg-red-600 hover:bg-red-700"
+                        : "bg-emerald-600 hover:bg-emerald-700"
+                    }`}
+                  >
+                    {saving ? "Gönderiliyor…" : primaryEmailAction.label}
+                  </button>
+                )}
+
                 {!lead.email && (
-                  <p className="text-xs text-muted">E-posta yok — onay maili gönderilemez.</p>
+                  <p className="text-xs text-muted">E-posta yok — müşteri bildirimi gönderilemez.</p>
                 )}
               </div>
             </section>
@@ -264,6 +384,19 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
             </AdminPanel>
           )}
         </div>
+
+        {(error || success) && (
+          <div
+            ref={feedbackRef}
+            className="sticky bottom-0 border-t border-border bg-white/95 backdrop-blur px-6 py-4 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+            role="status"
+            aria-live="polite"
+          >
+            <AdminAlert variant={error ? "error" : "success"} className="mb-0">
+              {error ?? success}
+            </AdminAlert>
+          </div>
+        )}
       </aside>
     </div>
   );

@@ -16,6 +16,17 @@ export interface LeadAppointment {
   confirmedDate?: string;
   confirmedAt?: string;
   note?: string;
+  lastEmail?: LeadEmailNotification;
+}
+
+export type LeadEmailAction = "confirm" | "update" | "propose" | "reject";
+
+export interface LeadEmailNotification {
+  action: LeadEmailAction;
+  sentAt: string;
+  status: LeadStatus;
+  confirmedDate?: string;
+  proposedDate?: string;
 }
 
 export interface StoredLead {

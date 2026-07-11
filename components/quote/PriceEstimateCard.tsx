@@ -21,7 +21,7 @@ export function PriceEstimateCard({ data, compact = false }: PriceEstimateCardPr
   if (!estimate) return null;
 
   return (
-    <div className="rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary-light/40 to-white p-6 shadow-lg shadow-primary/5">
+    <div className="rounded-2xl border-2 border-primary/20 bg-linear-to-br from-primary-light/40 to-white p-6 shadow-lg shadow-primary/5">
       <div className="flex items-center justify-between gap-2 mb-2">
         <p className="text-xs font-bold text-primary uppercase tracking-wider">
           {estimate.label}
