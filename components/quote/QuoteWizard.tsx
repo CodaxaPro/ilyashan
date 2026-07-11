@@ -8,6 +8,7 @@ import {
   syncObjectTypeWithService,
   validateQuoteStep,
 } from "@/lib/quote-validation";
+import { trackAnalytics } from "@/lib/analytics/client";
 import { applyConciergePrefillToWizard } from "@/lib/concierge/wizard-bridge";
 import { QuoteProgress } from "@/components/quote/QuoteProgress";
 import { scrollToQuoteWizardTop } from "@/components/quote/quote-wizard-scroll";
@@ -37,6 +38,7 @@ export function QuoteWizard() {
 
   useEffect(() => {
     scrollToQuoteWizardTop(wizardAnchorRef.current);
+    trackAnalytics("wizard_step", { payload: { step } });
   }, [step]);
 
   function updateData(updates: Partial<QuoteFormData>) {

@@ -107,6 +107,7 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-3">
             <a
               href={`tel:${siteConfig.contact.phone}`}
+              data-analytics-id="header-phone"
               className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
                 showSolid ? "text-primary" : "text-white"
               }`}
@@ -114,7 +115,7 @@ export function Header() {
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
-            <Button href={routes.angebot} variant="primary" size="sm">
+            <Button href={routes.angebot} variant="primary" size="sm" data-analytics-id="header-cta-angebot">
               {siteConfig.messaging.ctaPrimary}
             </Button>
           </div>
@@ -169,6 +170,7 @@ export function Header() {
             )}
             <a
               href={`tel:${siteConfig.contact.phone}`}
+              data-analytics-id="header-phone"
               className={`flex items-center gap-2 text-sm font-semibold py-2 ${
                 showSolid ? "text-primary" : "text-white"
               }`}

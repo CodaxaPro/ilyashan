@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { CookieConsent } from "@/components/CookieConsent";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { ConciergeWidget } from "@/components/ConciergeWidget";
 import { siteConfig } from "@/lib/config";
 import { getLocalBusinessSchema, getFAQSchema, getServiceSchema } from "@/lib/schema";
@@ -82,9 +83,11 @@ export default function RootLayout({
         ))}
       </head>
       <body className={`${inter.variable} antialiased`}>
-        {children}
-        <ConciergeWidget />
-        <CookieConsent />
+        <AnalyticsProvider>
+          {children}
+          <ConciergeWidget />
+          <CookieConsent />
+        </AnalyticsProvider>
       </body>
     </html>
   );

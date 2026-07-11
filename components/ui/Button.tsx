@@ -13,6 +13,7 @@ interface ButtonProps {
   type?: "button" | "submit";
   disabled?: boolean;
   "data-testid"?: string;
+  "data-analytics-id"?: string;
 }
 
 const variants = {
@@ -43,6 +44,7 @@ export function Button({
   type = "button",
   disabled = false,
   "data-testid": dataTestId,
+  "data-analytics-id": dataAnalyticsId,
 }: ButtonProps) {
   const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 ${variants[variant]} ${sizes[size]} ${className}`;
 
@@ -50,13 +52,25 @@ export function Button({
     const isExternal = href.startsWith("http") || href.startsWith("tel:") || href.startsWith("mailto:");
     if (isExternal) {
       return (
-        <a href={href} className={classes} onClick={onClick} onMouseDown={onMouseDown}>
+        <a
+          href={href}
+          className={classes}
+          onClick={onClick}
+          onMouseDown={onMouseDown}
+          data-analytics-id={dataAnalyticsId}
+        >
           {children}
         </a>
       );
     }
     return (
-      <Link href={href} className={classes} onClick={onClick} onMouseDown={onMouseDown}>
+      <Link
+        href={href}
+        className={classes}
+        onClick={onClick}
+        onMouseDown={onMouseDown}
+        data-analytics-id={dataAnalyticsId}
+      >
         {children}
       </Link>
     );
@@ -70,6 +84,7 @@ export function Button({
       disabled={disabled}
       className={classes}
       data-testid={dataTestId}
+      data-analytics-id={dataAnalyticsId}
     >
       {children}
     </button>
@@ -95,10 +110,15 @@ export function WhatsAppIcon({ className = "w-5 h-5" }: { className?: string }) 
 export function CTAButtons({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
-      <Button href={routes.angebot} variant="primary" size="lg">
+      <Button href={routes.angebot} variant="primary" size="lg" data-analytics-id="hero-cta-angebot">
         {siteConfig.messaging.ctaPrimary}
       </Button>
-      <Button href={`tel:${siteConfig.contact.phone}`} variant="outline" size="lg">
+      <Button
+        href={`tel:${siteConfig.contact.phone}`}
+        variant="outline"
+        size="lg"
+        data-analytics-id="hero-phone"
+      >
         <PhoneIcon />
         {siteConfig.contact.phoneDisplay}
       </Button>

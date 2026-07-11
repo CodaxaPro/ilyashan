@@ -5,6 +5,7 @@ import { routes } from "@/lib/routes";
 import type { QuoteFormData } from "@/lib/quote-form";
 import { getWhatsAppQuoteUrl } from "@/lib/whatsapp-quote";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
+import { trackAnalytics } from "@/lib/analytics/client";
 import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
 import { PhotoUploader } from "@/components/PhotoUploader";
@@ -45,6 +46,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "Senden fehlgeschlagen");
       trackRequestQuoteConversion(result.anfrageNr ?? undefined);
+      trackAnalytics("wizard_submit", { payload: { anfrageNr: result.anfrageNr } });
       setAnfrageNr(result.anfrageNr ?? null);
       setSubmitted(true);
     } catch (err) {

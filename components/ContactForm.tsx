@@ -3,9 +3,10 @@
 import { siteConfig } from "@/lib/config";
 import { routes } from "@/lib/routes";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
+import { trackAnalytics } from "@/lib/analytics/client";
 import { Button, PhoneIcon, WhatsAppIcon } from "@/components/ui/Button";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface ContactFormProps {
   compact?: boolean;
@@ -15,6 +16,10 @@ export function ContactForm({ compact = false }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    trackAnalytics("form_start", { payload: { form: "contact" } });
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,6 +43,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
       }
 
       trackRequestQuoteConversion();
+      trackAnalytics("form_submit", { payload: { form: "contact" } });
 
       setSubmitted(true);
     } catch (err) {

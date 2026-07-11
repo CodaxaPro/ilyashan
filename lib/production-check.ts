@@ -73,6 +73,17 @@ export function runProductionChecks(): ProductionCheckItem[] {
       : "NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO fehlt – Events ohne send_to",
   });
 
+  const supabaseReady =
+    hasEnv("SUPABASE_URL") && hasEnv("SUPABASE_SERVICE_ROLE_KEY");
+  checks.push({
+    id: "analytics",
+    label: "First-party Analytics (Supabase)",
+    status: supabaseReady ? "ok" : "warn",
+    detail: supabaseReady
+      ? "Supabase analytics store verbunden"
+      : "SUPABASE_URL/SERVICE_ROLE_KEY fehlt – /admin/analytics bleibt leer",
+  });
+
   return checks;
 }
 
