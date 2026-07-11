@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import {
   filterCalendarAppointments,
+  countAppointmentsByStatus,
   parseCalendarFilters,
 } from "@/lib/calendar/filters";
 import { formatMonthLabel } from "@/lib/calendar/month-range";
@@ -44,6 +45,7 @@ export async function GET(request: Request) {
   const today = toIsoDate(new Date());
 
   const { items, storage } = await fetchCalendarAppointments(range.from, range.to);
+  const statusCounts = countAppointmentsByStatus(items, filters);
   const filtered = sortAppointments(filterCalendarAppointments(items, filters));
   const byDay: Record<string, ReturnType<typeof sortAppointmentsForDay>> = {};
 
@@ -68,6 +70,7 @@ export async function GET(request: Request) {
     byDay,
     range,
     filters,
+    statusCounts,
     stats,
     upcoming,
     today,

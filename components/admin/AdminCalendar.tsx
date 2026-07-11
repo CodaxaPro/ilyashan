@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  APPOINTMENT_STATUS_COLORS,
-  APPOINTMENT_STATUS_LABELS_TR,
   canRescheduleAppointment,
 } from "@/lib/calendar/appointment-from-lead";
 import type { CalendarViewMode, CalendarFilters } from "@/lib/calendar/filters";
@@ -27,6 +25,8 @@ import { CalendarToolbar } from "@/components/admin/calendar/CalendarToolbar";
 import { CalendarUpcomingPanel } from "@/components/admin/calendar/CalendarUpcomingPanel";
 import { CalendarWeekView } from "@/components/admin/calendar/CalendarWeekView";
 import { CalendarExportPanel } from "@/components/admin/calendar/CalendarExportPanel";
+import { CalendarStatusChips } from "@/components/admin/calendar/CalendarStatusChips";
+import type { AppointmentStatus } from "@/lib/calendar/types";
 
 interface CalendarApiResponse {
   appointments: CalendarAppointment[];
@@ -41,6 +41,7 @@ interface CalendarApiResponse {
   storage: "supabase" | "kv-fallback";
   dbConfigured: boolean;
   icsFeed?: { configured: boolean; subscribeUrl: string | null };
+  statusCounts?: Record<AppointmentStatus, number>;
 }
 
 function buildQuery(
@@ -309,18 +310,20 @@ export function AdminCalendar() {
 
         {data && <CalendarStatsBar stats={data.stats} upcoming={data.upcoming} />}
 
-        <div className="flex flex-wrap gap-2 text-xs">
-          {(Object.keys(APPOINTMENT_STATUS_LABELS_TR) as Array<keyof typeof APPOINTMENT_STATUS_LABELS_TR>).map(
-            (key) => (
-              <span
-                key={key}
-                className={`px-2 py-1 rounded-full border ${APPOINTMENT_STATUS_COLORS[key]}`}
-              >
-                {APPOINTMENT_STATUS_LABELS_TR[key]}
-              </span>
-            )
-          )}
-        </div>
+        {data && (
+          <CalendarStatusChips
+            counts={
+              data.statusCounts ?? {
+                vorgeschlagen: data.stats.byStatus.vorgeschlagen ?? 0,
+                bestätigt: data.stats.byStatus.bestätigt ?? 0,
+                erledigt: data.stats.byStatus.erledigt ?? 0,
+                storniert: data.stats.byStatus.storniert ?? 0,
+              }
+            }
+            active={filters.status}
+            onChange={(status) => setFilters((prev) => ({ ...prev, status }))}
+          />
+        )}
       </AdminPanel>
 
       {loading ? (

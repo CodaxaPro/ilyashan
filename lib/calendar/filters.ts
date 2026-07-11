@@ -25,39 +25,59 @@ export function isPreferredRole(role: string): boolean {
   return role.startsWith("preferred-");
 }
 
+function matchesCalendarFilters(
+  item: CalendarAppointment,
+  filters: CalendarFilters,
+  options?: { includeStatus?: boolean }
+): boolean {
+  const includeStatus = options?.includeStatus ?? true;
+  const q = filters.search.trim().toLowerCase();
+
+  if (includeStatus && filters.status !== "all" && item.status !== filters.status) return false;
+  if (filters.kind !== "all" && item.kind !== filters.kind) return false;
+
+  if (filters.role === "actionable") {
+    if (isPreferredRole(item.role) && item.status !== "bestätigt") return false;
+  } else if (filters.role !== "all" && item.role !== filters.role) {
+    return false;
+  }
+
+  if (!q) return true;
+
+  const haystack = [
+    item.customerName,
+    item.city,
+    item.postalCode,
+    item.anfrageNr,
+    item.title,
+    item.customerPhone,
+    item.customerEmail,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(q);
+}
+
 export function filterCalendarAppointments(
   items: CalendarAppointment[],
   filters: CalendarFilters
 ): CalendarAppointment[] {
-  const q = filters.search.trim().toLowerCase();
+  return items.filter((item) => matchesCalendarFilters(item, filters));
+}
 
-  return items.filter((item) => {
-    if (filters.status !== "all" && item.status !== filters.status) return false;
-    if (filters.kind !== "all" && item.kind !== filters.kind) return false;
-
-    if (filters.role === "actionable") {
-      if (isPreferredRole(item.role) && item.status !== "bestätigt") return false;
-    } else if (filters.role !== "all" && item.role !== filters.role) {
-      return false;
-    }
-
-    if (!q) return true;
-
-    const haystack = [
-      item.customerName,
-      item.city,
-      item.postalCode,
-      item.anfrageNr,
-      item.title,
-      item.customerPhone,
-      item.customerEmail,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-
-    return haystack.includes(q);
-  });
+export function countAppointmentsByStatus(
+  items: CalendarAppointment[],
+  filters: CalendarFilters
+): Record<AppointmentStatus, number> {
+  const base = items.filter((item) => matchesCalendarFilters(item, filters, { includeStatus: false }));
+  return {
+    vorgeschlagen: base.filter((i) => i.status === "vorgeschlagen").length,
+    bestätigt: base.filter((i) => i.status === "bestätigt").length,
+    erledigt: base.filter((i) => i.status === "erledigt").length,
+    storniert: base.filter((i) => i.status === "storniert").length,
+  };
 }
 
 export function parseCalendarFilters(searchParams: URLSearchParams): CalendarFilters {

@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   DEFAULT_CALENDAR_FILTERS,
+  countAppointmentsByStatus,
   filterCalendarAppointments,
   isPreferredRole,
   parseCalendarFilters,
@@ -61,5 +62,22 @@ describe("calendar filters", () => {
   it("detects preferred roles", () => {
     assert.equal(isPreferredRole("preferred-1"), true);
     assert.equal(isPreferredRole("confirmed"), false);
+  });
+
+  it("counts by status without applying status filter", () => {
+    const items = [
+      appt({ status: "bestätigt" }),
+      appt({ id: "2", status: "vorgeschlagen", role: "proposed" }),
+      appt({ id: "3", status: "vorgeschlagen", role: "proposed" }),
+      appt({ id: "4", status: "storniert" }),
+    ];
+    const counts = countAppointmentsByStatus(items, {
+      ...DEFAULT_CALENDAR_FILTERS,
+      status: "bestätigt",
+    });
+    assert.equal(counts.bestätigt, 1);
+    assert.equal(counts.vorgeschlagen, 2);
+    assert.equal(counts.storniert, 1);
+    assert.equal(counts.erledigt, 0);
   });
 });

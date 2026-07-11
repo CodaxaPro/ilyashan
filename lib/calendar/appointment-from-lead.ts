@@ -22,6 +22,13 @@ export const APPOINTMENT_STATUS_LABELS_TR: Record<AppointmentStatus, string> = {
   storniert: "İptal",
 };
 
+export const APPOINTMENT_STATUS_ORDER: AppointmentStatus[] = [
+  "vorgeschlagen",
+  "bestätigt",
+  "erledigt",
+  "storniert",
+];
+
 export const APPOINTMENT_STATUS_COLORS: Record<AppointmentStatus, string> = {
   vorgeschlagen: "bg-amber-100 text-amber-900 border-amber-200",
   bestätigt: "bg-emerald-100 text-emerald-900 border-emerald-200",

@@ -39,6 +39,7 @@ export function CalendarFiltersBar({ filters, onChange }: CalendarFiltersBarProp
           <option value="bestätigt">Onaylandı</option>
           <option value="vorgeschlagen">Önerildi</option>
           <option value="erledigt">Tamamlandı</option>
+          <option value="storniert">İptal</option>
         </select>
       </label>
 

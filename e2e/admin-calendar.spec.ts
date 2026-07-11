@@ -42,6 +42,7 @@ test.describe("Admin Takvim v2", () => {
     await expect(page.getByTestId("calendar-upcoming-panel").or(page.getByTestId("calendar-upcoming-empty"))).toBeVisible();
     await expect(page.getByTestId("calendar-stats-bar")).toBeVisible();
     await expect(page.getByTestId("calendar-filters")).toBeVisible();
+    await expect(page.getByTestId("calendar-status-chips")).toBeVisible();
 
     const period = page.getByTestId("calendar-period-label");
     const before = await period.textContent();
