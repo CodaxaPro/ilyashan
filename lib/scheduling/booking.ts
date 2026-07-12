@@ -10,6 +10,7 @@ import {
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
 import { isCustomerArrivalTimeAllowed, deriveTimeSlotFromStartTime } from "@/lib/scheduling/customer-arrival-options";
+import { estimateJobHours } from "@/lib/scheduling/job-duration";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -40,6 +41,24 @@ function deriveMismatch(timeSlot: BookableTimeSlot, startTime: string): boolean 
   const derived = deriveTimeSlotFromStartTime(startTime);
   if (!derived || timeSlot === "flexibel") return false;
   return derived !== timeSlot;
+}
+
+/** Sets planned arrival + duration when the customer chose a specific time (not Flexibel). */
+function applyPlannedScheduleOnBooking(
+  appointment: LeadAppointment,
+  windowCount: number
+): LeadAppointment {
+  const plannedStartTime =
+    normalizeTimeInput(appointment.plannedStartTime) ??
+    normalizeTimeInput(appointment.preferredStartTime);
+  if (!plannedStartTime) return appointment;
+
+  return {
+    ...appointment,
+    plannedStartTime,
+    estimatedDurationHours:
+      appointment.estimatedDurationHours ?? estimateJobHours(windowCount),
+  };
 }
 
 export function applyCustomerBooking(
@@ -81,15 +100,18 @@ export function applyCustomerBooking(
       (staffConfig.autoAssign ? pickStaffForSlot(staffConfig, occupancy, proposed, timeSlot) : null) ??
       undefined;
 
-    const appointment: LeadAppointment = {
-      ...previous,
-      confirmedDate: proposed,
-      confirmedAt: now.toISOString(),
-      customerBookedAt: now.toISOString(),
-      timeSlot,
-      staffId,
-      proposedDate: undefined,
-    };
+    const appointment = applyPlannedScheduleOnBooking(
+      {
+        ...previous,
+        confirmedDate: proposed,
+        confirmedAt: now.toISOString(),
+        customerBookedAt: now.toISOString(),
+        timeSlot,
+        staffId,
+        proposedDate: undefined,
+      },
+      quote.windowCount
+    );
 
     return {
       ok: true,
@@ -121,16 +143,19 @@ export function applyCustomerBooking(
       (staffConfig.autoAssign ? pickStaffForSlot(staffConfig, occupancy, input.date, timeSlot) : null) ??
       undefined;
 
-    const appointment: LeadAppointment = {
-      ...previous,
-      confirmedDate: input.date,
-      confirmedAt: now.toISOString(),
-      customerBookedAt: now.toISOString(),
-      timeSlot,
-      preferredStartTime: preferredStartTime ?? previous.preferredStartTime,
-      staffId,
-      proposedDate: undefined,
-    };
+    const appointment = applyPlannedScheduleOnBooking(
+      {
+        ...previous,
+        confirmedDate: input.date,
+        confirmedAt: now.toISOString(),
+        customerBookedAt: now.toISOString(),
+        timeSlot,
+        preferredStartTime: preferredStartTime ?? previous.preferredStartTime,
+        staffId,
+        proposedDate: undefined,
+      },
+      quote.windowCount
+    );
 
     return {
       ok: true,

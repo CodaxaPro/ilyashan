@@ -55,6 +55,48 @@ describe("customer booking", () => {
     assert.equal(result.appointment?.timeSlot, "vormittag");
   });
 
+  it("auto-sets planned start and duration when customer picks a specific time", () => {
+    const result = applyCustomerBooking(lead({ appointment: {}, quote: { windowCount: 10 } }), DEFAULT_STAFF_CONFIG, [], {
+      action: "pick_slot",
+      date: "2026-05-20",
+      timeSlot: "vormittag",
+      preferredStartTime: "09:30",
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.appointment?.plannedStartTime, "09:30");
+    assert.equal(result.appointment?.estimatedDurationHours, 2.5);
+  });
+
+  it("does not set planned start for flexibel booking without specific time", () => {
+    const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
+      action: "pick_slot",
+      date: "2026-05-20",
+      timeSlot: "flexibel",
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.appointment?.plannedStartTime, undefined);
+    assert.equal(result.appointment?.estimatedDurationHours, undefined);
+  });
+
+  it("keeps admin planned start on confirm_proposed", () => {
+    const result = applyCustomerBooking(
+      lead({
+        appointment: {
+          proposedDate: "2026-05-12",
+          timeSlot: "vormittag",
+          plannedStartTime: "10:00",
+          estimatedDurationHours: 3,
+        },
+      }),
+      DEFAULT_STAFF_CONFIG,
+      [lead()],
+      { action: "confirm_proposed" }
+    );
+    assert.equal(result.ok, true);
+    assert.equal(result.appointment?.plannedStartTime, "10:00");
+    assert.equal(result.appointment?.estimatedDurationHours, 3);
+  });
+
   it("rejects invalid preferred start time", () => {
     const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
       action: "pick_slot",
