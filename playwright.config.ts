@@ -40,6 +40,7 @@ function webServerEnv(): Record<string, string> {
   const env: Record<string, string> = {
     CONCIERGE_ENABLED: "true",
     ADMIN_PASSWORD: E2E_ADMIN_PASSWORD,
+    E2E_MODE: "true",
   };
   for (const key of WEB_SERVER_ENV_KEYS) {
     if (process.env[key]) env[key] = process.env[key]!;

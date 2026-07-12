@@ -10,6 +10,8 @@ import {
   formatTimeDe,
   resolveAppointmentTimePlan,
 } from "@/lib/scheduling/appointment-times";
+import { buildTerminPortalSummary, canCustomerReschedule } from "@/lib/termin-portal";
+import { toIsoDate } from "@/lib/calendar/week-range";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -40,6 +42,10 @@ export async function GET(request: Request) {
         }`
       : undefined;
 
+  const today = toIsoDate(new Date());
+  const canReschedule = canCustomerReschedule(lead, today);
+  const portal = buildTerminPortalSummary(lead);
+
   return NextResponse.json({
     lead: {
       id: lead.id,
@@ -59,8 +65,11 @@ export async function GET(request: Request) {
       postalCode: quote?.postalCode,
     },
     availability,
+    portal,
     canConfirmProposed: Boolean(proposedDate && !confirmedDate),
-    canPickSlot: !confirmedDate,
+    canPickSlot: !confirmedDate || canReschedule,
+    canReschedule,
     alreadyBooked: Boolean(confirmedDate),
+    pdfUrl: portal?.canDownloadPdf ? `/api/termin/pdf?token=${encodeURIComponent(token ?? "")}` : undefined,
   });
 }

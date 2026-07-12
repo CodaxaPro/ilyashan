@@ -5,7 +5,7 @@ import { Footer } from "@/components/Footer";
 import { TerminBookingClient } from "@/components/termin/TerminBookingClient";
 
 export const metadata: Metadata = {
-  title: "Termin bestätigen",
+  title: "Meine Anfrage",
   robots: { index: false, follow: false },
 };
 
@@ -13,7 +13,7 @@ function TerminPageInner({ searchParams }: { searchParams: { token?: string } })
   const token = searchParams.token?.trim();
   if (!token) {
     return (
-      <div className="max-w-lg mx-auto text-center py-16 px-4">
+      <div className="max-w-lg mx-auto text-center py-16 px-4" data-testid="termin-incomplete">
         <h1 className="text-2xl font-bold text-foreground mb-3">Link unvollständig</h1>
         <p className="text-muted">Bitte öffnen Sie den Link aus Ihrer E-Mail erneut.</p>
       </div>
