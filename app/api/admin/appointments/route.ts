@@ -22,6 +22,8 @@ import {
   getCalendarIcsToken,
   isCalendarFeedConfigured,
 } from "@/lib/calendar/feed-config";
+import { getStaffConfig } from "@/lib/staff/config";
+import { toStaffSummaries } from "@/lib/calendar/staff-lookup";
 
 async function requireAdmin() {
   if (!isAdminConfigured()) {
@@ -45,8 +47,13 @@ export async function GET(request: Request) {
   const today = toIsoDate(new Date());
 
   const { items, storage } = await fetchCalendarAppointments(range.from, range.to);
-  const statusCounts = countAppointmentsByStatus(items, filters);
-  const filtered = sortAppointments(filterCalendarAppointments(items, filters));
+  const staffConfig = await getStaffConfig();
+  const staffMembers = toStaffSummaries(staffConfig);
+  const staffNames = Object.fromEntries(staffMembers.map((m) => [m.id, m.name]));
+  const filterOptions = { staffNames };
+
+  const statusCounts = countAppointmentsByStatus(items, filters, filterOptions);
+  const filtered = sortAppointments(filterCalendarAppointments(items, filters, filterOptions));
   const byDay: Record<string, ReturnType<typeof sortAppointmentsForDay>> = {};
 
   const dayKeys =
@@ -91,6 +98,7 @@ export async function GET(request: Request) {
       configured: isCalendarFeedConfigured(),
       subscribeUrl: icsFeedUrl,
     },
+    staffMembers,
   });
 }
 

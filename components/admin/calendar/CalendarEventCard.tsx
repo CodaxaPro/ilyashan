@@ -9,11 +9,15 @@ import {
 } from "@/lib/calendar/appointment-from-lead";
 import { buildGoogleCalendarAddUrl, isGoogleCalendarLinkVisible } from "@/lib/calendar/google-calendar";
 import type { CalendarAppointment } from "@/lib/calendar/types";
+import type { StaffMemberSummary } from "@/lib/calendar/staff-lookup";
+import { resolveStaffMember } from "@/lib/calendar/staff-lookup";
 import { formatGermanDate } from "@/lib/quote-form";
-import { formatTimeDe } from "@/lib/scheduling/appointment-times";
+import { formatTimeDe, formatDurationDe } from "@/lib/scheduling/appointment-times";
+import { StaffBadge } from "@/components/admin/calendar/StaffBadge";
 
 interface CalendarEventCardProps {
   item: CalendarAppointment;
+  staffMembers?: StaffMemberSummary[];
   compact?: boolean;
   draggable?: boolean;
   dragging?: boolean;
@@ -24,6 +28,7 @@ interface CalendarEventCardProps {
 
 export function CalendarEventCard({
   item,
+  staffMembers = [],
   compact = false,
   draggable = false,
   dragging = false,
@@ -31,29 +36,57 @@ export function CalendarEventCard({
   onDragStart,
   onDragEnd,
 }: CalendarEventCardProps) {
+  const staff = resolveStaffMember(item.staffId, staffMembers);
+  const accentColor = staff?.color ?? "#94a3b8";
+  const timeLabel = item.plannedStartTime
+    ? formatTimeDe(item.plannedStartTime)
+    : item.timeSlot
+      ? TIME_SLOT_LABELS_TR[item.timeSlot] ?? item.timeSlot
+      : null;
+
   return (
     <div
       data-testid={`calendar-event-${item.id}`}
       draggable={draggable}
       onDragStart={(e) => onDragStart?.(item, e)}
       onDragEnd={onDragEnd}
-      className={`rounded-xl border p-2 text-xs cursor-pointer transition-shadow hover:shadow-md ${APPOINTMENT_STATUS_COLORS[item.status]} ${dragging ? "opacity-50" : ""}`}
+      className={`group relative rounded-xl border bg-white shadow-sm cursor-pointer transition-all hover:shadow-md hover:-translate-y-px ${
+        dragging ? "opacity-50 scale-[0.98]" : ""
+      } ${compact ? "p-2" : "p-2.5"}`}
+      style={{ borderLeftWidth: 4, borderLeftColor: accentColor }}
       onClick={() => onOpen(item.leadId)}
     >
-      <div className="flex items-start justify-between gap-1 mb-1">
-        <p className="font-bold truncate">{item.customerName}</p>
-        {!compact && item.anfrageNr && (
-          <span className="text-[9px] font-mono opacity-70 shrink-0">{item.anfrageNr}</span>
-        )}
+      <div className="flex items-start justify-between gap-2 mb-1.5">
+        <div className="min-w-0 flex-1">
+          {timeLabel && (
+            <p className="text-[10px] font-bold uppercase tracking-wide text-muted mb-0.5">
+              {timeLabel}
+              {item.estimatedDurationHours
+                ? ` · ${formatDurationDe(item.estimatedDurationHours)}`
+                : ""}
+            </p>
+          )}
+          <p className={`font-bold text-foreground truncate ${compact ? "text-xs" : "text-sm"}`}>
+            {item.customerName}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${APPOINTMENT_STATUS_COLORS[item.status]}`}
+        >
+          {APPOINTMENT_STATUS_LABELS_TR[item.status]}
+        </span>
       </div>
 
-      <p className="text-[10px] opacity-80 truncate">
-        {item.city || item.postalCode || "—"}
+      <p className="text-[10px] text-muted truncate">
+        {[item.city, item.postalCode].filter(Boolean).join(" · ") || "—"}
         {item.windowCount ? ` · ${item.windowCount} Flügel` : ""}
       </p>
 
-      <div className="flex flex-wrap gap-1 mt-1.5">
-        <span className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${appointmentRoleColorClass(String(item.role))}`}>
+      <div className="flex flex-wrap items-center gap-1 mt-2">
+        <StaffBadge member={staff} size="sm" />
+        <span
+          className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${appointmentRoleColorClass(String(item.role))}`}
+        >
           {appointmentRoleLabelTr(String(item.role))}
         </span>
         {item.kind === "wartung" && (
@@ -63,18 +96,11 @@ export function CalendarEventCard({
         )}
       </div>
 
-      {item.timeSlot && (
-        <p className="text-[10px] mt-1 font-medium">
-          {TIME_SLOT_LABELS_TR[item.timeSlot] ?? item.timeSlot}
-          {item.plannedStartTime ? ` · ${formatTimeDe(item.plannedStartTime)}` : ""}
-          {item.staffId ? ` · ${item.staffId}` : ""}
-        </p>
-      )}
-
-      <p className="text-[10px] mt-1">{APPOINTMENT_STATUS_LABELS_TR[item.status]}</p>
-
       {!compact && (
-        <div className="mt-1.5 flex flex-wrap gap-2 text-[10px]">
+        <div className="mt-2 pt-2 border-t border-border/60 flex flex-wrap items-center gap-2 text-[10px]">
+          {item.anfrageNr && (
+            <span className="font-mono text-muted">{item.anfrageNr}</span>
+          )}
           {item.customerPhone && (
             <a
               href={`tel:${item.customerPhone.replace(/\s/g, "")}`}
@@ -96,9 +122,7 @@ export function CalendarEventCard({
               Google
             </a>
           )}
-          {!compact && (
-            <span className="text-muted">{formatGermanDate(item.eventDate)}</span>
-          )}
+          <span className="text-muted ml-auto">{formatGermanDate(item.eventDate)}</span>
         </div>
       )}
     </div>

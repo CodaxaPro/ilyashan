@@ -41,15 +41,17 @@ export function CalendarToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-xl border border-border overflow-hidden">
+        <div className="inline-flex rounded-xl border border-border overflow-hidden shadow-sm bg-white">
           {(["week", "month", "agenda"] as CalendarViewMode[]).map((mode) => (
             <button
               key={mode}
               type="button"
               data-testid={`calendar-view-${mode}`}
               onClick={() => onViewChange(mode)}
-              className={`px-3 py-2 text-sm font-semibold ${
-                view === mode ? "bg-primary text-white" : "bg-white text-foreground hover:bg-slate-50"
+              className={`px-4 py-2 text-sm font-semibold transition ${
+                view === mode
+                  ? "bg-primary text-white shadow-inner"
+                  : "bg-white text-foreground hover:bg-slate-50"
               }`}
             >
               {mode === "week" ? "Hafta" : mode === "month" ? "Ay" : "Liste"}

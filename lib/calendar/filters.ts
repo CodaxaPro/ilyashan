@@ -12,6 +12,7 @@ export interface CalendarFilters {
   status: AppointmentStatus | "all";
   kind: AppointmentKind | "all";
   role: AppointmentRole | "all" | "actionable";
+  staffId: string | "all" | "unassigned";
 }
 
 export const DEFAULT_CALENDAR_FILTERS: CalendarFilters = {
@@ -19,6 +20,7 @@ export const DEFAULT_CALENDAR_FILTERS: CalendarFilters = {
   status: "all",
   kind: "all",
   role: "actionable",
+  staffId: "all",
 };
 
 export function isPreferredRole(role: string): boolean {
@@ -28,7 +30,7 @@ export function isPreferredRole(role: string): boolean {
 function matchesCalendarFilters(
   item: CalendarAppointment,
   filters: CalendarFilters,
-  options?: { includeStatus?: boolean }
+  options?: { includeStatus?: boolean; staffNames?: Record<string, string> }
 ): boolean {
   const includeStatus = options?.includeStatus ?? true;
   const q = filters.search.trim().toLowerCase();
@@ -42,8 +44,15 @@ function matchesCalendarFilters(
     return false;
   }
 
+  if (filters.staffId === "unassigned") {
+    if (item.staffId) return false;
+  } else if (filters.staffId !== "all" && item.staffId !== filters.staffId) {
+    return false;
+  }
+
   if (!q) return true;
 
+  const staffName = item.staffId ? options?.staffNames?.[item.staffId] : undefined;
   const haystack = [
     item.customerName,
     item.city,
@@ -52,6 +61,8 @@ function matchesCalendarFilters(
     item.title,
     item.customerPhone,
     item.customerEmail,
+    item.staffId,
+    staffName,
   ]
     .filter(Boolean)
     .join(" ")
@@ -62,16 +73,20 @@ function matchesCalendarFilters(
 
 export function filterCalendarAppointments(
   items: CalendarAppointment[],
-  filters: CalendarFilters
+  filters: CalendarFilters,
+  options?: { staffNames?: Record<string, string> }
 ): CalendarAppointment[] {
-  return items.filter((item) => matchesCalendarFilters(item, filters));
+  return items.filter((item) => matchesCalendarFilters(item, filters, options));
 }
 
 export function countAppointmentsByStatus(
   items: CalendarAppointment[],
-  filters: CalendarFilters
+  filters: CalendarFilters,
+  options?: { staffNames?: Record<string, string> }
 ): Record<AppointmentStatus, number> {
-  const base = items.filter((item) => matchesCalendarFilters(item, filters, { includeStatus: false }));
+  const base = items.filter((item) =>
+    matchesCalendarFilters(item, filters, { includeStatus: false, staffNames: options?.staffNames })
+  );
   return {
     vorgeschlagen: base.filter((i) => i.status === "vorgeschlagen").length,
     bestätigt: base.filter((i) => i.status === "bestätigt").length,
@@ -85,8 +100,12 @@ export function parseCalendarFilters(searchParams: URLSearchParams): CalendarFil
   const kind = searchParams.get("kind") as CalendarFilters["kind"] | null;
   const role = searchParams.get("role") as CalendarFilters["role"] | null;
 
+  const staffId = searchParams.get("staffId");
+
   return {
     search: searchParams.get("search") ?? "",
+    staffId:
+      staffId === "unassigned" || (staffId && staffId !== "all") ? staffId : "all",
     status:
       status === "vorgeschlagen" ||
       status === "bestätigt" ||

@@ -64,6 +64,38 @@ describe("calendar filters", () => {
     assert.equal(isPreferredRole("confirmed"), false);
   });
 
+  it("filters by staff id and unassigned", () => {
+    const items = [
+      appt({ staffId: "team-1" }),
+      appt({ id: "2", staffId: "team-2" }),
+      appt({ id: "3" }),
+    ];
+    assert.equal(
+      filterCalendarAppointments(items, { ...DEFAULT_CALENDAR_FILTERS, staffId: "team-1" }).length,
+      1
+    );
+    assert.equal(
+      filterCalendarAppointments(items, { ...DEFAULT_CALENDAR_FILTERS, staffId: "unassigned" }).length,
+      1
+    );
+  });
+
+  it("searches by staff name", () => {
+    const items = [appt({ staffId: "team-1" })];
+    assert.equal(
+      filterCalendarAppointments(items, { ...DEFAULT_CALENDAR_FILTERS, search: "ekip 1" }, {
+        staffNames: { "team-1": "Ekip 1" },
+      }).length,
+      1
+    );
+  });
+
+  it("parses staffId param", () => {
+    const params = new URLSearchParams("staffId=team-1");
+    assert.equal(parseCalendarFilters(params).staffId, "team-1");
+    assert.equal(parseCalendarFilters(new URLSearchParams("staffId=unassigned")).staffId, "unassigned");
+  });
+
   it("counts by status without applying status filter", () => {
     const items = [
       appt({ status: "bestätigt" }),

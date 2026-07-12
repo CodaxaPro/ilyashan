@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import { fetchCalendarAppointments } from "@/lib/calendar/calendar-service";
 import { filterCalendarAppointments, parseCalendarFilters } from "@/lib/calendar/filters";
+import { getStaffConfig } from "@/lib/staff/config";
+import { toStaffSummaries } from "@/lib/calendar/staff-lookup";
 import { buildIcsCalendar } from "@/lib/calendar/ics";
 import { calendarUidHost } from "@/lib/calendar/feed-config";
 import { resolveCalendarQueryRange } from "@/lib/calendar/query-range";
@@ -29,7 +31,11 @@ export async function GET(request: Request) {
   const filters = parseCalendarFilters(searchParams);
 
   const { items } = await fetchCalendarAppointments(range.from, range.to);
-  const filtered = sortAppointments(filterCalendarAppointments(items, filters));
+  const staffMembers = toStaffSummaries(await getStaffConfig());
+  const staffNames = Object.fromEntries(staffMembers.map((m) => [m.id, m.name]));
+  const filtered = sortAppointments(
+    filterCalendarAppointments(items, filters, { staffNames })
+  );
 
   const ics = buildIcsCalendar(filtered, {
     calendarName: "Ilyashan Admin Termine",

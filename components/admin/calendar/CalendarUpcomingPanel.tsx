@@ -1,11 +1,13 @@
 "use client";
 
 import type { UpcomingGroup, UpcomingSummary } from "@/lib/calendar/upcoming";
+import type { StaffMemberSummary } from "@/lib/calendar/staff-lookup";
 import { CalendarEventCard } from "@/components/admin/calendar/CalendarEventCard";
 
 interface CalendarUpcomingPanelProps {
   summary: UpcomingSummary;
   groups: UpcomingGroup[];
+  staffMembers?: StaffMemberSummary[];
   onOpenLead: (leadId: string) => void;
   onJumpToDate?: (iso: string) => void;
   compact?: boolean;
@@ -14,6 +16,7 @@ interface CalendarUpcomingPanelProps {
 export function CalendarUpcomingPanel({
   summary,
   groups,
+  staffMembers = [],
   onOpenLead,
   onJumpToDate,
   compact = false,
@@ -48,7 +51,12 @@ export function CalendarUpcomingPanel({
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
               {group.items.map((item) => (
                 <div key={item.id} className="relative">
-                  <CalendarEventCard item={item} compact onOpen={onOpenLead} />
+                  <CalendarEventCard
+                    item={item}
+                    staffMembers={staffMembers}
+                    compact
+                    onOpen={onOpenLead}
+                  />
                   {onJumpToDate && (
                     <button
                       type="button"

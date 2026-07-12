@@ -1,16 +1,18 @@
 "use client";
 
 import type { CalendarAppointment } from "@/lib/calendar/types";
+import type { StaffMemberSummary } from "@/lib/calendar/staff-lookup";
 import { formatGermanDate } from "@/lib/quote-form";
 import { CalendarEventCard } from "@/components/admin/calendar/CalendarEventCard";
 import { weekdayLabelTr } from "@/lib/calendar/week-range";
 
 interface CalendarAgendaViewProps {
   items: CalendarAppointment[];
+  staffMembers: StaffMemberSummary[];
   onOpenLead: (leadId: string) => void;
 }
 
-export function CalendarAgendaView({ items, onOpenLead }: CalendarAgendaViewProps) {
+export function CalendarAgendaView({ items, staffMembers, onOpenLead }: CalendarAgendaViewProps) {
   if (items.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-white p-8 text-center text-muted text-sm" data-testid="calendar-agenda-empty">
@@ -31,9 +33,14 @@ export function CalendarAgendaView({ items, onOpenLead }: CalendarAgendaViewProp
             </h3>
             <span className="text-xs text-muted">{dayItems.length} iş</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {dayItems.map((item) => (
-              <CalendarEventCard key={item.id} item={item} onOpen={onOpenLead} />
+              <CalendarEventCard
+                key={item.id}
+                item={item}
+                staffMembers={staffMembers}
+                onOpen={onOpenLead}
+              />
             ))}
           </div>
         </section>

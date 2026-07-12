@@ -26,7 +26,10 @@ import { CalendarUpcomingPanel } from "@/components/admin/calendar/CalendarUpcom
 import { CalendarWeekView } from "@/components/admin/calendar/CalendarWeekView";
 import { CalendarExportPanel } from "@/components/admin/calendar/CalendarExportPanel";
 import { CalendarStatusChips } from "@/components/admin/calendar/CalendarStatusChips";
+import { StaffLegend } from "@/components/admin/calendar/StaffLegend";
 import type { AppointmentStatus } from "@/lib/calendar/types";
+import type { StaffMemberSummary } from "@/lib/calendar/staff-lookup";
+import { countAppointmentsByStaff } from "@/lib/calendar/staff-lookup";
 
 interface CalendarApiResponse {
   appointments: CalendarAppointment[];
@@ -42,6 +45,7 @@ interface CalendarApiResponse {
   dbConfigured: boolean;
   icsFeed?: { configured: boolean; subscribeUrl: string | null };
   statusCounts?: Record<AppointmentStatus, number>;
+  staffMembers?: StaffMemberSummary[];
 }
 
 function buildQuery(
@@ -58,6 +62,7 @@ function buildQuery(
   if (filters.status !== "all") params.set("status", filters.status);
   if (filters.kind !== "all") params.set("kind", filters.kind);
   if (filters.role !== "actionable") params.set("role", filters.role);
+  if (filters.staffId !== "all") params.set("staffId", filters.staffId);
   return params.toString();
 }
 
@@ -204,12 +209,17 @@ export function AdminCalendar() {
     setMonth(m);
   }
 
+  const staffCounts = useMemo(
+    () => (data ? countAppointmentsByStaff(data.appointments, data.staffMembers ?? []) : {}),
+    [data]
+  );
+
   const monthWeeks: MonthWeekRow[] = monthGrid.weeks;
 
   return (
     <AdminShell
       title="Takvim"
-      subtitle="Haftalık, aylık ve liste görünümü · yaklaşan termin uyarıları"
+      subtitle="Ekip planlaması · haftalık/aylık görünüm · sürükle-bırak"
       onRefresh={() => void load()}
       onLogout={logout}
       actions={
@@ -247,6 +257,7 @@ export function AdminCalendar() {
           <CalendarUpcomingPanel
             summary={data.upcoming}
             groups={upcomingGroups}
+            staffMembers={data.staffMembers}
             onOpenLead={(id) => void openLead(id)}
             onJumpToDate={jumpToDate}
           />
@@ -302,6 +313,15 @@ export function AdminCalendar() {
 
         <CalendarFiltersBar filters={filters} onChange={setFilters} />
 
+        {data?.staffMembers && data.staffMembers.length > 0 && (
+          <StaffLegend
+            members={data.staffMembers}
+            counts={staffCounts}
+            activeStaffId={filters.staffId}
+            onSelect={(staffId) => setFilters((prev) => ({ ...prev, staffId }))}
+          />
+        )}
+
         <CalendarExportPanel
           exportUrl={exportUrl}
           feedConfigured={data?.icsFeed?.configured ?? false}
@@ -339,6 +359,7 @@ export function AdminCalendar() {
               days={week.days}
               byDay={data.byDay}
               dayStats={data.stats.byDay}
+              staffMembers={data.staffMembers ?? []}
               today={data.today}
               draggingId={draggingId}
               onOpenLead={(id) => void openLead(id)}
@@ -356,13 +377,18 @@ export function AdminCalendar() {
             <CalendarMonthView
               weeks={monthWeeks}
               byDay={data.byDay}
+              staffMembers={data.staffMembers ?? []}
               today={data.today}
               onSelectDay={jumpToDate}
             />
           )}
 
           {view === "agenda" && (
-            <CalendarAgendaView items={data.appointments} onOpenLead={(id) => void openLead(id)} />
+            <CalendarAgendaView
+              items={data.appointments}
+              staffMembers={data.staffMembers ?? []}
+              onOpenLead={(id) => void openLead(id)}
+            />
           )}
         </>
       ) : null}

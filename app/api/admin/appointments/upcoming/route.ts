@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/admin-auth";
 import { filterCalendarAppointments, parseCalendarFilters } from "@/lib/calendar/filters";
+import { getStaffConfig } from "@/lib/staff/config";
+import { toStaffSummaries } from "@/lib/calendar/staff-lookup";
 import { groupUpcomingAppointments, buildUpcomingSummary } from "@/lib/calendar/upcoming";
 import { resolveUpcomingFetchRange } from "@/lib/calendar/query-range";
 import { fetchCalendarAppointments } from "@/lib/calendar/calendar-service";
@@ -32,7 +34,11 @@ export async function GET(request: Request) {
 
   const { items, storage } = await fetchCalendarAppointments(from, to);
   const filters = parseCalendarFilters(searchParams);
-  const filtered = sortAppointments(filterCalendarAppointments(items, filters));
+  const staffMembers = toStaffSummaries(await getStaffConfig());
+  const staffNames = Object.fromEntries(staffMembers.map((m) => [m.id, m.name]));
+  const filtered = sortAppointments(
+    filterCalendarAppointments(items, filters, { staffNames })
+  );
   const summary = buildUpcomingSummary(filtered, today);
   const groups = groupUpcomingAppointments(filtered, today, false).map((group) => ({
     ...group,
