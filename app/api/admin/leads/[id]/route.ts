@@ -69,6 +69,8 @@ async function sendLeadEmail(
     proposedDate?: string;
     note?: string;
     terminUrl?: string | null;
+    appointment?: StoredLead["appointment"];
+    windowCount?: number;
   }
 ) {
   const quote = mergeQuote(lead.quote);
@@ -147,6 +149,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     confirmedDate: body.confirmedDate,
     timeSlot: body.timeSlot,
     staffId: body.staffId,
+    preferredStartTime: body.preferredStartTime,
+    plannedStartTime: body.plannedStartTime,
+    estimatedDurationHours: body.estimatedDurationHours,
     appointmentNote: body.appointmentNote,
     emailAction:
       body.emailAction ??
@@ -188,12 +193,15 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   if (emailAction && lead.source === "quote") {
     const origin = new URL(request.url).origin;
     const terminUrl = buildTerminPageUrl(origin, lead.id);
+    const quote = mergeQuote(lead.quote);
     const result = await sendLeadEmail(emailAction, lead, {
       confirmedDate: appointment.confirmedDate ?? patchInput.confirmedDate,
       previousConfirmedDate,
       proposedDate: appointment.proposedDate ?? patchInput.proposedDate,
       note: appointment.note,
       terminUrl: emailAction === "propose" ? terminUrl : null,
+      appointment,
+      windowCount: quote?.windowCount,
     });
     emailSent = result.emailSent;
     emailError = result.emailError;

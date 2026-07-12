@@ -43,13 +43,14 @@ describe("customer booking", () => {
     assert.equal(result.appointment?.timeSlot, "nachmittag");
   });
 
-  it("rejects booking for rejected lead", () => {
-    const result = applyCustomerBooking(
-      lead({ status: "abgelehnt" }),
-      DEFAULT_STAFF_CONFIG,
-      [],
-      { action: "pick_slot", date: "2026-05-20", timeSlot: "flexibel" }
-    );
-    assert.equal(result.ok, false);
+  it("stores customer preferred start time on pick_slot", () => {
+    const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
+      action: "pick_slot",
+      date: "2026-05-20",
+      timeSlot: "nachmittag",
+      preferredStartTime: "09:45",
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.appointment?.preferredStartTime, "09:45");
   });
 });

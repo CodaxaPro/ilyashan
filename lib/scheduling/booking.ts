@@ -8,6 +8,7 @@ import {
   resolveLeadTimeSlot,
 } from "@/lib/scheduling/slot-engine";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
+import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -15,6 +16,7 @@ export interface BookingInput {
   action: BookingAction;
   date?: string;
   timeSlot?: BookableTimeSlot;
+  preferredStartTime?: string;
 }
 
 export interface BookingResult {
@@ -94,6 +96,7 @@ export function applyCustomerBooking(
       return { ok: false, error: "Bitte wählen Sie ein gültiges Datum." };
     }
     const timeSlot = input.timeSlot ?? "flexibel";
+    const preferredStartTime = normalizeTimeInput(input.preferredStartTime);
     const check = isSlotAvailable(staffConfig, occupancy, input.date, timeSlot, {
       excludeLeadId: lead.id,
     });
@@ -111,6 +114,7 @@ export function applyCustomerBooking(
       confirmedAt: now.toISOString(),
       customerBookedAt: now.toISOString(),
       timeSlot,
+      preferredStartTime: preferredStartTime ?? previous.preferredStartTime,
       staffId,
       proposedDate: undefined,
     };

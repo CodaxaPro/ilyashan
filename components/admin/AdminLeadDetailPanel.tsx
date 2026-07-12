@@ -19,6 +19,13 @@ import {
 } from "@/lib/lead-workflow";
 import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
+import { estimateJobHours } from "@/lib/scheduling/job-duration";
+import {
+  computePlannedEndTime,
+  formatDurationDe,
+  formatTimeDe,
+  suggestDefaultStartForSlot,
+} from "@/lib/scheduling/appointment-times";
 
 export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
@@ -51,6 +58,9 @@ function syncFormFromLead(lead: StoredLead) {
     appointmentNote: lead.appointment?.note ?? "",
     timeSlot: lead.appointment?.timeSlot ?? "flexibel",
     staffId: lead.appointment?.staffId ?? "",
+    preferredStartTime: lead.appointment?.preferredStartTime ?? "",
+    plannedStartTime: lead.appointment?.plannedStartTime ?? "",
+    estimatedDurationHours: lead.appointment?.estimatedDurationHours ?? ("" as const),
   };
 }
 
@@ -65,6 +75,11 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   const [appointmentNote, setAppointmentNote] = useState(lead.appointment?.note ?? "");
   const [timeSlot, setTimeSlot] = useState<LeadTimeSlot>(lead.appointment?.timeSlot ?? "flexibel");
   const [staffId, setStaffId] = useState(lead.appointment?.staffId ?? "");
+  const [preferredStartTime, setPreferredStartTime] = useState(lead.appointment?.preferredStartTime ?? "");
+  const [plannedStartTime, setPlannedStartTime] = useState(lead.appointment?.plannedStartTime ?? "");
+  const [estimatedDurationHours, setEstimatedDurationHours] = useState<number | "">(
+    lead.appointment?.estimatedDurationHours ?? ""
+  );
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [terminUrl, setTerminUrl] = useState<string | null>(null);
   const [capacityHint, setCapacityHint] = useState<string | null>(null);
@@ -83,7 +98,53 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     setAppointmentNote(next.appointmentNote);
     setTimeSlot(next.timeSlot as LeadTimeSlot);
     setStaffId(next.staffId);
+    setPreferredStartTime(next.preferredStartTime);
+    setPlannedStartTime(next.plannedStartTime);
+    setEstimatedDurationHours(next.estimatedDurationHours);
   }, [lead]);
+
+  const plannedEndTime = useMemo(() => {
+    if (!plannedStartTime || estimatedDurationHours === "") return null;
+    return computePlannedEndTime(plannedStartTime, Number(estimatedDurationHours));
+  }, [plannedStartTime, estimatedDurationHours]);
+
+  useEffect(() => {
+    if (estimatedDurationHours !== "" || !quote?.windowCount) return;
+    if (!confirmedDate && !proposedDate) return;
+    setEstimatedDurationHours(estimateJobHours(quote.windowCount));
+  }, [quote?.windowCount, confirmedDate, proposedDate, estimatedDurationHours]);
+
+  useEffect(() => {
+    if (plannedStartTime) return;
+    const suggested = suggestDefaultStartForSlot(timeSlot);
+    if (suggested && (confirmedDate || proposedDate)) {
+      setPlannedStartTime(suggested);
+    }
+  }, [timeSlot, confirmedDate, proposedDate, plannedStartTime]);
+
+  const draftAppointment = useMemo(
+    () => ({
+      proposedDate: proposedDate || undefined,
+      confirmedDate: confirmedDate || undefined,
+      timeSlot,
+      staffId: staffId || undefined,
+      preferredStartTime: preferredStartTime || undefined,
+      plannedStartTime: plannedStartTime || undefined,
+      estimatedDurationHours:
+        estimatedDurationHours === "" ? undefined : Number(estimatedDurationHours),
+      note: appointmentNote || undefined,
+    }),
+    [
+      proposedDate,
+      confirmedDate,
+      timeSlot,
+      staffId,
+      preferredStartTime,
+      plannedStartTime,
+      estimatedDurationHours,
+      appointmentNote,
+    ]
+  );
 
   useEffect(() => {
     void fetch("/api/admin/staff")
@@ -134,6 +195,8 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
         previousConfirmedDate: lead.appointment?.confirmedDate,
         proposedDate: proposedDate || undefined,
         note: appointmentNote || undefined,
+        appointment: draftAppointment,
+        windowCount: quote?.windowCount,
       })
     : null;
 
@@ -166,6 +229,9 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           appointmentNote: appointmentNote || undefined,
           timeSlot,
           staffId: staffId || undefined,
+          preferredStartTime: preferredStartTime || undefined,
+          plannedStartTime: plannedStartTime || undefined,
+          estimatedDurationHours: estimatedDurationHours === "" ? undefined : estimatedDurationHours,
           emailAction,
         }),
       });
@@ -181,6 +247,9 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
       setAppointmentNote(synced.appointmentNote);
       setTimeSlot(synced.timeSlot as LeadTimeSlot);
       setStaffId(synced.staffId);
+      setPreferredStartTime(synced.preferredStartTime);
+      setPlannedStartTime(synced.plannedStartTime);
+      setEstimatedDurationHours(synced.estimatedDurationHours);
       onUpdated(updated);
 
       if (emailAction !== "none") {
@@ -427,6 +496,12 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 </AdminPanel>
               )}
 
+              {lead.appointment?.preferredStartTime && (
+                <p className="text-xs text-muted">
+                  Müşteri Wunsch-Uhrzeit: {formatTimeDe(lead.appointment.preferredStartTime)}
+                </p>
+              )}
+
               <label className="block text-sm">
                 <span className="text-muted">Onaylanan termin (düzenlenebilir)</span>
                 <input
@@ -442,6 +517,47 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                   className="mt-1 w-full rounded-xl border border-border px-3 py-2 disabled:opacity-50"
                 />
               </label>
+
+              <AdminPanel className="p-4 space-y-3 bg-slate-50">
+                <p className="text-xs font-semibold text-muted uppercase">Einsatzplanung (müşteriye gider)</p>
+
+                <label className="block text-sm">
+                  <span className="text-muted">Geplante Ankunft (Start)</span>
+                  <input
+                    type="time"
+                    value={plannedStartTime}
+                    onChange={(e) => setPlannedStartTime(e.target.value)}
+                    className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                  />
+                </label>
+
+                <label className="block text-sm">
+                  <span className="text-muted">Geschätzte Dauer (Stunden)</span>
+                  <input
+                    type="number"
+                    min={0.5}
+                    max={12}
+                    step={0.5}
+                    value={estimatedDurationHours}
+                    onChange={(e) =>
+                      setEstimatedDurationHours(e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                  />
+                  {quote?.windowCount ? (
+                    <span className="text-xs text-muted">
+                      Flügel önerisi: {estimateJobHours(quote.windowCount)} h
+                    </span>
+                  ) : null}
+                </label>
+
+                {plannedStartTime && estimatedDurationHours !== "" && (
+                  <p className="text-sm text-foreground">
+                    <strong>Vorauss. Ende:</strong> ca. {formatTimeDe(plannedEndTime ?? undefined)} ·{" "}
+                    {formatDurationDe(Number(estimatedDurationHours))}
+                  </p>
+                )}
+              </AdminPanel>
 
               <textarea
                 value={appointmentNote}

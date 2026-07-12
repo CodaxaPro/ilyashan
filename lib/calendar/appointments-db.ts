@@ -32,6 +32,8 @@ function rowToAppointment(row: CalendarAppointmentRow): CalendarAppointment {
     source: (row.source as CalendarAppointment["source"]) ?? undefined,
     windowCount: row.window_count ?? undefined,
     staffId: row.staff_id ?? undefined,
+    plannedStartTime: row.planned_start_time ?? undefined,
+    estimatedDurationHours: row.estimated_duration_hours ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -57,6 +59,8 @@ function appointmentToRow(item: Omit<CalendarAppointment, "id" | "createdAt" | "
     source: item.source ?? null,
     window_count: item.windowCount ?? null,
     staff_id: item.staffId ?? null,
+    planned_start_time: item.plannedStartTime ?? null,
+    estimated_duration_hours: item.estimatedDurationHours ?? null,
   };
 }
 

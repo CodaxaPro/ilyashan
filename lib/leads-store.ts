@@ -19,6 +19,12 @@ export interface LeadAppointment {
   confirmedDate?: string;
   confirmedAt?: string;
   timeSlot?: LeadTimeSlot;
+  /** Customer wish HH:mm — unverbindlich. */
+  preferredStartTime?: string;
+  /** Admin committed arrival HH:mm. */
+  plannedStartTime?: string;
+  /** Estimated on-site hours (from Flügel or admin override). */
+  estimatedDurationHours?: number;
   staffId?: string;
   customerBookedAt?: string;
   note?: string;

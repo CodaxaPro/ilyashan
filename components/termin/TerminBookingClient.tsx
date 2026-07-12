@@ -17,6 +17,9 @@ interface TerminLeadSummary {
   timeSlotLabel?: string;
   proposedDateLabel?: string;
   confirmedDateLabel?: string;
+  preferredStartTime?: string;
+  plannedStartTime?: string;
+  plannedStartLabel?: string;
   windowCount?: number;
   city?: string;
   postalCode?: string;
@@ -41,6 +44,7 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<BookableTimeSlot>("flexibel");
+  const [preferredStartTime, setPreferredStartTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -85,6 +89,7 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
           action,
           date: action === "pick_slot" ? selectedDate : undefined,
           timeSlot: action === "pick_slot" ? selectedSlot : undefined,
+          preferredStartTime: preferredStartTime || undefined,
         }),
       });
       const data = await res.json();
@@ -158,6 +163,9 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6 mb-8">
           <p className="text-sm font-semibold text-emerald-800 uppercase">Bestätigter Termin</p>
           <p className="text-2xl font-bold text-foreground mt-2">{lead.confirmedDateLabel}</p>
+          {lead.plannedStartLabel && (
+            <p className="text-lg font-semibold text-foreground mt-2">{lead.plannedStartLabel}</p>
+          )}
           {lead.timeSlotLabel && <p className="text-muted mt-1">{lead.timeSlotLabel}</p>}
           <p className="text-sm text-muted mt-4">
             Bei Änderungswünschen erreichen Sie uns unter{" "}
@@ -239,6 +247,19 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
               ))}
             </div>
           )}
+
+          <label className="block mt-6 text-sm">
+            <span className="font-semibold text-muted">Wunsch-Uhrzeit (optional, unverbindlich)</span>
+            <input
+              type="time"
+              value={preferredStartTime}
+              onChange={(e) => setPreferredStartTime(e.target.value)}
+              className="mt-2 w-full rounded-xl border border-border px-3 py-2"
+            />
+            <span className="text-xs text-muted mt-1 block">
+              Die genaue Ankunftszeit bestätigen wir nach der Einsatzplanung.
+            </span>
+          </label>
 
           <button
             type="button"

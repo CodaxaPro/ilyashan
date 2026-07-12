@@ -24,11 +24,14 @@ describe("appointment emails", () => {
       "ANG-2026-123",
       "2026-03-15",
       "2026-03-08",
-      "Bitte klingeln"
+      "Bitte klingeln",
+      undefined,
+      { plannedStartTime: "09:30", estimatedDurationHours: 2.5 }
     );
     assert.match(email.subject, /Terminänderung/i);
     assert.match(email.text, /Bisher: 08\.03\.2026/);
-    assert.match(email.text, /Neu: 15\.03\.2026/);
+    assert.match(email.text, /Datum: 15\.03\.2026/);
+    assert.match(email.text, /Ankunft: gegen 09:30 Uhr/);
     assert.match(email.text, /Bitte klingeln/);
   });
 

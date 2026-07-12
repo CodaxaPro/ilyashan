@@ -5,6 +5,11 @@ import { loadSchedulingAvailability } from "@/lib/scheduling/availability-servic
 import { formatGermanDate, initialQuoteFormData } from "@/lib/quote-form";
 import { TIME_SLOT_LABELS_DE } from "@/lib/scheduling/slot-engine";
 import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
+import {
+  formatDurationDe,
+  formatTimeDe,
+  resolveAppointmentTimePlan,
+} from "@/lib/scheduling/appointment-times";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -27,6 +32,13 @@ export async function GET(request: Request) {
   const proposedDate = lead.appointment?.proposedDate;
   const confirmedDate = lead.appointment?.confirmedDate;
   const timeSlot = lead.appointment?.timeSlot as BookableTimeSlot | undefined;
+  const plan = resolveAppointmentTimePlan(lead.appointment, quote?.windowCount);
+  const scheduleLabel =
+    plan.plannedStartTime && confirmedDate
+      ? `Ankunft gegen ${formatTimeDe(plan.plannedStartTime)}${
+          plan.estimatedDurationHours ? ` · ${formatDurationDe(plan.estimatedDurationHours)}` : ""
+        }`
+      : undefined;
 
   return NextResponse.json({
     lead: {
@@ -37,9 +49,11 @@ export async function GET(request: Request) {
       proposedDate,
       confirmedDate,
       timeSlot,
+      preferredStartTime: lead.appointment?.preferredStartTime,
       timeSlotLabel: timeSlot ? TIME_SLOT_LABELS_DE[timeSlot] : undefined,
       proposedDateLabel: proposedDate ? formatGermanDate(proposedDate) : undefined,
       confirmedDateLabel: confirmedDate ? formatGermanDate(confirmedDate) : undefined,
+      plannedStartLabel: scheduleLabel,
       windowCount: quote?.windowCount,
       city: quote?.city,
       postalCode: quote?.postalCode,

@@ -5,6 +5,7 @@ import type {
   LeadStatus,
   StoredLead,
 } from "@/lib/leads-store";
+import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
 
 export type LeadEmailActionInput = LeadEmailAction | "none";
 
@@ -15,6 +16,9 @@ export interface LeadPatchInput {
   confirmedDate?: string;
   timeSlot?: "vormittag" | "nachmittag" | "flexibel" | "";
   staffId?: string;
+  preferredStartTime?: string;
+  plannedStartTime?: string;
+  estimatedDurationHours?: number | "";
   appointmentNote?: string;
   emailAction?: LeadEmailActionInput;
 }
@@ -48,6 +52,20 @@ export function mergeLeadAppointment(
   }
   if (input.staffId !== undefined) {
     appointment.staffId = input.staffId || undefined;
+  }
+  if (input.preferredStartTime !== undefined) {
+    appointment.preferredStartTime = normalizeTimeInput(input.preferredStartTime);
+  }
+  if (input.plannedStartTime !== undefined) {
+    appointment.plannedStartTime = normalizeTimeInput(input.plannedStartTime);
+  }
+  if (input.estimatedDurationHours !== undefined) {
+    const raw = input.estimatedDurationHours;
+    if (raw === "" || raw === null || (typeof raw === "number" && !Number.isFinite(raw))) {
+      appointment.estimatedDurationHours = undefined;
+    } else if (typeof raw === "number") {
+      appointment.estimatedDurationHours = Math.min(12, Math.max(0.5, Math.round(raw * 2) / 2));
+    }
   }
 
   return appointment;

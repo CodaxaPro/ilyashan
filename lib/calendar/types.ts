@@ -35,6 +35,8 @@ export interface CalendarAppointment {
   source?: LeadSource;
   windowCount?: number;
   staffId?: string;
+  plannedStartTime?: string;
+  estimatedDurationHours?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -59,6 +61,8 @@ export interface CalendarAppointmentRow {
   source: string | null;
   window_count: number | null;
   staff_id: string | null;
+  planned_start_time: string | null;
+  estimated_duration_hours: number | null;
   created_at: string;
   updated_at: string;
 }

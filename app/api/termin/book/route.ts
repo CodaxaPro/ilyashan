@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     action: body.action,
     date: body.date,
     timeSlot: body.timeSlot as BookableTimeSlot | undefined,
+    preferredStartTime: body.preferredStartTime,
   });
 
   if (!result.ok || !result.appointment || !result.status) {
@@ -62,7 +63,8 @@ export async function POST(request: Request) {
         updated.anfrageNr ?? updated.id,
         updated.appointment.confirmedDate,
         updated.appointment.note,
-        ctx
+        ctx,
+        updated.appointment
       );
       const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
       const { error } = await resend.emails.send({

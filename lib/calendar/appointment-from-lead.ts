@@ -114,6 +114,8 @@ function baseFields(lead: StoredLead, quote: QuoteFormData | null) {
     kind: resolveKind(quote),
     timeSlot: resolveTimeSlot(lead, quote),
     staffId: lead.appointment?.staffId,
+    plannedStartTime: lead.appointment?.plannedStartTime,
+    estimatedDurationHours: lead.appointment?.estimatedDurationHours,
     customerName: lead.name,
     customerEmail: lead.email,
     customerPhone: lead.phone,

@@ -10,6 +10,7 @@ import {
 import { buildGoogleCalendarAddUrl, isGoogleCalendarLinkVisible } from "@/lib/calendar/google-calendar";
 import type { CalendarAppointment } from "@/lib/calendar/types";
 import { formatGermanDate } from "@/lib/quote-form";
+import { formatTimeDe } from "@/lib/scheduling/appointment-times";
 
 interface CalendarEventCardProps {
   item: CalendarAppointment;
@@ -65,6 +66,7 @@ export function CalendarEventCard({
       {item.timeSlot && (
         <p className="text-[10px] mt-1 font-medium">
           {TIME_SLOT_LABELS_TR[item.timeSlot] ?? item.timeSlot}
+          {item.plannedStartTime ? ` · ${formatTimeDe(item.plannedStartTime)}` : ""}
           {item.staffId ? ` · ${item.staffId}` : ""}
         </p>
       )}

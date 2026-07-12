@@ -18,6 +18,14 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import {
+  buildArrivalHtmlDe,
+  buildArrivalLinesDe,
+  formatSchedulePreviewDe,
+  resolveAppointmentTimePlan,
+  type AppointmentTimePlan,
+} from "@/lib/scheduling/appointment-times";
+import type { LeadAppointment } from "@/lib/leads-store";
 
 function quoteEmailContext(
   data: QuoteFormData,
@@ -56,15 +64,21 @@ function contactFooter() {
     </p>`;
 }
 
+function scheduleInfoBox(dateLabel: string, plan: AppointmentTimePlan, options?: { includePreferredNote?: boolean }) {
+  return buildInfoBox(buildArrivalHtmlDe(dateLabel, plan, options));
+}
+
 export function buildAppointmentConfirmationEmail(
   data: QuoteFormData,
   anfrageNr: string,
   confirmedDate: string,
   note?: string,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  appointment?: LeadAppointment
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
+  const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -74,7 +88,7 @@ export function buildAppointmentConfirmationEmail(
       wir bestätigen hiermit Ihren Termin für die <strong>Fensterreinigung</strong>
       (${escapeHtml(services)}).
     </p>
-    ${buildInfoBox(`<strong>Bestätigter Termin:</strong> ${escapeHtml(dateLabel)}`)}
+    ${scheduleInfoBox(dateLabel, plan)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
@@ -87,7 +101,7 @@ export function buildAppointmentConfirmationEmail(
     `Guten Tag ${firstName},`,
     "",
     `Ihr Termin für Fensterreinigung (${services}) ist bestätigt:`,
-    dateLabel,
+    ...buildArrivalLinesDe(dateLabel, plan),
     note ? `Hinweis: ${note}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
@@ -116,11 +130,13 @@ export function buildAppointmentUpdateEmail(
   confirmedDate: string,
   previousDate: string | undefined,
   note?: string,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  appointment?: LeadAppointment
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const previousLabel = previousDate ? formatGermanDate(previousDate) : null;
+  const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -131,7 +147,7 @@ export function buildAppointmentUpdateEmail(
       (${escapeHtml(services)}) aktualisiert.
     </p>
     ${previousLabel ? buildInfoBox(`<strong>Bisheriger Termin:</strong> ${escapeHtml(previousLabel)}`) : ""}
-    ${buildInfoBox(`<strong>Neuer Termin:</strong> ${escapeHtml(dateLabel)}`)}
+    ${scheduleInfoBox(dateLabel, plan)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${contactFooter()}`;
@@ -141,7 +157,7 @@ export function buildAppointmentUpdateEmail(
     "",
     `Ihr Termin für Fensterreinigung (${services}) wurde geändert:`,
     previousLabel ? `Bisher: ${previousLabel}` : "",
-    `Neu: ${dateLabel}`,
+    ...buildArrivalLinesDe(dateLabel, plan),
     note ? `Hinweis: ${note}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
@@ -167,10 +183,12 @@ export function buildAppointmentProposalEmail(
   proposedDate: string,
   note?: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
-  terminUrl?: string | null
+  terminUrl?: string | null,
+  appointment?: LeadAppointment
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(proposedDate);
+  const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -180,7 +198,7 @@ export function buildAppointmentProposalEmail(
       vielen Dank für Ihre Anfrage zur <strong>Fensterreinigung</strong>
       (${escapeHtml(services)}). Wir schlagen folgenden Termin vor:
     </p>
-    ${buildInfoBox(`<strong>Vorgeschlagener Termin:</strong> ${escapeHtml(dateLabel)}`)}
+    ${scheduleInfoBox(dateLabel, plan, { includePreferredNote: true })}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${
@@ -199,7 +217,7 @@ export function buildAppointmentProposalEmail(
     `Guten Tag ${firstName},`,
     "",
     `Wir schlagen folgenden Termin für Fensterreinigung (${services}) vor:`,
-    dateLabel,
+    ...buildArrivalLinesDe(dateLabel, plan, { includePreferredNote: true }),
     note ? `Hinweis: ${note}` : "",
     terminUrl ? `Online bestätigen: ${terminUrl}` : "",
     "",
@@ -276,13 +294,22 @@ export function buildLeadStatusEmail(
     proposedDate?: string;
     note?: string;
     terminUrl?: string | null;
+    appointment?: LeadAppointment;
+    windowCount?: number;
   },
   ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
   switch (action) {
     case "confirm":
       if (!options.confirmedDate) throw new Error("confirmedDate required");
-      return buildAppointmentConfirmationEmail(data, anfrageNr, options.confirmedDate, options.note, ctx);
+      return buildAppointmentConfirmationEmail(
+        data,
+        anfrageNr,
+        options.confirmedDate,
+        options.note,
+        ctx,
+        options.appointment
+      );
     case "update":
       if (!options.confirmedDate) throw new Error("confirmedDate required");
       return buildAppointmentUpdateEmail(
@@ -291,7 +318,8 @@ export function buildLeadStatusEmail(
         options.confirmedDate,
         options.previousConfirmedDate,
         options.note,
-        ctx
+        ctx,
+        options.appointment
       );
     case "propose":
       if (!options.proposedDate) throw new Error("proposedDate required");
@@ -301,7 +329,8 @@ export function buildLeadStatusEmail(
         options.proposedDate,
         options.note,
         ctx,
-        options.terminUrl
+        options.terminUrl,
+        options.appointment
       );
     case "reject":
       return buildLeadRejectionEmail(data, anfrageNr, options.note, ctx);
@@ -317,15 +346,18 @@ export function getCustomerEmailPreviewDe(
     previousConfirmedDate?: string;
     proposedDate?: string;
     note?: string;
+    appointment?: LeadAppointment;
+    windowCount?: number;
   }
 ): string {
+  const plan = resolveAppointmentTimePlan(options.appointment, options.windowCount);
   switch (action) {
     case "confirm":
-      return `Terminbestätigung: ${options.confirmedDate ? formatGermanDate(options.confirmedDate) : "–"}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminbestätigung: ${formatSchedulePreviewDe(options.confirmedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
     case "update":
-      return `Terminänderung: ${options.previousConfirmedDate ? formatGermanDate(options.previousConfirmedDate) : "–"} → ${options.confirmedDate ? formatGermanDate(options.confirmedDate) : "–"}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminänderung: ${options.previousConfirmedDate ? formatGermanDate(options.previousConfirmedDate) : "–"} → ${formatSchedulePreviewDe(options.confirmedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
     case "propose":
-      return `Terminvorschlag: ${options.proposedDate ? formatGermanDate(options.proposedDate) : "–"}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminvorschlag: ${formatSchedulePreviewDe(options.proposedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
     case "reject":
       return `Ablehnung${options.note ? `: ${options.note}` : ""}`;
     default:
