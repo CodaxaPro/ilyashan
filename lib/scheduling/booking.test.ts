@@ -47,10 +47,21 @@ describe("customer booking", () => {
     const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
       action: "pick_slot",
       date: "2026-05-20",
-      timeSlot: "nachmittag",
+      timeSlot: "vormittag",
       preferredStartTime: "09:45",
     });
     assert.equal(result.ok, true);
     assert.equal(result.appointment?.preferredStartTime, "09:45");
+    assert.equal(result.appointment?.timeSlot, "vormittag");
+  });
+
+  it("rejects invalid preferred start time", () => {
+    const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
+      action: "pick_slot",
+      date: "2026-05-20",
+      timeSlot: "vormittag",
+      preferredStartTime: "23:15",
+    });
+    assert.equal(result.ok, false);
   });
 });

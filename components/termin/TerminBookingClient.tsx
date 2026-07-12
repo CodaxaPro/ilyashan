@@ -2,8 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatGermanDate } from "@/lib/quote-form";
-import { TIME_SLOT_LABELS_DE, type BookableTimeSlot } from "@/lib/scheduling/slot-engine";
 import type { DayAvailability } from "@/lib/scheduling/slot-engine";
+import {
+  buildCustomerArrivalOptions,
+  findCustomerArrivalOption,
+  formatCustomerArrivalLabel,
+  type CustomerArrivalOption,
+} from "@/lib/scheduling/customer-arrival-options";
 import { siteConfig } from "@/lib/config";
 
 interface TerminLeadSummary {
@@ -13,12 +18,9 @@ interface TerminLeadSummary {
   status?: string;
   proposedDate?: string;
   confirmedDate?: string;
-  timeSlot?: BookableTimeSlot;
   timeSlotLabel?: string;
   proposedDateLabel?: string;
   confirmedDateLabel?: string;
-  preferredStartTime?: string;
-  plannedStartTime?: string;
   plannedStartLabel?: string;
   windowCount?: number;
   city?: string;
@@ -38,13 +40,14 @@ interface TerminBookingClientProps {
   token: string;
 }
 
+const ARRIVAL_GROUPS = ["Vormittag", "Nachmittag", "Flexibel"] as const;
+
 export function TerminBookingClient({ token }: TerminBookingClientProps) {
   const [context, setContext] = useState<TerminContextResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedSlot, setSelectedSlot] = useState<BookableTimeSlot>("flexibel");
-  const [preferredStartTime, setPreferredStartTime] = useState("");
+  const [selectedArrivalId, setSelectedArrivalId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -77,10 +80,39 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
     [availableDays, selectedDate]
   );
 
+  const arrivalOptions = useMemo(
+    () => (selectedDay ? buildCustomerArrivalOptions(selectedDay) : []),
+    [selectedDay]
+  );
+
+  const selectedArrival = useMemo(
+    () =>
+      selectedDay && selectedArrivalId
+        ? findCustomerArrivalOption(selectedDay, selectedArrivalId)
+        : null,
+    [selectedDay, selectedArrivalId]
+  );
+
+  useEffect(() => {
+    if (!selectedDay) {
+      setSelectedArrivalId(null);
+      return;
+    }
+    const options = buildCustomerArrivalOptions(selectedDay);
+    setSelectedArrivalId((current) =>
+      current && options.some((o) => o.id === current) ? current : (options[0]?.id ?? null)
+    );
+  }, [selectedDay]);
+
   async function book(action: "confirm_proposed" | "pick_slot") {
     setSubmitting(true);
     setError(null);
     try {
+      const arrival =
+        action === "pick_slot" && selectedDay && selectedArrivalId
+          ? findCustomerArrivalOption(selectedDay, selectedArrivalId)
+          : null;
+
       const res = await fetch("/api/termin/book", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -88,8 +120,8 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
           token,
           action,
           date: action === "pick_slot" ? selectedDate : undefined,
-          timeSlot: action === "pick_slot" ? selectedSlot : undefined,
-          preferredStartTime: preferredStartTime || undefined,
+          timeSlot: arrival?.timeSlot,
+          preferredStartTime: arrival?.startTime,
         }),
       });
       const data = await res.json();
@@ -105,6 +137,33 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function renderArrivalGroup(group: (typeof ARRIVAL_GROUPS)[number], options: CustomerArrivalOption[]) {
+    const items = options.filter((o) => o.groupDe === group);
+    if (items.length === 0) return null;
+
+    return (
+      <div key={group} className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted">{group}</p>
+        <div className={`grid gap-2 ${group === "Flexibel" ? "grid-cols-1" : "grid-cols-2 sm:grid-cols-3"}`}>
+          {items.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              onClick={() => setSelectedArrivalId(option.id)}
+              className={`rounded-xl border px-3 py-2.5 text-sm font-medium text-left transition ${
+                selectedArrivalId === option.id
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border hover:border-primary/40"
+              }`}
+            >
+              {option.groupDe === "Flexibel" ? option.labelDe : option.labelDe}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (loading) {
@@ -200,19 +259,16 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
             {canConfirmProposed ? "Alternativen Termin wählen" : "Termin wählen"}
           </h2>
           <p className="text-sm text-muted mt-1">
-            Verfügbare Termine basieren auf unserer aktuellen Einsatzplanung.
+            Wählen Sie Datum und gewünschte Ankunftszeit. Die genaue Uhrzeit bestätigen wir nach der Einsatzplanung.
           </p>
 
-          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
+          <p className="mt-6 text-sm font-semibold text-muted">1. Datum</p>
+          <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
             {availableDays.map((day) => (
               <button
                 key={day.date}
                 type="button"
-                onClick={() => {
-                  setSelectedDate(day.date);
-                  const firstOpen = day.slots.find((s) => s.available);
-                  if (firstOpen) setSelectedSlot(firstOpen.timeSlot);
-                }}
+                onClick={() => setSelectedDate(day.date)}
                 className={`px-3 py-2 rounded-xl border text-sm font-medium transition ${
                   selectedDate === day.date
                     ? "border-primary bg-primary/10 text-primary"
@@ -224,46 +280,23 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
             ))}
           </div>
 
-          {selectedDay && (
-            <div className="mt-6 space-y-2">
-              <p className="text-sm font-semibold text-muted">Uhrzeit / Tageszeit</p>
-              {selectedDay.slots.map((slot) => (
-                <label
-                  key={slot.timeSlot}
-                  className={`flex items-center gap-3 rounded-xl border px-4 py-3 cursor-pointer ${
-                    !slot.available ? "opacity-40 cursor-not-allowed" : ""
-                  } ${selectedSlot === slot.timeSlot ? "border-primary bg-primary/5" : "border-border"}`}
-                >
-                  <input
-                    type="radio"
-                    name="timeSlot"
-                    disabled={!slot.available}
-                    checked={selectedSlot === slot.timeSlot}
-                    onChange={() => setSelectedSlot(slot.timeSlot)}
-                    className="accent-primary"
-                  />
-                  <span className="text-sm font-medium">{TIME_SLOT_LABELS_DE[slot.timeSlot]}</span>
-                </label>
-              ))}
+          {selectedDay && arrivalOptions.length > 0 && (
+            <div className="mt-6 space-y-4">
+              <p className="text-sm font-semibold text-muted">2. Ankunftszeit</p>
+              {ARRIVAL_GROUPS.map((group) => renderArrivalGroup(group, arrivalOptions))}
             </div>
           )}
 
-          <label className="block mt-6 text-sm">
-            <span className="font-semibold text-muted">Wunsch-Uhrzeit (optional, unverbindlich)</span>
-            <input
-              type="time"
-              value={preferredStartTime}
-              onChange={(e) => setPreferredStartTime(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-border px-3 py-2"
-            />
-            <span className="text-xs text-muted mt-1 block">
-              Die genaue Ankunftszeit bestätigen wir nach der Einsatzplanung.
-            </span>
-          </label>
+          {selectedArrival && (
+            <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">
+              <span className="font-semibold">Ihre Auswahl:</span>{" "}
+              {formatGermanDate(selectedDate!)} · {formatCustomerArrivalLabel(selectedArrival)}
+            </div>
+          )}
 
           <button
             type="button"
-            disabled={submitting || !selectedDate}
+            disabled={submitting || !selectedDate || !selectedArrivalId}
             onClick={() => void book("pick_slot")}
             className="mt-6 w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 disabled:opacity-50"
           >

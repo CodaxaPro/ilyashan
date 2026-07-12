@@ -9,6 +9,7 @@ import {
 } from "@/lib/scheduling/slot-engine";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
+import { isCustomerArrivalTimeAllowed, deriveTimeSlotFromStartTime } from "@/lib/scheduling/customer-arrival-options";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -33,6 +34,12 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
 
 function isoDateValid(iso: string | undefined): iso is string {
   return Boolean(iso && /^\d{4}-\d{2}-\d{2}$/.test(iso));
+}
+
+function deriveMismatch(timeSlot: BookableTimeSlot, startTime: string): boolean {
+  const derived = deriveTimeSlotFromStartTime(startTime);
+  if (!derived || timeSlot === "flexibel") return false;
+  return derived !== timeSlot;
 }
 
 export function applyCustomerBooking(
@@ -97,6 +104,12 @@ export function applyCustomerBooking(
     }
     const timeSlot = input.timeSlot ?? "flexibel";
     const preferredStartTime = normalizeTimeInput(input.preferredStartTime);
+    if (preferredStartTime && !isCustomerArrivalTimeAllowed(preferredStartTime)) {
+      return { ok: false, error: "Bitte wählen Sie eine Ankunftszeit zwischen 08:00 und 17:00 Uhr." };
+    }
+    if (preferredStartTime && input.timeSlot && deriveMismatch(timeSlot, preferredStartTime)) {
+      return { ok: false, error: "Die gewählte Uhrzeit passt nicht zum Tageszeitfenster." };
+    }
     const check = isSlotAvailable(staffConfig, occupancy, input.date, timeSlot, {
       excludeLeadId: lead.id,
     });
