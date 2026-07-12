@@ -89,4 +89,23 @@ describe("slot engine", () => {
     const day = buildDayAvailability(config, occ, "2026-04-15", { excludeLeadId: "self" });
     assert.equal(day.available, true);
   });
+
+  it("includes wartung series in occupancy for confirmed contracts", () => {
+    const leads = [
+      quoteLead({
+        status: "termin_bestaetigt",
+        appointment: { confirmedDate: "2026-03-10", timeSlot: "vormittag" },
+        quote: {
+          windowCount: 8,
+          services: ["privat", "wartung"],
+          wartungPackageId: "quarterly",
+          wartungPreferredWeekday: "di",
+        },
+      }),
+    ];
+    const occ = buildOccupancyFromLeads(leads);
+    assert.ok(occ.some((o) => o.role === "confirmed"));
+    assert.ok(occ.some((o) => o.role === "wartung-0"));
+    assert.ok(occ.length > 1);
+  });
 });

@@ -6,7 +6,7 @@ import { defaultQuotePricingContext, captureQuotePriceSnapshot } from "@/lib/quo
 import { initialQuoteFormData } from "@/lib/quote-form";
 import { createTerminToken } from "@/lib/termin-token";
 
-export type TerminFixtureScenario = "proposed" | "pick_slot" | "already_booked";
+export type TerminFixtureScenario = "proposed" | "pick_slot" | "already_booked" | "wartung_pick";
 
 function futureIso(daysFromToday: number): string {
   return addDaysIso(toIsoDate(new Date()), daysFromToday);
@@ -58,6 +58,16 @@ export function buildTerminFixtureLead(scenario: TerminFixtureScenario): StoredL
       plannedStartTime: "09:30",
       estimatedDurationHours: 2,
     };
+  } else if (scenario === "wartung_pick") {
+    lead.status = "neu";
+    lead.quote = {
+      ...quote,
+      services: ["privat", "wartung"],
+      wartungPackageId: "quarterly",
+      wartungPreferredWeekday: "di",
+      wartungPreferredTimeSlot: "vormittag",
+    };
+    lead.summary = "E2E Wartung";
   } else {
     lead.status = "neu";
   }

@@ -10,6 +10,7 @@ import {
   type CustomerArrivalOption,
 } from "@/lib/scheduling/customer-arrival-options";
 import type { TerminPortalSummary } from "@/lib/termin-portal";
+import type { TerminWartungContext } from "@/lib/termin-wartung";
 import { siteConfig } from "@/lib/config";
 
 interface TerminLeadSummary {
@@ -32,6 +33,7 @@ interface TerminContextResponse {
   lead: TerminLeadSummary;
   availability: { days: DayAvailability[] };
   portal?: TerminPortalSummary | null;
+  wartung?: TerminWartungContext | null;
   canConfirmProposed: boolean;
   canPickSlot: boolean;
   canReschedule?: boolean;
@@ -202,7 +204,7 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
 
   if (!context) return null;
 
-  const { lead, canConfirmProposed, canPickSlot, canReschedule, alreadyBooked, portal, pdfUrl } =
+  const { lead, canConfirmProposed, canPickSlot, canReschedule, alreadyBooked, portal, wartung, pdfUrl } =
     context;
   const showPickSlot = canPickSlot && (!alreadyBooked || showReschedule);
 
@@ -266,6 +268,37 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
               </div>
             ) : null}
           </dl>
+        </section>
+      )}
+
+      {wartung && (
+        <section
+          className="rounded-2xl border border-blue-200 bg-blue-50/60 p-6 mb-6 shadow-sm"
+          data-testid="termin-wartung-plan"
+        >
+          <p className="text-sm font-semibold text-blue-900 uppercase">Ihr Wartungsvertrag</p>
+          <p className="text-lg font-bold text-foreground mt-2">{wartung.planSummaryDe}</p>
+          <p className="text-sm text-muted mt-2">
+            Der erste Termin legt den Rhythmus für alle weiteren Wartungsbesuche fest. Bitte wählen
+            Sie einen <strong>{wartung.weekdayLabel}</strong>.
+          </p>
+          {wartung.previewDateLabels.length > 0 && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted mb-2">
+                Geplante Folgetermine (Auszug)
+              </p>
+              <ul className="flex flex-wrap gap-2">
+                {wartung.previewDateLabels.map((label) => (
+                  <li
+                    key={label}
+                    className="px-2.5 py-1 rounded-lg bg-white border border-blue-200 text-xs font-semibold text-foreground"
+                  >
+                    {label}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </section>
       )}
 

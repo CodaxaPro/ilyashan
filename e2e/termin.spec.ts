@@ -79,6 +79,42 @@ test.describe("Termin / Meine Anfrage", () => {
     expect(pdfRes.headers()["content-type"]).toContain("application/pdf");
   });
 
+  test("Wartung planı görünür ve nur Dienstag seçilebilir", async ({ page, request }) => {
+    const ready = await isTerminE2eReady(request);
+    test.skip(!ready, "E2E_MODE + KV required for termin fixtures");
+
+    const fixture = await seedTerminFixture(request, "wartung_pick");
+    await page.goto(fixture!.terminPath);
+    await expect(page.getByTestId("termin-wartung-plan")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("termin-wartung-plan")).toContainText("Vierteljährlich");
+    await expect(page.getByTestId("termin-wartung-plan")).toContainText("Dienstag");
+
+    const dateButtons = page.locator("[data-testid^='termin-date-']");
+    await expect(dateButtons.first()).toBeVisible();
+    const count = await dateButtons.count();
+    expect(count).toBeGreaterThan(0);
+
+    let picked = false;
+    for (let i = 0; i < count; i++) {
+      const testId = await dateButtons.nth(i).getAttribute("data-testid");
+      const iso = testId?.replace("termin-date-", "") ?? "";
+      const day = new Date(iso + "T12:00:00").getDay();
+      expect(day).not.toBe(0);
+      if (day === 2) {
+        await dateButtons.nth(i).click();
+        picked = true;
+        break;
+      }
+    }
+    expect(picked).toBe(true);
+
+    const firstArrival = page.locator("[data-testid^='termin-arrival-']").first();
+    await expect(firstArrival).toBeVisible();
+    await firstArrival.click();
+    await page.getByTestId("termin-book-slot").click();
+    await expect(page.getByTestId("termin-success")).toBeVisible({ timeout: 15_000 });
+  });
+
   test("unauthorized fixture API", async ({ request }) => {
     const res = await request.post("/api/e2e/termin-fixture", {
       data: { scenario: "pick_slot" },

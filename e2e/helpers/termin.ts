@@ -12,7 +12,7 @@ export interface TerminFixture {
 
 export async function seedTerminFixture(
   request: APIRequestContext,
-  scenario: "proposed" | "pick_slot" | "already_booked"
+  scenario: "proposed" | "pick_slot" | "already_booked" | "wartung_pick"
 ): Promise<TerminFixture | null> {
   const res = await request.post("/api/e2e/termin-fixture", {
     headers: { Authorization: `Bearer ${ADMIN_PASSWORD}` },

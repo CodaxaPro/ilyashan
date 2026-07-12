@@ -97,13 +97,43 @@ describe("customer booking", () => {
     assert.equal(result.appointment?.estimatedDurationHours, 3);
   });
 
-  it("rejects invalid preferred start time", () => {
-    const result = applyCustomerBooking(lead({ appointment: {} }), DEFAULT_STAFF_CONFIG, [], {
+  it("rejects wartung booking on wrong weekday", () => {
+    const wartungLead = lead({
+      appointment: {},
+      quote: {
+        windowCount: 10,
+        services: ["privat", "wartung"],
+        wartungPackageId: "quarterly",
+        wartungPreferredWeekday: "di",
+        wartungPreferredTimeSlot: "vormittag",
+      },
+    });
+    const result = applyCustomerBooking(wartungLead, DEFAULT_STAFF_CONFIG, [], {
       action: "pick_slot",
       date: "2026-05-20",
       timeSlot: "vormittag",
-      preferredStartTime: "23:15",
     });
     assert.equal(result.ok, false);
+    assert.match(result.error ?? "", /Dienstag/i);
+  });
+
+  it("books wartung slot on preferred weekday", () => {
+    const wartungLead = lead({
+      appointment: {},
+      quote: {
+        windowCount: 10,
+        services: ["privat", "wartung"],
+        wartungPackageId: "quarterly",
+        wartungPreferredWeekday: "di",
+        wartungPreferredTimeSlot: "vormittag",
+      },
+    });
+    const result = applyCustomerBooking(wartungLead, DEFAULT_STAFF_CONFIG, [], {
+      action: "pick_slot",
+      date: "2026-05-12",
+      timeSlot: "vormittag",
+    });
+    assert.equal(result.ok, true);
+    assert.equal(result.appointment?.timeSlot, "vormittag");
   });
 });

@@ -3,7 +3,7 @@ import { assertE2eAuthorized, isE2eModeEnabled } from "@/lib/e2e/guard";
 import { seedTerminFixture, type TerminFixtureScenario } from "@/lib/e2e/termin-fixture";
 import { isLeadsStoreConfigured } from "@/lib/leads-store";
 
-const SCENARIOS: TerminFixtureScenario[] = ["proposed", "pick_slot", "already_booked"];
+const SCENARIOS: TerminFixtureScenario[] = ["proposed", "pick_slot", "already_booked", "wartung_pick"];
 
 export async function POST(request: Request) {
   if (!isE2eModeEnabled()) {

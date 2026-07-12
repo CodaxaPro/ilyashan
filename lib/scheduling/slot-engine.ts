@@ -5,6 +5,8 @@ import { initialQuoteFormData } from "@/lib/quote-form";
 import type { StaffConfig, StaffMember } from "@/lib/staff/types";
 import { getActiveStaff } from "@/lib/staff/config";
 import { parseIsoDate } from "@/lib/calendar/week-range";
+import { generateWartungSeriesDates } from "@/lib/calendar/wartung-series";
+import type { WartungPackageId } from "@/lib/wartung-packages";
 
 export type BookableTimeSlot = "vormittag" | "nachmittag" | "flexibel";
 
@@ -86,7 +88,7 @@ function slotsMatch(requested: BookableTimeSlot, existing: BookableTimeSlot): bo
 }
 
 function countsTowardOccupancy(role: string): boolean {
-  return role === "confirmed" || role === "proposed";
+  return role === "confirmed" || role === "proposed" || /^wartung-\d+$/.test(role);
 }
 
 export function buildOccupancyFromLeads(leads: StoredLead[]): ScheduledOccupancy[] {
@@ -113,6 +115,28 @@ export function buildOccupancyFromLeads(leads: StoredLead[]): ScheduledOccupancy
         role: "confirmed",
         windowCount,
       });
+
+      if (
+        quote.services.includes("wartung") &&
+        quote.wartungPackageId &&
+        (lead.status === "termin_bestaetigt" || lead.status === "abgeschlossen")
+      ) {
+        const seriesDates = generateWartungSeriesDates({
+          anchorDate: confirmed,
+          packageId: quote.wartungPackageId as WartungPackageId,
+          preferredWeekday: quote.wartungPreferredWeekday,
+        });
+        seriesDates.forEach((eventDate, index) => {
+          items.push({
+            leadId: lead.id,
+            eventDate,
+            timeSlot,
+            staffId,
+            role: `wartung-${index}`,
+            windowCount,
+          });
+        });
+      }
     } else if (proposed) {
       items.push({
         leadId: lead.id,

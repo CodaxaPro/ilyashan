@@ -11,6 +11,7 @@ import {
   resolveAppointmentTimePlan,
 } from "@/lib/scheduling/appointment-times";
 import { buildTerminPortalSummary, canCustomerReschedule } from "@/lib/termin-portal";
+import { buildTerminWartungContext, filterDaysForWartung } from "@/lib/termin-wartung";
 import { toIsoDate } from "@/lib/calendar/week-range";
 
 export async function GET(request: Request) {
@@ -30,7 +31,14 @@ export async function GET(request: Request) {
     ? { ...initialQuoteFormData, ...lead.quote }
     : null;
 
-  const { availability } = await loadSchedulingAvailability({ excludeLeadId: lead.id });
+  const { availability: rawAvailability } = await loadSchedulingAvailability({ excludeLeadId: lead.id });
+  const wartung = buildTerminWartungContext(lead);
+  const availability = wartung?.preferredWeekday
+    ? {
+        ...rawAvailability,
+        days: filterDaysForWartung(rawAvailability.days, wartung.preferredWeekday),
+      }
+    : rawAvailability;
   const proposedDate = lead.appointment?.proposedDate;
   const confirmedDate = lead.appointment?.confirmedDate;
   const timeSlot = lead.appointment?.timeSlot as BookableTimeSlot | undefined;
@@ -65,6 +73,7 @@ export async function GET(request: Request) {
       postalCode: quote?.postalCode,
     },
     availability,
+    wartung,
     portal,
     canConfirmProposed: Boolean(proposedDate && !confirmedDate),
     canPickSlot: !confirmedDate || canReschedule,

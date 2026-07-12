@@ -11,6 +11,11 @@ import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
 import { isCustomerArrivalTimeAllowed, deriveTimeSlotFromStartTime } from "@/lib/scheduling/customer-arrival-options";
 import { estimateJobHours } from "@/lib/scheduling/job-duration";
+import {
+  dateMatchesPreferredWeekday,
+  isWartungQuote,
+  wartungWeekdayErrorDe,
+} from "@/lib/termin-wartung";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -86,6 +91,13 @@ export function applyCustomerBooking(
     if (!isoDateValid(proposed)) {
       return { ok: false, error: "Es liegt kein Terminvorschlag vor." };
     }
+    if (
+      isWartungQuote(quote) &&
+      quote.wartungPreferredWeekday &&
+      !dateMatchesPreferredWeekday(proposed, quote.wartungPreferredWeekday)
+    ) {
+      return { ok: false, error: wartungWeekdayErrorDe(quote.wartungPreferredWeekday) };
+    }
     const timeSlot = (previous.timeSlot as BookableTimeSlot | undefined) ?? resolveLeadTimeSlot(lead, quote);
     const check = isSlotAvailable(staffConfig, occupancy, proposed, timeSlot, {
       excludeLeadId: lead.id,
@@ -124,7 +136,14 @@ export function applyCustomerBooking(
     if (!isoDateValid(input.date)) {
       return { ok: false, error: "Bitte wählen Sie ein gültiges Datum." };
     }
-    const timeSlot = input.timeSlot ?? "flexibel";
+    if (
+      isWartungQuote(quote) &&
+      quote.wartungPreferredWeekday &&
+      !dateMatchesPreferredWeekday(input.date, quote.wartungPreferredWeekday)
+    ) {
+      return { ok: false, error: wartungWeekdayErrorDe(quote.wartungPreferredWeekday) };
+    }
+    const timeSlot = input.timeSlot ?? resolveLeadTimeSlot(lead, quote);
     const preferredStartTime = normalizeTimeInput(input.preferredStartTime);
     if (preferredStartTime && !isCustomerArrivalTimeAllowed(preferredStartTime)) {
       return { ok: false, error: "Bitte wählen Sie eine Ankunftszeit zwischen 08:00 und 17:00 Uhr." };
