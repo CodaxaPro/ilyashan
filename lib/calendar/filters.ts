@@ -6,6 +6,7 @@ import type {
 } from "@/lib/calendar/types";
 
 export type CalendarViewMode = "week" | "month" | "agenda";
+export type WeekLayoutMode = "days" | "team";
 
 export interface CalendarFilters {
   search: string;

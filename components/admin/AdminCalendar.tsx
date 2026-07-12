@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   canRescheduleAppointment,
 } from "@/lib/calendar/appointment-from-lead";
-import type { CalendarViewMode, CalendarFilters } from "@/lib/calendar/filters";
+import type { CalendarViewMode, CalendarFilters, WeekLayoutMode } from "@/lib/calendar/filters";
 import { DEFAULT_CALENDAR_FILTERS } from "@/lib/calendar/filters";
 import type { CalendarAppointment } from "@/lib/calendar/types";
 import type { MonthWeekRow } from "@/lib/calendar/month-range";
@@ -24,6 +24,7 @@ import { CalendarStatsBar } from "@/components/admin/calendar/CalendarStatsBar";
 import { CalendarToolbar } from "@/components/admin/calendar/CalendarToolbar";
 import { CalendarUpcomingPanel } from "@/components/admin/calendar/CalendarUpcomingPanel";
 import { CalendarWeekView } from "@/components/admin/calendar/CalendarWeekView";
+import { CalendarStaffWeekView } from "@/components/admin/calendar/CalendarStaffWeekView";
 import { CalendarExportPanel } from "@/components/admin/calendar/CalendarExportPanel";
 import { CalendarStatusChips } from "@/components/admin/calendar/CalendarStatusChips";
 import { StaffLegend } from "@/components/admin/calendar/StaffLegend";
@@ -85,6 +86,8 @@ export function AdminCalendar() {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragItem, setDragItem] = useState<CalendarAppointment | null>(null);
   const [pendingMove, setPendingMove] = useState<PendingMove | null>(null);
+  const [weekLayout, setWeekLayout] = useState<WeekLayoutMode>("days");
+  const [assigningId, setAssigningId] = useState<string | null>(null);
 
   const monthGrid = useMemo(() => getMonthRange(monthYear, month), [monthYear, month]);
   const exportUrl = useMemo(
@@ -201,6 +204,27 @@ export function AdminCalendar() {
     }
   }
 
+  async function assignStaff(appointmentId: string, staffId: string | null) {
+    setAssigningId(appointmentId);
+    setFeedback(null);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/appointments/${appointmentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ staffId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Ekip ataması başarısız");
+      setFeedback("Ekip ataması güncellendi.");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ekip ataması hatası");
+    } finally {
+      setAssigningId(null);
+    }
+  }
+
   function jumpToDate(iso: string) {
     setView("week");
     setWeekStart(getWeekRange(new Date(iso + "T12:00:00")).start);
@@ -309,6 +333,8 @@ export function AdminCalendar() {
             setMonthYear(y);
             setMonth(m);
           }}
+          weekLayout={weekLayout}
+          onWeekLayoutChange={setWeekLayout}
         />
 
         <CalendarFiltersBar filters={filters} onChange={setFilters} />
@@ -354,7 +380,7 @@ export function AdminCalendar() {
         </div>
       ) : data ? (
         <>
-          {view === "week" && (
+          {view === "week" && weekLayout === "days" && (
             <CalendarWeekView
               days={week.days}
               byDay={data.byDay}
@@ -370,6 +396,18 @@ export function AdminCalendar() {
               }}
               onDrop={handleDrop}
               setDraggingId={setDraggingId}
+            />
+          )}
+
+          {view === "week" && weekLayout === "team" && (
+            <CalendarStaffWeekView
+              days={week.days}
+              byDay={data.byDay}
+              staffMembers={data.staffMembers ?? []}
+              today={data.today}
+              onOpenLead={(id) => void openLead(id)}
+              onAssignStaff={(id, staffId) => void assignStaff(id, staffId)}
+              assigningId={assigningId}
             />
           )}
 

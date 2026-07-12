@@ -21,9 +21,11 @@ interface CalendarEventCardProps {
   compact?: boolean;
   draggable?: boolean;
   dragging?: boolean;
+  assigning?: boolean;
   onOpen: (leadId: string) => void;
   onDragStart?: (item: CalendarAppointment, e: React.DragEvent) => void;
   onDragEnd?: () => void;
+  onAssignStaff?: (appointmentId: string, staffId: string | null) => void;
 }
 
 export function CalendarEventCard({
@@ -32,9 +34,11 @@ export function CalendarEventCard({
   compact = false,
   draggable = false,
   dragging = false,
+  assigning = false,
   onOpen,
   onDragStart,
   onDragEnd,
+  onAssignStaff,
 }: CalendarEventCardProps) {
   const staff = resolveStaffMember(item.staffId, staffMembers);
   const accentColor = staff?.color ?? "#94a3b8";
@@ -83,7 +87,29 @@ export function CalendarEventCard({
       </p>
 
       <div className="flex flex-wrap items-center gap-1 mt-2">
-        <StaffBadge member={staff} size="sm" />
+        {onAssignStaff && staffMembers.length > 0 ? (
+          <select
+            value={item.staffId ?? ""}
+            disabled={assigning}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              e.stopPropagation();
+              const value = e.target.value;
+              onAssignStaff(item.id, value || null);
+            }}
+            className="text-[9px] font-semibold rounded-md border border-border bg-white px-1 py-0.5 max-w-[110px]"
+            data-testid={`staff-assign-${item.id}`}
+          >
+            <option value="">Atanmamış</option>
+            {staffMembers.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <StaffBadge member={staff} size="sm" />
+        )}
         <span
           className={`px-1.5 py-0.5 rounded border text-[9px] font-semibold ${appointmentRoleColorClass(String(item.role))}`}
         >

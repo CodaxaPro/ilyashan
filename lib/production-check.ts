@@ -84,6 +84,15 @@ export function runProductionChecks(): ProductionCheckItem[] {
       : "SUPABASE_URL/SERVICE_ROLE_KEY fehlt – /admin/analytics bleibt leer",
   });
 
+  checks.push({
+    id: "cron_secret",
+    label: "Termin-Erinnerung (Cron)",
+    status: hasEnv("CRON_SECRET") ? "ok" : "warn",
+    detail: hasEnv("CRON_SECRET")
+      ? "CRON_SECRET gesetzt – Vortag-Erinnerungen aktiv"
+      : "CRON_SECRET fehlt – Cron-Route in Production blockiert",
+  });
+
   return checks;
 }
 

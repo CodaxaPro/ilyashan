@@ -1,6 +1,6 @@
 "use client";
 
-import type { CalendarViewMode } from "@/lib/calendar/filters";
+import type { CalendarViewMode, WeekLayoutMode } from "@/lib/calendar/filters";
 import { formatMonthLabel } from "@/lib/calendar/month-range";
 import { formatWeekLabel } from "@/lib/calendar/week-range";
 
@@ -16,6 +16,8 @@ interface CalendarToolbarProps {
   onToday: () => void;
   onMonthYearChange: (year: number, month: number) => void;
   onWeekJump: (iso: string) => void;
+  weekLayout?: WeekLayoutMode;
+  onWeekLayoutChange?: (layout: WeekLayoutMode) => void;
 }
 
 export function CalendarToolbar({
@@ -30,6 +32,8 @@ export function CalendarToolbar({
   onToday,
   onMonthYearChange,
   onWeekJump,
+  weekLayout = "days",
+  onWeekLayoutChange,
 }: CalendarToolbarProps) {
   const periodLabel =
     view === "month"
@@ -58,6 +62,26 @@ export function CalendarToolbar({
             </button>
           ))}
         </div>
+
+        {view === "week" && onWeekLayoutChange && (
+          <div className="inline-flex rounded-xl border border-border overflow-hidden shadow-sm bg-white">
+            {(["days", "team"] as WeekLayoutMode[]).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                data-testid={`calendar-week-layout-${mode}`}
+                onClick={() => onWeekLayoutChange(mode)}
+                className={`px-3 py-2 text-sm font-semibold transition ${
+                  weekLayout === mode
+                    ? "bg-slate-800 text-white shadow-inner"
+                    : "bg-white text-foreground hover:bg-slate-50"
+                }`}
+              >
+                {mode === "days" ? "Gün" : "Ekip"}
+              </button>
+            ))}
+          </div>
+        )}
 
         <button
           type="button"

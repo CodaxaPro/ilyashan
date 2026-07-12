@@ -29,6 +29,13 @@ export interface LeadAppointment {
   customerBookedAt?: string;
   note?: string;
   lastEmail?: LeadEmailNotification;
+  /** Vortag reminder — tracks which confirmedDate was reminded. */
+  reminderEmail?: LeadReminderEmail;
+}
+
+export interface LeadReminderEmail {
+  sentAt: string;
+  forDate: string;
 }
 
 export type LeadEmailAction = "confirm" | "update" | "propose" | "reject";

@@ -4,6 +4,7 @@ import { ADMIN_COOKIE, isAdminConfigured, verifyAdminSessionToken } from "@/lib/
 import { buildLeadStatusEmail } from "@/lib/appointment-email";
 import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import { canRescheduleAppointment } from "@/lib/calendar/appointment-from-lead";
+import type { CalendarAppointment } from "@/lib/calendar/types";
 import {
   getAppointmentById,
   isAppointmentsDbConfigured,
@@ -16,6 +17,8 @@ import {
   buildRescheduleLeadUpdate,
   resolvePreviousAppointmentDate,
 } from "@/lib/calendar/reschedule-lead";
+import { mergeLeadAppointment } from "@/lib/lead-workflow";
+import { getStaffConfig, getStaffMemberById } from "@/lib/staff/config";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { getLead, isLeadsStoreConfigured, updateLead } from "@/lib/leads-store";
 import { Resend } from "resend";
@@ -50,11 +53,22 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const { id } = await context.params;
   const body = (await request.json()) as {
     eventDate?: string;
+    staffId?: string | null;
     sendUpdateEmail?: boolean;
   };
 
-  if (!body.eventDate) {
-    return NextResponse.json({ error: "eventDate gerekli." }, { status: 400 });
+  const hasDateChange = Boolean(body.eventDate);
+  const hasStaffChange = body.staffId !== undefined;
+
+  if (!hasDateChange && !hasStaffChange) {
+    return NextResponse.json({ error: "eventDate veya staffId gerekli." }, { status: 400 });
+  }
+
+  if (hasStaffChange && body.staffId) {
+    const staffConfig = await getStaffConfig();
+    if (!getStaffMemberById(staffConfig, body.staffId)) {
+      return NextResponse.json({ error: "Geçersiz ekip üyesi." }, { status: 400 });
+    }
   }
 
   let appointment = isAppointmentsDbConfigured() ? await getAppointmentById(id) : null;
@@ -73,16 +87,16 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       status: parsed.role === "confirmed" ? "bestätigt" : "vorgeschlagen",
       eventDate:
         parsed.role === "confirmed"
-          ? (lead.appointment?.confirmedDate ?? body.eventDate)
+          ? (lead.appointment?.confirmedDate ?? body.eventDate ?? "")
           : parsed.role === "proposed"
-            ? (lead.appointment?.proposedDate ?? body.eventDate)
-            : body.eventDate,
+            ? (lead.appointment?.proposedDate ?? body.eventDate ?? "")
+            : (body.eventDate ?? lead.appointment?.confirmedDate ?? lead.appointment?.proposedDate ?? ""),
       customerName: lead.name,
       title: lead.name,
     };
   }
 
-  if (!canRescheduleAppointment(appointment)) {
+  if (!canRescheduleAppointment(appointment) && hasDateChange) {
     return NextResponse.json({ error: "Bu randevu taşınamaz." }, { status: 400 });
   }
 
@@ -91,17 +105,52 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     return NextResponse.json({ error: "Lead bulunamadı." }, { status: 404 });
   }
 
+  if (hasStaffChange && !hasDateChange) {
+    const appointmentPatch = mergeLeadAppointment(lead.appointment, {
+      staffId: body.staffId ?? "",
+    });
+    const updatedLead = await updateLead(lead.id, { appointment: appointmentPatch });
+    if (!updatedLead) {
+      return NextResponse.json({ error: "Lead güncellenemedi." }, { status: 500 });
+    }
+
+    await syncLeadToCalendar(updatedLead);
+
+    let updatedAppointment: CalendarAppointment = {
+      ...appointment,
+      staffId: appointmentPatch.staffId,
+    };
+    if (isAppointmentsDbConfigured() && !id.startsWith("local-")) {
+      await syncLeadAppointments(updatedLead);
+      const dbRow = await getAppointmentById(id);
+      if (dbRow) updatedAppointment = dbRow;
+    }
+
+    return NextResponse.json({
+      success: true,
+      appointment: updatedAppointment,
+      lead: updatedLead,
+      emailSent: false,
+      emailError: null,
+    });
+  }
+
   const previousDate = resolvePreviousAppointmentDate(lead, appointment);
+  const eventDate = body.eventDate!;
 
   const { appointment: appointmentPatch, status: nextStatus } = buildRescheduleLeadUpdate(
     lead,
     appointment,
-    body.eventDate
+    eventDate
   );
+
+  const finalAppointment = hasStaffChange
+    ? mergeLeadAppointment(appointmentPatch, { staffId: body.staffId ?? "" })
+    : appointmentPatch;
 
   const updatedLead = await updateLead(lead.id, {
     status: nextStatus,
-    appointment: appointmentPatch,
+    appointment: finalAppointment,
   });
 
   if (!updatedLead) {
@@ -110,9 +159,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
   await syncLeadToCalendar(updatedLead);
 
-  let updatedAppointment = { ...appointment, eventDate: body.eventDate };
+  let updatedAppointment: CalendarAppointment = {
+    ...appointment,
+    eventDate,
+    staffId: finalAppointment.staffId,
+  };
   if (isAppointmentsDbConfigured() && !id.startsWith("local-")) {
-    const dbRow = await updateAppointmentEventDate(id, body.eventDate);
+    const dbRow = await updateAppointmentEventDate(id, eventDate);
     if (dbRow) updatedAppointment = dbRow;
     else await syncLeadAppointments(updatedLead);
   }
@@ -134,9 +187,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     } else {
       const ctx = await resolveServerQuotePricing(lead);
       const mail = buildLeadStatusEmail("update", quote, lead.anfrageNr ?? lead.id, {
-        confirmedDate: body.eventDate,
+        confirmedDate: eventDate,
         previousConfirmedDate: previousDate,
-        note: appointmentPatch.note,
+        note: finalAppointment.note,
       }, ctx);
       const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
       const { error } = await resend.emails.send({

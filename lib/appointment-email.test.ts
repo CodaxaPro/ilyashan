@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  buildAppointmentReminderEmail,
   buildAppointmentUpdateEmail,
   buildLeadRejectionEmail,
   getCustomerEmailPreviewDe,
@@ -39,6 +40,20 @@ describe("appointment emails", () => {
     const email = buildLeadRejectionEmail(quote, "ANG-2026-123", "Kapazität voll");
     assert.match(email.subject, /Rückmeldung/i);
     assert.match(email.text, /Kapazität voll/);
+  });
+
+  it("builds reminder email for tomorrow appointment", () => {
+    const email = buildAppointmentReminderEmail(
+      quote,
+      "ANG-2026-123",
+      "2026-07-13",
+      undefined,
+      { plannedStartTime: "09:30", estimatedDurationHours: 2.5 }
+    );
+    assert.match(email.subject, /Erinnerung/i);
+    assert.match(email.subject, /morgen/i);
+    assert.match(email.text, /Morgen \(13\.07\.2026\)/);
+    assert.match(email.text, /Ankunft: gegen 09:30 Uhr/);
   });
 
   it("previews customer email content in German", () => {

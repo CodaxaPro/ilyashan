@@ -177,6 +177,61 @@ export function buildAppointmentUpdateEmail(
   };
 }
 
+export function buildAppointmentReminderEmail(
+  data: QuoteFormData,
+  anfrageNr: string,
+  confirmedDate: string,
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  appointment?: LeadAppointment
+) {
+  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
+  const dateLabel = formatGermanDate(confirmedDate);
+  const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
+
+  const body = `
+    <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
+      Guten Tag ${escapeHtml(firstName)},
+    </p>
+    <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
+      kurze Erinnerung: <strong>morgen</strong> findet Ihr Termin für die
+      <strong>Fensterreinigung</strong> (${escapeHtml(services)}) statt.
+    </p>
+    ${scheduleInfoBox(dateLabel, plan)}
+    ${buildInfoBox(
+      `<strong>Bitte beachten:</strong> Stellen Sie sicher, dass alle Fenster zugänglich sind. ` +
+        "Bei kurzfristigen Änderungen erreichen Sie uns telefonisch."
+    )}
+    ${quoteSummaryBlock(data, anfrageNr, ctx)}
+    ${contactFooter()}`;
+
+  const text = [
+    `Guten Tag ${firstName},`,
+    "",
+    `Erinnerung: Morgen (${dateLabel}) ist Ihr Termin für Fensterreinigung (${services}).`,
+    ...buildArrivalLinesDe(dateLabel, plan),
+    "",
+    "Bitte stellen Sie sicher, dass die Fenster zugänglich sind.",
+    "",
+    `Anfrage-Nr.: ${anfrageNr}`,
+    "",
+    "Mit freundlichen Grüßen",
+    siteConfig.name,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return {
+    subject: `Erinnerung: Termin morgen ${dateLabel} – ${anfrageNr}`,
+    text,
+    html: buildEmailLayout({
+      preheader: `Morgen: Fensterreinigung am ${dateLabel}`,
+      title: "Terminerinnerung",
+      subtitle: `${anfrageNr} · morgen · ${dateLabel}`,
+      body,
+    }),
+  };
+}
+
 export function buildAppointmentProposalEmail(
   data: QuoteFormData,
   anfrageNr: string,
