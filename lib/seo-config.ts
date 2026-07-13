@@ -10,14 +10,30 @@ export const LOCATION_SLUGS = [
   "stolberg",
   "roetgen",
   "kornelimuenster",
+  "dueren",
+  "juelich",
+  "geilenkirchen",
+  "heinsberg",
+  "erkelenz",
+  "monschau",
 ] as const;
 
 export const INTENT_TYPES = [
   "fensterputzer",
+  "fenster-putzen",
   "glasreinigung",
   "fensterreiniger",
-  "gebaeudereinigung",
+  "fensterreinigung-preis",
+  "fensterreinigung-kosten",
+  "fensterreinigung-firma",
   "professionelle-fensterreinigung",
+  "gebaeudereinigung",
+  "solaranlagen-reinigung",
+  "glasfassaden-reinigung",
+  "schaufenster-reinigung",
+  "wintergarten-reinigung",
+  "hausmeister-fenster",
+  "wartungsvertrag-fenster",
   "geschenk",
 ] as const;
 
@@ -37,19 +53,39 @@ export type IntentSlug = `${IntentType}-${LocationSlug}`;
 
 export const INTENT_TYPE_LABELS: Record<IntentType, string> = {
   fensterputzer: "Fensterputzer",
+  "fenster-putzen": "Fenster putzen",
   glasreinigung: "Glasreinigung",
   fensterreiniger: "Fensterreiniger",
+  "fensterreinigung-preis": "Fensterreinigung Preis",
+  "fensterreinigung-kosten": "Fensterreinigung Kosten",
+  "fensterreinigung-firma": "Fensterreinigung Firma",
   gebaeudereinigung: "Gebäudereinigung Fenster",
   "professionelle-fensterreinigung": "Professionelle Fensterreinigung",
+  "solaranlagen-reinigung": "Solaranlagen-Reinigung",
+  "glasfassaden-reinigung": "Glasfassaden-Reinigung",
+  "schaufenster-reinigung": "Schaufenster-Reinigung",
+  "wintergarten-reinigung": "Wintergarten-Reinigung",
+  "hausmeister-fenster": "Hausmeister Fenster",
+  "wartungsvertrag-fenster": "Wartungsvertrag Fenster",
   geschenk: "Fensterreinigung Geschenk",
 };
 
 export const INTENT_TYPE_HINTS: Record<IntentType, string> = {
   fensterputzer: "Der wirklich kommt",
+  "fenster-putzen": "Selbst oder Profi?",
   glasreinigung: "Streifenfrei & sicher",
   fensterreiniger: "Lokal aus Baesweiler",
+  "fensterreinigung-preis": "Festpreis in 24h",
+  "fensterreinigung-kosten": "Transparent kalkuliert",
+  "fensterreinigung-firma": "Versichert & regional",
   gebaeudereinigung: "Gewerbe & MFH",
   "professionelle-fensterreinigung": "Versichert · Festpreis",
+  "solaranlagen-reinigung": "PV ab 99 €",
+  "glasfassaden-reinigung": "Gewerbe & Büro",
+  "schaufenster-reinigung": "Laden & Praxis",
+  "wintergarten-reinigung": "Wintergarten & Veranda",
+  "hausmeister-fenster": "Hausverwaltung",
+  "wartungsvertrag-fenster": "Ab 59 €/Monat",
   geschenk: "Zeit statt Zeug",
 };
 
@@ -60,7 +96,8 @@ export function getAllIntentSlugs(): IntentSlug[] {
 }
 
 export function parseIntentSlug(slug: string): { type: IntentType; citySlug: LocationSlug } | null {
-  for (const type of INTENT_TYPES) {
+  const sorted = [...INTENT_TYPES].sort((a, b) => b.length - a.length);
+  for (const type of sorted) {
     const prefix = `${type}-`;
     if (slug.startsWith(prefix)) {
       const citySlug = slug.slice(prefix.length);
@@ -86,10 +123,14 @@ export function getIntentRewrites() {
 export function getLocationRewrites() {
   return LOCATION_SLUGS.flatMap((city) => [
     { source: `/fensterreinigung-${city}`, destination: `/locations/${city}` },
-    { source: `/fenster-putzen-${city}`, destination: `/locations/${city}` },
-    { source: `/fensterputzen-${city}`, destination: `/locations/${city}` },
+    { source: `/fenster-putzen-${city}`, destination: `/intent/fenster-putzen-${city}` },
+    { source: `/fensterputzen-${city}`, destination: `/intent/fenster-putzen-${city}` },
     { source: `/fensterreinigung-in-${city}`, destination: `/locations/${city}` },
     { source: `/fensterreinigung-gewerbe-${city}`, destination: `/fensterreinigung/gewerbe` },
+    { source: `/fensterreinigung-preis-${city}`, destination: `/intent/fensterreinigung-preis-${city}` },
+    { source: `/fensterreinigung-kosten-${city}`, destination: `/intent/fensterreinigung-kosten-${city}` },
+    { source: `/solaranlagen-reinigung-${city}`, destination: `/intent/solaranlagen-reinigung-${city}` },
+    { source: `/photovoltaik-reinigung-${city}`, destination: `/intent/solaranlagen-reinigung-${city}` },
   ]);
 }
 
@@ -135,12 +176,20 @@ export function getGiftSeoRewrites() {
   return aliases;
 }
 
-/** Fenster keyword aliases → hub or ratgeber */
+/** Fenster keyword aliases → hub, intent or ratgeber */
 export function getFensterSeoRewrites() {
   return [
     { source: "/fensterreinigung-preise", destination: "/ratgeber/was-kostet-fensterreinigung" },
     { source: "/fensterreinigung-kosten", destination: "/ratgeber/was-kostet-fensterreinigung" },
     { source: "/fensterputzer", destination: "/fensterreinigung" },
     { source: "/glasreinigung", destination: "/fensterreinigung" },
+    { source: "/fenster-putzen", destination: "/fensterreinigung" },
+    { source: "/fenster-reinigen", destination: "/fensterreinigung" },
+    { source: "/photovoltaik-reinigung", destination: "/fensterreinigung/solar" },
+    { source: "/pv-anlage-reinigen", destination: "/fensterreinigung/solar" },
+    { source: "/glasfassade-reinigung", destination: "/fensterreinigung/fassade" },
+    { source: "/schaufenster-putzen", destination: "/fensterreinigung/gewerbe" },
+    { source: "/wintergarten-putzen", destination: "/fensterreinigung/privat" },
+    { source: "/wartungsvertrag-fensterreinigung", destination: "/fensterreinigung/wartung" },
   ];
 }

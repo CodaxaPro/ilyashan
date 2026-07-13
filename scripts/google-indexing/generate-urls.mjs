@@ -13,10 +13,14 @@ const BASE = process.env.SITE_URL ?? "https://ilyashan.de/de";
 const LOCATION_SLUGS = [
   "baesweiler", "aachen", "wurselen", "alsdorf", "ubach-palenberg",
   "herzogenrath", "eschweiler", "stolberg", "roetgen", "kornelimuenster",
+  "dueren", "juelich", "geilenkirchen", "heinsberg", "erkelenz", "monschau",
 ];
 const INTENT_TYPES = [
-  "fensterputzer", "glasreinigung", "fensterreiniger", "gebaeudereinigung",
-  "professionelle-fensterreinigung", "geschenk",
+  "fensterputzer", "fenster-putzen", "glasreinigung", "fensterreiniger",
+  "fensterreinigung-preis", "fensterreinigung-kosten", "fensterreinigung-firma",
+  "professionelle-fensterreinigung", "gebaeudereinigung", "solaranlagen-reinigung",
+  "glasfassaden-reinigung", "schaufenster-reinigung", "wintergarten-reinigung",
+  "hausmeister-fenster", "wartungsvertrag-fenster", "geschenk",
 ];
 const PACKAGE_SLUGS = ["privat", "gewerbe", "rahmen", "solar", "fassade", "wartung"];
 const GUIDE_SLUGS = [

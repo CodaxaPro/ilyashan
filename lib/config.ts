@@ -44,7 +44,7 @@ export const siteConfig = {
       },
       {
         name: "Weitere Umgebung",
-        areas: ["Herzogenrath", "Eschweiler", "Stolberg", "Roetgen"],
+        areas: ["Herzogenrath", "Eschweiler", "Stolberg", "Roetgen", "Düren", "Jülich", "Geilenkirchen", "Heinsberg", "Erkelenz", "Monschau"],
       },
     ],
   },

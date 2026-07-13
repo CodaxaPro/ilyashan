@@ -1,4 +1,5 @@
-/** UTM tracking for Angebots-Wizard & TreuePay Gutschein conversion attribution */
+/** Infer tracking context from a landing page slug */
+import { INTENT_TYPES } from "./seo-config";
 
 export type TrackingChannel =
   | "home"
@@ -39,16 +40,9 @@ export function getGutscheinUrl(ctx?: TrackingContext): string {
   return withUtm("https://treuepay.de/ilyashan/gutschein", ctx);
 }
 
-/** Infer tracking context from a landing page slug */
 export function trackingFromPageSlug(slug: string): TrackingContext {
-  const intentPrefixes = [
-    "fensterputzer-",
-    "glasreinigung-",
-    "fensterreiniger-",
-    "gebaeudereinigung-",
-    "professionelle-fensterreinigung-",
-    "geschenk-",
-  ];
+  const sorted = [...INTENT_TYPES].sort((a, b) => b.length - a.length);
+  const intentPrefixes = sorted.map((t) => `${t}-`);
   if (intentPrefixes.some((p) => slug.startsWith(p))) {
     return { channel: "intent", slug };
   }
