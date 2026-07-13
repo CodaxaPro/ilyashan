@@ -1,0 +1,303 @@
+{
+  "slug": "hub",
+  "path": "/gutschein",
+  "seo": {
+    "title": "Fensterreinigung Gutschein | Geschenk — Ilyashan",
+    "description": "Sie schenken keine Reinigung. Sie schenken Zeit und Klarheit. Gutschein sofort online, ab 49 €. 4,9★ · Baesweiler & Aachen."
+  },
+  "hero": {
+    "eyebrow": "Geschenk · Klarheit · Zeit",
+    "headline": "Sie schenken keine Reinigung. Sie schenken Zeit und Klarheit.",
+    "subline": "Ein Gutschein für streifenfreie Fenster — sofort online, per E-Mail, Print@Home.",
+    "trust": "4,9★ bei Google · Sofort online · Print@Home"
+  },
+  "essence": {
+    "eyebrow": "Was wirklich ankommt",
+    "headline": "Hinter dem Gutschein steckt Entlastung — nicht nur eine Leistung.",
+    "paragraphs": [
+      "Die meisten Geschenke landen im Schrank. Dieses hier landet im Alltag — als Klarheit und Leichtigkeit.",
+      "Fensterreinigung ist der Rahmen. Was Sie wirklich schenken: Zeit, die niemand mehr an der Leiter verbringt.",
+      "Ob für Mama, Partner oder Freundin — Sie schenken Entlastung, die man spürt."
+    ]
+  },
+  "emotions": {
+    "eyebrow": "Sechs Worte des Geschenks",
+    "headline": "Klarheit — auf eine besondere Art",
+    "items": [
+      {
+        "word": "Klarheit",
+        "headline": "Durchblick schenken",
+        "text": "Streifenfreie Fenster — sichtbarer als Blumen."
+      },
+      {
+        "word": "Zeit",
+        "headline": "Zeit statt Zeug",
+        "text": "Entlastung, die ankommt."
+      },
+      {
+        "word": "Vertrauen",
+        "headline": "Seriös & versichert",
+        "text": "4,9★ · 500+ Kunden."
+      },
+      {
+        "word": "Fairness",
+        "headline": "Kein Anfahrtszuschlag",
+        "text": "Region Aachen & Baesweiler."
+      },
+      {
+        "word": "Überraschung",
+        "headline": "Unerwartet gut",
+        "text": "Ein Geschenk, das hilft."
+      },
+      {
+        "word": "Erinnerung",
+        "headline": "Bleibt",
+        "text": "Klare Fenster, gute Erinnerung."
+      }
+    ]
+  },
+  "recipients": {
+    "eyebrow": "Für wen?",
+    "headline": "Jede Person verdient Klarheit",
+    "items": [
+      {
+        "title": "Für Mama",
+        "text": "Sie gibt immer — diesmal Entlastung."
+      },
+      {
+        "title": "Für Sie",
+        "text": "Selbstfürsorge ohne schlechtes Gewissen."
+      },
+      {
+        "title": "Für Paare",
+        "text": "Gemeinsam entspannen — wir putzen."
+      },
+      {
+        "title": "Für Freunde",
+        "text": "Praktisch und überraschend."
+      }
+    ]
+  },
+  "occasions": {
+    "eyebrow": "Jeder Anlass",
+    "headline": "Finden Sie das passende Geschenk",
+    "intro": "Gleiche Qualität — andere Bedeutung.",
+    "items": [
+      {
+        "slug": "fensterreinigung",
+        "label": "Fensterreinigung Gutschein",
+        "hint": "Das Original"
+      },
+      {
+        "slug": "fensterreinigung-geschenk",
+        "label": "Fensterreinigung Geschenk",
+        "hint": "Zeit schenken"
+      },
+      {
+        "slug": "muttertag",
+        "label": "Muttertag",
+        "hint": "Für Mama"
+      },
+      {
+        "slug": "weihnachten",
+        "label": "Weihnachten",
+        "hint": "Festtags-Geschenk"
+      },
+      {
+        "slug": "valentinstag",
+        "label": "Valentinstag",
+        "hint": "Liebe zeigen"
+      },
+      {
+        "slug": "paar",
+        "label": "Zu zweit",
+        "hint": "Paar-Geschenk"
+      },
+      {
+        "slug": "geburtstag",
+        "label": "Geburtstag",
+        "hint": "Originell"
+      },
+      {
+        "slug": "freundin",
+        "label": "Freundin",
+        "hint": "Wertschätzung"
+      },
+      {
+        "slug": "vatertag",
+        "label": "Vatertag",
+        "hint": "Für Papa"
+      },
+      {
+        "slug": "ostern",
+        "label": "Ostern",
+        "hint": "Frühling"
+      },
+      {
+        "slug": "last-minute",
+        "label": "Last Minute",
+        "hint": "Sofort"
+      },
+      {
+        "slug": "danke",
+        "label": "Danke sagen",
+        "hint": "Wertschätzung"
+      },
+      {
+        "slug": "hochzeit",
+        "label": "Hochzeit",
+        "hint": "Neues Zuhause"
+      },
+      {
+        "slug": "jubilaeum",
+        "label": "Jubiläum",
+        "hint": "Gemeinsam"
+      },
+      {
+        "slug": "abschied",
+        "label": "Abschied",
+        "hint": "Kollegin & Team"
+      },
+      {
+        "slug": "firmen-geschenk",
+        "label": "Firmengeschenk",
+        "hint": "Mitarbeiter"
+      },
+      {
+        "slug": "ruhestand",
+        "label": "Ruhestand",
+        "hint": "Entlastung"
+      },
+      {
+        "slug": "team-geschenk",
+        "label": "Team-Geschenk",
+        "hint": "Kollegen"
+      },
+      {
+        "slug": "online",
+        "label": "Gutschein online",
+        "hint": "Digital"
+      },
+      {
+        "slug": "reinigung",
+        "label": "Reinigungsgutschein",
+        "hint": "Putzservice"
+      },
+      {
+        "slug": "geschenkidee",
+        "label": "Geschenkidee",
+        "hint": "Originell"
+      },
+      {
+        "slug": "zeit-schenken",
+        "label": "Zeit schenken",
+        "hint": "Me Time"
+      },
+      {
+        "slug": "selbstfuersorge",
+        "label": "Selbstfürsorge",
+        "hint": "Für sich"
+      },
+      {
+        "slug": "premium",
+        "label": "Premium",
+        "hint": "Komplett"
+      },
+      {
+        "slug": "fensterreinigung-nrw",
+        "label": "NRW",
+        "hint": "Regional"
+      },
+      {
+        "slug": "fuer-mama",
+        "label": "Für Mama",
+        "hint": "Muttertag & mehr"
+      },
+      {
+        "slug": "fuer-papa",
+        "label": "Für Papa",
+        "hint": "Vatertag & mehr"
+      },
+      {
+        "slug": "fuer-oma",
+        "label": "Für Oma",
+        "hint": "Sanft"
+      },
+      {
+        "slug": "fuer-opa",
+        "label": "Für Opa",
+        "hint": "Praktisch"
+      },
+      {
+        "slug": "fuer-freund",
+        "label": "Für Freund",
+        "hint": "Neutral"
+      },
+      {
+        "slug": "silberhochzeit",
+        "label": "Silberhochzeit",
+        "hint": "25 Jahre"
+      },
+      {
+        "slug": "nikolaus",
+        "label": "Nikolaus",
+        "hint": "Überraschung"
+      },
+      {
+        "slug": "verlobung",
+        "label": "Verlobung",
+        "hint": "Ja sagen"
+      },
+      {
+        "slug": "ueberraschung",
+        "label": "Überraschung",
+        "hint": "Wow"
+      }
+    ]
+  },
+  "journey": {
+    "eyebrow": "So funktioniert's",
+    "headline": "Vom Gutschein bis zu klaren Fenstern",
+    "steps": [
+      {
+        "num": "01",
+        "title": "Bestellen",
+        "text": "Online — sofort per E-Mail."
+      },
+      {
+        "num": "02",
+        "title": "Verschenken",
+        "text": "Print@Home oder digital."
+      },
+      {
+        "num": "03",
+        "title": "Einlösen",
+        "text": "Termin in Baesweiler & Region."
+      },
+      {
+        "num": "04",
+        "title": "Freude",
+        "text": "Streifenfrei — garantiert."
+      }
+    ]
+  },
+  "faq": [
+    {
+      "q": "Sofort verfügbar?",
+      "a": "Ja — Gutschein sofort per E-Mail nach Bestellung."
+    },
+    {
+      "q": "Wo einlösbar?",
+      "a": "Baesweiler, Aachen und gesamtes Einsatzgebiet — kein Anfahrtszuschlag."
+    },
+    {
+      "q": "Ab welchem Betrag?",
+      "a": "Ab 49 € Privat — oder Wunschbetrag im Shop."
+    }
+  ],
+  "closing": {
+    "headline": "Schenken Sie, was bleibt — Klarheit.",
+    "text": "Gutschein in Minuten bestellt — lange erinnert.",
+    "cta": "Gutschein bestellen"
+  }
+}

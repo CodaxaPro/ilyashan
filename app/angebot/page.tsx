@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
+import { pageMetadata } from "@/lib/seo-meta";
 import { QuoteWizard } from "@/components/quote/QuoteWizard";
 import { PricingConfigProvider } from "@/components/quote/PricingConfigProvider";
 import { Header } from "@/components/Header";
@@ -7,10 +8,11 @@ import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { Button } from "@/components/ui/Button";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: `Preis berechnen – Fensterreinigung ${siteConfig.contact.region}`,
   description: `Sofort-Preisschätzung im Angebots-Wizard für Fensterreinigung in ${siteConfig.contact.region}. Verbindliches Festpreis-Angebot in 24 Stunden. Streifenfrei garantiert.`,
-};
+  path: "/angebot",
+});
 
 export default function AngebotPage() {
   return (

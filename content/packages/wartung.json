@@ -1,0 +1,126 @@
+{
+  "slug": "wartung",
+  "path": "/fensterreinigung/wartung",
+  "serviceId": "wartung",
+  "priceFrom": "ab 59 €/Monat",
+  "seo": {
+    "title": "Wartungsvertrag | Fensterreinigung — Ilyashan Baesweiler",
+    "description": "Wartungsvertrag in Baesweiler & Aachen: ab 59 €/Monat, streifenfrei garantiert, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★"
+  },
+  "hero": {
+    "eyebrow": "Wartungsvertrag · Ilyashan",
+    "headline": "Wartungsvertrag — immer klare Fenster",
+    "subline": "Professionelle wartungsvertrag — transparent kalkuliert, versichert, pünktlich. Live-Preisschätzung im Wizard.",
+    "trust": "4,9★ bei Google · Kein Anfahrtszuschlag · Versichert"
+  },
+  "essence": {
+    "eyebrow": "Wartungsvertrag",
+    "headline": "Wartungsvertrag — Qualität, die man sieht",
+    "paragraphs": [
+      "Wartungsvertrag von Ilyashan: streifenfrei garantiert, ab 59 €/Monat, kein Anfahrtszuschlag in Baesweiler, Aachen und Umgebung.",
+      "Im Angebots-Wizard sehen Sie sofort eine Live-Preisschätzung — verbindliches Festpreis-Angebot in 24 Stunden.",
+      "Über 500 zufriedene Kunden vertrauen uns — seit 2020 regional verwurzelt in Baesweiler."
+    ]
+  },
+  "emotions": {
+    "eyebrow": "Warum Ilyashan",
+    "headline": "Sechs Gründe für Wartungsvertrag",
+    "items": [
+      {
+        "word": "Klarheit",
+        "headline": "Streifenfrei",
+        "text": "Kristallklare Ergebnisse — garantiert."
+      },
+      {
+        "word": "Vertrauen",
+        "headline": "Versichert",
+        "text": "Betriebshaftpflicht inklusive."
+      },
+      {
+        "word": "Fairness",
+        "headline": "Kein Anfahrtszuschlag",
+        "text": "Festpreis ohne versteckte Kosten."
+      },
+      {
+        "word": "Präzision",
+        "headline": "Profi-Technik",
+        "text": "Erfahrung seit 2020."
+      },
+      {
+        "word": "Zeit",
+        "headline": "Pünktlich",
+        "text": "Termintreue ist unser Versprechen."
+      },
+      {
+        "word": "Wertschätzung",
+        "headline": "500+ Kunden",
+        "text": "4,9★ bei Google."
+      }
+    ]
+  },
+  "includes": {
+    "eyebrow": "Leistung",
+    "headline": "Das ist enthalten",
+    "items": [
+      "Regelmäßige Termine",
+      "Festpreis monatlich",
+      "Ideal für Gewerbe & MFH",
+      "Planbare Kosten"
+    ]
+  },
+  "forWhom": {
+    "eyebrow": "Für wen?",
+    "headline": "Ideal für",
+    "items": [
+      {
+        "title": "Privatkunden",
+        "text": "Wohnung, Haus, Balkon — fair kalkuliert."
+      },
+      {
+        "title": "Gewerbe",
+        "text": "Büro, Praxis, Laden — flexible Termine."
+      }
+    ]
+  },
+  "journey": {
+    "eyebrow": "Ablauf",
+    "headline": "In vier Schritten",
+    "steps": [
+      {
+        "num": "01",
+        "title": "Preis berechnen",
+        "text": "Wizard — live sichtbar."
+      },
+      {
+        "num": "02",
+        "title": "Festpreis",
+        "text": "Angebot in 24 Stunden."
+      },
+      {
+        "num": "03",
+        "title": "Termin",
+        "text": "Pünktlich vor Ort."
+      },
+      {
+        "num": "04",
+        "title": "Ergebnis",
+        "text": "Streifenfrei garantiert."
+      }
+    ]
+  },
+  "faq": [
+    {
+      "q": "Was kostet es?",
+      "a": "ab 59 €/Monat. Live-Schätzung im Wizard."
+    },
+    {
+      "q": "Anfahrtszuschlag?",
+      "a": "Nein — im gesamten Einsatzgebiet."
+    }
+  ],
+  "closing": {
+    "headline": "Wartungsvertrag — jetzt Preis berechnen",
+    "text": "Live-Preisschätzung online — Festpreis in 24 Stunden.",
+    "cta": "Preis jetzt berechnen"
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "slug": "hub",
+  "path": "/fensterreinigung",
+  "seo": {
+    "title": "Fensterreinigung Baesweiler & Aachen | Streifenfrei — Ilyashan",
+    "description": "Professionelle Fensterreinigung: streifenfrei garantiert, ab 49 €, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★ · versichert."
+  },
+  "hero": {
+    "eyebrow": "Fensterreinigung · Baesweiler & Aachen",
+    "headline": "Klare Fenster. Klarer Preis. Kein Anfahrtszuschlag.",
+    "subline": "Professionelle Fensterreinigung mit Live-Preisschätzung im Wizard — verbindliches Festpreis-Angebot in 24 Stunden.",
+    "trust": "4,9★ bei Google · 500+ Kunden · Versichert"
+  },
+  "pain": {
+    "eyebrow": "Kennen Sie das?",
+    "headline": "Schlierige Fenster. Keine Zeit. Frust statt Ergebnis.",
+    "paragraphs": [
+      "Schlierige Scheiben, verschmierte Rahmen, die Leiter im Weg — Fenster putzen landet immer auf der morgen-Liste.",
+      "Unzuverlässige Putzkräfte, versteckte Kosten, Streifen trotz Stundenarbeit — da verliert man die Lust."
+    ],
+    "closing": "Es geht auch anders — streifenfrei, fair, versichert."
+  },
+  "promise": {
+    "eyebrow": "Unser Versprechen",
+    "headline": "Live-Preisschätzung. Festpreis in 24h. Streifenfrei garantiert.",
+    "text": "Transparent von Anfang an — kein Anfahrtszuschlag in unserem Einsatzgebiet."
+  },
+  "stats": [
+    {
+      "value": "4,9★",
+      "label": "Google Bewertung"
+    },
+    {
+      "value": "500+",
+      "label": "Zufriedene Kunden"
+    },
+    {
+      "value": "24h",
+      "label": "Festpreis-Angebot"
+    }
+  ],
+  "emotions": {
+    "eyebrow": "Warum Ilyashan",
+    "headline": "Sechs Gründe für klare Fenster",
+    "items": [
+      {
+        "word": "Klarheit",
+        "headline": "Kristallklare Fenster",
+        "text": "Endlich wieder durchblicken — streifenfrei garantiert."
+      },
+      {
+        "word": "Vertrauen",
+        "headline": "Vollversichert",
+        "text": "Ihr Zuhause in sicheren Händen."
+      },
+      {
+        "word": "Fairness",
+        "headline": "Kein Anfahrtszuschlag",
+        "text": "Festpreis in 24 Stunden — transparent."
+      },
+      {
+        "word": "Präzision",
+        "headline": "Profi-Technik",
+        "text": "Streifenfrei — jedes Mal."
+      },
+      {
+        "word": "Zeit",
+        "headline": "Mehr Zeit für Sie",
+        "text": "Wir erledigen, was Sie aufschieben."
+      },
+      {
+        "word": "Wertschätzung",
+        "headline": "500+ Kunden",
+        "text": "4,9★ bei Google."
+      }
+    ]
+  },
+  "services": [
+    "privat",
+    "gewerbe",
+    "rahmen",
+    "solar",
+    "fassade",
+    "wartung"
+  ],
+  "journey": {
+    "eyebrow": "So einfach",
+    "headline": "In vier Schritten zu klaren Fenstern",
+    "steps": [
+      {
+        "num": "01",
+        "title": "Preis berechnen",
+        "text": "Wizard — Flügel, Etage, Extras."
+      },
+      {
+        "num": "02",
+        "title": "Festpreis erhalten",
+        "text": "Verbindliches Angebot in 24h."
+      },
+      {
+        "num": "03",
+        "title": "Reinigung",
+        "text": "Pünktlich, versichert, streifenfrei."
+      },
+      {
+        "num": "04",
+        "title": "Durchblicken",
+        "text": "Klare Fenster — garantiert."
+      }
+    ]
+  },
+  "faq": [
+    {
+      "q": "Was kostet Fensterreinigung?",
+      "a": "Privat ab 49 €. Live-Schätzung im Wizard — Festpreis in 24h."
+    },
+    {
+      "q": "Kein Anfahrtszuschlag?",
+      "a": "Ja — für Baesweiler, Aachen und gesamtes Einsatzgebiet."
+    },
+    {
+      "q": "Versichert?",
+      "a": "Ja — Betriebshaftpflicht inklusive."
+    }
+  ],
+  "closing": {
+    "headline": "Klare Fenster. Jetzt Preis berechnen.",
+    "text": "Live-Preisschätzung online — Festpreis in 24 Stunden.",
+    "cta": "Preis jetzt berechnen"
+  }
+}

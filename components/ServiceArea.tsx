@@ -1,4 +1,7 @@
+import Link from "next/link";
+
 import { siteConfig } from "@/lib/config";
+import { LOCAL_SEO_LINKS } from "@/lib/landing-pages";
 
 export function ServiceArea() {
   const { serviceArea } = siteConfig;
@@ -55,6 +58,22 @@ export function ServiceArea() {
                   ))}
                 </ul>
               </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-14 pt-10 border-t border-border">
+          <h3 className="text-center font-bold text-lg mb-2">Fensterreinigung in Ihrer Stadt</h3>
+          <p className="text-center text-sm text-muted mb-6">{serviceArea.noTravelFeeLabel} — in allen Städten</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {LOCAL_SEO_LINKS.map((link) => (
+              <Link
+                key={link.slug}
+                href={`/fensterreinigung-${link.slug}`}
+                className="px-4 py-2 rounded-full border border-border bg-card text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+              >
+                {link.label}
+              </Link>
             ))}
           </div>
         </div>

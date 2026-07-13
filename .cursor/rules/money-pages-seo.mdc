@@ -1,0 +1,28 @@
+---
+description: SEO money pages vs conversion landing pages — Ilyashan Fensterreinigung
+alwaysApply: true
+---
+
+# Money Pages vs Conversion Landings (Ilyashan)
+
+## Conversion landing pages — DO NOT convert to long-form articles
+
+These pages are sales-focused landings. Keep short emotional copy + visual sections (hero, essence, emotions, journey, FAQ, CTA). Never inject 2.500+ word article overlays into these routes:
+
+- `/fensterreinigung` and `ServiceHubLanding`
+- `/gutschein` and `/gutschein/*` (`GiftLanding`)
+- `/fensterreinigung/*` (`PackageLanding`)
+- `/locations/*` (`LocationLanding`)
+
+CTA on landings: **Preis jetzt berechnen** → `/de/angebot` (UTM) or **Gutschein bestellen** → TreuePay (UTM).
+
+## Long-form SEO — allowed on intent & ratgeber only
+
+- `/intent/*` (e.g. fensterputzer-aachen, glasreinigung-baesweiler)
+- `/ratgeber/*`
+
+Each SEO page must be unique, intent-specific, native German, with schema and internal links.
+
+## Content language
+
+All user-facing content in German at native quality. Fensterreinigung sector tone: Klarheit, Vertrauen, Streifenfrei, Zeit schenken.
