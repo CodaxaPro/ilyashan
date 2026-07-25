@@ -98,11 +98,12 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
     nearby: meta.nearby,
     hero: {
       eyebrow: `Fensterreinigung · ${meta.city}`,
+      // Ads Quality Score: H1 must mirror city+service intent (Neredeyim 5s test)
       headline: home
-        ? "Ihre Fenster. Unsere Handschrift. Streifenfrei — garantiert."
+        ? "Fensterreinigung Baesweiler — klar, fair, streifenfrei."
         : `Fensterreinigung ${meta.city} — klar, fair, streifenfrei.`,
       subline: home
-        ? "Ansässig in Baesweiler — keine anonyme Putzkette. Live-Preisschätzung im Wizard, Festpreis in 24 Stunden, versichert und pünktlich."
+        ? "Ansässig in Baesweiler — Kückstr. 29. Live-Preisschätzung im Wizard, Festpreis in 24 Stunden, versichert und pünktlich."
         : `Professionelle Fensterreinigung nahe ${meta.city}: ${travel}. Transparente Preisschätzung online — verbindliches Festpreis-Angebot in 24 Stunden.`,
       trust: home
         ? `${TRUST} · Kückstr. 29`

@@ -1,0 +1,5 @@
+google-ads>=28.0.0
+python-dotenv>=1.0.0
+google-auth-oauthlib>=1.2.0
+cryptography>=42,<49
+# venv: python3.12 (3.14 has no grpcio wheels). Prefer binary: pip install --prefer-binary -r requirements.txt

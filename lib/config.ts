@@ -413,8 +413,10 @@ export const siteConfig = {
 
   googleAds: {
     tagId: "AW-18191480247",
-    /** Optional: full send_to from Google Ads → request_quote → Event snippet */
-    requestQuoteSendTo: "",
+    /** Optional: full send_to from Google Ads event snippet */
+    requestQuoteSendTo: "AW-18191480247/5p7uCKbC2tUcELfrr-JD",
+    whatsappSendTo: "AW-18191480247/2NC7CI_N29UcELfrr-JD",
+    phoneSendTo: "",
   },
 } as const;
 

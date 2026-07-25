@@ -47,6 +47,11 @@ scripts/google-indexing/*-indexing-*.json
 scripts/google-indexing/node_modules
 scripts/google-indexing/urls-local.txt
 
+# Google Ads API local tooling
+scripts/google-ads/.venv/
+scripts/google-ads/google-ads.yaml
+scripts/google-ads/__pycache__/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

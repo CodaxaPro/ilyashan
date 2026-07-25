@@ -1,3 +1,15 @@
+# Ilyashan Fensterreinigung
+
+**Site:** https://ilyashan.de  
+
+## Google Ads (tek kaynak)
+
+- Docs: `docs/google-ads/`
+- Scripts: `scripts/google-ads/`
+- Bağlantı: `docs/google-ads/ADS-BAGLANTI-KONTROL.md`
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

@@ -51,6 +51,7 @@ export function Button({
   if (href) {
     const isExternal = href.startsWith("http") || href.startsWith("tel:") || href.startsWith("mailto:");
     if (isExternal) {
+      const isHttp = href.startsWith("http");
       return (
         <a
           href={href}
@@ -58,6 +59,7 @@ export function Button({
           onClick={onClick}
           onMouseDown={onMouseDown}
           data-analytics-id={dataAnalyticsId}
+          {...(isHttp ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         >
           {children}
         </a>

@@ -112,7 +112,7 @@ export function Footer() {
             <h3 className="font-bold text-white mb-4">Kontakt & Rechtliches</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href={`tel:${siteConfig.contact.phone}`} className="flex items-center gap-2 hover:text-white transition-colors">
+                <a href={`tel:${siteConfig.contact.phone}`} data-analytics-id="footer-phone" className="flex items-center gap-2 hover:text-white transition-colors">
                   <PhoneIcon className="w-4 h-4" />
                   {siteConfig.contact.phoneDisplay}
                 </a>

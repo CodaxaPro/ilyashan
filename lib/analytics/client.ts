@@ -3,6 +3,10 @@
 import type { AnalyticsClientEvent, AnalyticsEventType } from "./types";
 import { parseAttributionFromUrl } from "./attribution";
 import { resolvePageviewContext } from "./page-context";
+import {
+  trackPhoneClickConversion,
+  trackWhatsAppClickConversion,
+} from "@/lib/google-ads";
 
 const VISITOR_KEY = "ilyashan_vid";
 const SESSION_KEY = "ilyashan_sid";
@@ -219,6 +223,8 @@ function handleClick(event: MouseEvent) {
 
   if (elementHref.startsWith("tel:")) {
     trackAnalytics("phone_click", { elementId: elementId || "phone", elementHref, elementText, elementTag });
+    // Site-wide Ads: every tel: CTA (Header, Footer, Angebot, Termin, …)
+    trackPhoneClickConversion();
   } else if (elementHref.includes("wa.me") || elementHref.includes("whatsapp")) {
     trackAnalytics("whatsapp_click", {
       elementId: elementId || "whatsapp",
@@ -226,6 +232,7 @@ function handleClick(event: MouseEvent) {
       elementText,
       elementTag,
     });
+    trackWhatsAppClickConversion();
   } else if (elementHref && !elementHref.includes(window.location.hostname)) {
     trackAnalytics("outbound_click", { elementId, elementHref, elementText, elementTag });
   } else {

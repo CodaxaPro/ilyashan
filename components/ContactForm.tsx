@@ -221,6 +221,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button
             href={`tel:${siteConfig.contact.phone}`}
+            data-analytics-id="contact-form-phone"
             variant="secondary"
             size="md"
             className="flex-1"
@@ -230,6 +231,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
           </Button>
           <Button
             href={`https://wa.me/${siteConfig.contact.whatsapp}?text=Hallo,%20ich%20möchte%20ein%20Angebot%20für%20Fensterreinigung%20anfordern.`}
+            data-analytics-id="contact-form-whatsapp"
             variant="whatsapp"
             size="md"
             className="flex-1"

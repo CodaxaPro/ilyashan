@@ -19,7 +19,10 @@ export function GoogleAdsTag() {
           function gtag(){dataLayer.push(arguments);}
           window.gtag = gtag;
           gtag('js', new Date());
-          gtag('config', '${tagId}');
+          gtag('config', '${tagId}', {
+            allow_enhanced_conversions: true,
+            send_page_view: true
+          });
         `}
       </Script>
     </>
