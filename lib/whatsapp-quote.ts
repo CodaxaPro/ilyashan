@@ -9,12 +9,13 @@ import {
   formatGermanDate,
   quoteServiceLabels,
 } from "@/lib/quote-form";
-import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
+import { calculatePriceEstimate } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 
 export function buildWhatsAppQuoteMessage(
   data: QuoteFormData,
@@ -29,9 +30,10 @@ export function buildWhatsAppQuoteMessage(
     ? `${services}${services !== "–" ? ", " : ""}${addonParts.join(", ")}`
     : services;
   const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
+  const audience = resolvePriceAudience(data);
   const priceLine = estimate
     ? estimate.amount > 0
-      ? `${siteConfig.messaging.priceEstimateRowLabel}: ca. ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} (unverbindlich)`
+      ? `${siteConfig.messaging.priceEstimateRowLabel}: ${formatEstimateRangeLabel(estimate.min, estimate.max, audience)} (unverbindlich)`
       : `Preis: ${estimate.label}`
     : "";
 

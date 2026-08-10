@@ -74,13 +74,13 @@ export function referencePriceBreakdown(
     "oldBuildingWindows",
     "shutters",
     "blinds",
-    "flyScreens",
   ] as const;
 
   for (const key of perFluegelKeys) {
     if (data[key]) extrasTotal += n * pricing.extrasPerFluegel[key];
   }
   if (data.skylights) extrasTotal += pricing.extrasFlat.skylights;
+  if (data.flyScreens) extrasTotal += pricing.extrasFlat.flyScreens;
   if (data.canopy) {
     const sqm = data.canopySqm > 0 ? data.canopySqm : 5;
     extrasTotal += Math.max(pricing.extrasFlat.canopy, sqm * pricing.extrasFlat.canopyPerSqm);

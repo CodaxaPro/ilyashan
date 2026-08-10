@@ -7,6 +7,13 @@ import {
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
 import { buildTrustFooter } from "./knowledge";
+import {
+  formatEstimateRangeLabel,
+  resolvePriceAudience,
+  splitBrutto,
+  vatFootnote,
+  VAT_PERCENT_LABEL,
+} from "@/lib/vat-display";
 
 export function quoteDataForEstimate(partial: Partial<QuoteFormData>): QuoteFormData | null {
   const services: QuoteServiceId[] = partial.services?.length
@@ -44,6 +51,8 @@ export function buildPriceResponse(
   const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
   if (!estimate) return null;
 
+  const audience = resolvePriceAudience(data);
+  const split = splitBrutto(estimate.amount);
   const floor = getFloorLabel(data);
   const breakdown =
     estimate.breakdown.length > 0
@@ -59,7 +68,14 @@ export function buildPriceResponse(
   let text = `Ihre **Live-Preisschätzung** (${siteConfig.messaging.priceEstimateLabel}):
 
 **ca. ${formatEuro(estimate.amount)}**
-Spanne: ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)}
+${formatEstimateRangeLabel(estimate.min, estimate.max, audience)}
+_${vatFootnote(audience)}_`;
+
+  if (audience === "gewerbe") {
+    text += `\nNetto ca. **${formatEuroExact(split.netto)}** zzgl. ${VAT_PERCENT_LABEL} MwSt. (${formatEuroExact(split.mwst)})`;
+  }
+
+  text += `
 
 **Ihre Angaben:**
 • ${data.windowCount} Fensterflügel

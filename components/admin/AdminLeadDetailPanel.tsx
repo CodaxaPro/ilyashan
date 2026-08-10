@@ -19,7 +19,7 @@ import {
   requiresFestpreisForEmail,
 } from "@/lib/lead-workflow";
 import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
-import { getDefaultFestpreis } from "@/lib/festpreis";
+import { getDefaultFestpreis, getLeadPriceAudience } from "@/lib/festpreis";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 import { estimateJobHours } from "@/lib/scheduling/job-duration";
 import {
@@ -28,7 +28,13 @@ import {
   formatTimeDe,
   suggestDefaultStartForSlot,
 } from "@/lib/scheduling/appointment-times";
-import { formatEuro } from "@/lib/pricing";
+import { formatEuro, formatEuroExact } from "@/lib/pricing";
+import {
+  formatFestpreisBreakdownLines,
+  splitBrutto,
+  vatFootnote,
+  VAT_PERCENT_LABEL,
+} from "@/lib/vat-display";
 
 export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
@@ -196,11 +202,16 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
 
   const primaryEmailAction = getPrimaryEmailActionLabel(lead, status, confirmedDate, proposedDate);
 
+  const priceAudience = getLeadPriceAudience(lead);
   const festpreisForEmail = festpreis === "" ? undefined : Number(festpreis);
   const festpreisMissingForEmail =
     Boolean(primaryEmailAction) &&
     requiresFestpreisForEmail(primaryEmailAction!.action) &&
     !(typeof festpreisForEmail === "number" && festpreisForEmail > 0);
+  const festpreisSplit =
+    typeof festpreisForEmail === "number" && festpreisForEmail > 0
+      ? splitBrutto(festpreisForEmail)
+      : null;
 
   const emailPreview = primaryEmailAction
     ? getCustomerEmailPreviewDe(primaryEmailAction.action, {
@@ -211,6 +222,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
         appointment: draftAppointment,
         windowCount: quote?.windowCount,
         festpreis: festpreisForEmail,
+        audience: priceAudience,
       })
     : null;
 
@@ -589,11 +601,16 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 <p className="text-xs text-muted">
                   Live-Schätzung: <strong>{priceLabel}</strong>
                   {lead.priceSnapshot?.amount
-                    ? ` · önerilen orta değer ${formatEuro(lead.priceSnapshot.amount)}`
+                    ? ` · önerilen Endpreis ${formatEuro(lead.priceSnapshot.amount)}`
                     : ""}
                 </p>
+                <p className="text-xs text-muted">{vatFootnote(priceAudience)}</p>
                 <label className="block text-sm">
-                  <span className="text-muted">Net Festpreis (€) — düzenlenebilir</span>
+                  <span className="text-muted">
+                    {priceAudience === "gewerbe"
+                      ? "Festpreis Brutto / Endpreis (€) — düzenlenebilir"
+                      : "Festpreis Endpreis (€) inkl. MwSt. — düzenlenebilir"}
+                  </span>
                   <input
                     type="number"
                     min={1}
@@ -606,6 +623,32 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                     placeholder="örn. 125"
                   />
                 </label>
+                {festpreisSplit && (
+                  <div className="text-xs rounded-lg border border-emerald-200 bg-white px-3 py-2 space-y-0.5">
+                    {priceAudience === "gewerbe" ? (
+                      <>
+                        <p>
+                          <strong>Netto:</strong> {formatEuroExact(festpreisSplit.netto)}
+                        </p>
+                        <p>
+                          <strong>zzgl. {VAT_PERCENT_LABEL} MwSt.:</strong>{" "}
+                          {formatEuroExact(festpreisSplit.mwst)}
+                        </p>
+                        <p>
+                          <strong>Brutto / Endpreis:</strong> {formatEuro(festpreisSplit.brutto)}
+                        </p>
+                      </>
+                    ) : (
+                      <p>
+                        <strong>Kunde zahlt:</strong> {formatEuro(festpreisSplit.brutto)} inkl. MwSt.
+                      </p>
+                    )}
+                    <p className="text-muted pt-1">
+                      Mail özeti:{" "}
+                      {formatFestpreisBreakdownLines(festpreisSplit.brutto, priceAudience).join(" · ")}
+                    </p>
+                  </div>
+                )}
                 {festpreisMissingForEmail && (
                   <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
                     Onay / güncelleme e-postası için Festpreis zorunlu.

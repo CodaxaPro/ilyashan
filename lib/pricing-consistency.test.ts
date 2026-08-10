@@ -34,6 +34,14 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
     }
   });
 
+  it("extraPriceHints match flat extras + canopy", () => {
+    for (const key of ["skylights", "flyScreens", "canopy", "narrowStairs"] as const) {
+      assert.ok(extraPriceHints[key], `UI-Hint fehlt für ${key}`);
+    }
+    assert.match(extraPriceHints.flyScreens, /12,00/);
+    assert.match(extraPriceHints.canopy, /8,00/);
+  });
+
   it("jeder floorAccessPercent-Wert ist in Engine aktiv", () => {
     for (const floor of Object.keys(P.floorAccessPercent)) {
       if (floor === "eg") continue;

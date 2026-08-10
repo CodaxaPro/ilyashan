@@ -1,6 +1,6 @@
 import type { ConciergeSession } from "./types";
 import { quoteDataForEstimate } from "./pricing-response";
-import { calculatePriceEstimate, formatEuro } from "@/lib/pricing";
+import { calculatePriceEstimate } from "@/lib/pricing";
 import {
   cleaningSideLabels,
   getFloorLabel,
@@ -11,6 +11,7 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 
 export function isHotLead(session: ConciergeSession): boolean {
   return session.stage === "price_ready" || (!!session.quote.windowCount && !!session.quote.floorLevel);
@@ -39,7 +40,10 @@ export function buildLeadSummaryRows(
   if (data) {
     const est = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig);
     if (est && est.amount > 0) {
-      rows.push(["Live-Preisschätzung", `ca. ${formatEuro(est.min)}–${formatEuro(est.max)}`]);
+      rows.push([
+        "Live-Preisschätzung",
+        formatEstimateRangeLabel(est.min, est.max, resolvePriceAudience(data)),
+      ]);
     }
   }
 

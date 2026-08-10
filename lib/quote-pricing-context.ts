@@ -11,6 +11,7 @@ import {
 import type { WartungPackage } from "@/lib/wartung-packages";
 import { calculatePriceEstimate, formatEuro, type PriceEstimate } from "@/lib/pricing";
 import type { StoredLead } from "@/lib/leads-store";
+import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 
 /** Shared pricing inputs for every quote output channel (wizard, email, PDF, admin). */
 export interface QuotePricingContext {
@@ -55,11 +56,14 @@ export function contextFromSnapshot(snapshot: QuotePriceSnapshot): QuotePricingC
   };
 }
 
-function formatPriceLabel(estimate: PriceEstimate): string {
+function formatPriceLabel(estimate: PriceEstimate, data: QuoteFormData): string {
+  const audience = resolvePriceAudience(data);
   if (estimate.amount > 0) {
-    return `ca. ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)}`;
+    return formatEstimateRangeLabel(estimate.min, estimate.max, audience);
   }
-  return `${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} (${estimate.label})`;
+  return `${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} (${estimate.label}) · ${
+    audience === "gewerbe" ? "zzgl. MwSt." : "inkl. MwSt."
+  }`;
 }
 
 export function captureQuotePriceSnapshot(
@@ -71,7 +75,7 @@ export function captureQuotePriceSnapshot(
   if (!estimate) return null;
 
   return {
-    priceLabel: formatPriceLabel(estimate),
+    priceLabel: formatPriceLabel(estimate, data),
     amount: estimate.amount,
     min: estimate.min,
     max: estimate.max,

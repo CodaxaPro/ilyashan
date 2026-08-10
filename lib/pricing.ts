@@ -93,15 +93,18 @@ function calculateExtras(data: QuoteFormData, P: PricingConstants): { total: num
     ["windowSills", "windowSills", "Fensterbänke"],
     ["muntinWindows", "muntinWindows", "Sprossenfenster"],
     ["oldBuildingWindows", "oldBuildingWindows", "Altbaufenster"],
-    ["shutters", "shutters", "Rollläden"],
-    ["blinds", "blinds", "Jalousien"],
-    ["flyScreens", "flyScreens", "Fliegengitter"],
+    ["shutters", "shutters", "Rollläden (nur innen)"],
+    ["blinds", "blinds", "Jalousien (innenliegend)"],
   ];
 
   for (const [key, priceKey, label] of perFluegelMap) {
     if (data[key]) {
       const unit = P.extrasPerFluegel[priceKey];
-      items.push({ label, amount: n * unit, detail: `${n} × ${unit.toFixed(2)} €` });
+      const detail =
+        key === "shutters"
+          ? `${n} × ${unit.toFixed(2)} € · nur innen`
+          : `${n} × ${unit.toFixed(2)} €`;
+      items.push({ label, amount: n * unit, detail });
     }
   }
 
@@ -113,11 +116,19 @@ function calculateExtras(data: QuoteFormData, P: PricingConstants): { total: num
     });
   }
 
+  if (data.flyScreens) {
+    items.push({
+      label: "Fliegengitter",
+      amount: P.extrasFlat.flyScreens,
+      detail: "1× pauschal · ausgebaut / innen zugänglich",
+    });
+  }
+
   if (data.canopy) {
     const sqm = data.canopySqm > 0 ? data.canopySqm : 5;
     const amount = Math.max(P.extrasFlat.canopy, sqm * P.extrasFlat.canopyPerSqm);
     items.push({
-      label: "Vordach / Glasdach",
+      label: "Vordach / Glasdach (nur Glas)",
       amount,
       detail: `${sqm} m² × ${P.extrasFlat.canopyPerSqm.toFixed(2)} €`,
     });

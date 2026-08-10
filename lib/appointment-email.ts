@@ -27,7 +27,12 @@ import {
 } from "@/lib/scheduling/appointment-times";
 import type { LeadAppointment } from "@/lib/leads-store";
 import { formatEuro } from "@/lib/pricing";
-import { formatFestpreisEmailLine } from "@/lib/festpreis";
+import {
+  formatFestpreisEmailLine,
+  formatFestpreisHtmlInner,
+  resolvePriceAudience,
+  type PriceAudience,
+} from "@/lib/vat-display";
 
 function quoteEmailContext(
   data: QuoteFormData,
@@ -40,8 +45,9 @@ function quoteEmailContext(
   const summaryRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx)
     .filter(([k]) => !["Anfrage-Nr."].includes(k))
     .slice(0, 6);
+  const audience = resolvePriceAudience(data);
 
-  return { name, firstName, services, summaryRows };
+  return { name, firstName, services, summaryRows, audience };
 }
 
 function quoteSummaryBlock(
@@ -55,25 +61,18 @@ function quoteSummaryBlock(
     ${buildDataTable(summaryRows)}`;
 }
 
-function festpreisInfoBox(festpreis?: number, options?: { proposal?: boolean }) {
+function festpreisInfoBox(festpreis: number | undefined, audience: PriceAudience) {
   if (typeof festpreis !== "number" || !Number.isFinite(festpreis) || festpreis <= 0) {
     return "";
   }
-  const label = options?.proposal ? "Ihr Festpreis-Angebot" : "Ihr Festpreis";
-  return buildInfoBox(
-    `<strong>${escapeHtml(label)}:</strong> ${escapeHtml(formatEuro(festpreis))}` +
-      ` · verbindlich · ohne versteckte Kosten`
-  );
+  return buildInfoBox(formatFestpreisHtmlInner(festpreis, audience));
 }
 
-function festpreisTextLine(festpreis?: number, options?: { proposal?: boolean }): string {
+function festpreisTextLine(festpreis: number | undefined, audience: PriceAudience): string {
   if (typeof festpreis !== "number" || !Number.isFinite(festpreis) || festpreis <= 0) {
     return "";
   }
-  if (options?.proposal) {
-    return `Ihr Festpreis-Angebot: ${formatEuro(festpreis)} (verbindlich)`;
-  }
-  return formatFestpreisEmailLine(festpreis);
+  return formatFestpreisEmailLine(festpreis, audience);
 }
 
 function contactFooter() {
@@ -100,10 +99,10 @@ export function buildAppointmentConfirmationEmail(
   appointment?: LeadAppointment,
   festpreis?: number
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
+  const { firstName, services, audience } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
-  const festpreisLine = festpreisTextLine(festpreis);
+  const festpreisLine = festpreisTextLine(festpreis, audience);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -114,7 +113,7 @@ export function buildAppointmentConfirmationEmail(
       (${escapeHtml(services)}).
     </p>
     ${scheduleInfoBox(dateLabel, plan)}
-    ${festpreisInfoBox(festpreis)}
+    ${festpreisInfoBox(festpreis, audience)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
@@ -163,11 +162,11 @@ export function buildAppointmentUpdateEmail(
   appointment?: LeadAppointment,
   festpreis?: number
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
+  const { firstName, services, audience } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const previousLabel = previousDate ? formatGermanDate(previousDate) : null;
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
-  const festpreisLine = festpreisTextLine(festpreis);
+  const festpreisLine = festpreisTextLine(festpreis, audience);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -179,7 +178,7 @@ export function buildAppointmentUpdateEmail(
     </p>
     ${previousLabel ? buildInfoBox(`<strong>Bisheriger Termin:</strong> ${escapeHtml(previousLabel)}`) : ""}
     ${scheduleInfoBox(dateLabel, plan)}
-    ${festpreisInfoBox(festpreis)}
+    ${festpreisInfoBox(festpreis, audience)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${contactFooter()}`;
@@ -218,10 +217,10 @@ export function buildAppointmentReminderEmail(
   appointment?: LeadAppointment,
   festpreis?: number
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
+  const { firstName, services, audience } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
-  const festpreisLine = festpreisTextLine(festpreis);
+  const festpreisLine = festpreisTextLine(festpreis, audience);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -232,7 +231,7 @@ export function buildAppointmentReminderEmail(
       <strong>Fensterreinigung</strong> (${escapeHtml(services)}) statt.
     </p>
     ${scheduleInfoBox(dateLabel, plan)}
-    ${festpreisInfoBox(festpreis)}
+    ${festpreisInfoBox(festpreis, audience)}
     ${buildInfoBox(
       `<strong>Bitte beachten:</strong> Stellen Sie sicher, dass alle Fenster zugänglich sind. ` +
         "Bei kurzfristigen Änderungen erreichen Sie uns telefonisch."
@@ -279,10 +278,10 @@ export function buildAppointmentProposalEmail(
   appointment?: LeadAppointment,
   festpreis?: number
 ) {
-  const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
+  const { firstName, services, audience } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(proposedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
-  const festpreisLine = festpreisTextLine(festpreis, { proposal: true });
+  const festpreisLine = festpreisTextLine(festpreis, audience);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -293,7 +292,7 @@ export function buildAppointmentProposalEmail(
       (${escapeHtml(services)}). Wir schlagen folgenden Termin vor:
     </p>
     ${scheduleInfoBox(dateLabel, plan, { includePreferredNote: true })}
-    ${festpreisInfoBox(festpreis, { proposal: true })}
+    ${festpreisInfoBox(festpreis, audience)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${
@@ -451,12 +450,14 @@ export function getCustomerEmailPreviewDe(
     appointment?: LeadAppointment;
     windowCount?: number;
     festpreis?: number;
+    audience?: PriceAudience;
   }
 ): string {
   const plan = resolveAppointmentTimePlan(options.appointment, options.windowCount);
+  const audience = options.audience ?? "privat";
   const festpreisBit =
     typeof options.festpreis === "number" && options.festpreis > 0
-      ? ` · ${formatFestpreisEmailLine(options.festpreis)}`
+      ? ` · ${formatFestpreisEmailLine(options.festpreis, audience)}`
       : "";
   switch (action) {
     case "confirm":

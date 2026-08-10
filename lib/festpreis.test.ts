@@ -12,7 +12,7 @@ describe("festpreis helpers", () => {
       getDefaultFestpreis({
         festpreis: 130,
         priceSnapshot: {
-          priceLabel: "ca. 119 € – 131 €",
+          priceLabel: "ca. 119 € – 131 € inkl. MwSt.",
           amount: 125,
           min: 119,
           max: 131,
@@ -33,7 +33,7 @@ describe("festpreis helpers", () => {
     assert.equal(
       getDefaultFestpreis({
         priceSnapshot: {
-          priceLabel: "ca. 119 € – 131 €",
+          priceLabel: "ca. 119 € – 131 € inkl. MwSt.",
           amount: 125,
           min: 119,
           max: 131,
@@ -57,7 +57,9 @@ describe("festpreis helpers", () => {
     assert.equal(parseFestpreisInput(0), undefined);
   });
 
-  it("formats email line", () => {
-    assert.match(formatFestpreisEmailLine(125), /Ihr Festpreis: 125\s*€/);
+  it("formats email line with VAT for privat and gewerbe", () => {
+    assert.match(formatFestpreisEmailLine(125, "privat"), /inkl\. MwSt/);
+    assert.match(formatFestpreisEmailLine(125, "gewerbe"), /Netto/);
+    assert.match(formatFestpreisEmailLine(125, "gewerbe"), /Brutto 125\s*€/);
   });
 });

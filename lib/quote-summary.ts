@@ -22,6 +22,7 @@ import {
   preferredWeekdayLabels,
 } from "@/lib/quote-form";
 import { getWartungPackageById, type WartungPackage } from "@/lib/wartung-packages";
+import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 
 const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "withFrame", label: "Mit Rahmen" },
@@ -30,10 +31,10 @@ const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "muntinWindows", label: "Sprossenfenster" },
   { key: "oldBuildingWindows", label: "Altbaufenster" },
   { key: "skylights", label: "Oberlichter / Dachfenster" },
-  { key: "shutters", label: "Rollladen" },
-  { key: "blinds", label: "Jalousien" },
-  { key: "canopy", label: "Vordach" },
-  { key: "flyScreens", label: "Fliegengitter" },
+  { key: "shutters", label: "Rollladen (nur innen – außen nicht)" },
+  { key: "blinds", label: "Jalousien (innenliegend)" },
+  { key: "canopy", label: "Vordach / Glasdach (nur Glas)" },
+  { key: "flyScreens", label: "Fliegengitter (pauschal)" },
 ];
 
 export function generateAnfrageNr() {
@@ -88,10 +89,13 @@ export function getPriceLabel(
 ) {
   const estimate = calculatePriceEstimate(data, pricingOverrides, wartungConfig);
   if (!estimate) return "–";
+  const audience = resolvePriceAudience(data);
   if (estimate.amount > 0) {
-    return `ca. ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)}`;
+    return formatEstimateRangeLabel(estimate.min, estimate.max, audience);
   }
-  return `${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} (${estimate.label})`;
+  return `${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} (${estimate.label}) · ${
+    audience === "gewerbe" ? `zzgl. MwSt.` : "inkl. MwSt."
+  }`;
 }
 
 export function getPriceLabelFromContext(data: QuoteFormData, ctx: QuotePricingContext) {

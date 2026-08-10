@@ -21,7 +21,7 @@ const quote = {
 };
 
 describe("appointment emails", () => {
-  it("builds confirmation email with Festpreis", () => {
+  it("builds confirmation email with Festpreis inkl. MwSt. for privat", () => {
     const email = buildAppointmentConfirmationEmail(
       quote,
       "ANG-2026-836209",
@@ -32,10 +32,24 @@ describe("appointment emails", () => {
       125
     );
     assert.match(email.subject, /Terminbestätigung/i);
-    assert.match(email.text, /Ihr Festpreis: 125\s*€/);
-    assert.match(email.text, /verbindlich/);
-    assert.match(email.html, /Ihr Festpreis/);
-    assert.match(email.html, /125\s*€/);
+    assert.match(email.text, /Ihr Festpreis: 125\s*€ inkl\. MwSt/);
+    assert.match(email.html, /inkl\. MwSt/);
+  });
+
+  it("builds confirmation email with Netto/MwSt/Brutto for gewerbe", () => {
+    const gewerbeQuote = { ...quote, services: ["gewerbe" as const], objectType: "gewerbe" as const };
+    const email = buildAppointmentConfirmationEmail(
+      gewerbeQuote,
+      "ANG-2026-836210",
+      "2026-09-01",
+      undefined,
+      undefined,
+      { plannedStartTime: "11:00", estimatedDurationHours: 2 },
+      125
+    );
+    assert.match(email.text, /Netto/);
+    assert.match(email.text, /zzgl\. 19 % MwSt/);
+    assert.match(email.text, /Brutto 125\s*€/);
   });
 
   it("builds update email with previous date and Festpreis", () => {
@@ -54,7 +68,7 @@ describe("appointment emails", () => {
     assert.match(email.text, /Datum: 15\.03\.2026/);
     assert.match(email.text, /Ankunft: gegen 09:30 Uhr/);
     assert.match(email.text, /Bitte klingeln/);
-    assert.match(email.text, /Ihr Festpreis: 130\s*€/);
+    assert.match(email.text, /Ihr Festpreis: 130\s*€ inkl\. MwSt/);
   });
 
   it("builds rejection email with note and without Festpreis", () => {
@@ -77,10 +91,10 @@ describe("appointment emails", () => {
     assert.match(email.subject, /morgen/i);
     assert.match(email.text, /Morgen \(13\.07\.2026\)/);
     assert.match(email.text, /Ankunft: gegen 09:30 Uhr/);
-    assert.match(email.text, /Ihr Festpreis: 125\s*€/);
+    assert.match(email.text, /inkl\. MwSt/);
   });
 
-  it("builds proposal email with Festpreis-Angebot", () => {
+  it("builds proposal email with Festpreis", () => {
     const email = buildAppointmentProposalEmail(
       quote,
       "ANG-2026-123",
@@ -92,17 +106,18 @@ describe("appointment emails", () => {
       125
     );
     assert.match(email.subject, /Terminvorschlag/i);
-    assert.match(email.text, /Festpreis-Angebot: 125\s*€/);
+    assert.match(email.text, /Festpreis: 125\s*€ inkl\. MwSt/);
   });
 
   it("previews customer email content in German including Festpreis", () => {
     const preview = getCustomerEmailPreviewDe("confirm", {
       confirmedDate: "2026-03-15",
       festpreis: 125,
+      audience: "privat",
       appointment: { plannedStartTime: "11:00", estimatedDurationHours: 2 },
     });
     assert.match(preview, /Terminbestätigung/i);
-    assert.match(preview, /Festpreis: 125\s*€/);
+    assert.match(preview, /inkl\. MwSt/);
   });
 
   it("previews update without requiring Festpreis text when missing", () => {

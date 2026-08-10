@@ -28,7 +28,7 @@ describe("termin portal", () => {
     const summary = buildTerminPortalSummary(lead({ status: "termin_bestaetigt" }));
     assert.ok(summary);
     assert.equal(summary.statusLabelDe, LEAD_STATUS_LABELS_DE.termin_bestaetigt);
-    assert.equal(summary.priceLabel, "ab 120 €");
+    assert.match(summary.priceLabel ?? "", /inkl\. MwSt/);
     assert.equal(summary.windowCount, 10);
   });
 
@@ -36,7 +36,7 @@ describe("termin portal", () => {
     const summary = buildTerminPortalSummary(
       lead({ status: "termin_bestaetigt", festpreis: 125 })
     );
-    assert.match(summary?.priceLabel ?? "", /^Festpreis: 125\s*€$/);
+    assert.match(summary?.priceLabel ?? "", /Festpreis:.*inkl\. MwSt/);
   });
 
   it("allows reschedule for future confirmed dates", () => {

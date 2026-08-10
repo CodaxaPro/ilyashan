@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { QuoteFormData } from "@/lib/quote-form";
-import { formatEuro } from "@/lib/pricing";
+import { formatEuro, formatEuroExact } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
+import { resolvePriceAudience, splitBrutto, VAT_PERCENT_LABEL } from "@/lib/vat-display";
 
 interface PriceEstimateMobileDockProps {
   data: QuoteFormData;
@@ -32,6 +33,9 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
 
   if (!estimate) return null;
 
+  const audience = resolvePriceAudience(data);
+  const split = splitBrutto(estimate.amount);
+
   return (
     <>
       <div
@@ -56,7 +60,9 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
                 ca. {formatEuro(estimate.amount)}
               </p>
               <p className="text-xs text-muted truncate" data-testid="price-estimate-range">
-                Spanne {formatEuro(estimate.min)} – {formatEuro(estimate.max)} · unverbindlich
+                {audience === "privat"
+                  ? `Spanne ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} · inkl. MwSt.`
+                  : `Brutto ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} · Netto ca. ${formatEuroExact(split.netto)} zzgl. ${VAT_PERCENT_LABEL} MwSt.`}
               </p>
               {estimate.wartung && (
                 <p

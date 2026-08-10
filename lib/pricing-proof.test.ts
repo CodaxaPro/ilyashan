@@ -128,6 +128,17 @@ describe("Pricing proof – Forschung ↔ Engine Konstanten", () => {
       assert.equal(parseEuroPerFluegel(extraPriceHints[key]), P.extrasPerFluegel[key]);
     }
   });
+
+  it("Extras pauschal / m²: Forschung = Engine = UI", () => {
+    assert.equal(P.extrasFlat.skylights, EXTRAS_RESEARCH.skylights.perUnit);
+    assert.equal(P.extrasFlat.flyScreens, EXTRAS_RESEARCH.flyScreens.perUnit);
+    assert.equal(P.extrasFlat.canopy, EXTRAS_RESEARCH.canopy.perUnit);
+    assert.equal(P.extrasFlat.canopyPerSqm, EXTRAS_RESEARCH.canopy.marketPerSqm);
+    assert.match(extraPriceHints.skylights, /18,00 € pauschal/);
+    assert.match(extraPriceHints.flyScreens, /12,00 € pauschal/);
+    assert.match(extraPriceHints.canopy, /39 €/);
+    assert.match(extraPriceHints.canopy, /8,00 €\/m²/);
+  });
 });
 
 describe("Pricing proof – Referenzformel ≡ Engine", () => {
@@ -139,7 +150,7 @@ describe("Pricing proof – Referenzformel ≡ Engine", () => {
     { cleaningSide: "nur_innen", dirtLevel: "extrem", roomHeight: 4.5 },
     { withFrame: true, withFalz: true, muntinWindows: true, windowCount: 15 },
     { includeSolar: true, solarSqm: 80, includeWintergarden: true, wintergardenSqm: 20 },
-    { narrowStairs: true, skylights: true, canopy: true, canopySqm: 8 },
+    { narrowStairs: true, skylights: true, flyScreens: true, canopy: true, canopySqm: 8 },
     { floorLevel: "og2", elevator: "unbekannt" },
     { floorLevel: "dg", elevator: "nein", dirtLevel: "stark", cleaningSide: "nur_aussen" },
   ];
@@ -225,7 +236,7 @@ describe("Pricing proof – Formel-Schritte einzeln", () => {
     const ref = referencePriceBreakdown(data);
     assert.equal(ref.base, 50);
     assertEuro(ref.heightSurcharge, 50 * 0.12);
-    assert.equal(ref.extrasTotal, 10);
+    assert.equal(ref.extrasTotal, 10 * P.extrasPerFluegel.withFrame);
   });
 
   it("Schritt 3: Etage auf Basis×Höhe", () => {

@@ -231,16 +231,16 @@ export const preferredTimeSlotLabels: Record<Exclude<PreferredTimeSlot, "">, str
 
 /** Aufschläge pro Flügel – aus Marktforschung */
 export const extraPriceHints: Record<string, string> = {
-  withFrame: "+1,00 €/Flügel",
-  withFalz: "+0,65 €/Flügel",
-  windowSills: "+0,50 €/Flügel",
-  muntinWindows: "+1,75 €/Flügel",
-  oldBuildingWindows: "+2,50 €/Flügel",
-  skylights: "+12,00 € pauschal",
-  shutters: "+1,00 €/Flügel",
-  blinds: "+1,25 €/Flügel",
-  canopy: "ab 25 € / 5,00 €/m²",
-  flyScreens: "+0,75 €/Flügel",
+  withFrame: "+2,10 €/Flügel",
+  withFalz: "+1,50 €/Flügel",
+  windowSills: "+1,50 €/Flügel",
+  muntinWindows: "+4,50 €/Flügel",
+  oldBuildingWindows: "+4,00 €/Flügel",
+  skylights: "+18,00 € pauschal",
+  shutters: "+6,00 €/Flügel · ausschließlich Innenreinigung (außen nicht erreichbar)",
+  blinds: "+6,00 €/Flügel · innenliegende Jalousien",
+  canopy: "ab 39 € / 8,00 €/m² · nur Glas",
+  flyScreens: "+12,00 € pauschal · ausgebaut / innen zugänglich",
   narrowStairs: "+15,00 € pauschal",
 };
 

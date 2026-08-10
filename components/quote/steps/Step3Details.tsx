@@ -114,10 +114,10 @@ const reinigungswünsche: {
   { key: "muntinWindows", label: "Sprossenfenster" },
   { key: "oldBuildingWindows", label: "Altbaufenster" },
   { key: "skylights", label: "Oberlichter / Dachfenster" },
-  { key: "shutters", label: "Rollladen" },
-  { key: "blinds", label: "Jalousien" },
-  { key: "canopy", label: "Vordach / Glasdach" },
-  { key: "flyScreens", label: "Fliegengitter" },
+  { key: "shutters", label: "Rollladen (nur innen)" },
+  { key: "blinds", label: "Jalousien (innenliegend)" },
+  { key: "canopy", label: "Vordach / Glasdach (nur Glas)" },
+  { key: "flyScreens", label: "Fliegengitter (pauschal)" },
 ];
 
 export function Step3Details({ data, onChange }: Step3DetailsProps) {
@@ -291,10 +291,40 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               ))}
             </div>
 
+            {data.shutters && (
+              <p
+                className="mt-3 text-xs leading-relaxed rounded-lg border border-amber-200 bg-amber-50 text-amber-950 px-3 py-2"
+                data-testid="shutters-innen-notice"
+              >
+                <strong>Rollladen – nur innen:</strong> Reinigung ausschließlich von innen.
+                Außenliegende Rollläden sind nicht erreichbar und nicht im Preis enthalten.
+              </p>
+            )}
+
+            {data.blinds && (
+              <p
+                className="mt-3 text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                data-testid="blinds-innen-notice"
+              >
+                <strong>Jalousien:</strong> Preis gilt für innenliegende Lamellenjalousien.
+                Außenjalousien / Raffstores nur nach Absprache.
+              </p>
+            )}
+
+            {data.flyScreens && (
+              <p
+                className="mt-3 text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                data-testid="flyscreens-notice"
+              >
+                <strong>Fliegengitter:</strong> Pauschale gilt für ausbaubare / innen zugängliche
+                Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
+              </p>
+            )}
+
             {data.canopy && (
-              <div className="mt-4 ml-1">
+              <div className="mt-4 ml-1 space-y-2">
                 <Stepper
-                  label="Vordach-Fläche"
+                  label="Vordach-Fläche (Glas)"
                   hint={formatCanopyHint()}
                   value={data.canopySqm || 5}
                   min={1}
@@ -303,6 +333,12 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                   unit="m²"
                   onChange={(canopySqm) => onChange({ canopySqm })}
                 />
+                <p
+                  className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                  data-testid="canopy-glas-notice"
+                >
+                  <strong>Nur Glas:</strong> Stoffmarkisen / textile Vordächer sind nicht enthalten.
+                </p>
               </div>
             )}
           </section>

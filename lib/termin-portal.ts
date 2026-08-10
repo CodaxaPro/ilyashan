@@ -2,7 +2,8 @@ import type { LeadStatus, StoredLead } from "@/lib/leads-store";
 import { getServicesLabel } from "@/lib/quote-summary";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { toIsoDate } from "@/lib/calendar/week-range";
-import { formatFestpreisLabel } from "@/lib/festpreis";
+import { formatFestpreisLabel, getLeadPriceAudience } from "@/lib/festpreis";
+import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 
 export const LEAD_STATUS_LABELS_DE: Record<LeadStatus, string> = {
   neu: "Anfrage eingegangen",
@@ -42,16 +43,27 @@ export function buildTerminPortalSummary(lead: StoredLead): TerminPortalSummary 
 
   const status = lead.status ?? "neu";
   const location = [quote.postalCode, quote.city].filter(Boolean).join(" ");
+  const audience = getLeadPriceAudience(lead);
   const festpreisLabel =
     typeof lead.festpreis === "number" && lead.festpreis > 0
-      ? `Festpreis: ${formatFestpreisLabel(lead.festpreis)}`
+      ? `Festpreis: ${formatFestpreisLabel(lead.festpreis, audience)}`
       : undefined;
+  const estimateLabel =
+    lead.priceSnapshot &&
+    typeof lead.priceSnapshot.min === "number" &&
+    typeof lead.priceSnapshot.max === "number"
+      ? formatEstimateRangeLabel(
+          lead.priceSnapshot.min,
+          lead.priceSnapshot.max,
+          resolvePriceAudience(quote)
+        )
+      : lead.priceSnapshot?.priceLabel;
 
   return {
     status,
     statusLabelDe: LEAD_STATUS_LABELS_DE[status],
     servicesLabel: getServicesLabel(quote),
-    priceLabel: festpreisLabel ?? lead.priceSnapshot?.priceLabel,
+    priceLabel: festpreisLabel ?? estimateLabel,
     locationLabel: location || undefined,
     windowCount: quote.windowCount,
     canDownloadPdf: Boolean(lead.quote?.windowCount),

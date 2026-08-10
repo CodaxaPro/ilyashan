@@ -6,6 +6,12 @@ import { siteConfig } from "@/lib/config";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import { formatPriceEstimateBasisLine } from "@/lib/pricing-display";
+import {
+  resolvePriceAudience,
+  splitBrutto,
+  vatFootnote,
+  VAT_PERCENT_LABEL,
+} from "@/lib/vat-display";
 
 interface PriceEstimateCardProps {
   data: QuoteFormData;
@@ -24,9 +30,11 @@ export function PriceEstimateCard({
 }: PriceEstimateCardProps) {
   const estimate = useQuotePriceEstimate(data);
   const { config } = usePricingConfig();
+  const audience = resolvePriceAudience(data);
 
   if (!estimate) return null;
 
+  const split = splitBrutto(estimate.amount);
   const rootClass = sheet
     ? className
     : `rounded-2xl border-2 border-primary/20 bg-linear-to-br from-primary-light/40 to-white p-6 shadow-lg shadow-primary/5 ${className}`;
@@ -47,10 +55,51 @@ export function PriceEstimateCard({
           <p className="text-4xl font-extrabold text-foreground mb-1" data-testid="price-estimate-amount">
             ca. {formatEuro(estimate.amount)}
           </p>
-          <p className="text-sm text-muted mb-1" data-testid="price-estimate-range">
-            Spanne {formatEuro(estimate.min)} – {formatEuro(estimate.max)}
+          {audience === "privat" ? (
+            <p className="text-sm text-muted mb-1" data-testid="price-estimate-range">
+              Spanne {formatEuro(estimate.min)} – {formatEuro(estimate.max)} · inkl. MwSt.
+            </p>
+          ) : (
+            <div className="mb-2 space-y-1" data-testid="price-estimate-range">
+              <p className="text-sm text-foreground font-medium">
+                Brutto / Endpreis · Spanne {formatEuro(estimate.min)} – {formatEuro(estimate.max)}
+              </p>
+              <p className="text-xs text-muted">
+                Netto ca. {formatEuroExact(split.netto)} zzgl. {VAT_PERCENT_LABEL} MwSt. (
+                {formatEuroExact(split.mwst)})
+              </p>
+            </div>
+          )}
+          <p className="text-xs text-muted mb-2" data-testid="price-vat-footnote">
+            {vatFootnote(audience)}
           </p>
         </>
+      )}
+
+      {sheet && (
+        <div className="mb-4 rounded-xl border border-border bg-slate-50 px-3 py-3" data-testid="price-vat-footnote">
+          {audience === "privat" ? (
+            <p className="text-sm text-foreground">
+              <strong>ca. {formatEuro(estimate.amount)}</strong> inkl. MwSt. (Endpreis)
+              <span className="block text-xs text-muted mt-1">
+                Spanne {formatEuro(estimate.min)} – {formatEuro(estimate.max)}
+              </span>
+            </p>
+          ) : (
+            <div className="text-sm space-y-1">
+              <p>
+                <strong>Brutto / Endpreis:</strong> ca. {formatEuro(estimate.amount)}
+              </p>
+              <p className="text-muted text-xs">
+                Netto ca. {formatEuroExact(split.netto)} · zzgl. {VAT_PERCENT_LABEL} MwSt.{" "}
+                {formatEuroExact(split.mwst)}
+              </p>
+              <p className="text-xs text-muted">
+                Spanne Brutto {formatEuro(estimate.min)} – {formatEuro(estimate.max)}
+              </p>
+            </div>
+          )}
+        </div>
       )}
 
       {estimate.minimumApplied && (
@@ -104,6 +153,11 @@ export function PriceEstimateCard({
               </li>
             ))}
           </ul>
+          <p className="mt-2 text-[10px] text-muted">
+            {audience === "gewerbe"
+              ? "Positionsbeträge als Kalkulationsbasis · Ausweis Netto + MwSt. im Festpreis-Angebot"
+              : "Alle Beträge inkl. MwSt."}
+          </p>
         </div>
       )}
 
@@ -125,7 +179,7 @@ export function PriceEstimateCard({
       )}
 
       <p className={`${sheet ? "mt-4" : "mt-4"} text-xs text-muted leading-relaxed border-t border-border pt-4`}>
-        {estimate.note}
+        {estimate.note} {vatFootnote(audience)}
       </p>
 
       {!compact && (

@@ -53,6 +53,17 @@ describe("Quote sync – wizard ≡ email ≡ PDF ≡ snapshot", () => {
     assert.match(label, /ca\./);
     assert.match(label, new RegExp(String(estimate.min)));
     assert.match(label, new RegExp(String(estimate.max)));
+    assert.match(label, /inkl\. MwSt/);
+  });
+
+  it("gewerbe price label shows Netto zzgl. MwSt. and Brutto without changing amounts", () => {
+    const data = sampleQuote({ services: ["gewerbe"], objectType: "gewerbe" });
+    const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig)!;
+    const label = getPriceLabelFromContext(data, ctx);
+    assert.match(label, /Netto/);
+    assert.match(label, /zzgl\./);
+    assert.match(label, /Brutto/);
+    assert.equal(estimate.amount, calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig)!.amount);
   });
 
   it("email admin/customer price row equals table row", () => {

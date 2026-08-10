@@ -130,10 +130,16 @@ describe("calculatePriceEstimate – Extras & Zusatzleistungen", () => {
     });
   }
 
-  it("Dachfenster pauschal 12 €", () => {
+  it("Dachfenster pauschal 18 €", () => {
     const est = breakdownTotal(base({ skylights: true }));
     const line = est.breakdown.find((l) => l.label.includes("Dachfenster"));
     assert.equal(line!.amount, P.extrasFlat.skylights);
+  });
+
+  it("Fliegengitter pauschal 12 €", () => {
+    const est = breakdownTotal(base({ flyScreens: true, windowCount: 20 }));
+    const line = est.breakdown.find((l) => l.label.includes("Fliegengitter"));
+    assert.equal(line!.amount, P.extrasFlat.flyScreens);
   });
 
   it("Enge Treppe 15 €", () => {

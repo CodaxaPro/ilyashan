@@ -480,16 +480,16 @@ export const DIRT_LEVEL_RESEARCH = {
 
 /** Aufschläge pro Flügel (€) – bei boolean-Extras */
 export const EXTRAS_RESEARCH = {
-  withFrame: { perFluegel: 1.0, sourceCount: 24 },
-  withFalz: { perFluegel: 0.65, sourceCount: 21 },
-  windowSills: { perFluegel: 0.5, sourceCount: 20 },
-  muntinWindows: { perFluegel: 1.75, sourceCount: 22 },
-  oldBuildingWindows: { perFluegel: 2.5, sourceCount: 20 },
-  skylights: { perUnit: 12.0, sourceCount: 24 },
-  shutters: { perFluegel: 1.0, sourceCount: 20 },
-  blinds: { perFluegel: 1.25, sourceCount: 21 },
-  canopy: { perUnit: 25.0, unit: "m²-basiert empfohlen", marketPerSqm: 5.0, sourceCount: 20 },
-  flyScreens: { perFluegel: 0.75, sourceCount: 20 },
+  withFrame: { perFluegel: 2.1, sourceCount: 24 },
+  withFalz: { perFluegel: 1.5, sourceCount: 21 },
+  windowSills: { perFluegel: 1.5, sourceCount: 20 },
+  muntinWindows: { perFluegel: 4.5, sourceCount: 22 },
+  oldBuildingWindows: { perFluegel: 4.0, sourceCount: 20 },
+  skylights: { perUnit: 18.0, sourceCount: 24 },
+  shutters: { perFluegel: 6.0, sourceCount: 20 },
+  blinds: { perFluegel: 6.0, sourceCount: 21 },
+  canopy: { perUnit: 39.0, unit: "m²-basiert empfohlen", marketPerSqm: 8.0, sourceCount: 20 },
+  flyScreens: { perUnit: 12.0, unit: "pauschal", sourceCount: 20 },
 } as const;
 
 export const ROOM_HEIGHT_RESEARCH = {
@@ -550,19 +550,19 @@ export const RECOMMENDED_PRICING = {
   /** Aufzug „Weiß nicht“ → 50 % des Etagen-Zuschlags */
   elevatorUnbekanntFactor: 0.5,
   extrasPerFluegel: {
-    withFrame: 1.0,
-    withFalz: 0.65,
-    windowSills: 0.5,
-    muntinWindows: 1.75,
-    oldBuildingWindows: 2.5,
-    shutters: 1.0,
-    blinds: 1.25,
-    flyScreens: 0.75,
+    withFrame: 2.1,
+    withFalz: 1.5,
+    windowSills: 1.5,
+    muntinWindows: 4.5,
+    oldBuildingWindows: 4.0,
+    shutters: 6.0,
+    blinds: 6.0,
   },
   extrasFlat: {
-    skylights: 12,
-    canopy: 25,
-    canopyPerSqm: 5.0,
+    skylights: 18,
+    flyScreens: 12,
+    canopy: 39,
+    canopyPerSqm: 8.0,
     narrowStairs: 15,
   },
   solarPerSqm: 2.2,
