@@ -8,8 +8,9 @@ import type { QuoteFormData } from "@/lib/quote-form";
 import { formatGermanDate, initialQuoteFormData } from "@/lib/quote-form";
 import {
   buildQuoteTableRowsFromContext,
-  getTerminLabel,
   getPriceLabelFromContext,
+  getServicesLabel,
+  getTerminLabel,
 } from "@/lib/quote-summary";
 import { useLeadQuotePricing } from "@/components/admin/useLeadQuotePricing";
 import {
@@ -20,6 +21,7 @@ import {
 } from "@/lib/lead-workflow";
 import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
 import { getDefaultFestpreis, getLeadPriceAudience } from "@/lib/festpreis";
+import { buildLeadQuickReplyLinks } from "@/lib/lead-quick-reply";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 import { estimateJobHours } from "@/lib/scheduling/job-duration";
 import {
@@ -311,6 +313,31 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     lead.priceSnapshot?.priceLabel ??
     (quote ? getPriceLabelFromContext(quote, quotePricing) : "–");
 
+  const quickReply = useMemo(() => {
+    if (!lead.phone && !lead.email) return null;
+    return buildLeadQuickReplyLinks({
+      name: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      anfrageNr: lead.anfrageNr || lead.id,
+      services: quote ? getServicesLabel(quote) : lead.summary || "Fensterreinigung",
+      festpreis: festpreisForEmail,
+      audience: priceAudience,
+      estimateLabel: priceLabel !== "–" ? priceLabel : undefined,
+    });
+  }, [
+    lead.phone,
+    lead.email,
+    lead.name,
+    lead.anfrageNr,
+    lead.id,
+    lead.summary,
+    quote,
+    festpreisForEmail,
+    priceAudience,
+    priceLabel,
+  ]);
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <button
@@ -363,6 +390,52 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
             <p><strong>Tarih:</strong> {new Date(lead.createdAt).toLocaleString("tr-TR")}</p>
             {lead.photoCount > 0 && <p><strong>Foto:</strong> {lead.photoCount}</p>}
           </AdminPanel>
+
+          {quickReply && (
+            <section className="space-y-2" data-testid="admin-schnellantwort">
+              <h3 className="font-bold text-foreground">Schnellantwort</h3>
+              <p className="text-xs text-muted leading-relaxed">
+                {quickReply.isFestpreis ? (
+                  <>
+                    WA / Angebot senden: <strong>Festpreis</strong> ({quickReply.priceLabel})
+                  </>
+                ) : (
+                  <>
+                    Henüz Festpreis yok — WA/Mail <strong>Schätzung</strong> kullanır. Bağlayıcı fiyat
+                    için aşağıda Festpreis girin.
+                  </>
+                )}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {quickReply.callHref && (
+                  <a
+                    href={quickReply.callHref}
+                    className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white bg-sky-700 hover:bg-sky-800"
+                  >
+                    Anrufen
+                  </a>
+                )}
+                {quickReply.whatsappHref && (
+                  <a
+                    href={quickReply.whatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white bg-[#25D366] hover:bg-[#20bd5a]"
+                  >
+                    WhatsApp
+                  </a>
+                )}
+                {quickReply.mailtoHref && (
+                  <a
+                    href={quickReply.mailtoHref}
+                    className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    Angebot senden
+                  </a>
+                )}
+              </div>
+            </section>
+          )}
 
           {quote && (
             <section className="space-y-3">

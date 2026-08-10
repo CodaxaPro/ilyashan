@@ -18,29 +18,8 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
-
-function cleanPhone(phone: string) {
-  return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
-}
-
-function buildReplyBody(name: string, services: string, price: string) {
-  return [
-    `Guten Tag ${name},`,
-    "",
-    "vielen Dank für Ihre Anfrage bei Ilyashan Fensterreinigung.",
-    "",
-    `Angefragte Leistung: ${services}`,
-    `Ihr Festpreis-Angebot: ${price || "___ €"}`,
-    "Vorgeschlagener Termin: ___________",
-    "",
-    "Bei Rückfragen stehe ich Ihnen jederzeit gerne zur Verfügung.",
-    "",
-    "Mit freundlichen Grüßen",
-    "Ilyashan Fensterreinigung",
-    siteConfig.contact.phoneDisplay,
-    siteConfig.contact.email,
-  ].join("\n");
-}
+import { buildLeadQuickReplyLinks } from "@/lib/lead-quick-reply";
+import { resolvePriceAudience } from "@/lib/vat-display";
 
 export function buildQuoteAdminEmail(
   data: QuoteFormData,
@@ -52,17 +31,18 @@ export function buildQuoteAdminEmail(
   const plzOrt = getQuotePlzOrt(data);
   const services = getServicesLabel(data);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
-  const phoneClean = cleanPhone(data.phone);
   const detailRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
   const priceRow = detailRows.find(([k]) => k === siteConfig.messaging.priceEstimateRowLabel);
-  const price = priceRow?.[1] ?? "";
-
-  const whatsappText = encodeURIComponent(
-    `Guten Tag ${name}, vielen Dank für Ihre Anfrage (${services}). Ihr Festpreis-Angebot: ${price || "folgt"}. Freundliche Grüße – Ilyashan Fensterreinigung`
-  );
-  const mailtoReply = data.email
-    ? `mailto:${data.email}?subject=${encodeURIComponent(`Ihr Angebot ${anfrageNr} – Ilyashan Fensterreinigung`)}&body=${encodeURIComponent(buildReplyBody(name, services, price))}`
-    : null;
+  const estimateLabel = priceRow?.[1] ?? "";
+  const quick = buildLeadQuickReplyLinks({
+    name,
+    phone: data.phone,
+    email: data.email,
+    anfrageNr,
+    services,
+    audience: resolvePriceAudience(data),
+    estimateLabel,
+  });
 
   const body = `
     ${buildInfoBox(`<strong>Neue Angebotsanfrage</strong> · ${escapeHtml(anfrageNr)} · ${escapeHtml(timestamp)}`)}
@@ -71,10 +51,11 @@ export function buildQuoteAdminEmail(
     ${buildDataTable(detailRows)}
     <p style="margin:12px 0 0;font-size:12px;color:#64748b;">PDF-Eingangsbestätigung ist als Anhang beigefügt.${photoCount > 0 ? ` ${photoCount} Foto(s) im Anhang.` : ""}</p>
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Schnellantwort</p>
+    <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Preis in WA/Mail = Live-Schätzung. Verbindlichen Festpreis im Admin-Panel setzen.</p>
     <div>
-      ${buildButton(`tel:${data.phone}`, "Anrufen", "#0369a1")}
-      ${buildButton(`https://wa.me/${phoneClean}?text=${whatsappText}`, "WhatsApp", "#25D366")}
-      ${mailtoReply ? buildButton(mailtoReply, "Angebot senden", "#059669") : ""}
+      ${quick.callHref ? buildButton(quick.callHref, "Anrufen", "#0369a1") : ""}
+      ${quick.whatsappHref ? buildButton(quick.whatsappHref, "WhatsApp", "#25D366") : ""}
+      ${quick.mailtoHref ? buildButton(quick.mailtoHref, "Angebot senden", "#059669") : ""}
     </div>`;
 
   const text = ["NEUE ANGEBOTSANFRAGE – ilyashan.de", "", `Anfrage-Nr.: ${anfrageNr}`, ...detailRows.map(([k, v]) => `${k}: ${v}`), photoCount > 0 ? `Fotos: ${photoCount}` : "", "", `Eingegangen: ${timestamp}`].filter(Boolean).join("\n");
