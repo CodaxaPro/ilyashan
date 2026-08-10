@@ -76,7 +76,9 @@ const LEADS_KEY = "ilyashan:leads";
 const MAX_LEADS = 200;
 
 function isKvConfigured(): boolean {
-  return Boolean(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+  const url = process.env.KV_REST_API_URL?.trim();
+  const token = process.env.KV_REST_API_TOKEN?.trim();
+  return Boolean(url && token && !url.includes("HIER_IHREN") && !token.includes("HIER_IHREN"));
 }
 
 export function isLeadsStoreConfigured(): boolean {

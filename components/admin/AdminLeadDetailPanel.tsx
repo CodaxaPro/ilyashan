@@ -331,11 +331,12 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
     }
   }
 
-  async function hardDeleteLead(force = false) {
+  async function hardDeleteLead() {
     const policy = getLeadDeletePolicy(lead);
-    const confirmMsg = force
-      ? "Onaylı terminli lead kalıcı silinecek. Emin misiniz?"
-      : policy.reasonDe + "\n\nDevam edilsin mi?";
+    const needsForce = policy.requiresForce;
+    const confirmMsg = needsForce
+      ? `${policy.reasonDe}\n\nYine de kalıcı silmek istiyor musunuz?`
+      : `${policy.reasonDe}\n\nDevam edilsin mi?`;
     if (!window.confirm(confirmMsg)) return;
 
     setSaving(true);
@@ -344,15 +345,9 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ force }),
+        body: JSON.stringify({ force: needsForce }),
       });
-      const data = await res.json();
-      if (res.status === 409 && data.requiresForce) {
-        if (window.confirm(data.error + "\n\nYine de kalıcı sil?")) {
-          await hardDeleteLead(true);
-        }
-        return;
-      }
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error ?? "Silinemedi");
       onDeleted?.(lead.id);
       onClose();
@@ -874,7 +869,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
               <button
                 type="button"
                 disabled={saving}
-                onClick={() => void hardDeleteLead(false)}
+                onClick={() => void hardDeleteLead()}
                 className="px-3 py-2 rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm font-semibold hover:bg-red-100 disabled:opacity-40"
                 data-testid="admin-lead-delete"
               >

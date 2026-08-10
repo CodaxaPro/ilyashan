@@ -68,7 +68,7 @@ function AdminPageContent() {
   const [unknownItems, setUnknownItems] = useState<UnknownQueueItem[]>([]);
   const [conciergeSettings, setConciergeSettings] = useState<ConciergeAdminSettings | null>(null);
   const [conciergeSaving, setConciergeSaving] = useState(false);
-  const [storageConfigured, setStorageConfigured] = useState(false);
+  const [storageConfigured, setStorageConfigured] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<StoredLead | null>(null);
@@ -197,6 +197,7 @@ function AdminPageContent() {
   }
 
   const headerMeta = TAB_TITLES[tab];
+  const kvMissing = storageConfigured === false;
   const dynamicSubtitle =
     tab === "leads"
       ? leadFilters.query || leadFilters.status !== "all" || leadFilters.source !== "all"
@@ -212,14 +213,14 @@ function AdminPageContent() {
     <AdminShell
       title={headerMeta.title}
       subtitle={
-        !storageConfigured && tab !== "settings"
+        kvMissing && tab !== "settings"
           ? `${dynamicSubtitle} · KV depolama yapılandırılmadı`
           : dynamicSubtitle
       }
       onRefresh={() => void loadData()}
       onLogout={() => void handleLogout()}
     >
-      {!storageConfigured && tab !== "settings" && tab !== "pricing" && tab !== "staff" && (
+      {kvMissing && tab !== "settings" && tab !== "pricing" && tab !== "staff" && (
         <AdminAlert variant="warning">
           Kalıcı depolama için Vercel&apos;de <strong>Upstash Redis</strong> bağlayın (
           <strong>KV_REST_API_URL</strong>, <strong>KV_REST_API_TOKEN</strong>). E-posta ve asistan
@@ -244,9 +245,9 @@ function AdminPageContent() {
           Yükleniyor…
         </div>
       ) : tab === "pricing" ? (
-        <AdminPricingPanel storageConfigured={storageConfigured} />
+        <AdminPricingPanel storageConfigured={storageConfigured === true} />
       ) : tab === "staff" ? (
-        <AdminStaffPanel storageConfigured={storageConfigured} />
+        <AdminStaffPanel storageConfigured={storageConfigured === true} />
       ) : tab === "settings" ? (
         <AdminPanel className="p-6 space-y-6" data-testid="admin-settings-panel">
           <div>
@@ -257,7 +258,7 @@ function AdminPageContent() {
             </p>
           </div>
 
-          {!storageConfigured && (
+          {kvMissing && (
             <AdminAlert variant="warning">
               Production&apos;da anahtarı kullanmak için Vercel&apos;de <strong>Upstash Redis</strong>{" "}
               bağlayın. Lokal test: <code>CONCIERGE_ENABLED=true</code> in{" "}
@@ -300,7 +301,7 @@ function AdminPageContent() {
                 disabled={
                   conciergeSaving ||
                   conciergeSettings?.source === "env" ||
-                  !storageConfigured ||
+                  storageConfigured !== true ||
                   conciergeSettings?.enabled === true
                 }
                 onClick={() => void updateConciergeEnabled(true)}
@@ -314,7 +315,7 @@ function AdminPageContent() {
                 disabled={
                   conciergeSaving ||
                   conciergeSettings?.source === "env" ||
-                  !storageConfigured ||
+                  storageConfigured !== true ||
                   conciergeSettings?.enabled === false
                 }
                 onClick={() => void updateConciergeEnabled(false)}
