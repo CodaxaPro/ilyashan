@@ -19,6 +19,7 @@ import {
   type LeadPatchInput,
 } from "@/lib/lead-workflow";
 import {
+  deleteLead,
   getLead,
   isLeadsStoreConfigured,
   listLeads,
@@ -28,6 +29,7 @@ import {
   type StoredLead,
 } from "@/lib/leads-store";
 import { parseFestpreisInput } from "@/lib/festpreis";
+import { getLeadDeletePolicy } from "@/lib/admin-lead-lifecycle";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -139,7 +141,19 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   const body = (await request.json()) as LeadPatchInput & {
     sendConfirmationEmail?: boolean;
     emailAction?: LeadEmailActionInput;
+    /** Soft-archive toggle — when set, only updates archivedAt. */
+    archived?: boolean;
   };
+
+  if (typeof body.archived === "boolean") {
+    const updated = await updateLead(id, {
+      archivedAt: body.archived ? new Date().toISOString() : "",
+    });
+    if (!updated) {
+      return NextResponse.json({ error: "Lead konnte nicht aktualisiert werden." }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, lead: updated });
+  }
 
   if (body.status && !VALID_STATUSES.includes(body.status)) {
     return NextResponse.json({ error: "Ungültiger Status." }, { status: 400 });
@@ -253,4 +267,48 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     emailError,
     emailAction: emailActionUsed,
   });
+}
+
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
+  if (!isLeadsStoreConfigured()) {
+    return NextResponse.json({ error: "KV-Speicher nicht konfiguriert." }, { status: 503 });
+  }
+
+  const { id } = await context.params;
+  const lead = await getLead(id);
+  if (!lead) {
+    return NextResponse.json({ error: "Lead nicht gefunden." }, { status: 404 });
+  }
+
+  let force = false;
+  try {
+    const body = (await request.json()) as { force?: boolean };
+    force = Boolean(body.force);
+  } catch {
+    force = false;
+  }
+
+  const policy = getLeadDeletePolicy(lead);
+  if (policy.requiresForce && !force) {
+    return NextResponse.json(
+      {
+        error: policy.reasonDe,
+        requiresForce: true,
+      },
+      { status: 409 }
+    );
+  }
+
+  const ok = await deleteLead(id);
+  if (!ok) {
+    return NextResponse.json({ error: "Lead konnte nicht gelöscht werden." }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true, deletedId: id });
 }

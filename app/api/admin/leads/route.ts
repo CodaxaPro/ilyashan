@@ -24,7 +24,7 @@ export async function GET() {
   const authError = await requireAdmin();
   if (authError) return authError;
 
-  const leads = await listLeads(100);
+  const leads = await listLeads(200);
   return NextResponse.json({
     leads,
     storageConfigured: isLeadsStoreConfigured(),

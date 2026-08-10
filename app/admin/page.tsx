@@ -8,12 +8,19 @@ import {
   AdminShell,
 } from "@/components/admin/AdminShell";
 import { AdminLeadDetailPanel, LeadStatusBadge } from "@/components/admin/AdminLeadDetailPanel";
+import { AdminLeadFiltersBar } from "@/components/admin/AdminLeadFiltersBar";
+import { AdminLeadKanban } from "@/components/admin/AdminLeadKanban";
 import { AdminPricingPanel } from "@/components/admin/AdminPricingPanel";
 import { AdminStaffPanel } from "@/components/admin/AdminStaffPanel";
 import { AdminUpcomingWidget } from "@/components/admin/AdminUpcomingWidget";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import type { StoredLead } from "@/lib/leads-store";
 import type { UnknownQueueItem } from "@/lib/concierge/unknown-queue";
+import {
+  EMPTY_LEAD_LIST_FILTERS,
+  filterLeads,
+  type LeadListFilters,
+} from "@/lib/admin-lead-filters";
 
 type AdminTab = "leads" | "unknown" | "pricing" | "staff" | "settings";
 
@@ -65,6 +72,13 @@ function AdminPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedLead, setSelectedLead] = useState<StoredLead | null>(null);
+  const [leadFilters, setLeadFilters] = useState<LeadListFilters>(EMPTY_LEAD_LIST_FILTERS);
+  const [leadView, setLeadView] = useState<"list" | "board">("list");
+
+  const filteredLeads = useMemo(
+    () => filterLeads(leads, leadFilters),
+    [leads, leadFilters]
+  );
 
   const loadLeads = useCallback(async () => {
     const res = await fetch("/api/admin/leads");
@@ -185,7 +199,9 @@ function AdminPageContent() {
   const headerMeta = TAB_TITLES[tab];
   const dynamicSubtitle =
     tab === "leads"
-      ? `${leads.length} kayıtlı lead`
+      ? leadFilters.query || leadFilters.status !== "all" || leadFilters.source !== "all"
+        ? `${filteredLeads.length} / ${leads.length} lead`
+        : `${leads.length} kayıtlı lead`
       : tab === "unknown"
         ? `${unknownItems.length} açık soru`
         : tab === "pricing"
@@ -213,7 +229,14 @@ function AdminPageContent() {
 
       {error && <AdminAlert variant="error">{error}</AdminAlert>}
 
-      {!loading && tab === "leads" && <AdminUpcomingWidget />}
+      {!loading && tab === "leads" && (
+        <AdminUpcomingWidget
+          onOpenLead={(leadId) => {
+            const found = leads.find((l) => l.id === leadId);
+            if (found) setSelectedLead(found);
+          }}
+        />
+      )}
 
       {loading ? (
         <div className="flex items-center gap-3 text-muted">
@@ -311,64 +334,116 @@ function AdminPageContent() {
         leads.length === 0 ? (
           <AdminPanel className="p-10 text-center text-muted">Henüz kayıtlı lead yok.</AdminPanel>
         ) : (
-          <AdminPanel>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm" data-testid="admin-leads-table">
-                <thead className="bg-slate-50 text-left border-b border-border">
-                  <tr>
-                    <th className="px-5 py-3.5 font-semibold text-muted">Tarih</th>
-                    <th className="px-5 py-3.5 font-semibold text-muted">Durum</th>
-                    <th className="px-5 py-3.5 font-semibold text-muted">Kaynak</th>
-                    <th className="px-5 py-3.5 font-semibold text-muted">İletişim</th>
-                    <th className="px-5 py-3.5 font-semibold text-muted">Detay</th>
-                    <th className="px-5 py-3.5 font-semibold text-muted">Foto</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leads.map((lead) => (
-                    <tr
-                      key={lead.id}
-                      className="border-t border-border align-top hover:bg-slate-50/50 cursor-pointer"
-                      onClick={() => setSelectedLead(lead)}
-                    >
-                      <td className="px-5 py-4 whitespace-nowrap text-muted">
-                        {new Date(lead.createdAt).toLocaleString("tr-TR")}
-                      </td>
-                      <td className="px-5 py-4">
-                        <LeadStatusBadge status={lead.status} />
-                      </td>
-                      <td className="px-5 py-4">
-                        <span
-                          className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                            lead.hot
-                              ? "bg-red-100 text-red-700"
-                              : lead.source === "quote"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-emerald-100 text-emerald-700"
-                          }`}
-                        >
-                          {lead.hot ? "🔥 " : ""}
-                          {lead.source}
-                        </span>
-                        {lead.anfrageNr && (
-                          <p className="text-xs text-muted mt-1">{lead.anfrageNr}</p>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">
-                        <p className="font-medium">{lead.name}</p>
-                        {lead.phone && <p className="text-muted">{lead.phone}</p>}
-                        {lead.email && <p className="text-muted">{lead.email}</p>}
-                      </td>
-                      <td className="px-5 py-4 max-w-md text-muted whitespace-pre-wrap">
-                        {lead.summary}
-                      </td>
-                      <td className="px-5 py-4">{lead.photoCount > 0 ? lead.photoCount : "–"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <>
+            <AdminLeadFiltersBar
+              filters={leadFilters}
+              onChange={setLeadFilters}
+              totalCount={leads.length}
+              filteredCount={filteredLeads.length}
+            />
+            <div className="mb-4 flex flex-wrap gap-2" data-testid="admin-lead-view-toggle">
+              <button
+                type="button"
+                onClick={() => setLeadView("list")}
+                className={`px-3 py-1.5 rounded-xl text-sm font-semibold border transition-colors ${
+                  leadView === "list"
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white border-border text-foreground hover:bg-slate-50"
+                }`}
+              >
+                Liste
+              </button>
+              <button
+                type="button"
+                onClick={() => setLeadView("board")}
+                className={`px-3 py-1.5 rounded-xl text-sm font-semibold border transition-colors ${
+                  leadView === "board"
+                    ? "bg-primary text-white border-primary"
+                    : "bg-white border-border text-foreground hover:bg-slate-50"
+                }`}
+              >
+                Board
+              </button>
             </div>
-          </AdminPanel>
+            {filteredLeads.length === 0 ? (
+              <AdminPanel className="p-10 text-center text-muted" data-testid="admin-leads-empty-filter">
+                Filtreye uyan lead yok.{" "}
+                <button
+                  type="button"
+                  className="text-primary font-semibold hover:underline"
+                  onClick={() => setLeadFilters(EMPTY_LEAD_LIST_FILTERS)}
+                >
+                  Filtreleri temizle
+                </button>
+              </AdminPanel>
+            ) : leadView === "board" ? (
+              <AdminLeadKanban leads={filteredLeads} onOpenLead={setSelectedLead} />
+            ) : (
+              <AdminPanel>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm" data-testid="admin-leads-table">
+                    <thead className="bg-slate-50 text-left border-b border-border">
+                      <tr>
+                        <th className="px-5 py-3.5 font-semibold text-muted">Tarih</th>
+                        <th className="px-5 py-3.5 font-semibold text-muted">Durum</th>
+                        <th className="px-5 py-3.5 font-semibold text-muted">Kaynak</th>
+                        <th className="px-5 py-3.5 font-semibold text-muted">İletişim</th>
+                        <th className="px-5 py-3.5 font-semibold text-muted">Detay</th>
+                        <th className="px-5 py-3.5 font-semibold text-muted">Foto</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredLeads.map((lead) => (
+                        <tr
+                          key={lead.id}
+                          className="border-t border-border align-top hover:bg-slate-50/50 cursor-pointer"
+                          onClick={() => setSelectedLead(lead)}
+                        >
+                          <td className="px-5 py-4 whitespace-nowrap text-muted">
+                            {new Date(lead.createdAt).toLocaleString("tr-TR")}
+                          </td>
+                          <td className="px-5 py-4">
+                            <LeadStatusBadge status={lead.status} />
+                            {lead.archivedAt && (
+                              <span className="ml-1 inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-200 text-slate-700">
+                                arşiv
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-5 py-4">
+                            <span
+                              className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                lead.hot
+                                  ? "bg-red-100 text-red-700"
+                                  : lead.source === "quote"
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-emerald-100 text-emerald-700"
+                              }`}
+                            >
+                              {lead.hot ? "🔥 " : ""}
+                              {lead.source}
+                            </span>
+                            {lead.anfrageNr && (
+                              <p className="text-xs text-muted mt-1">{lead.anfrageNr}</p>
+                            )}
+                          </td>
+                          <td className="px-5 py-4">
+                            <p className="font-medium">{lead.name}</p>
+                            {lead.phone && <p className="text-muted">{lead.phone}</p>}
+                            {lead.email && <p className="text-muted">{lead.email}</p>}
+                          </td>
+                          <td className="px-5 py-4 max-w-md text-muted whitespace-pre-wrap">
+                            {lead.summary}
+                          </td>
+                          <td className="px-5 py-4">{lead.photoCount > 0 ? lead.photoCount : "–"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </AdminPanel>
+            )}
+          </>
         )
       ) : unknownItems.length === 0 ? (
         <AdminPanel className="p-10 text-center text-muted" data-testid="admin-unknown-empty">
@@ -447,6 +522,10 @@ function AdminPageContent() {
           onUpdated={(updated) => {
             setLeads((items) => items.map((item) => (item.id === updated.id ? updated : item)));
             setSelectedLead(updated);
+          }}
+          onDeleted={(leadId) => {
+            setLeads((items) => items.filter((item) => item.id !== leadId));
+            setSelectedLead(null);
           }}
         />
       )}

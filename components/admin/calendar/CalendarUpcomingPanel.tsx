@@ -41,15 +41,17 @@ export function CalendarUpcomingPanel({
         <StatChip label="Bu hafta" value={summary.week} tone="neutral" testId="upcoming-week" />
       </div>
 
-      {!compact &&
-        groups.map((group) => (
+      {(compact
+        ? groups.filter((g) => g.bucket === "overdue" || g.bucket === "today").slice(0, 2)
+        : groups
+      ).map((group) => (
           <div key={group.bucket} data-testid={`upcoming-group-${group.bucket}`}>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-bold text-foreground">{group.label}</h3>
               <span className="text-xs text-muted">{group.items.length} iş</span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-              {group.items.map((item) => (
+            <div className={`grid grid-cols-1 ${compact ? "" : "md:grid-cols-2 xl:grid-cols-3"} gap-2`}>
+              {group.items.slice(0, compact ? 6 : group.items.length).map((item) => (
                 <div key={item.id} className="relative">
                   <CalendarEventCard
                     item={item}

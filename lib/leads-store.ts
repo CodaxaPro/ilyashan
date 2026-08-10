@@ -68,6 +68,8 @@ export interface StoredLead {
   priceSnapshot?: QuotePriceSnapshot;
   /** Admin-confirmed binding Festpreis (EUR). Sent with Terminbestätigung. */
   festpreis?: number;
+  /** Soft-archive timestamp — hidden from default lead list. */
+  archivedAt?: string;
 }
 
 const LEADS_KEY = "ilyashan:leads";
@@ -144,11 +146,38 @@ export async function updateLead(
       createdAt: items[index].createdAt,
     };
 
+    if ("archivedAt" in patch && !patch.archivedAt) {
+      delete updated.archivedAt;
+    }
+
     await kv.lset(LEADS_KEY, index, updated);
     return updated;
   } catch (error) {
     console.error("[leads-store] update failed:", error);
     return null;
+  }
+}
+
+/** Hard-delete a lead from the KV list. Returns false if not found. */
+export async function deleteLead(id: string): Promise<boolean> {
+  if (!isKvConfigured()) return false;
+
+  try {
+    const { kv } = await import("@vercel/kv");
+    const items = await kv.lrange<StoredLead>(LEADS_KEY, 0, MAX_LEADS - 1);
+    if (!Array.isArray(items)) return false;
+
+    const next = items.filter((lead) => lead.id !== id);
+    if (next.length === items.length) return false;
+
+    await kv.del(LEADS_KEY);
+    for (let i = next.length - 1; i >= 0; i -= 1) {
+      await kv.lpush(LEADS_KEY, next[i]);
+    }
+    return true;
+  } catch (error) {
+    console.error("[leads-store] delete failed:", error);
+    return false;
   }
 }
 

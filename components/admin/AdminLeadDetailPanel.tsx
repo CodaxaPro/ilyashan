@@ -22,6 +22,7 @@ import {
 import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
 import { getDefaultFestpreis, getLeadPriceAudience } from "@/lib/festpreis";
 import { buildLeadQuickReplyLinks } from "@/lib/lead-quick-reply";
+import { getLeadDeletePolicy, isLeadArchived } from "@/lib/admin-lead-lifecycle";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 import { estimateJobHours } from "@/lib/scheduling/job-duration";
 import {
@@ -53,6 +54,7 @@ interface AdminLeadDetailPanelProps {
   lead: StoredLead;
   onClose: () => void;
   onUpdated: (lead: StoredLead) => void;
+  onDeleted?: (leadId: string) => void;
 }
 
 function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | null {
@@ -77,7 +79,7 @@ function syncFormFromLead(lead: StoredLead) {
   };
 }
 
-export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDetailPanelProps) {
+export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: AdminLeadDetailPanelProps) {
   const quote = useMemo(() => mergeQuote(lead.quote), [lead.quote]);
   const preferredDates = quote?.preferredDates ?? [];
 
@@ -307,6 +309,60 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     }
   }
 
+  async function setArchived(archived: boolean) {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archived }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Arşiv işlemi başarısız");
+      const updated = data.lead as StoredLead;
+      onUpdated(updated);
+      showFeedback(archived ? "Lead arşivlendi." : "Lead arşivden çıkarıldı.", "success");
+      if (archived) onClose();
+    } catch (err) {
+      showFeedback(err instanceof Error ? err.message : "Arşiv işlemi başarısız", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function hardDeleteLead(force = false) {
+    const policy = getLeadDeletePolicy(lead);
+    const confirmMsg = force
+      ? "Onaylı terminli lead kalıcı silinecek. Emin misiniz?"
+      : policy.reasonDe + "\n\nDevam edilsin mi?";
+    if (!window.confirm(confirmMsg)) return;
+
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ force }),
+      });
+      const data = await res.json();
+      if (res.status === 409 && data.requiresForce) {
+        if (window.confirm(data.error + "\n\nYine de kalıcı sil?")) {
+          await hardDeleteLead(true);
+        }
+        return;
+      }
+      if (!res.ok) throw new Error(data.error ?? "Silinemedi");
+      onDeleted?.(lead.id);
+      onClose();
+    } catch (err) {
+      showFeedback(err instanceof Error ? err.message : "Silinemedi", "error");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const detailRows =
     quote && lead.anfrageNr ? buildQuoteTableRowsFromContext(quote, lead.anfrageNr, quotePricing) : [];
   const priceLabel =
@@ -382,6 +438,11 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
             <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
               {lead.source}
             </span>
+            {isLeadArchived(lead) && (
+              <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">
+                Arşiv
+              </span>
+            )}
           </div>
 
           <AdminPanel className="p-4 space-y-2 text-sm">
@@ -783,6 +844,44 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
               <p className="text-sm text-muted whitespace-pre-wrap">{lead.summary}</p>
             </AdminPanel>
           )}
+
+          <section className="space-y-3 border-t border-border pt-4" data-testid="admin-lead-lifecycle">
+            <h3 className="font-bold text-foreground">Arşiv & sil</h3>
+            <p className="text-xs text-muted leading-relaxed">
+              Test leadleri için: önce arşivleyin (listeden gizlenir). Kalıcı silme geri alınamaz.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {isLeadArchived(lead) ? (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => void setArchived(false)}
+                  className="px-3 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-slate-50 disabled:opacity-40"
+                >
+                  Arşivden çıkar
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={saving}
+                  onClick={() => void setArchived(true)}
+                  className="px-3 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-slate-50 disabled:opacity-40"
+                  data-testid="admin-lead-archive"
+                >
+                  Arşivle
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => void hardDeleteLead(false)}
+                className="px-3 py-2 rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm font-semibold hover:bg-red-100 disabled:opacity-40"
+                data-testid="admin-lead-delete"
+              >
+                Kalıcı sil
+              </button>
+            </div>
+          </section>
         </div>
 
         {(error || success) && (
