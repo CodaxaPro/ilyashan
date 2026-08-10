@@ -5,6 +5,7 @@ import type {
   LeadStatus,
   StoredLead,
 } from "@/lib/leads-store";
+import { parseFestpreisInput } from "@/lib/festpreis";
 import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
 
 export type LeadEmailActionInput = LeadEmailAction | "none";
@@ -20,12 +21,15 @@ export interface LeadPatchInput {
   plannedStartTime?: string;
   estimatedDurationHours?: number | "";
   appointmentNote?: string;
+  /** Binding Festpreis in EUR. Empty string clears; omit keeps previous. */
+  festpreis?: number | "" | null;
   emailAction?: LeadEmailActionInput;
 }
 
 export interface ResolvedLeadUpdate {
   status: LeadStatus;
   appointment: LeadAppointment;
+  festpreis?: number;
 }
 
 export function mergeLeadAppointment(
@@ -71,8 +75,18 @@ export function mergeLeadAppointment(
   return appointment;
 }
 
+export function resolveFestpreis(
+  previous: number | undefined,
+  input: LeadPatchInput
+): number | undefined {
+  if (input.festpreis === undefined) return previous;
+  if (input.festpreis === "" || input.festpreis === null) return undefined;
+  return parseFestpreisInput(input.festpreis);
+}
+
 export function resolveLeadUpdate(lead: StoredLead, input: LeadPatchInput): ResolvedLeadUpdate {
   const appointment = mergeLeadAppointment(lead.appointment, input);
+  const festpreis = resolveFestpreis(lead.festpreis, input);
   let status = input.status ?? lead.status ?? "neu";
   const emailAction = input.emailAction ?? "none";
 
@@ -98,7 +112,7 @@ export function resolveLeadUpdate(lead: StoredLead, input: LeadPatchInput): Reso
       break;
   }
 
-  return { status, appointment };
+  return { status, appointment, festpreis };
 }
 
 export function inferEmailAction(
@@ -143,6 +157,11 @@ export function resolveEmailActionForSave(
   }
 
   return action;
+}
+
+/** Confirm/update emails must include a binding Festpreis. */
+export function requiresFestpreisForEmail(action: LeadEmailAction): boolean {
+  return action === "confirm" || action === "update";
 }
 
 export function buildEmailNotificationRecord(

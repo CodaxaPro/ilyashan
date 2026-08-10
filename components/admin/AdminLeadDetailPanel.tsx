@@ -16,8 +16,10 @@ import {
   LEAD_EMAIL_ACTION_LABELS_TR,
   LEAD_STATUS_LABELS_TR,
   getPrimaryEmailActionLabel,
+  requiresFestpreisForEmail,
 } from "@/lib/lead-workflow";
 import { getCustomerEmailPreviewDe } from "@/lib/appointment-email";
+import { getDefaultFestpreis } from "@/lib/festpreis";
 import { AdminAlert, AdminPanel } from "@/components/admin/AdminShell";
 import { estimateJobHours } from "@/lib/scheduling/job-duration";
 import {
@@ -26,6 +28,7 @@ import {
   formatTimeDe,
   suggestDefaultStartForSlot,
 } from "@/lib/scheduling/appointment-times";
+import { formatEuro } from "@/lib/pricing";
 
 export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
@@ -50,6 +53,7 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
 }
 
 function syncFormFromLead(lead: StoredLead) {
+  const defaultFestpreis = getDefaultFestpreis(lead);
   return {
     status: lead.status ?? "neu",
     adminNotes: lead.adminNotes ?? "",
@@ -61,6 +65,7 @@ function syncFormFromLead(lead: StoredLead) {
     preferredStartTime: lead.appointment?.preferredStartTime ?? "",
     plannedStartTime: lead.appointment?.plannedStartTime ?? "",
     estimatedDurationHours: lead.appointment?.estimatedDurationHours ?? ("" as const),
+    festpreis: defaultFestpreis ?? ("" as const),
   };
 }
 
@@ -80,6 +85,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   const [estimatedDurationHours, setEstimatedDurationHours] = useState<number | "">(
     lead.appointment?.estimatedDurationHours ?? ""
   );
+  const [festpreis, setFestpreis] = useState<number | "">(getDefaultFestpreis(lead) ?? "");
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [terminUrl, setTerminUrl] = useState<string | null>(null);
   const [capacityHint, setCapacityHint] = useState<string | null>(null);
@@ -101,6 +107,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
     setPreferredStartTime(next.preferredStartTime);
     setPlannedStartTime(next.plannedStartTime);
     setEstimatedDurationHours(next.estimatedDurationHours);
+    setFestpreis(next.festpreis);
   }, [lead]);
 
   const plannedEndTime = useMemo(() => {
@@ -189,6 +196,12 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
 
   const primaryEmailAction = getPrimaryEmailActionLabel(lead, status, confirmedDate, proposedDate);
 
+  const festpreisForEmail = festpreis === "" ? undefined : Number(festpreis);
+  const festpreisMissingForEmail =
+    Boolean(primaryEmailAction) &&
+    requiresFestpreisForEmail(primaryEmailAction!.action) &&
+    !(typeof festpreisForEmail === "number" && festpreisForEmail > 0);
+
   const emailPreview = primaryEmailAction
     ? getCustomerEmailPreviewDe(primaryEmailAction.action, {
         confirmedDate: confirmedDate || undefined,
@@ -197,6 +210,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
         note: appointmentNote || undefined,
         appointment: draftAppointment,
         windowCount: quote?.windowCount,
+        festpreis: festpreisForEmail,
       })
     : null;
 
@@ -214,6 +228,13 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
   }
 
   async function saveLead(emailAction: LeadEmailAction | "none" = "none") {
+    if (emailAction !== "none" && requiresFestpreisForEmail(emailAction)) {
+      if (!(typeof festpreisForEmail === "number" && festpreisForEmail > 0)) {
+        showFeedback("Festpreis girin — onay e-postasında müşteri net fiyatı görmeli.", "error");
+        return;
+      }
+    }
+
     setSaving(true);
     setError(null);
     setSuccess(null);
@@ -232,6 +253,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
           preferredStartTime: preferredStartTime || undefined,
           plannedStartTime: plannedStartTime || undefined,
           estimatedDurationHours: estimatedDurationHours === "" ? undefined : estimatedDurationHours,
+          festpreis: festpreis === "" ? "" : festpreis,
           emailAction,
         }),
       });
@@ -250,6 +272,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
       setPreferredStartTime(synced.preferredStartTime);
       setPlannedStartTime(synced.plannedStartTime);
       setEstimatedDurationHours(synced.estimatedDurationHours);
+      setFestpreis(synced.festpreis);
       onUpdated(updated);
 
       if (emailAction !== "none") {
@@ -559,6 +582,37 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 )}
               </AdminPanel>
 
+              <AdminPanel className="p-4 space-y-3 border-emerald-200 bg-emerald-50/60">
+                <p className="text-xs font-semibold text-emerald-900 uppercase">
+                  Festpreis (müşteriye gider)
+                </p>
+                <p className="text-xs text-muted">
+                  Live-Schätzung: <strong>{priceLabel}</strong>
+                  {lead.priceSnapshot?.amount
+                    ? ` · önerilen orta değer ${formatEuro(lead.priceSnapshot.amount)}`
+                    : ""}
+                </p>
+                <label className="block text-sm">
+                  <span className="text-muted">Net Festpreis (€) — düzenlenebilir</span>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={festpreis}
+                    onChange={(e) =>
+                      setFestpreis(e.target.value === "" ? "" : Math.round(Number(e.target.value)))
+                    }
+                    className="mt-1 w-full rounded-xl border border-border px-3 py-2"
+                    placeholder="örn. 125"
+                  />
+                </label>
+                {festpreisMissingForEmail && (
+                  <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    Onay / güncelleme e-postası için Festpreis zorunlu.
+                  </p>
+                )}
+              </AdminPanel>
+
               <textarea
                 value={appointmentNote}
                 onChange={(e) => setAppointmentNote(e.target.value)}
@@ -589,7 +643,7 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated }: AdminLeadDeta
                 {primaryEmailAction && (
                   <button
                     type="button"
-                    disabled={saving}
+                    disabled={saving || festpreisMissingForEmail}
                     onClick={() => void saveLead(primaryEmailAction.action)}
                     className={`px-4 py-2 rounded-xl text-white text-sm font-semibold disabled:opacity-40 ${
                       primaryEmailAction.action === "reject"

@@ -42,7 +42,8 @@ export async function GET(request: Request) {
         lead.anfrageNr ?? lead.id,
         confirmedDate,
         ctx,
-        lead.appointment
+        lead.appointment,
+        lead.festpreis
       );
 
       const { error } = await resend.emails.send({

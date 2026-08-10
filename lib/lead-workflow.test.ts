@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   getPrimaryEmailActionLabel,
+  requiresFestpreisForEmail,
   resolveEmailActionForSave,
   resolveLeadUpdate,
 } from "./lead-workflow";
@@ -43,9 +44,27 @@ describe("resolveLeadUpdate", () => {
     const result = resolveLeadUpdate(sampleLead(), {
       confirmedDate: "2026-04-01",
       emailAction: "confirm",
+      festpreis: 125,
     });
     assert.equal(result.status, "termin_bestaetigt");
     assert.equal(result.appointment.confirmedDate, "2026-04-01");
+    assert.equal(result.festpreis, 125);
+  });
+
+  it("keeps previous festpreis when not in patch", () => {
+    const result = resolveLeadUpdate(sampleLead({ festpreis: 120 }), {
+      confirmedDate: "2026-04-01",
+      emailAction: "none",
+    });
+    assert.equal(result.festpreis, 120);
+  });
+
+  it("clears festpreis when empty string provided", () => {
+    const result = resolveLeadUpdate(sampleLead({ festpreis: 120 }), {
+      festpreis: "",
+      emailAction: "none",
+    });
+    assert.equal(result.festpreis, undefined);
   });
 
   it("allows editing confirmed date without forcing wrong status when saving only", () => {
@@ -92,6 +111,15 @@ describe("resolveEmailActionForSave", () => {
       }
     );
     assert.equal(action, "update");
+  });
+});
+
+describe("requiresFestpreisForEmail", () => {
+  it("requires festpreis for confirm and update only", () => {
+    assert.equal(requiresFestpreisForEmail("confirm"), true);
+    assert.equal(requiresFestpreisForEmail("update"), true);
+    assert.equal(requiresFestpreisForEmail("propose"), false);
+    assert.equal(requiresFestpreisForEmail("reject"), false);
   });
 });
 

@@ -12,6 +12,7 @@ import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import {
   buildEmailNotificationRecord,
+  requiresFestpreisForEmail,
   resolveEmailActionForSave,
   resolveLeadUpdate,
   type LeadEmailActionInput,
@@ -26,6 +27,7 @@ import {
   type LeadStatus,
   type StoredLead,
 } from "@/lib/leads-store";
+import { parseFestpreisInput } from "@/lib/festpreis";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -71,6 +73,7 @@ async function sendLeadEmail(
     terminUrl?: string | null;
     appointment?: StoredLead["appointment"];
     windowCount?: number;
+    festpreis?: number;
   }
 ) {
   const quote = mergeQuote(lead.quote);
@@ -153,6 +156,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     plannedStartTime: body.plannedStartTime,
     estimatedDurationHours: body.estimatedDurationHours,
     appointmentNote: body.appointmentNote,
+    festpreis: body.festpreis,
     emailAction:
       body.emailAction ??
       (body.sendConfirmationEmail ? "confirm" : "none"),
@@ -183,8 +187,21 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   const previousConfirmedDate = lead.appointment?.confirmedDate;
-  const { status, appointment } = resolveLeadUpdate(lead, patchInput);
+  const { status, appointment, festpreis } = resolveLeadUpdate(lead, patchInput);
   const emailAction = resolveEmailActionForSave(lead, patchInput);
+
+  if (emailAction && requiresFestpreisForEmail(emailAction)) {
+    const price = festpreis ?? parseFestpreisInput(patchInput.festpreis) ?? lead.festpreis;
+    if (!price || price <= 0) {
+      return NextResponse.json(
+        {
+          error:
+            "Festpreis gerekli. Onay e-postasında müşteriye net fiyat gitmesi için Festpreis girin.",
+        },
+        { status: 400 }
+      );
+    }
+  }
 
   let emailSent = false;
   let emailError: string | null = null;
@@ -202,6 +219,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       terminUrl: emailAction === "propose" ? terminUrl : null,
       appointment,
       windowCount: quote?.windowCount,
+      festpreis,
     });
     emailSent = result.emailSent;
     emailError = result.emailError;
@@ -219,6 +237,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     status,
     adminNotes: body.adminNotes ?? lead.adminNotes,
     appointment: finalAppointment,
+    festpreis,
   });
 
   if (!updated) {

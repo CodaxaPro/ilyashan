@@ -26,6 +26,8 @@ import {
   type AppointmentTimePlan,
 } from "@/lib/scheduling/appointment-times";
 import type { LeadAppointment } from "@/lib/leads-store";
+import { formatEuro } from "@/lib/pricing";
+import { formatFestpreisEmailLine } from "@/lib/festpreis";
 
 function quoteEmailContext(
   data: QuoteFormData,
@@ -53,6 +55,27 @@ function quoteSummaryBlock(
     ${buildDataTable(summaryRows)}`;
 }
 
+function festpreisInfoBox(festpreis?: number, options?: { proposal?: boolean }) {
+  if (typeof festpreis !== "number" || !Number.isFinite(festpreis) || festpreis <= 0) {
+    return "";
+  }
+  const label = options?.proposal ? "Ihr Festpreis-Angebot" : "Ihr Festpreis";
+  return buildInfoBox(
+    `<strong>${escapeHtml(label)}:</strong> ${escapeHtml(formatEuro(festpreis))}` +
+      ` · verbindlich · ohne versteckte Kosten`
+  );
+}
+
+function festpreisTextLine(festpreis?: number, options?: { proposal?: boolean }): string {
+  if (typeof festpreis !== "number" || !Number.isFinite(festpreis) || festpreis <= 0) {
+    return "";
+  }
+  if (options?.proposal) {
+    return `Ihr Festpreis-Angebot: ${formatEuro(festpreis)} (verbindlich)`;
+  }
+  return formatFestpreisEmailLine(festpreis);
+}
+
 function contactFooter() {
   return `<p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
       Bei Fragen erreichen Sie uns unter
@@ -74,11 +97,13 @@ export function buildAppointmentConfirmationEmail(
   confirmedDate: string,
   note?: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
-  appointment?: LeadAppointment
+  appointment?: LeadAppointment,
+  festpreis?: number
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
+  const festpreisLine = festpreisTextLine(festpreis);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -89,6 +114,7 @@ export function buildAppointmentConfirmationEmail(
       (${escapeHtml(services)}).
     </p>
     ${scheduleInfoBox(dateLabel, plan)}
+    ${festpreisInfoBox(festpreis)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     <p style="margin:24px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
@@ -102,6 +128,7 @@ export function buildAppointmentConfirmationEmail(
     "",
     `Ihr Termin für Fensterreinigung (${services}) ist bestätigt:`,
     ...buildArrivalLinesDe(dateLabel, plan),
+    festpreisLine,
     note ? `Hinweis: ${note}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
@@ -116,7 +143,9 @@ export function buildAppointmentConfirmationEmail(
     subject: `Terminbestätigung ${dateLabel} – ${anfrageNr}`,
     text,
     html: buildEmailLayout({
-      preheader: `Ihr Termin am ${dateLabel} ist bestätigt`,
+      preheader: festpreisLine
+        ? `Ihr Termin am ${dateLabel} ist bestätigt · ${formatEuro(festpreis!)}`
+        : `Ihr Termin am ${dateLabel} ist bestätigt`,
       title: "Terminbestätigung",
       subtitle: `${anfrageNr} · ${dateLabel}`,
       body,
@@ -131,12 +160,14 @@ export function buildAppointmentUpdateEmail(
   previousDate: string | undefined,
   note?: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
-  appointment?: LeadAppointment
+  appointment?: LeadAppointment,
+  festpreis?: number
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const previousLabel = previousDate ? formatGermanDate(previousDate) : null;
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
+  const festpreisLine = festpreisTextLine(festpreis);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -148,6 +179,7 @@ export function buildAppointmentUpdateEmail(
     </p>
     ${previousLabel ? buildInfoBox(`<strong>Bisheriger Termin:</strong> ${escapeHtml(previousLabel)}`) : ""}
     ${scheduleInfoBox(dateLabel, plan)}
+    ${festpreisInfoBox(festpreis)}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${contactFooter()}`;
@@ -158,6 +190,7 @@ export function buildAppointmentUpdateEmail(
     `Ihr Termin für Fensterreinigung (${services}) wurde geändert:`,
     previousLabel ? `Bisher: ${previousLabel}` : "",
     ...buildArrivalLinesDe(dateLabel, plan),
+    festpreisLine,
     note ? `Hinweis: ${note}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
@@ -182,11 +215,13 @@ export function buildAppointmentReminderEmail(
   anfrageNr: string,
   confirmedDate: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
-  appointment?: LeadAppointment
+  appointment?: LeadAppointment,
+  festpreis?: number
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
+  const festpreisLine = festpreisTextLine(festpreis);
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -197,6 +232,7 @@ export function buildAppointmentReminderEmail(
       <strong>Fensterreinigung</strong> (${escapeHtml(services)}) statt.
     </p>
     ${scheduleInfoBox(dateLabel, plan)}
+    ${festpreisInfoBox(festpreis)}
     ${buildInfoBox(
       `<strong>Bitte beachten:</strong> Stellen Sie sicher, dass alle Fenster zugänglich sind. ` +
         "Bei kurzfristigen Änderungen erreichen Sie uns telefonisch."
@@ -209,6 +245,7 @@ export function buildAppointmentReminderEmail(
     "",
     `Erinnerung: Morgen (${dateLabel}) ist Ihr Termin für Fensterreinigung (${services}).`,
     ...buildArrivalLinesDe(dateLabel, plan),
+    festpreisLine,
     "",
     "Bitte stellen Sie sicher, dass die Fenster zugänglich sind.",
     "",
@@ -239,11 +276,13 @@ export function buildAppointmentProposalEmail(
   note?: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
   terminUrl?: string | null,
-  appointment?: LeadAppointment
+  appointment?: LeadAppointment,
+  festpreis?: number
 ) {
   const { firstName, services } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(proposedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
+  const festpreisLine = festpreisTextLine(festpreis, { proposal: true });
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
@@ -254,6 +293,7 @@ export function buildAppointmentProposalEmail(
       (${escapeHtml(services)}). Wir schlagen folgenden Termin vor:
     </p>
     ${scheduleInfoBox(dateLabel, plan, { includePreferredNote: true })}
+    ${festpreisInfoBox(festpreis, { proposal: true })}
     ${note ? buildInfoBox(`<strong>Hinweis:</strong> ${escapeHtml(note)}`) : ""}
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${
@@ -273,6 +313,7 @@ export function buildAppointmentProposalEmail(
     "",
     `Wir schlagen folgenden Termin für Fensterreinigung (${services}) vor:`,
     ...buildArrivalLinesDe(dateLabel, plan, { includePreferredNote: true }),
+    festpreisLine,
     note ? `Hinweis: ${note}` : "",
     terminUrl ? `Online bestätigen: ${terminUrl}` : "",
     "",
@@ -285,7 +326,9 @@ export function buildAppointmentProposalEmail(
     subject: `Terminvorschlag ${dateLabel} – ${anfrageNr}`,
     text,
     html: buildEmailLayout({
-      preheader: `Terminvorschlag: ${dateLabel}`,
+      preheader: festpreisLine
+        ? `Terminvorschlag: ${dateLabel} · ${formatEuro(festpreis!)}`
+        : `Terminvorschlag: ${dateLabel}`,
       title: "Terminvorschlag",
       subtitle: `${anfrageNr} · ${dateLabel}`,
       body,
@@ -351,6 +394,7 @@ export function buildLeadStatusEmail(
     terminUrl?: string | null;
     appointment?: LeadAppointment;
     windowCount?: number;
+    festpreis?: number;
   },
   ctx: QuotePricingContext = defaultQuotePricingContext()
 ) {
@@ -363,7 +407,8 @@ export function buildLeadStatusEmail(
         options.confirmedDate,
         options.note,
         ctx,
-        options.appointment
+        options.appointment,
+        options.festpreis
       );
     case "update":
       if (!options.confirmedDate) throw new Error("confirmedDate required");
@@ -374,7 +419,8 @@ export function buildLeadStatusEmail(
         options.previousConfirmedDate,
         options.note,
         ctx,
-        options.appointment
+        options.appointment,
+        options.festpreis
       );
     case "propose":
       if (!options.proposedDate) throw new Error("proposedDate required");
@@ -385,7 +431,8 @@ export function buildLeadStatusEmail(
         options.note,
         ctx,
         options.terminUrl,
-        options.appointment
+        options.appointment,
+        options.festpreis
       );
     case "reject":
       return buildLeadRejectionEmail(data, anfrageNr, options.note, ctx);
@@ -403,16 +450,21 @@ export function getCustomerEmailPreviewDe(
     note?: string;
     appointment?: LeadAppointment;
     windowCount?: number;
+    festpreis?: number;
   }
 ): string {
   const plan = resolveAppointmentTimePlan(options.appointment, options.windowCount);
+  const festpreisBit =
+    typeof options.festpreis === "number" && options.festpreis > 0
+      ? ` · ${formatFestpreisEmailLine(options.festpreis)}`
+      : "";
   switch (action) {
     case "confirm":
-      return `Terminbestätigung: ${formatSchedulePreviewDe(options.confirmedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminbestätigung: ${formatSchedulePreviewDe(options.confirmedDate, plan)}${festpreisBit}${options.note ? ` · ${options.note}` : ""}`;
     case "update":
-      return `Terminänderung: ${options.previousConfirmedDate ? formatGermanDate(options.previousConfirmedDate) : "–"} → ${formatSchedulePreviewDe(options.confirmedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminänderung: ${options.previousConfirmedDate ? formatGermanDate(options.previousConfirmedDate) : "–"} → ${formatSchedulePreviewDe(options.confirmedDate, plan)}${festpreisBit}${options.note ? ` · ${options.note}` : ""}`;
     case "propose":
-      return `Terminvorschlag: ${formatSchedulePreviewDe(options.proposedDate, plan)}${options.note ? ` · ${options.note}` : ""}`;
+      return `Terminvorschlag: ${formatSchedulePreviewDe(options.proposedDate, plan)}${festpreisBit}${options.note ? ` · ${options.note}` : ""}`;
     case "reject":
       return `Ablehnung${options.note ? `: ${options.note}` : ""}`;
     default:

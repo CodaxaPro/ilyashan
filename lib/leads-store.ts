@@ -66,6 +66,8 @@ export interface StoredLead {
   session?: Partial<ConciergeSession>;
   /** Price captured at submission – same numbers in email, PDF, admin. */
   priceSnapshot?: QuotePriceSnapshot;
+  /** Admin-confirmed binding Festpreis (EUR). Sent with Terminbestätigung. */
+  festpreis?: number;
 }
 
 const LEADS_KEY = "ilyashan:leads";

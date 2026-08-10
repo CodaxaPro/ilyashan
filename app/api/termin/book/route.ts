@@ -64,7 +64,8 @@ export async function POST(request: Request) {
         updated.appointment.confirmedDate,
         updated.appointment.note,
         ctx,
-        updated.appointment
+        updated.appointment,
+        updated.festpreis
       );
       const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
       const { error } = await resend.emails.send({

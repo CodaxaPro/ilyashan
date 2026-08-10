@@ -32,6 +32,13 @@ describe("termin portal", () => {
     assert.equal(summary.windowCount, 10);
   });
 
+  it("prefers Festpreis over Live-Schätzung label", () => {
+    const summary = buildTerminPortalSummary(
+      lead({ status: "termin_bestaetigt", festpreis: 125 })
+    );
+    assert.match(summary?.priceLabel ?? "", /^Festpreis: 125\s*€$/);
+  });
+
   it("allows reschedule for future confirmed dates", () => {
     const future = addDaysIso(toIsoDate(new Date()), 10);
     assert.equal(
