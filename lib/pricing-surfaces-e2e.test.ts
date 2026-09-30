@@ -691,6 +691,24 @@ describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
   });
 });
 
+describe("E2E – Step2 object UX compact + scroll-safe", () => {
+  const step2 = readFileSync(
+    join(process.cwd(), "components/quote/steps/Step2Object.tsx"),
+    "utf8"
+  );
+
+  it("uses segmented controls with short floor labels and full aria names", () => {
+    assert.match(step2, /SegmentedControl/);
+    assert.match(step2, /preventChoiceButtonScroll/);
+    assert.match(step2, /touch-manipulation/);
+    assert.match(step2, /grid-cols-4 sm:grid-cols-7/);
+    assert.match(step2, /aria-label=\{opt\.label\}/);
+    assert.match(step2, /eg: "EG"/);
+    assert.match(step2, /og3: "3\. OG"/);
+    assert.doesNotMatch(step2, /px-5 py-2\.5 rounded-xl text-sm font-semibold border-2/);
+  });
+});
+
 describe("E2E – wizard card + admin panel wire VAT helpers", () => {
   it("PriceEstimateCard + MobileDock import vat-display", () => {
     const card = readFileSync(

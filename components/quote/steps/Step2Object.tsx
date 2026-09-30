@@ -15,71 +15,111 @@ interface Step2ObjectProps {
   onChange: (updates: Partial<QuoteFormData>) => void;
 }
 
-function ToggleGroup<T extends string>({
+/** Compact segmented control – corporate, touch-safe, no scroll jump */
+function SegmentedControl<T extends string>({
   label,
   required,
   options,
   value,
   onChange,
+  columnsClassName,
+  testIdPrefix,
 }: {
   label: string;
   required?: boolean;
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; shortLabel?: string; hint?: string }[];
   value: T | "";
   onChange: (value: T) => void;
+  columnsClassName: string;
+  testIdPrefix?: string;
 }) {
+  const selected = options.find((opt) => opt.value === value);
+
   return (
-    <div>
-      <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-3">
-        {label}
-        {required && <span className="text-red-500 ml-0.5">*</span>}
-      </label>
-      <div className="flex flex-wrap gap-2">
-        {options.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onMouseDown={preventChoiceButtonScroll}
-            onClick={() => onChange(opt.value)}
-            className={`px-5 py-2.5 rounded-xl text-sm font-semibold border-2 transition-all ${
-              value === opt.value
-                ? "border-primary bg-primary-light/50 text-primary"
-                : "border-border bg-white text-foreground hover:border-primary/30"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
+    <div className="min-w-0">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <label className="block text-xs font-bold text-muted uppercase tracking-wider">
+          {label}
+          {required && <span className="text-red-500 ml-0.5">*</span>}
+        </label>
+        {selected?.hint && (
+          <span className="text-[11px] text-muted truncate max-w-[55%] text-right">
+            {selected.hint}
+          </span>
+        )}
+      </div>
+      <div
+        role="group"
+        aria-label={label}
+        className={`grid ${columnsClassName} gap-1 p-1 rounded-2xl border border-border bg-slate-50/80`}
+      >
+        {options.map((opt) => {
+          const active = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              data-testid={testIdPrefix ? `${testIdPrefix}-${opt.value}` : undefined}
+              aria-pressed={active}
+              aria-label={opt.label}
+              title={opt.label}
+              onMouseDown={preventChoiceButtonScroll}
+              onClick={() => onChange(opt.value)}
+              className={`min-h-11 px-2 py-2 rounded-xl text-sm font-semibold border transition-colors touch-manipulation ${
+                active
+                  ? "border-primary bg-white text-primary shadow-sm"
+                  : "border-transparent bg-transparent text-foreground/80 hover:bg-white/80 hover:text-foreground"
+              }`}
+            >
+              <span className="block leading-tight">{opt.shortLabel ?? opt.label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
 }
 
+const FLOOR_SHORT: Record<FloorLevel, string> = {
+  eg: "EG",
+  og1: "1. OG",
+  og2: "2. OG",
+  og3: "3. OG",
+  og4: "4. OG",
+  og5plus: "5+",
+  dg: "DG",
+};
+
 export function Step2Object({ data, onChange }: Step2ObjectProps) {
-  const objectOptions: { value: ObjectType; label: string }[] = (
-    Object.entries(objectTypeLabels) as [ObjectType, string][]
-  ).map(([value, label]) => ({ value, label }));
+  const objectOptions = (Object.entries(objectTypeLabels) as [ObjectType, string][]).map(
+    ([value, label]) => ({ value, label })
+  );
 
-  const floorOptions: { value: FloorLevel; label: string }[] = (
-    Object.entries(floorLevelLabels) as [FloorLevel, string][]
-  ).map(([value, label]) => ({ value, label }));
+  const floorOptions = (Object.entries(floorLevelLabels) as [FloorLevel, string][]).map(
+    ([value, label]) => ({
+      value,
+      label,
+      shortLabel: FLOOR_SHORT[value],
+      hint: label,
+    })
+  );
 
-  const elevatorOptions: { value: ElevatorOption; label: string }[] = (
-    Object.entries(elevatorLabels) as [ElevatorOption, string][]
-  ).map(([value, label]) => ({ value, label }));
+  const elevatorOptions = (Object.entries(elevatorLabels) as [ElevatorOption, string][]).map(
+    ([value, label]) => ({ value, label })
+  );
 
   return (
-    <div>
+    <div className="min-w-0">
       {data.services.length > 0 && (
-        <div className="mb-8 pb-6 border-b border-border">
-          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
+        <div className="mb-5 pb-4 border-b border-border">
+          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-2">
             Ihre Auswahl
           </p>
           <div className="flex flex-wrap gap-2">
             {data.services.map((id) => (
               <span
                 key={id}
-                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium"
+                className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium"
               >
                 {quoteServiceLabels[id]}
               </span>
@@ -88,75 +128,85 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
         </div>
       )}
 
-      <h2 className="text-2xl font-bold text-foreground mb-2">Objekt & Zugang</h2>
-      <p className="text-muted mb-8">
-        Etage und Aufzug fließen direkt in die Preisberechnung ein – je genauer, desto
-        transparenter Ihr Festpreis.
+      <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1">Objekt & Zugang</h2>
+      <p className="text-muted text-sm sm:text-base mb-5 sm:mb-6">
+        Etage und Aufzug fließen direkt in die Preisberechnung ein.
       </p>
 
-      <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
-        <div className="space-y-8">
-          <ToggleGroup
+      <div className="grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] gap-5 lg:gap-8 items-start">
+        <div className="space-y-4 min-w-0">
+          <SegmentedControl
             label="Objektart"
             required
             options={objectOptions}
             value={data.objectType}
             onChange={(objectType) => onChange({ objectType })}
+            columnsClassName="grid-cols-2 sm:grid-cols-4"
+            testIdPrefix="object-type"
           />
 
           {data.objectType === "sonstiges" && (
-            <div>
-              <input
-                type="text"
-                value={data.objectTypeOther}
-                onChange={(e) => onChange({ objectTypeOther: e.target.value })}
-                placeholder="z. B. Keller, Garage, Lagerraum"
-                className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
-              />
-            </div>
+            <input
+              type="text"
+              value={data.objectTypeOther}
+              onChange={(e) => onChange({ objectTypeOther: e.target.value })}
+              placeholder="z. B. Keller, Garage, Lagerraum"
+              className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+            />
           )}
 
-          <ToggleGroup
+          <SegmentedControl
             label="Etage"
             required
             options={floorOptions}
             value={data.floorLevel}
             onChange={(floorLevel) => onChange({ floorLevel })}
+            columnsClassName="grid-cols-4 sm:grid-cols-7"
+            testIdPrefix="floor"
           />
 
-          <ToggleGroup
+          <SegmentedControl
             label="Aufzug vorhanden?"
             required
             options={elevatorOptions}
             value={data.elevator}
             onChange={(elevator) => onChange({ elevator })}
+            columnsClassName="grid-cols-3"
+            testIdPrefix="elevator"
           />
+
+          <p className="text-xs text-primary-dark/90 leading-relaxed rounded-xl border border-primary/15 bg-primary-light/25 px-3 py-2.5">
+            <strong>Preisfaktoren:</strong> Ohne Aufzug ab 1. OG +10–42&nbsp;% je nach Etage. Mit
+            Aufzug entfällt der Etagenzuschlag.
+          </p>
         </div>
 
-        <div>
-          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-4">
+        <div className="min-w-0 rounded-2xl border border-border bg-card/40 p-4 sm:p-5">
+          <p className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
             Zugang & Besonderheiten{" "}
             <span className="font-normal normal-case tracking-normal text-muted/80">
               (optional)
             </span>
           </p>
 
-          <div className="space-y-4">
-            <label className="flex items-start gap-3 cursor-pointer group">
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer group min-h-11 touch-manipulation">
               <input
                 type="checkbox"
                 checked={data.narrowStairs}
                 onChange={(e) => onChange({ narrowStairs: e.target.checked })}
-                className="mt-1 rounded border-border text-primary focus:ring-primary/30"
+                className="mt-1 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-primary/30"
               />
-              <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+              <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors min-w-0">
                 Enge Treppe
-                <span className="block text-xs text-muted font-normal mt-0.5">{formatNarrowStairsHint()}</span>
+                <span className="block text-xs text-muted font-normal mt-0.5">
+                  {formatNarrowStairsHint()}
+                </span>
               </span>
             </label>
 
             <div>
-              <label className="flex items-start gap-3 cursor-pointer group">
+              <label className="flex items-start gap-3 cursor-pointer group min-h-11 touch-manipulation">
                 <input
                   type="checkbox"
                   checked={data.accessTimes}
@@ -166,7 +216,7 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
                       accessTimesNote: e.target.checked ? data.accessTimesNote : "",
                     })
                   }
-                  className="mt-1 rounded border-border text-primary focus:ring-primary/30"
+                  className="mt-1 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-primary/30"
                 />
                 <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                   Zugang nur zu bestimmten Zeiten
@@ -178,13 +228,13 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
                   value={data.accessTimesNote}
                   onChange={(e) => onChange({ accessTimesNote: e.target.value })}
                   placeholder="Uhrzeit angeben, z. B. Mo–Fr 9–17 Uhr"
-                  className="mt-3 ml-7 w-[calc(100%-1.75rem)] px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm"
                 />
               )}
             </div>
 
             <div>
-              <label className="flex items-start gap-3 cursor-pointer group">
+              <label className="flex items-start gap-3 cursor-pointer group min-h-11 touch-manipulation">
                 <input
                   type="checkbox"
                   checked={data.specialFeatures}
@@ -194,7 +244,7 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
                       specialNotes: e.target.checked ? data.specialNotes : "",
                     })
                   }
-                  className="mt-1 rounded border-border text-primary focus:ring-primary/30"
+                  className="mt-1 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-primary/30"
                 />
                 <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                   Weitere Besonderheiten angeben
@@ -206,17 +256,10 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
                   onChange={(e) => onChange({ specialNotes: e.target.value })}
                   placeholder="z. B. Hinterhof, schmaler Zugang, Schlüssel beim Nachbarn …"
                   rows={3}
-                  className="mt-3 ml-7 w-[calc(100%-1.75rem)] px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 text-sm resize-none"
                 />
               )}
             </div>
-          </div>
-
-          <div className="mt-8 p-4 rounded-xl bg-primary-light/30 border border-primary/10">
-            <p className="text-sm text-primary-dark leading-relaxed">
-              <strong>Preisfaktoren:</strong> Ohne Aufzug ab 1. OG +10–42 % je nach Etage.
-              Mit Aufzug entfällt der Etagenzuschlag.
-            </p>
           </div>
         </div>
       </div>
