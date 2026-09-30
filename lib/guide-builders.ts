@@ -65,11 +65,11 @@ const ARTICLE_DEFS: Record<
       {
         title: "Preisübersicht Ilyashan",
         paragraphs: [
-          "Die Kosten hängen von Fensteranzahl, Etage, Verschmutzung und Extras ab. Als Orientierung: Privatfenster ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €, Wartungsvertrag ab 59 €/Monat.",
+          "Die Kosten hängen von Fensteranzahl, Reinigungsumfang (innen/außen), Etage, Verschmutzung und Extras ab. Als Orientierung: Privatfenster Mindestauftrag ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €, Wartungsvertrag ab 59 €/Monat.",
           "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine Live-Preisschätzung. Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot.",
         ],
         bullets: [
-          "Privatfenster: ab 49 € (ca. 8 Fenster, einseitig)",
+          "Privatfenster: Mindestauftrag ab 49 € (Umfang innen/außen im Wizard)",
           "Rahmen & Falz: ab 79 € (beidseitig inkl. Rahmen)",
           "Solaranlagen: ab 99 € (bis ca. 15 Module)",
           "Gewerbe & Fassade: auf Anfrage nach Aufmaß",

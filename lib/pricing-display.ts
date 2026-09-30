@@ -36,6 +36,21 @@ export function formatFlyScreensHint(): string {
   return `${formatEuroDe(P.extrasFlat.flyScreens)} €/Stück · ausgebaut / innen zugänglich`;
 }
 
+/** 49 € = Wohnung-Mindestauftrag – kein festes Paket „einseitig“ oder „innen+außen“. */
 export function formatMinimumWohnungHint(minimumWohnung: number): string {
-  return `Live berechnet · ab ${minimumWohnung} €`;
+  return `Live berechnet · Mindestauftrag ab ${minimumWohnung} €`;
+}
+
+export function formatMinimumWohnungScopeHint(minimumWohnung = P.minimumWohnung): string {
+  return `Mindestauftrag Wohnung ab ${minimumWohnung} € · Reinigungsumfang (innen/außen) im Wizard`;
+}
+
+/** Homepage / ServiceHub – gleicher Scope-Standard wie Wizard */
+export function formatPrivatHomeServiceDescription(minimumWohnung = P.minimumWohnung): string {
+  return `Wohnung & Haus – streifenfreie Glasreinigung. ${formatMinimumWohnungScopeHint(minimumWohnung)}.`;
+}
+
+/** Angebots-Wizard Step 1 – Preis nicht an festen Umfang koppeln */
+export function formatPrivatQuoteServiceDescription(): string {
+  return "Wohnung & Haus – streifenfrei; Umfang (innen/außen) im Wizard";
 }

@@ -1,4 +1,9 @@
 import type { WartungPackageId } from "@/lib/wartung-packages";
+import { RECOMMENDED_PRICING } from "@/lib/pricing-market-research";
+import {
+  formatMinimumWohnungHint,
+  formatPrivatQuoteServiceDescription,
+} from "@/lib/pricing-display";
 
 export const QUOTE_STEPS = [
   { id: 1, label: "Leistung" },
@@ -138,8 +143,8 @@ export const quoteServices: {
   {
     id: "privat",
     title: "Privathaushalt",
-    description: "Wohnung & Haus – streifenfrei innen und außen",
-    priceHint: "Live berechnet · ab 49 €",
+    description: formatPrivatQuoteServiceDescription(),
+    priceHint: formatMinimumWohnungHint(RECOMMENDED_PRICING.minimumWohnung),
     icon: "home",
   },
   {

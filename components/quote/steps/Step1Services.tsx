@@ -5,6 +5,7 @@ import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scrol
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import { WartungPlanSelector, pickDefaultWartungFields } from "@/components/quote/WartungPlanSelector";
 import { normalizeServices, syncObjectTypeWithService } from "@/lib/quote-validation";
+import { formatMinimumWohnungHint } from "@/lib/pricing-display";
 
 const serviceIcons: Record<string, React.ReactNode> = {
   home: (
@@ -86,7 +87,11 @@ export function Step1Services({ data, onUpdate }: Step1ServicesProps) {
           const selected = data.services.includes(service.id);
           const isPrimary = service.id !== "wartung" && selected;
           const priceHint =
-            service.id === "wartung" && wartungHint ? `Live berechnet · ${wartungHint}` : service.priceHint;
+            service.id === "wartung" && wartungHint
+              ? `Live berechnet · ${wartungHint}`
+              : service.id === "privat"
+                ? formatMinimumWohnungHint(config.minimumWohnung)
+                : service.priceHint;
 
           return (
             <button

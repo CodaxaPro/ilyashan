@@ -1,3 +1,7 @@
+import {
+  formatPrivatHomeServiceDescription,
+} from "@/lib/pricing-display";
+
 export const siteConfig = {
   name: "Ilyashan Fensterreinigung",
   tagline: "Professionelle Fensterreinigung",
@@ -123,8 +127,7 @@ export const siteConfig = {
     {
       id: "privat",
       title: "Privatfenster",
-      description:
-        "Kleine Wohnung (ca. 8 Fenster, einseitig). Streifenfreie Reinigung für Wohnungen, Häuser und Balkone.",
+      description: formatPrivatHomeServiceDescription(),
       priceFrom: "ab 49 €",
       icon: "home",
     },
@@ -415,7 +418,8 @@ export const siteConfig = {
     tagId: "AW-18191480247",
     /** Optional: full send_to from Google Ads event snippet */
     requestQuoteSendTo: "AW-18191480247/5p7uCKbC2tUcELfrr-JD",
-    whatsappSendTo: "AW-18191480247/2NC7CI_N29UcELfrr-JD",
+    /** Set after creating Ads Event action `whatsapp_click` — do not reuse Kişi/contact label */
+    whatsappSendTo: "",
     phoneSendTo: "",
   },
 } as const;

@@ -8,9 +8,19 @@ import {
   cleaningSideHints,
   dirtLevelHints,
   extraPriceHints,
+  quoteServices,
 } from "./quote-form";
 import { calculatePriceEstimate } from "./pricing";
 import { initialQuoteFormData } from "./quote-form";
+import { siteConfig } from "./config";
+import {
+  formatMinimumWohnungHint,
+  formatMinimumWohnungScopeHint,
+  formatPrivatHomeServiceDescription,
+  formatPrivatQuoteServiceDescription,
+} from "./pricing-display";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
   it("cleaningSideHints match sideMultipliers", () => {
@@ -59,5 +69,40 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
       const est = calculatePriceEstimate(data);
       assert.ok(est?.breakdown.some((l) => l.label === "Etagen-Zuschlag"), floor);
     }
+  });
+
+  it("49 € Scope: Homepage ≡ Wizard ≡ Paket (Mindestauftrag, kein falsches einseitig/innen+außen)", () => {
+    const privatHome = siteConfig.services.find((s) => s.id === "privat")!;
+    const privatQuote = quoteServices.find((s) => s.id === "privat")!;
+    const privatPkg = JSON.parse(
+      readFileSync(join(process.cwd(), "content/packages/privat.json"), "utf8")
+    ) as { includes: { items: string[] }; faq: { a: string }[] };
+
+    assert.equal(privatHome.description, formatPrivatHomeServiceDescription());
+    assert.equal(privatQuote.description, formatPrivatQuoteServiceDescription());
+    assert.equal(privatQuote.priceHint, formatMinimumWohnungHint(P.minimumWohnung));
+
+    for (const text of [
+      privatHome.description,
+      privatQuote.description,
+      privatQuote.priceHint,
+      formatMinimumWohnungScopeHint(),
+      ...privatPkg.includes.items,
+      privatPkg.faq[0].a,
+    ]) {
+      assert.doesNotMatch(text, /einseitig/i);
+      assert.doesNotMatch(text, /streifenfrei innen und außen/i);
+    }
+
+    assert.match(privatHome.description, /Mindestauftrag/);
+    assert.match(privatHome.description, /[Uu]mfang/);
+    assert.match(privatQuote.description, /[Uu]mfang/);
+    assert.match(privatQuote.priceHint, /Mindestauftrag/);
+    assert.ok(
+      privatPkg.includes.items.some((i) => /Mindestauftrag Wohnung ab 49/.test(i))
+    );
+    assert.ok(
+      privatPkg.includes.items.some((i) => /[Uu]mfang.*Wizard/i.test(i))
+    );
   });
 });
