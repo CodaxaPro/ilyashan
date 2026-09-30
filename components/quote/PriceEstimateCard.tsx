@@ -5,7 +5,7 @@ import { formatEuro, formatEuroExact } from "@/lib/pricing";
 import { siteConfig } from "@/lib/config";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
-import { formatPriceEstimateBasisLine } from "@/lib/pricing-display";
+import { formatPriceEstimateBasisLine, resolvePriceBasisMode } from "@/lib/pricing-display";
 import {
   resolvePriceAudience,
   splitBrutto,
@@ -183,8 +183,12 @@ export function PriceEstimateCard({
       </p>
 
       {!compact && (
-        <p className="mt-3 text-xs text-muted">
-          {formatPriceEstimateBasisLine(config.basePerFluegel, siteConfig.contact.region)}
+        <p className="mt-3 text-xs text-muted" data-testid="price-basis-line">
+          {formatPriceEstimateBasisLine({
+            mode: resolvePriceBasisMode(data),
+            region: siteConfig.contact.region,
+            basePerFluegel: config.basePerFluegel,
+          })}
         </p>
       )}
     </div>

@@ -12,8 +12,34 @@ export function formatBasePerFluegelDescription(basePerFluegel: number): string 
   return `Basispreis ${formatEuroDe(basePerFluegel)} €/Flügel = Glas innen & außen (normal), ohne Rahmen. Multiplikatoren und Zuschläge werden live berechnet.`;
 }
 
-export function formatPriceEstimateBasisLine(basePerFluegel: number, region: string): string {
-  return `Basis: ${formatEuroDe(basePerFluegel)} €/Flügel (i+a, normal) · ${region}`;
+export function formatGewerbeBaseDescription(
+  gewerbePerSqm = P.gewerbePerSqm,
+  avgSqmPerFluegel = P.avgSqmPerFluegel
+): string {
+  return `Gewerbe-Basis ${formatEuroDe(gewerbePerSqm)} €/m² Glas (normal). Orientierung: ca. ${formatEuroDe(avgSqmPerFluegel)} m² je Flügel. Multiplikatoren und Zuschläge werden live berechnet.`;
+}
+
+export type PriceBasisMode = "privat" | "gewerbe";
+
+/** Footer under live estimate – must match the active calculation model. */
+export function formatPriceEstimateBasisLine(options: {
+  mode: PriceBasisMode;
+  region: string;
+  basePerFluegel?: number;
+  gewerbePerSqm?: number;
+}): string {
+  if (options.mode === "gewerbe") {
+    const rate = options.gewerbePerSqm ?? P.gewerbePerSqm;
+    return `Basis: ${formatEuroDe(rate)} €/m² Glas (Gewerbe, normal) · ${options.region}`;
+  }
+  const base = options.basePerFluegel ?? P.basePerFluegel;
+  return `Basis: ${formatEuroDe(base)} €/Flügel (i+a, normal) · ${options.region}`;
+}
+
+export function resolvePriceBasisMode(
+  data: { services?: readonly string[] } | null | undefined
+): PriceBasisMode {
+  return data?.services?.includes("gewerbe") ? "gewerbe" : "privat";
 }
 
 export function formatNarrowStairsHint(): string {

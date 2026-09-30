@@ -22,7 +22,9 @@ import {
   formatCanopyHint,
   formatFlyScreensHint,
   formatNarrowStairsHint,
+  formatPriceEstimateBasisLine,
   formatSkylightsHint,
+  resolvePriceBasisMode,
 } from "./pricing-display";
 import {
   captureQuotePriceSnapshot,
@@ -550,6 +552,16 @@ describe("E2E – Step3 wizard UX source of truth", () => {
     assert.match(step3, /formatSkylightsHint/);
   });
 
+  it("quantity panels expand inline under their checkbox (not dumped at section bottom)", () => {
+    assert.match(step3, /col-span-full/);
+    assert.match(step3, /grid-cols-1 sm:grid-cols-2/);
+    assert.match(step3, /touch-manipulation/);
+    assert.match(step3, /key === "skylights" && selected/);
+    assert.match(step3, /key === "flyScreens" && selected/);
+    assert.match(step3, /key === "canopy" && selected/);
+    assert.match(step3, /key === "shutters" && selected/);
+  });
+
   it("wizard-bridge prefills Stück counts with backward-compatible default 1", () => {
     const bridge = readFileSync(
       join(process.cwd(), "lib/concierge/wizard-bridge.ts"),
@@ -587,6 +599,95 @@ describe("E2E – Step3 wizard UX source of truth", () => {
     ]) {
       assert.ok(extraPriceHints[key], `Step3 key ${key} needs hint`);
     }
+  });
+});
+
+describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
+  const kitchenSink = base({
+    services: ["gewerbe"],
+    objectType: "gewerbe",
+    windowCount: 8,
+    withFrame: true,
+    withFalz: true,
+    windowSills: true,
+    muntinWindows: true,
+    oldBuildingWindows: true,
+    shutters: true,
+    blinds: true,
+    skylights: true,
+    skylightsCount: 7,
+    flyScreens: true,
+    flyScreensCount: 3,
+    canopy: true,
+    canopySqm: 6,
+    includeWintergarden: true,
+    wintergardenSqm: 20,
+  });
+
+  it("kitchen-sink amounts ≡ engine ≡ VAT split (customer example)", () => {
+    const est = calculatePriceEstimate(kitchenSink)!;
+    const ref = referencePriceBreakdown(kitchenSink);
+    assert.equal(est.calculatedSubtotal, 611.28);
+    assert.equal(ref.calculatedSubtotal, 611.28);
+    assert.equal(est.amount, 610);
+    assert.equal(est.min, 579);
+    assert.equal(est.max, 641);
+
+    const byLabel = Object.fromEntries(
+      est.breakdown.map((l) => [l.label, l.amount])
+    );
+    assert.equal(byLabel["Gewerbefenster (Basis)"], 36.48);
+    assert.equal(byLabel["Rahmenreinigung"], 16.8);
+    assert.equal(byLabel["Fugen & Falz"], 12);
+    assert.equal(byLabel["Fensterbänke"], 12);
+    assert.equal(byLabel["Sprossenfenster"], 36);
+    assert.equal(byLabel["Altbaufenster"], 32);
+    assert.equal(byLabel["Rollläden (nur innen)"], 48);
+    assert.equal(byLabel["Jalousien (innenliegend)"], 48);
+    assert.equal(byLabel["Dachfenster / Oberlichter"], 126);
+    assert.equal(byLabel["Fliegengitter"], 36);
+    assert.equal(byLabel["Vordach / Glasdach (nur Glas)"], 48);
+    assert.equal(byLabel["Wintergarten-Reinigung"], 160);
+
+    const split = splitBrutto(est.amount);
+    assert.equal(split.netto, 512.61);
+    assert.equal(split.mwst, 97.39);
+    assert.equal(split.brutto, 610);
+  });
+
+  it("basis footer uses Gewerbe €/m² not Privat €/Flügel", () => {
+    assert.equal(resolvePriceBasisMode(kitchenSink), "gewerbe");
+    assert.equal(resolvePriceBasisMode(base()), "privat");
+
+    const gewerbeLine = formatPriceEstimateBasisLine({
+      mode: "gewerbe",
+      region: "Baesweiler, Aachen & Umgebung",
+    });
+    const privatLine = formatPriceEstimateBasisLine({
+      mode: "privat",
+      region: "Baesweiler, Aachen & Umgebung",
+      basePerFluegel: P.basePerFluegel,
+    });
+
+    assert.match(gewerbeLine, /3,80 €\/m² Glas \(Gewerbe, normal\)/);
+    assert.doesNotMatch(gewerbeLine, /5,00 €\/Flügel/);
+    assert.match(privatLine, /5,00 €\/Flügel \(i\+a, normal\)/);
+    assert.doesNotMatch(privatLine, /€\/m²/);
+  });
+
+  it("PriceEstimateCard + Step3 wire model-aware basis copy", () => {
+    const card = readFileSync(
+      join(process.cwd(), "components/quote/PriceEstimateCard.tsx"),
+      "utf8"
+    );
+    const step3 = readFileSync(
+      join(process.cwd(), "components/quote/steps/Step3Details.tsx"),
+      "utf8"
+    );
+    assert.match(card, /resolvePriceBasisMode/);
+    assert.match(card, /price-basis-line/);
+    assert.match(step3, /formatGewerbeBaseDescription/);
+    assert.match(step3, /resolvePriceBasisMode/);
   });
 });
 

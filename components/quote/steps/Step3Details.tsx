@@ -16,7 +16,9 @@ import {
   formatBasePerFluegelDescription,
   formatCanopyHint,
   formatFlyScreensHint,
+  formatGewerbeBaseDescription,
   formatSkylightsHint,
+  resolvePriceBasisMode,
 } from "@/lib/pricing-display";
 
 interface Step3DetailsProps {
@@ -60,22 +62,22 @@ function Stepper({
         <span className="text-red-500 ml-0.5">*</span>
       </label>
       {hint && <p className="text-xs text-muted mb-3">{hint}</p>}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           type="button"
           onClick={decrement}
           onMouseDown={preventChoiceButtonScroll}
           disabled={value <= min}
-          className="w-11 h-11 rounded-xl border-2 border-border bg-white text-lg font-bold hover:border-primary/30 disabled:opacity-40 transition-colors"
+          className="w-11 h-11 shrink-0 rounded-xl border-2 border-border bg-white text-lg font-bold hover:border-primary/30 disabled:opacity-40 transition-colors touch-manipulation"
           aria-label="Verringern"
         >
           −
         </button>
         <div
-          className="flex-1 text-center py-3 rounded-xl border-2 border-border bg-white"
+          className="flex-1 min-w-0 text-center py-3 rounded-xl border-2 border-border bg-white"
           data-testid={testIdPrefix ? `${testIdPrefix}-display` : undefined}
         >
-          <span className="text-2xl font-bold text-foreground">{value}</span>
+          <span className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{value}</span>
           {unit && <span className="text-sm text-muted ml-1">{unit}</span>}
         </div>
         <button
@@ -85,7 +87,7 @@ function Stepper({
           disabled={value >= max}
           aria-label="Erhöhen"
           data-testid={testIdPrefix ? `${testIdPrefix}-increase` : undefined}
-          className="w-11 h-11 rounded-xl border-2 border-border bg-white text-lg font-bold hover:border-primary/30 disabled:opacity-40 transition-colors"
+          className="w-11 h-11 shrink-0 rounded-xl border-2 border-border bg-white text-lg font-bold hover:border-primary/30 disabled:opacity-40 transition-colors touch-manipulation"
         >
           +
         </button>
@@ -147,8 +149,10 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
       )}
 
       <h2 className="text-2xl font-bold text-foreground mb-2">Leistungsdetails</h2>
-      <p className="text-muted mb-4">
-        {formatBasePerFluegelDescription(config.basePerFluegel)}
+      <p className="text-muted mb-4" data-testid="step3-basis-description">
+        {resolvePriceBasisMode(data) === "gewerbe"
+          ? formatGewerbeBaseDescription()
+          : formatBasePerFluegelDescription(config.basePerFluegel)}
       </p>
 
       <p className="lg:hidden text-sm text-foreground/90 mb-8 rounded-xl border border-primary/15 bg-primary-light/25 px-4 py-3 leading-relaxed">
@@ -165,7 +169,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
         </div>
 
         <div className="lg:col-span-2 order-2 lg:order-1 space-y-10">
-          <section className="rounded-2xl border border-border p-6 bg-card/50">
+          <section className="rounded-2xl border border-border p-4 sm:p-6 bg-card/50">
             <h3 className="font-bold text-foreground mb-6 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
                 1
@@ -226,7 +230,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border p-6 bg-card/50">
+          <section className="rounded-2xl border border-border p-4 sm:p-6 bg-card/50">
             <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
                 2
@@ -267,136 +271,156 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-3">
-              {reinigungswünsche.map(({ key, label }) => (
-                <label
-                  key={key}
-                  className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                    data[key]
-                      ? "border-primary/40 bg-primary-light/30"
-                      : "border-border bg-white hover:border-primary/20"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={data[key]}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      if (key === "skylights") {
-                        onChange({
-                          skylights: checked,
-                          skylightsCount: checked ? Math.max(data.skylightsCount, 1) : 0,
-                        });
-                        return;
-                      }
-                      if (key === "flyScreens") {
-                        onChange({
-                          flyScreens: checked,
-                          flyScreensCount: checked ? Math.max(data.flyScreensCount, 1) : 0,
-                        });
-                        return;
-                      }
-                      if (key === "canopy") {
-                        onChange({
-                          canopy: checked,
-                          canopySqm: checked ? Math.max(data.canopySqm, 5) : 0,
-                        });
-                        return;
-                      }
-                      onChange({ [key]: checked });
-                    }}
-                    className="rounded border-border text-primary focus:ring-primary/30"
-                  />
-                  <span className="text-sm font-medium flex-1">
-                    {label}
-                    <span className="block text-xs text-muted font-normal">
-                      {extraPriceHints[key]}
-                    </span>
-                  </span>
-                </label>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {reinigungswünsche.map(({ key, label }) => {
+                const selected = data[key];
+                const expands =
+                  key === "skylights" ||
+                  key === "flyScreens" ||
+                  key === "canopy" ||
+                  key === "shutters" ||
+                  key === "blinds";
+
+                return (
+                  <div
+                    key={key}
+                    className={
+                      selected && expands
+                        ? "col-span-full min-w-0 rounded-xl border-2 border-primary/40 bg-primary-light/20 p-3 space-y-3"
+                        : "min-w-0"
+                    }
+                  >
+                    <label
+                      className={`flex items-start sm:items-center gap-3 min-h-11 p-3 rounded-xl border-2 cursor-pointer transition-all touch-manipulation ${
+                        selected && expands
+                          ? "border-transparent bg-transparent p-0 min-h-0"
+                          : selected
+                            ? "border-primary/40 bg-primary-light/30"
+                            : "border-border bg-white hover:border-primary/20"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          if (key === "skylights") {
+                            onChange({
+                              skylights: checked,
+                              skylightsCount: checked ? Math.max(data.skylightsCount, 1) : 0,
+                            });
+                            return;
+                          }
+                          if (key === "flyScreens") {
+                            onChange({
+                              flyScreens: checked,
+                              flyScreensCount: checked ? Math.max(data.flyScreensCount, 1) : 0,
+                            });
+                            return;
+                          }
+                          if (key === "canopy") {
+                            onChange({
+                              canopy: checked,
+                              canopySqm: checked ? Math.max(data.canopySqm, 5) : 0,
+                            });
+                            return;
+                          }
+                          onChange({ [key]: checked });
+                        }}
+                        className="mt-0.5 sm:mt-0 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-primary/30"
+                      />
+                      <span className="text-sm font-medium flex-1 min-w-0">
+                        {label}
+                        <span className="block text-xs text-muted font-normal leading-snug">
+                          {extraPriceHints[key]}
+                        </span>
+                      </span>
+                    </label>
+
+                    {key === "shutters" && selected && (
+                      <p
+                        className="text-xs leading-relaxed rounded-lg border border-amber-200 bg-amber-50 text-amber-950 px-3 py-2"
+                        data-testid="shutters-innen-notice"
+                      >
+                        <strong>Rollladen – nur innen:</strong> Reinigung ausschließlich von innen.
+                        Außenliegende Rollläden sind nicht erreichbar und nicht im Preis enthalten.
+                      </p>
+                    )}
+
+                    {key === "blinds" && selected && (
+                      <p
+                        className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                        data-testid="blinds-innen-notice"
+                      >
+                        <strong>Jalousien:</strong> Preis gilt für innenliegende Lamellenjalousien.
+                        Außenjalousien / Raffstores nur nach Absprache.
+                      </p>
+                    )}
+
+                    {key === "skylights" && selected && (
+                      <div className="w-full min-w-0">
+                        <Stepper
+                          label="Anzahl Dachfenster / Oberlichter"
+                          hint={formatSkylightsHint()}
+                          value={data.skylightsCount || 1}
+                          min={1}
+                          max={20}
+                          step={1}
+                          unit="Stück"
+                          onChange={(skylightsCount) => onChange({ skylightsCount })}
+                        />
+                      </div>
+                    )}
+
+                    {key === "flyScreens" && selected && (
+                      <div className="w-full min-w-0 space-y-2">
+                        <Stepper
+                          label="Anzahl Fliegengitter"
+                          hint={formatFlyScreensHint()}
+                          value={data.flyScreensCount || 1}
+                          min={1}
+                          max={40}
+                          step={1}
+                          unit="Stück"
+                          onChange={(flyScreensCount) => onChange({ flyScreensCount })}
+                        />
+                        <p
+                          className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                          data-testid="flyscreens-notice"
+                        >
+                          <strong>Fliegengitter:</strong> Preis gilt für ausbaubare / innen zugängliche
+                          Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
+                        </p>
+                      </div>
+                    )}
+
+                    {key === "canopy" && selected && (
+                      <div className="w-full min-w-0 space-y-2">
+                        <Stepper
+                          label="Vordach-Fläche (Glas)"
+                          hint={formatCanopyHint()}
+                          value={data.canopySqm || 5}
+                          min={1}
+                          max={50}
+                          step={1}
+                          unit="m²"
+                          onChange={(canopySqm) => onChange({ canopySqm })}
+                        />
+                        <p
+                          className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                          data-testid="canopy-glas-notice"
+                        >
+                          <strong>Nur Glas:</strong> Stoffmarkisen / textile Vordächer sind nicht enthalten.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-
-            {data.shutters && (
-              <p
-                className="mt-3 text-xs leading-relaxed rounded-lg border border-amber-200 bg-amber-50 text-amber-950 px-3 py-2"
-                data-testid="shutters-innen-notice"
-              >
-                <strong>Rollladen – nur innen:</strong> Reinigung ausschließlich von innen.
-                Außenliegende Rollläden sind nicht erreichbar und nicht im Preis enthalten.
-              </p>
-            )}
-
-            {data.blinds && (
-              <p
-                className="mt-3 text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
-                data-testid="blinds-innen-notice"
-              >
-                <strong>Jalousien:</strong> Preis gilt für innenliegende Lamellenjalousien.
-                Außenjalousien / Raffstores nur nach Absprache.
-              </p>
-            )}
-
-            {data.skylights && (
-              <div className="mt-4 ml-1 space-y-2">
-                <Stepper
-                  label="Anzahl Dachfenster / Oberlichter"
-                  hint={formatSkylightsHint()}
-                  value={data.skylightsCount || 1}
-                  min={1}
-                  max={20}
-                  step={1}
-                  unit="Stück"
-                  onChange={(skylightsCount) => onChange({ skylightsCount })}
-                />
-              </div>
-            )}
-
-            {data.flyScreens && (
-              <div className="mt-4 ml-1 space-y-2">
-                <Stepper
-                  label="Anzahl Fliegengitter"
-                  hint={formatFlyScreensHint()}
-                  value={data.flyScreensCount || 1}
-                  min={1}
-                  max={40}
-                  step={1}
-                  unit="Stück"
-                  onChange={(flyScreensCount) => onChange({ flyScreensCount })}
-                />
-                <p
-                  className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
-                  data-testid="flyscreens-notice"
-                >
-                  <strong>Fliegengitter:</strong> Preis gilt für ausbaubare / innen zugängliche
-                  Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
-                </p>
-              </div>
-            )}
-
-            {data.canopy && (
-              <div className="mt-4 ml-1 space-y-2">
-                <Stepper
-                  label="Vordach-Fläche (Glas)"
-                  hint={formatCanopyHint()}
-                  value={data.canopySqm || 5}
-                  min={1}
-                  max={50}
-                  step={1}
-                  unit="m²"
-                  onChange={(canopySqm) => onChange({ canopySqm })}
-                />
-                <p
-                  className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
-                  data-testid="canopy-glas-notice"
-                >
-                  <strong>Nur Glas:</strong> Stoffmarkisen / textile Vordächer sind nicht enthalten.
-                </p>
-              </div>
-            )}
           </section>
 
-          <section className="rounded-2xl border border-border p-6 bg-card/50">
+          <section className="rounded-2xl border border-border p-4 sm:p-6 bg-card/50">
             <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
                 3
@@ -424,7 +448,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                 </div>
               </label>
               {data.includeSolar && (
-                <div className="ml-8">
+                <div className="w-full min-w-0 rounded-xl border border-primary/20 bg-primary-light/15 p-3">
                   <Stepper
                     label="Modulfläche"
                     value={data.solarSqm || 5}
@@ -455,7 +479,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                 </div>
               </label>
               {data.includeWintergarden && (
-                <div className="ml-8">
+                <div className="w-full min-w-0 rounded-xl border border-primary/20 bg-primary-light/15 p-3">
                   <Stepper
                     label="Glasfläche Wintergarten"
                     value={data.wintergardenSqm || 5}
@@ -470,7 +494,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
             </div>
           </section>
 
-          <section className="rounded-2xl border border-border p-6 bg-card/50">
+          <section className="rounded-2xl border border-border p-4 sm:p-6 bg-card/50">
             <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
                 4
