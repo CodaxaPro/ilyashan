@@ -39,6 +39,9 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
       assert.ok(extraPriceHints[key], `UI-Hint fehlt für ${key}`);
     }
     assert.match(extraPriceHints.flyScreens, /12,00/);
+    assert.match(extraPriceHints.skylights, /18,00/);
+    assert.match(extraPriceHints.skylights, /Stück/);
+    assert.match(extraPriceHints.flyScreens, /Stück/);
     assert.match(extraPriceHints.canopy, /8,00/);
   });
 

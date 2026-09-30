@@ -18,7 +18,12 @@ import {
   initialQuoteFormData,
   type QuoteFormData,
 } from "./quote-form";
-import { formatCanopyHint, formatNarrowStairsHint } from "./pricing-display";
+import {
+  formatCanopyHint,
+  formatFlyScreensHint,
+  formatNarrowStairsHint,
+  formatSkylightsHint,
+} from "./pricing-display";
 import {
   captureQuotePriceSnapshot,
   createQuotePricingContext,
@@ -157,11 +162,11 @@ describe("E2E – UI hints ↔ engine", () => {
 
   it("flat / special hints show exact engine prices", () => {
     assert.equal(
-      parseEuro(extraPriceHints.skylights, /\+([\d,]+)\s*€ pauschal/),
+      parseEuro(extraPriceHints.skylights, /\+([\d,]+)\s*€\/Stück/),
       P.extrasFlat.skylights
     );
     assert.equal(
-      parseEuro(extraPriceHints.flyScreens, /\+([\d,]+)\s*€ pauschal/),
+      parseEuro(extraPriceHints.flyScreens, /\+([\d,]+)\s*€\/Stück/),
       P.extrasFlat.flyScreens
     );
     assert.equal(
@@ -173,6 +178,8 @@ describe("E2E – UI hints ↔ engine", () => {
     assert.match(extraPriceHints.canopy, /nur Glas/);
     assert.equal(formatCanopyHint(), "8,00 €/m² · mindestens 39,00 €");
     assert.equal(formatNarrowStairsHint(), "+15,00 € pauschal");
+    assert.equal(formatSkylightsHint(), "18,00 €/Stück");
+    assert.match(formatFlyScreensHint(), /12,00 €\/Stück/);
   });
 
   it("UX constraint copy is present in hints", () => {
@@ -195,7 +202,7 @@ describe("E2E – calculation amounts", () => {
     }
   });
 
-  it("skylights / flyScreens / narrowStairs are pauschal (ignore windowCount)", () => {
+  it("skylights / flyScreens are Stück (ignore windowCount); narrowStairs pauschal", () => {
     for (const n of [1, 20, 40]) {
       const sky = calculatePriceEstimate(base({ windowCount: n, skylights: true }))!;
       const fly = calculatePriceEstimate(base({ windowCount: n, flyScreens: true }))!;
@@ -213,6 +220,23 @@ describe("E2E – calculation amounts", () => {
         15
       );
     }
+  });
+
+  it("skylights / flyScreens scale by Stück count", () => {
+    const sky = calculatePriceEstimate(
+      base({ skylights: true, skylightsCount: 3 })
+    )!;
+    const fly = calculatePriceEstimate(
+      base({ flyScreens: true, flyScreensCount: 4 })
+    )!;
+    assert.equal(
+      sky.breakdown.find((l) => l.label.includes("Dachfenster"))!.amount,
+      54
+    );
+    assert.equal(
+      fly.breakdown.find((l) => l.label.includes("Fliegengitter"))!.amount,
+      48
+    );
   });
 
   it("canopy = max(min, sqm × rate)", () => {
@@ -263,7 +287,7 @@ describe("E2E – calculation amounts", () => {
     assert.match(canopyLine!.label, /nur Glas/);
 
     const flyLine = est.breakdown.find((l) => l.label.includes("Fliegengitter"));
-    assert.match(flyLine!.detail ?? "", /pauschal/);
+    assert.match(flyLine!.detail ?? "", /1 × 12\.00 €/);
     assert.match(flyLine!.detail ?? "", /innen zugänglich/);
 
     const blindsLine = est.breakdown.find((l) => l.label.includes("Jalousien"));
@@ -272,18 +296,22 @@ describe("E2E – calculation amounts", () => {
 });
 
 describe("E2E – quote summary / PDF rows / snapshot", () => {
-  it("reinigungswünsche labels carry UX constraints", () => {
+  it("reinigungswünsche labels carry UX constraints + Stück counts", () => {
     const data = base({
       shutters: true,
       blinds: true,
       canopy: true,
       flyScreens: true,
+      flyScreensCount: 3,
+      skylights: true,
+      skylightsCount: 2,
     });
     const label = getReinigungswünscheLabel(data);
     assert.match(label, /Rollladen \(nur innen/);
     assert.match(label, /Jalousien \(innenliegend\)/);
     assert.match(label, /nur Glas/);
-    assert.match(label, /Fliegengitter \(pauschal\)/);
+    assert.match(label, /Fliegengitter \(3 Stück\)/);
+    assert.match(label, /Dachfenster \/ Oberlichter \(2 Stück\)/);
   });
 
   it("price label privat vs gewerbe on same brutto numbers", () => {
@@ -330,6 +358,32 @@ describe("E2E – WhatsApp + concierge + termin portal", () => {
     assert.match(gewerbeMsg, /Netto/);
     assert.match(gewerbeMsg, /Brutto/);
     assert.match(gewerbeMsg, /zzgl\. 19 % MwSt/);
+  });
+
+  it("WhatsApp includes Stück extras with counts in price path", () => {
+    const msg = buildWhatsAppQuoteMessage(
+      base({
+        skylights: true,
+        skylightsCount: 2,
+        flyScreens: true,
+        flyScreensCount: 3,
+        windowCount: 12,
+      })
+    );
+    assert.match(msg, /Dachfenster \/ Oberlichter \(2 Stück\)/);
+    assert.match(msg, /Fliegengitter \(3 Stück\)/);
+    assert.match(msg, /inkl\. MwSt/);
+    const est = calculatePriceEstimate(
+      base({ skylights: true, skylightsCount: 2, flyScreens: true, flyScreensCount: 3, windowCount: 12 })
+    )!;
+    assert.equal(
+      est.breakdown.find((l) => l.label.includes("Dachfenster"))!.amount,
+      36
+    );
+    assert.equal(
+      est.breakdown.find((l) => l.label.includes("Fliegengitter"))!.amount,
+      36
+    );
   });
 
   it("concierge price response uses VAT footnote + same estimate", () => {
@@ -482,7 +536,29 @@ describe("E2E – Step3 wizard UX source of truth", () => {
     assert.match(step3, /Rollladen \(nur innen\)/);
     assert.match(step3, /Jalousien \(innenliegend\)/);
     assert.match(step3, /Vordach \/ Glasdach \(nur Glas\)/);
-    assert.match(step3, /Fliegengitter \(pauschal\)/);
+    assert.match(step3, /Fliegengitter/);
+    assert.doesNotMatch(step3, /Fliegengitter \(pauschal\)/);
+    assert.match(step3, /Dachfenster \/ Oberlichter/);
+  });
+
+  it("skylights + flyScreens use Anzahl steppers", () => {
+    assert.match(step3, /Anzahl Fliegengitter/);
+    assert.match(step3, /Anzahl Dachfenster \/ Oberlichter/);
+    assert.match(step3, /flyScreensCount/);
+    assert.match(step3, /skylightsCount/);
+    assert.match(step3, /formatFlyScreensHint/);
+    assert.match(step3, /formatSkylightsHint/);
+  });
+
+  it("wizard-bridge prefills Stück counts with backward-compatible default 1", () => {
+    const bridge = readFileSync(
+      join(process.cwd(), "lib/concierge/wizard-bridge.ts"),
+      "utf8"
+    );
+    assert.match(bridge, /skylightsCount/);
+    assert.match(bridge, /flyScreensCount/);
+    assert.match(bridge, /q\.skylightsCount && q\.skylightsCount > 0 \? q\.skylightsCount : 1/);
+    assert.match(bridge, /q\.flyScreensCount && q\.flyScreensCount > 0 \? q\.flyScreensCount : 1/);
   });
 
   it("notice blocks exist for shutters, blinds, flyScreens, canopy", () => {

@@ -109,18 +109,22 @@ function calculateExtras(data: QuoteFormData, P: PricingConstants): { total: num
   }
 
   if (data.skylights) {
+    const count = data.skylightsCount > 0 ? data.skylightsCount : 1;
+    const unit = P.extrasFlat.skylights;
     items.push({
       label: "Dachfenster / Oberlichter",
-      amount: P.extrasFlat.skylights,
-      detail: "1× pauschal",
+      amount: count * unit,
+      detail: `${count} × ${unit.toFixed(2)} €`,
     });
   }
 
   if (data.flyScreens) {
+    const count = data.flyScreensCount > 0 ? data.flyScreensCount : 1;
+    const unit = P.extrasFlat.flyScreens;
     items.push({
       label: "Fliegengitter",
-      amount: P.extrasFlat.flyScreens,
-      detail: "1× pauschal · ausgebaut / innen zugänglich",
+      amount: count * unit,
+      detail: `${count} × ${unit.toFixed(2)} € · ausgebaut / innen zugänglich`,
     });
   }
 

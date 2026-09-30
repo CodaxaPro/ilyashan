@@ -79,8 +79,14 @@ export function referencePriceBreakdown(
   for (const key of perFluegelKeys) {
     if (data[key]) extrasTotal += n * pricing.extrasPerFluegel[key];
   }
-  if (data.skylights) extrasTotal += pricing.extrasFlat.skylights;
-  if (data.flyScreens) extrasTotal += pricing.extrasFlat.flyScreens;
+  if (data.skylights) {
+    const count = data.skylightsCount > 0 ? data.skylightsCount : 1;
+    extrasTotal += count * pricing.extrasFlat.skylights;
+  }
+  if (data.flyScreens) {
+    const count = data.flyScreensCount > 0 ? data.flyScreensCount : 1;
+    extrasTotal += count * pricing.extrasFlat.flyScreens;
+  }
   if (data.canopy) {
     const sqm = data.canopySqm > 0 ? data.canopySqm : 5;
     extrasTotal += Math.max(pricing.extrasFlat.canopy, sqm * pricing.extrasFlat.canopyPerSqm);

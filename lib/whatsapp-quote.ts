@@ -16,6 +16,7 @@ import {
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
 import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
+import { getReinigungswünscheLabel } from "@/lib/quote-summary";
 
 export function buildWhatsAppQuoteMessage(
   data: QuoteFormData,
@@ -59,6 +60,10 @@ export function buildWhatsAppQuoteMessage(
     data.roomHeight ? `Raumhöhe: ${data.roomHeight} m` : "",
     data.dirtLevel ? `Verschmutzung: ${dirtLevelLabels[data.dirtLevel]}` : "",
     data.cleaningSide ? `Umfang: ${cleaningSideLabels[data.cleaningSide]}` : "",
+    (() => {
+      const extras = getReinigungswünscheLabel(data);
+      return extras !== "–" ? `Reinigungswünsche: ${extras}` : "";
+    })(),
     data.scheduleOption
       ? `Termin: ${scheduleOptionLabels[data.scheduleOption]}`
       : "",

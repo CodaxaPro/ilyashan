@@ -30,11 +30,11 @@ const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "windowSills", label: "Fensterbänke" },
   { key: "muntinWindows", label: "Sprossenfenster" },
   { key: "oldBuildingWindows", label: "Altbaufenster" },
-  { key: "skylights", label: "Oberlichter / Dachfenster" },
+  { key: "skylights", label: "Dachfenster / Oberlichter" },
   { key: "shutters", label: "Rollladen (nur innen – außen nicht)" },
   { key: "blinds", label: "Jalousien (innenliegend)" },
   { key: "canopy", label: "Vordach / Glasdach (nur Glas)" },
-  { key: "flyScreens", label: "Fliegengitter (pauschal)" },
+  { key: "flyScreens", label: "Fliegengitter" },
 ];
 
 export function generateAnfrageNr() {
@@ -65,7 +65,19 @@ export function getServicesLabel(data: QuoteFormData) {
 }
 
 export function getReinigungswünscheLabel(data: QuoteFormData) {
-  const selected = reinigungsLabels.filter((item) => data[item.key] === true).map((i) => i.label);
+  const selected = reinigungsLabels
+    .filter((item) => data[item.key] === true)
+    .map((item) => {
+      if (item.key === "skylights") {
+        const count = data.skylightsCount > 0 ? data.skylightsCount : 1;
+        return `${item.label} (${count} Stück)`;
+      }
+      if (item.key === "flyScreens") {
+        const count = data.flyScreensCount > 0 ? data.flyScreensCount : 1;
+        return `${item.label} (${count} Stück)`;
+      }
+      return item.label;
+    });
   return selected.length > 0 ? selected.join(", ") : "–";
 }
 

@@ -28,6 +28,14 @@ export function formatCanopyHint(): string {
   return `${formatEuroDe(P.extrasFlat.canopyPerSqm)} €/m² · mindestens ${formatEuroDe(P.extrasFlat.canopy)} €`;
 }
 
+export function formatSkylightsHint(): string {
+  return `${formatEuroDe(P.extrasFlat.skylights)} €/Stück`;
+}
+
+export function formatFlyScreensHint(): string {
+  return `${formatEuroDe(P.extrasFlat.flyScreens)} €/Stück · ausgebaut / innen zugänglich`;
+}
+
 export function formatMinimumWohnungHint(minimumWohnung: number): string {
   return `Live berechnet · ab ${minimumWohnung} €`;
 }

@@ -130,16 +130,34 @@ describe("calculatePriceEstimate – Extras & Zusatzleistungen", () => {
     });
   }
 
-  it("Dachfenster pauschal 18 €", () => {
+  it("Dachfenster 18 €/Stück (Default 1)", () => {
     const est = breakdownTotal(base({ skylights: true }));
     const line = est.breakdown.find((l) => l.label.includes("Dachfenster"));
     assert.equal(line!.amount, P.extrasFlat.skylights);
+    assert.match(line!.detail ?? "", /1 × 18\.00 €/);
   });
 
-  it("Fliegengitter pauschal 12 €", () => {
+  it("Dachfenster Anzahl × 18 €",
+    () => {
+      const est = breakdownTotal(base({ skylights: true, skylightsCount: 3 }));
+      const line = est.breakdown.find((l) => l.label.includes("Dachfenster"));
+      assert.equal(line!.amount, 3 * P.extrasFlat.skylights);
+      assert.match(line!.detail ?? "", /3 × 18\.00 €/);
+    }
+  );
+
+  it("Fliegengitter 12 €/Stück (Default 1, unabhängig von Fensterzahl)", () => {
     const est = breakdownTotal(base({ flyScreens: true, windowCount: 20 }));
     const line = est.breakdown.find((l) => l.label.includes("Fliegengitter"));
     assert.equal(line!.amount, P.extrasFlat.flyScreens);
+    assert.match(line!.detail ?? "", /1 × 12\.00 €/);
+  });
+
+  it("Fliegengitter Anzahl × 12 €", () => {
+    const est = breakdownTotal(base({ flyScreens: true, flyScreensCount: 5 }));
+    const line = est.breakdown.find((l) => l.label.includes("Fliegengitter"));
+    assert.equal(line!.amount, 5 * P.extrasFlat.flyScreens);
+    assert.match(line!.detail ?? "", /5 × 12\.00 €/);
   });
 
   it("Enge Treppe 15 €", () => {

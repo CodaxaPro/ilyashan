@@ -80,6 +80,33 @@ describe("Quote sync – wizard ≡ email ≡ PDF ≡ snapshot", () => {
     assert.ok(customer.html.includes(tablePrice!));
   });
 
+  it("Stück extras appear with counts in email + table (admin/customer)", () => {
+    const data = sampleQuote({
+      skylights: true,
+      skylightsCount: 3,
+      flyScreens: true,
+      flyScreensCount: 5,
+    });
+    const anfrageNr = "ANG-2026-STUECK";
+    const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig)!;
+    const skyLine = estimate.breakdown.find((l) => l.label.includes("Dachfenster"));
+    const flyLine = estimate.breakdown.find((l) => l.label.includes("Fliegengitter"));
+    assert.equal(skyLine!.amount, 54);
+    assert.equal(flyLine!.amount, 60);
+
+    const rows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
+    const extras = rows.find(([k]) => k === "Reinigungswünsche")?.[1] ?? "";
+    assert.match(extras, /Dachfenster \/ Oberlichter \(3 Stück\)/);
+    assert.match(extras, /Fliegengitter \(5 Stück\)/);
+
+    const admin = buildQuoteAdminEmail(data, anfrageNr, 0, ctx);
+    const customer = buildQuoteCustomerEmail(data, anfrageNr, ctx);
+    assert.match(admin.text, /Dachfenster \/ Oberlichter \(3 Stück\)/);
+    assert.match(admin.text, /Fliegengitter \(5 Stück\)/);
+    assert.match(customer.text, /Dachfenster \/ Oberlichter \(3 Stück\)/);
+    assert.match(customer.text, /Fliegengitter \(5 Stück\)/);
+  });
+
   it("snapshot preserves submission price for admin replay", () => {
     const data = sampleQuote({ services: ["privat", "wartung"], wartungPackageId: "quarterly" });
     const snapshot = captureQuotePriceSnapshot(data, ctx)!;

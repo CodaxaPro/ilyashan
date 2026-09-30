@@ -15,6 +15,8 @@ import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scrol
 import {
   formatBasePerFluegelDescription,
   formatCanopyHint,
+  formatFlyScreensHint,
+  formatSkylightsHint,
 } from "@/lib/pricing-display";
 
 interface Step3DetailsProps {
@@ -113,11 +115,11 @@ const reinigungswünsche: {
   { key: "windowSills", label: "Fensterbänke" },
   { key: "muntinWindows", label: "Sprossenfenster" },
   { key: "oldBuildingWindows", label: "Altbaufenster" },
-  { key: "skylights", label: "Oberlichter / Dachfenster" },
+  { key: "skylights", label: "Dachfenster / Oberlichter" },
   { key: "shutters", label: "Rollladen (nur innen)" },
   { key: "blinds", label: "Jalousien (innenliegend)" },
   { key: "canopy", label: "Vordach / Glasdach (nur Glas)" },
-  { key: "flyScreens", label: "Fliegengitter (pauschal)" },
+  { key: "flyScreens", label: "Fliegengitter" },
 ];
 
 export function Step3Details({ data, onChange }: Step3DetailsProps) {
@@ -278,7 +280,31 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                   <input
                     type="checkbox"
                     checked={data[key]}
-                    onChange={(e) => onChange({ [key]: e.target.checked })}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      if (key === "skylights") {
+                        onChange({
+                          skylights: checked,
+                          skylightsCount: checked ? Math.max(data.skylightsCount, 1) : 0,
+                        });
+                        return;
+                      }
+                      if (key === "flyScreens") {
+                        onChange({
+                          flyScreens: checked,
+                          flyScreensCount: checked ? Math.max(data.flyScreensCount, 1) : 0,
+                        });
+                        return;
+                      }
+                      if (key === "canopy") {
+                        onChange({
+                          canopy: checked,
+                          canopySqm: checked ? Math.max(data.canopySqm, 5) : 0,
+                        });
+                        return;
+                      }
+                      onChange({ [key]: checked });
+                    }}
                     className="rounded border-border text-primary focus:ring-primary/30"
                   />
                   <span className="text-sm font-medium flex-1">
@@ -311,14 +337,41 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               </p>
             )}
 
+            {data.skylights && (
+              <div className="mt-4 ml-1 space-y-2">
+                <Stepper
+                  label="Anzahl Dachfenster / Oberlichter"
+                  hint={formatSkylightsHint()}
+                  value={data.skylightsCount || 1}
+                  min={1}
+                  max={20}
+                  step={1}
+                  unit="Stück"
+                  onChange={(skylightsCount) => onChange({ skylightsCount })}
+                />
+              </div>
+            )}
+
             {data.flyScreens && (
-              <p
-                className="mt-3 text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
-                data-testid="flyscreens-notice"
-              >
-                <strong>Fliegengitter:</strong> Pauschale gilt für ausbaubare / innen zugängliche
-                Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
-              </p>
+              <div className="mt-4 ml-1 space-y-2">
+                <Stepper
+                  label="Anzahl Fliegengitter"
+                  hint={formatFlyScreensHint()}
+                  value={data.flyScreensCount || 1}
+                  min={1}
+                  max={40}
+                  step={1}
+                  unit="Stück"
+                  onChange={(flyScreensCount) => onChange({ flyScreensCount })}
+                />
+                <p
+                  className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                  data-testid="flyscreens-notice"
+                >
+                  <strong>Fliegengitter:</strong> Preis gilt für ausbaubare / innen zugängliche
+                  Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
+                </p>
+              </div>
             )}
 
             {data.canopy && (

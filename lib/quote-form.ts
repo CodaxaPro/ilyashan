@@ -52,11 +52,15 @@ export interface QuoteFormData {
   muntinWindows: boolean;
   oldBuildingWindows: boolean;
   skylights: boolean;
+  /** Anzahl Dachfenster / Oberlichter – aktiv wenn skylights=true */
+  skylightsCount: number;
   shutters: boolean;
   blinds: boolean;
   canopy: boolean;
   canopySqm: number;
   flyScreens: boolean;
+  /** Anzahl Fliegengitter – aktiv wenn flyScreens=true */
+  flyScreensCount: number;
   additionalInfo: string;
   scheduleOption: ScheduleOption | "";
   preferredDates: string[];
@@ -101,11 +105,13 @@ export const initialQuoteFormData: QuoteFormData = {
   muntinWindows: false,
   oldBuildingWindows: false,
   skylights: false,
+  skylightsCount: 0,
   shutters: false,
   blinds: false,
   canopy: false,
   canopySqm: 0,
   flyScreens: false,
+  flyScreensCount: 0,
   additionalInfo: "",
   scheduleOption: "",
   preferredDates: [],
@@ -236,11 +242,11 @@ export const extraPriceHints: Record<string, string> = {
   windowSills: "+1,50 €/Flügel",
   muntinWindows: "+4,50 €/Flügel",
   oldBuildingWindows: "+4,00 €/Flügel",
-  skylights: "+18,00 € pauschal",
+  skylights: "+18,00 €/Stück",
   shutters: "+6,00 €/Flügel · ausschließlich Innenreinigung (außen nicht erreichbar)",
   blinds: "+6,00 €/Flügel · innenliegende Jalousien",
   canopy: "ab 39 € / 8,00 €/m² · nur Glas",
-  flyScreens: "+12,00 € pauschal · ausgebaut / innen zugänglich",
+  flyScreens: "+12,00 €/Stück · ausgebaut / innen zugänglich",
   narrowStairs: "+15,00 € pauschal",
 };
 

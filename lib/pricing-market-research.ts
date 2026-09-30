@@ -485,11 +485,11 @@ export const EXTRAS_RESEARCH = {
   windowSills: { perFluegel: 1.5, sourceCount: 20 },
   muntinWindows: { perFluegel: 4.5, sourceCount: 22 },
   oldBuildingWindows: { perFluegel: 4.0, sourceCount: 20 },
-  skylights: { perUnit: 18.0, sourceCount: 24 },
+  skylights: { perUnit: 18.0, unit: "Stück", sourceCount: 24 },
   shutters: { perFluegel: 6.0, sourceCount: 20 },
   blinds: { perFluegel: 6.0, sourceCount: 21 },
   canopy: { perUnit: 39.0, unit: "m²-basiert empfohlen", marketPerSqm: 8.0, sourceCount: 20 },
-  flyScreens: { perUnit: 12.0, unit: "pauschal", sourceCount: 20 },
+  flyScreens: { perUnit: 12.0, unit: "Stück", sourceCount: 20 },
 } as const;
 
 export const ROOM_HEIGHT_RESEARCH = {

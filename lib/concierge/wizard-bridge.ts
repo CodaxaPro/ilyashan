@@ -68,14 +68,22 @@ export function conciergeQuoteToWizardPrefill(session: ConciergeSession): Partia
   if (q.windowSills) prefill.windowSills = true;
   if (q.muntinWindows) prefill.muntinWindows = true;
   if (q.oldBuildingWindows) prefill.oldBuildingWindows = true;
-  if (q.skylights) prefill.skylights = true;
+  if (q.skylights) {
+    prefill.skylights = true;
+    prefill.skylightsCount =
+      q.skylightsCount && q.skylightsCount > 0 ? q.skylightsCount : 1;
+  }
   if (q.shutters) prefill.shutters = true;
   if (q.blinds) prefill.blinds = true;
   if (q.canopy) {
     prefill.canopy = true;
     if (q.canopySqm) prefill.canopySqm = q.canopySqm;
   }
-  if (q.flyScreens) prefill.flyScreens = true;
+  if (q.flyScreens) {
+    prefill.flyScreens = true;
+    prefill.flyScreensCount =
+      q.flyScreensCount && q.flyScreensCount > 0 ? q.flyScreensCount : 1;
+  }
   if (q.additionalInfo) prefill.additionalInfo = q.additionalInfo;
 
   return prefill;
