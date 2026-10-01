@@ -12,7 +12,7 @@ export function GoogleAdsTag() {
 
   return (
     <>
-      <Script id="google-consent-default" strategy="beforeInteractive">
+      <Script id="google-consent-default" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
@@ -29,9 +29,9 @@ export function GoogleAdsTag() {
       <Script
         async
         src={`https://www.googletagmanager.com/gtag/js?id=${tagId}`}
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
       />
-      <Script id="google-ads-gtag" strategy="beforeInteractive">
+      <Script id="google-ads-gtag" strategy="afterInteractive">
         {`
           gtag('js', new Date());
           gtag('config', '${tagId}', {

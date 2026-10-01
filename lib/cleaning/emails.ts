@@ -9,6 +9,7 @@ import {
 import { formatEuroFromCents } from "@/lib/cleaning/money";
 import type { CleaningQuoteSnapshot } from "@/lib/cleaning/snapshot";
 import type { LeadAppointment, LeadEmailAction } from "@/lib/leads-store";
+import { formatGermanDate } from "@/lib/quote-form";
 import {
   buildArrivalHtmlDe,
   buildArrivalLinesDe,
@@ -41,7 +42,7 @@ export function buildCleaningAdminEmail(snap: CleaningQuoteSnapshot) {
     preheader: subject,
     title: "Neue Büroreinigungs-Anfrage",
     subtitle: `${snap.quoteReference} · ${escapeHtml(snap.contact.company)}`,
-    bodyHtml: `
+    body: `
       ${buildInfoBox(`<strong>Büroreinigung</strong> · ${escapeHtml(snap.quoteReference)}`)}
       ${buildDataTable(rows)}
       ${
@@ -70,7 +71,7 @@ export function buildCleaningCustomerEmail(
     preheader: subject,
     title: "Vielen Dank für Ihre Anfrage",
     subtitle: snap.quoteReference,
-    bodyHtml: `
+    body: `
       <p style="font-size:15px;line-height:1.6;color:#334155;">
         Guten Tag ${escapeHtml(snap.contact.contactPerson)},<br/><br/>
         wir haben Ihre Angaben zur Büroreinigung erhalten
@@ -125,8 +126,7 @@ export function buildCleaningLeadStatusEmail(
   const name = snap.contact.contactPerson;
   const anfrageNr = snap.quoteReference;
   const hours = options.estimatedHours ?? snap.customer.estimatedOnsiteHours ?? 3;
-  const plan = resolveAppointmentTimePlan(options.appointment, Math.round(hours * 4)); // windowCount-like scale unused for buero labels if appointment has times
-  // Prefer explicit appointment times; fallback duration from snap
+  const plan = resolveAppointmentTimePlan(options.appointment, Math.round(hours * 4));
   const planForMail =
     options.appointment?.plannedStartTime || options.appointment?.preferredStartTime
       ? plan
@@ -137,15 +137,16 @@ export function buildCleaningLeadStatusEmail(
 
   if (action === "propose") {
     const date = options.proposedDate ?? "";
-    const subject = `Terminvorschlag ${date} – ${anfrageNr}`;
+    const dateLabel = date ? formatGermanDate(date) : "";
+    const subject = `Terminvorschlag ${dateLabel} – ${anfrageNr}`;
     const html = buildEmailLayout({
       preheader: subject,
       title: "Terminvorschlag Büroreinigung",
       subtitle: anfrageNr,
-      bodyHtml: `
+      body: `
         <p>Guten Tag ${escapeHtml(name)},</p>
         <p>wir schlagen folgenden Termin für Ihre Büroreinigung vor:</p>
-        ${buildInfoBox(`<strong>${escapeHtml(date)}</strong><br/>${formatSchedulePreviewDe(planForMail)}`)}
+        ${buildInfoBox(`<strong>${escapeHtml(formatSchedulePreviewDe(date, planForMail))}</strong>`)}
         ${options.terminUrl ? buildButton(options.terminUrl, "Termin online verwalten", "#0369a1") : ""}
         ${options.note ? `<p>${escapeHtml(options.note)}</p>` : ""}
       `,
@@ -153,7 +154,7 @@ export function buildCleaningLeadStatusEmail(
     return {
       subject,
       html,
-      text: [`Terminvorschlag ${date}`, festpreisText(options.festpreis)].filter(Boolean).join("\n"),
+      text: [`Terminvorschlag ${dateLabel}`, festpreisText(options.festpreis)].filter(Boolean).join("\n"),
     };
   }
 
@@ -165,7 +166,7 @@ export function buildCleaningLeadStatusEmail(
         preheader: subject,
         title: "Rückmeldung zu Ihrer Anfrage",
         subtitle: anfrageNr,
-        bodyHtml: `<p>Guten Tag ${escapeHtml(name)},</p><p>leider können wir Ihre Büroreinigungs-Anfrage derzeit nicht annehmen.</p>${options.note ? `<p>${escapeHtml(options.note)}</p>` : ""}`,
+        body: `<p>Guten Tag ${escapeHtml(name)},</p><p>leider können wir Ihre Büroreinigungs-Anfrage derzeit nicht annehmen.</p>${options.note ? `<p>${escapeHtml(options.note)}</p>` : ""}`,
       }),
       text: subject,
     };
@@ -173,44 +174,48 @@ export function buildCleaningLeadStatusEmail(
 
   if (action === "update") {
     const date = options.confirmedDate ?? "";
-    const subject = `Terminänderung ${date} – ${anfrageNr}`;
+    const dateLabel = date ? formatGermanDate(date) : "";
+    const previousLabel = options.previousConfirmedDate
+      ? formatGermanDate(options.previousConfirmedDate)
+      : "";
+    const subject = `Terminänderung ${dateLabel} – ${anfrageNr}`;
     return {
       subject,
       html: buildEmailLayout({
         preheader: subject,
         title: "Terminänderung Büroreinigung",
         subtitle: anfrageNr,
-        bodyHtml: `
+        body: `
           <p>Guten Tag ${escapeHtml(name)},</p>
-          <p>Ihr Termin wurde aktualisiert${options.previousConfirmedDate ? ` (vorher ${escapeHtml(options.previousConfirmedDate)})` : ""}:</p>
-          ${buildInfoBox(`<strong>${escapeHtml(date)}</strong><br/>${buildArrivalHtmlDe(planForMail)}`)}
+          <p>Ihr Termin wurde aktualisiert${previousLabel ? ` (vorher ${escapeHtml(previousLabel)})` : ""}:</p>
+          ${buildInfoBox(buildArrivalHtmlDe(dateLabel, planForMail))}
           ${festpreisBox(options.festpreis)}
         `,
       }),
-      text: [subject, ...buildArrivalLinesDe(planForMail), festpreisText(options.festpreis)]
+      text: [subject, ...buildArrivalLinesDe(dateLabel, planForMail), festpreisText(options.festpreis)]
         .filter(Boolean)
         .join("\n"),
     };
   }
 
-  // confirm
   const date = options.confirmedDate ?? "";
-  const subject = `Terminbestätigung ${date} – ${anfrageNr}`;
+  const dateLabel = date ? formatGermanDate(date) : "";
+  const subject = `Terminbestätigung ${dateLabel} – ${anfrageNr}`;
   return {
     subject,
     html: buildEmailLayout({
       preheader: subject,
       title: "Terminbestätigung Büroreinigung",
       subtitle: anfrageNr,
-      bodyHtml: `
+      body: `
         <p>Guten Tag ${escapeHtml(name)},</p>
         <p>hiermit bestätigen wir Ihren Termin zur Büroreinigung:</p>
-        ${buildInfoBox(`<strong>${escapeHtml(date)}</strong><br/>${buildArrivalHtmlDe(planForMail)}`)}
+        ${buildInfoBox(buildArrivalHtmlDe(dateLabel, planForMail))}
         ${festpreisBox(options.festpreis)}
         ${options.note ? `<p>${escapeHtml(options.note)}</p>` : ""}
       `,
     }),
-    text: [subject, ...buildArrivalLinesDe(planForMail), festpreisText(options.festpreis)]
+    text: [subject, ...buildArrivalLinesDe(dateLabel, planForMail), festpreisText(options.festpreis)]
       .filter(Boolean)
       .join("\n"),
   };
@@ -224,17 +229,19 @@ export function buildCleaningReminderEmail(
 ) {
   const hours = snap.customer.estimatedOnsiteHours ?? 3;
   const plan = resolveAppointmentTimePlan(appointment, Math.round(hours * 4));
-  const subject = `Erinnerung: Termin morgen ${confirmedDate} – ${snap.quoteReference}`;
+  const dateLabel = formatGermanDate(confirmedDate);
+  const planForMail = { ...plan, estimatedDurationHours: hours };
+  const subject = `Erinnerung: Termin morgen ${dateLabel} – ${snap.quoteReference}`;
   return {
     subject,
     html: buildEmailLayout({
       preheader: subject,
       title: "Terminerinnerung Büroreinigung",
       subtitle: snap.quoteReference,
-      bodyHtml: `
+      body: `
         <p>Guten Tag ${escapeHtml(snap.contact.contactPerson)},</p>
         <p>zur Erinnerung: morgen findet Ihre Büroreinigung statt.</p>
-        ${buildInfoBox(`<strong>${escapeHtml(confirmedDate)}</strong><br/>${buildArrivalHtmlDe({ ...plan, estimatedDurationHours: hours })}`)}
+        ${buildInfoBox(buildArrivalHtmlDe(dateLabel, planForMail))}
         ${festpreisBox(festpreis)}
       `,
     }),

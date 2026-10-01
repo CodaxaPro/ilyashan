@@ -155,7 +155,7 @@ export function AdminCleaningPage() {
       onRefresh={() => void load()}
       onLogout={logout}
     >
-      {error ? <AdminAlert tone="error">{error}</AdminAlert> : null}
+      {error ? <AdminAlert variant="error">{error}</AdminAlert> : null}
 
       <div className="flex flex-wrap gap-2 mb-6">
         {SECTIONS.map((s) => (
@@ -199,7 +199,8 @@ export function AdminCleaningPage() {
                   hint={`${overview.manualReviewCount} / ${overview.quoteCount}`}
                 />
               </div>
-              <AdminPanel title="Aktif config">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Aktif config</h2>
                 <p className="text-sm text-foreground/80">
                   Version: <strong>{overview.configVersionId}</strong>
                 </p>
@@ -217,7 +218,8 @@ export function AdminCleaningPage() {
           ) : null}
 
           {section === "tasks" ? (
-            <AdminPanel title="Task Rates">
+            <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Task Rates</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm" data-testid="admin-cleaning-tasks">
                   <thead>
@@ -255,7 +257,8 @@ export function AdminCleaningPage() {
 
           {section === "labor" && config ? (
             <div className="grid lg:grid-cols-2 gap-4">
-              <AdminPanel title="Labor cost">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Labor cost</h2>
                 <ul className="text-sm space-y-2 text-foreground/85">
                   <li>LG1 gross: {String(config.lg1GrossHourlyEuros)} €/h</li>
                   <li>Productive hour cost (seed): {overview?.productiveLaborCostPerHourEuros} €/h</li>
@@ -265,7 +268,8 @@ export function AdminCleaningPage() {
                   Seed değerler CALIBRATION_REQUIRED. Payroll modeli kaydedilmeden production claim yok.
                 </p>
               </AdminPanel>
-              <AdminPanel title="Margin">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Margin</h2>
                 <ul className="text-sm space-y-2 text-foreground/85">
                   <li>Target: {overview?.targetMarginPercent}%</li>
                   <li>Minimum: {overview?.minimumMarginPercent}%</li>
@@ -277,13 +281,15 @@ export function AdminCleaningPage() {
 
           {section === "pricing" && config ? (
             <div className="grid lg:grid-cols-2 gap-4">
-              <AdminPanel title="Minimums">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Minimums</h2>
                 <ul className="text-sm space-y-2">
                   <li>Min. billable hours: {String(config.minimumBillablePersonHours)}</li>
                   <li>Min. job net: {overview?.minimumJobNetEuros} €</li>
                 </ul>
               </AdminPanel>
-              <AdminPanel title="Tax / Team / Rounding">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Tax / Team / Rounding</h2>
                 <ul className="text-sm space-y-2">
                   <li>VAT: {overview?.vatPercent}%</li>
                   <li>Rounding: {String(config.rounding)}</li>
@@ -296,7 +302,8 @@ export function AdminCleaningPage() {
 
           {section === "quotes" ? (
             <div className="grid lg:grid-cols-[1fr_1.1fr] gap-4">
-              <AdminPanel title="Teklif listesi">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Teklif listesi</h2>
                 {quotes.length === 0 ? (
                   <p className="text-sm text-muted">Henüz Büro teklifi yok.</p>
                 ) : (
@@ -322,7 +329,8 @@ export function AdminCleaningPage() {
                 )}
               </AdminPanel>
 
-              <AdminPanel title="İç kalkülasyon">
+              <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">İç kalkülasyon</h2>
                 {!detail ? (
                   <p className="text-sm text-muted">Soldan bir teklif seçin.</p>
                 ) : (
@@ -399,7 +407,8 @@ export function AdminCleaningPage() {
           ) : null}
 
           {section === "zeitstudien" ? (
-            <AdminPanel title="Zeitstudien">
+            <AdminPanel className="p-4 space-y-3">
+                <h2 className="text-base font-bold text-foreground">Zeitstudien</h2>
               <p className="text-sm text-foreground/80 leading-relaxed">
                 Gerçek işlerden gözlemlenen production rate’ler burada toplanacak. Mevcut seed
                 rate’ler otomatik üzerine yazılmaz; admin onayından sonra yeni version oluşur.

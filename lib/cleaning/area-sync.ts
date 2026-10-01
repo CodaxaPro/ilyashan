@@ -1,5 +1,5 @@
 import type { FloorAreas, SubAreas } from "./types";
-import { emptyFloors, emptySubAreas, sumFloors, sumSubAreas } from "./types";
+import { emptySubAreas, sumFloors, sumSubAreas } from "./types";
 
 const SUB_KEYS: (keyof SubAreas)[] = [
   "office",

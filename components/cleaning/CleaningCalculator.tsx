@@ -12,7 +12,6 @@ import { CheckboxRow, NumberField, SegmentedField } from "./CleaningFields";
 import { CleaningSummaryContent } from "./CleaningSummaryContent";
 import {
   useCleaningCalculator,
-  type CalculatorStep,
   type CleaningCalculatorState,
 } from "./useCleaningCalculator";
 

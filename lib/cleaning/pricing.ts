@@ -79,7 +79,7 @@ export function calculatePrice(
     roundedNetCents > 0 ? 1 - totalCostCents / roundedNetCents : 0;
   const belowMinimumMargin = realizedMargin + 1e-9 < config.minimumGrossMargin;
 
-  let quoteStatus: QuoteStatus =
+  const quoteStatus: QuoteStatus =
     options?.overrideStatus ??
     (options?.forceManualReview || belowMinimumMargin
       ? "MANUAL_REVIEW_REQUIRED"
