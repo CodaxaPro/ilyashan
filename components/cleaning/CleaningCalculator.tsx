@@ -7,6 +7,10 @@ import type {
   CleaningFrequency,
   UsageIntensity,
 } from "@/lib/cleaning";
+import {
+  preventChoiceButtonScroll,
+  scrollToQuoteWizardTop,
+} from "@/components/quote/quote-wizard-scroll";
 import { CleaningAccordionSection } from "./CleaningAccordionSection";
 import { CheckboxRow, NumberField, SegmentedField } from "./CleaningFields";
 import { CleaningSummaryContent } from "./CleaningSummaryContent";
@@ -225,27 +229,42 @@ function MobileSheet({ state }: { state: CleaningCalculatorState }) {
 export function CleaningCalculator() {
   const state = useCleaningCalculator();
   const { locale, changeLocale, openStep, setOpenStep, input, patch } = state;
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
+
+  // Tall accordion → short success: without re-anchor, desktop scroll stays in the footer.
+  // Skip first paint so landing on the page does not steal the hero viewport.
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    scrollToQuoteWizardTop(anchorRef.current);
+  }, [openStep]);
 
   const toggle = (step: 1 | 2 | 3 | 4 | 5 | 6 | 7) => {
     setOpenStep((current) => (current === step ? null : step));
   };
 
-  if (openStep === "success") {
-    return (
-      <div className="text-center py-10" data-testid="cleaning-success">
-        <h2 className="text-2xl font-bold text-foreground mb-2">{t(locale, "successTitle")}</h2>
-        <p className="text-foreground/80 mb-4">{t(locale, "successBody")}</p>
-        {state.anfrageNr ? (
-          <p className="text-primary font-bold">
-            {t(locale, "anfrageNr")}: {state.anfrageNr}
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
   return (
-    <div data-testid="cleaning-calculator">
+    <div
+      ref={anchorRef}
+      id="cleaning-calculator"
+      className="scroll-mt-24"
+      data-testid="cleaning-calculator"
+    >
+      {openStep === "success" ? (
+        <div className="text-center py-10" data-testid="cleaning-success">
+          <h2 className="text-2xl font-bold text-foreground mb-2">{t(locale, "successTitle")}</h2>
+          <p className="text-foreground/80 mb-4">{t(locale, "successBody")}</p>
+          {state.anfrageNr ? (
+            <p className="text-primary font-bold">
+              {t(locale, "anfrageNr")}: {state.anfrageNr}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <>
       <div className="flex justify-end mb-4">
         <div
           className="inline-flex rounded-xl border border-border overflow-hidden"
@@ -257,6 +276,7 @@ export function CleaningCalculator() {
             <button
               key={code}
               type="button"
+              onMouseDown={preventChoiceButtonScroll}
               onClick={() => changeLocale(code)}
               className={`min-h-11 min-w-12 px-3 text-sm font-semibold ${
                 locale === code ? "bg-primary text-white" : "bg-white text-foreground/70"
@@ -681,6 +701,8 @@ export function CleaningCalculator() {
       </div>
 
       <MobileSheet state={state} />
+        </>
+      )}
     </div>
   );
 }

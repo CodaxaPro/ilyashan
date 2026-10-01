@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 interface AccordionSectionProps {
   step: number;
@@ -33,6 +34,7 @@ export function CleaningAccordionSection({
           aria-expanded={open}
           aria-controls={panelId}
           onClick={onToggle}
+          onMouseDown={preventChoiceButtonScroll}
           className="w-full flex items-start gap-3 px-4 sm:px-5 py-4 text-left min-h-14 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
           data-testid={`cleaning-accordion-${step}`}
         >

@@ -1,5 +1,7 @@
 "use client";
 
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+
 interface NumberFieldProps {
   label: string;
   value: number;
@@ -30,6 +32,7 @@ export function NumberField({
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onMouseDown={preventChoiceButtonScroll}
           onClick={dec}
           className="h-11 w-11 shrink-0 rounded-xl border border-border bg-white text-lg font-semibold text-foreground hover:bg-muted touch-manipulation"
           aria-label="-"
@@ -53,6 +56,7 @@ export function NumberField({
         />
         <button
           type="button"
+          onMouseDown={preventChoiceButtonScroll}
           onClick={inc}
           className="h-11 w-11 shrink-0 rounded-xl border border-border bg-white text-lg font-semibold text-foreground hover:bg-muted touch-manipulation"
           aria-label="+"
@@ -92,6 +96,7 @@ export function SegmentedField<T extends string>({
             <button
               key={opt.value}
               type="button"
+              onMouseDown={preventChoiceButtonScroll}
               onClick={() => onChange(opt.value)}
               className={`min-h-11 px-3 py-2 rounded-xl text-sm font-medium border touch-manipulation transition-colors ${
                 active

@@ -24,6 +24,7 @@ const TOTAL_STEPS = 5;
 
 export function QuoteWizard() {
   const wizardAnchorRef = useRef<HTMLDivElement>(null);
+  const didMountRef = useRef(false);
   const [step, setStep] = useState(1);
   const [data, setData] = useState<QuoteFormData>(initialQuoteFormData);
   const [prefillBanner, setPrefillBanner] = useState(false);
@@ -37,8 +38,12 @@ export function QuoteWizard() {
   }, []);
 
   useEffect(() => {
-    scrollToQuoteWizardTop(wizardAnchorRef.current);
     trackAnalytics("wizard_step", { payload: { step } });
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    scrollToQuoteWizardTop(wizardAnchorRef.current);
   }, [step]);
 
   function updateData(updates: Partial<QuoteFormData>) {
