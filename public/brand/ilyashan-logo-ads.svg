@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Ilyashan">
+  <title>Ilyashan</title>
+  <!-- Google Ads business logo: square, high contrast, readable at ~40px -->
+  <rect width="1200" height="1200" fill="#ffffff"/>
+  <!-- Brand tile (matches site header mark) -->
+  <rect x="140" y="140" width="920" height="920" rx="180" ry="180" fill="#0369a1"/>
+  <!-- Soft inner depth -->
+  <rect x="200" y="200" width="800" height="800" rx="140" ry="140" fill="#0284c7" opacity="0.22"/>
+  <!-- Window / glass mark reading as "I" -->
+  <g transform="translate(600 560)">
+    <!-- Outer window frame -->
+    <rect x="-150" y="-220" width="300" height="440" rx="36" ry="36" fill="#ffffff"/>
+    <!-- Glass pane -->
+    <rect x="-108" y="-178" width="216" height="356" rx="18" ry="18" fill="#e0f2fe"/>
+    <!-- Cross bars (window) -->
+    <rect x="-18" y="-178" width="36" height="356" fill="#ffffff"/>
+    <rect x="-108" y="-18" width="216" height="36" fill="#ffffff"/>
+    <!-- Streifenfrei gleam -->
+    <path d="M-72 -140 L-28 -140 L72 40 L28 40 Z" fill="#ffffff" opacity="0.72"/>
+    <path d="M-48 -140 L-20 -140 L48 20 L20 20 Z" fill="#ffffff" opacity="0.35"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="600" y="1020" text-anchor="middle" font-family="Avenir Next, Helvetica Neue, Arial, sans-serif" font-size="72" font-weight="700" letter-spacing="10" fill="#ffffff">ILYASHAN</text>
+</svg>

@@ -7,15 +7,17 @@ Hesap: `626-050-2839`
 
 **Ads paneli (doğrudan):** [Dönüşümler](https://ads.google.com/aw/conversions)
 
-### Canlı etiketler (2026-07-24)
+### Canlı etiketler (2026-08-05)
 
 | Aksiyon | send_to | Not |
 |---------|---------|-----|
-| `request_quote` (birincil, Event) | `AW-18191480247/5p7uCKbC2tUcELfrr-JD` | Ads’te adı `request_quote (1)` — `.env.local` + `lib/config.ts` yazılı |
-| `whatsapp_click` | henüz yok | Site event yolluyor; Ads aksiyonu eklenecek |
-| `phone_click` | henüz yok | Site event yolluyor; Ads aksiyonu eklenecek |
+| `request_quote` (birincil, Event) | `AW-18191480247/5p7uCKbC2tUcELfrr-JD` | Ads’te adı `request_quote (1)` — birincil |
+| `whatsapp_click` | event adı ile (send_to opsiyonel) | Site `gtag('event','whatsapp_click')` yolluyor. Ads’te Event aksiyonu oluştur; **ikincil**. Eski Kişi send_to kaldırıldı. |
+| `phone_click` | şimdilik yok | Bilinçli ertelendi |
 
-Eski `request_quote` (WEBPAGE_CODELESS / “Müdahale…”) → yok say / birincil yapma; yeni Event kullan.
+Eski `request_quote` (WEBPAGE_CODELESS, id `7679301761`) → **duraklat**. Birincil yalnız Event `request_quote (1)`.
+
+**API engeli:** `.env.local` içinde `GOOGLE_ADS_DEVELOPER_TOKEN` + `GOOGLE_ADS_REFRESH_TOKEN` boş → conversion create/pause API ile yapılamıyor. Script hazır: `scripts/google-ads/setup_measurement_whatsapp.py`.
 
 ---
 

@@ -66,7 +66,16 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
 
 async function sendLeadEmail(
   action: LeadEmailAction,
-  lead: Pick<StoredLead, "email" | "anfrageNr" | "id" | "quote" | "priceSnapshot">,
+  lead: Pick<
+    StoredLead,
+    | "email"
+    | "anfrageNr"
+    | "id"
+    | "quote"
+    | "priceSnapshot"
+    | "serviceLine"
+    | "cleaningSnapshot"
+  >,
   options: {
     confirmedDate?: string;
     previousConfirmedDate?: string;
@@ -78,10 +87,6 @@ async function sendLeadEmail(
     festpreis?: number;
   }
 ) {
-  const quote = mergeQuote(lead.quote);
-  if (!quote) {
-    return { emailSent: false, emailError: "Vollständige Anfragedaten fehlen." };
-  }
   if (!lead.email?.trim()) {
     return { emailSent: false, emailError: "Müşteri e-postası yok." };
   }
@@ -89,9 +94,39 @@ async function sendLeadEmail(
     return { emailSent: false, emailError: "E-Mail-Versand nicht konfiguriert." };
   }
 
+  const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+
+  if (lead.serviceLine === "buero" || lead.cleaningSnapshot) {
+    const snap = lead.cleaningSnapshot;
+    if (!snap) {
+      return { emailSent: false, emailError: "Vollständige Anfragedaten fehlen." };
+    }
+    const { buildCleaningLeadStatusEmail } = await import("@/lib/cleaning/emails");
+    const { resolveLeadEstimatedHours } = await import("@/lib/lead-product");
+    const customerEmail = buildCleaningLeadStatusEmail(action, snap, {
+      ...options,
+      estimatedHours: resolveLeadEstimatedHours(lead as StoredLead),
+    });
+    const { error } = await resend.emails.send({
+      from: fromEmail,
+      to: [lead.email.trim()],
+      subject: customerEmail.subject,
+      text: customerEmail.text,
+      html: customerEmail.html,
+    });
+    if (error) {
+      return { emailSent: false, emailError: error.message ?? "E-Mail konnte nicht gesendet werden." };
+    }
+    return { emailSent: true, emailError: null };
+  }
+
+  const quote = mergeQuote(lead.quote);
+  if (!quote) {
+    return { emailSent: false, emailError: "Vollständige Anfragedaten fehlen." };
+  }
+
   const ctx = await resolveServerQuotePricing(lead);
   const customerEmail = buildLeadStatusEmail(action, quote, lead.anfrageNr ?? lead.id, options, ctx);
-  const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
 
   const { error } = await resend.emails.send({
     from: fromEmail,

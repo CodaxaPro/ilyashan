@@ -51,6 +51,8 @@ const urls = [
   ...GUIDE_SLUGS.map((s) => `${BASE}/ratgeber/${s}`),
   ...INTENT_TYPES.flatMap((t) => LOCATION_SLUGS.map((c) => `${BASE}/${t}-${c}`)),
   `${BASE}/angebot`,
+  `${BASE}/bueroreinigung`,
+  `${BASE}/bueroreinigung/angebot`,
   `${BASE}/impressum`,
   `${BASE}/datenschutz`,
 ];

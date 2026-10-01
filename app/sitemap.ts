@@ -60,6 +60,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...guidePages,
     ...intentPages,
     { url: `${baseUrl}/angebot`, lastModified, changeFrequency: "monthly", priority: 0.9 },
+    { url: `${baseUrl}/bueroreinigung`, lastModified, changeFrequency: "weekly", priority: 0.88 },
+    {
+      url: `${baseUrl}/bueroreinigung/angebot`,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     { url: `${baseUrl}/impressum`, lastModified, changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/datenschutz`, lastModified, changeFrequency: "yearly", priority: 0.3 },
   ];

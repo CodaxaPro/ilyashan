@@ -9,13 +9,16 @@ import {
 } from "@/lib/scheduling/slot-engine";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { normalizeTimeInput } from "@/lib/scheduling/appointment-times";
-import { isCustomerArrivalTimeAllowed, deriveTimeSlotFromStartTime } from "@/lib/scheduling/customer-arrival-options";
-import { estimateJobHours } from "@/lib/scheduling/job-duration";
+import {
+  isCustomerArrivalTimeAllowed,
+  deriveTimeSlotFromStartTime,
+} from "@/lib/scheduling/customer-arrival-options";
 import {
   dateMatchesPreferredWeekday,
   isWartungQuote,
   wartungWeekdayErrorDe,
 } from "@/lib/termin-wartung";
+import { isBueroLead, resolveLeadEstimatedHours } from "@/lib/lead-product";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -51,7 +54,7 @@ function deriveMismatch(timeSlot: BookableTimeSlot, startTime: string): boolean 
 /** Sets planned arrival + duration when the customer chose a specific time (not Flexibel). */
 function applyPlannedScheduleOnBooking(
   appointment: LeadAppointment,
-  windowCount: number
+  durationHours: number
 ): LeadAppointment {
   const plannedStartTime =
     normalizeTimeInput(appointment.plannedStartTime) ??
@@ -61,8 +64,7 @@ function applyPlannedScheduleOnBooking(
   return {
     ...appointment,
     plannedStartTime,
-    estimatedDurationHours:
-      appointment.estimatedDurationHours ?? estimateJobHours(windowCount),
+    estimatedDurationHours: appointment.estimatedDurationHours ?? durationHours,
   };
 }
 
@@ -80,11 +82,16 @@ export function applyCustomerBooking(
     return { ok: false, error: "Für diese Anfrage ist keine Terminbuchung mehr möglich." };
   }
 
+  const buero = isBueroLead(lead);
   const quote = mergeQuote(lead.quote);
-  if (!quote) return { ok: false, error: "Anfragedaten unvollständig." };
+  if (!buero && !quote) return { ok: false, error: "Anfragedaten unvollständig." };
+  if (buero && !lead.cleaningSnapshot?.input?.totalAreaM2) {
+    return { ok: false, error: "Anfragedaten unvollständig." };
+  }
 
   const occupancy = buildOccupancyFromLeads(allLeads);
   const previous = lead.appointment ?? {};
+  const durationHours = resolveLeadEstimatedHours(lead);
 
   if (input.action === "confirm_proposed") {
     const proposed = previous.proposedDate;
@@ -92,13 +99,17 @@ export function applyCustomerBooking(
       return { ok: false, error: "Es liegt kein Terminvorschlag vor." };
     }
     if (
+      !buero &&
+      quote &&
       isWartungQuote(quote) &&
       quote.wartungPreferredWeekday &&
       !dateMatchesPreferredWeekday(proposed, quote.wartungPreferredWeekday)
     ) {
       return { ok: false, error: wartungWeekdayErrorDe(quote.wartungPreferredWeekday) };
     }
-    const timeSlot = (previous.timeSlot as BookableTimeSlot | undefined) ?? resolveLeadTimeSlot(lead, quote);
+    const timeSlot =
+      (previous.timeSlot as BookableTimeSlot | undefined) ??
+      (quote ? resolveLeadTimeSlot(lead, quote) : "flexibel");
     const check = isSlotAvailable(staffConfig, occupancy, proposed, timeSlot, {
       excludeLeadId: lead.id,
       staffId: previous.staffId,
@@ -109,7 +120,9 @@ export function applyCustomerBooking(
 
     const staffId =
       previous.staffId ??
-      (staffConfig.autoAssign ? pickStaffForSlot(staffConfig, occupancy, proposed, timeSlot) : null) ??
+      (staffConfig.autoAssign
+        ? pickStaffForSlot(staffConfig, occupancy, proposed, timeSlot)
+        : null) ??
       undefined;
 
     const appointment = applyPlannedScheduleOnBooking(
@@ -122,7 +135,7 @@ export function applyCustomerBooking(
         staffId,
         proposedDate: undefined,
       },
-      quote.windowCount
+      durationHours
     );
 
     return {
@@ -137,16 +150,22 @@ export function applyCustomerBooking(
       return { ok: false, error: "Bitte wählen Sie ein gültiges Datum." };
     }
     if (
+      !buero &&
+      quote &&
       isWartungQuote(quote) &&
       quote.wartungPreferredWeekday &&
       !dateMatchesPreferredWeekday(input.date, quote.wartungPreferredWeekday)
     ) {
       return { ok: false, error: wartungWeekdayErrorDe(quote.wartungPreferredWeekday) };
     }
-    const timeSlot = input.timeSlot ?? resolveLeadTimeSlot(lead, quote);
+    const timeSlot =
+      input.timeSlot ?? (quote ? resolveLeadTimeSlot(lead, quote) : "flexibel");
     const preferredStartTime = normalizeTimeInput(input.preferredStartTime);
     if (preferredStartTime && !isCustomerArrivalTimeAllowed(preferredStartTime)) {
-      return { ok: false, error: "Bitte wählen Sie eine Ankunftszeit zwischen 08:00 und 17:00 Uhr." };
+      return {
+        ok: false,
+        error: "Bitte wählen Sie eine Ankunftszeit zwischen 08:00 und 17:00 Uhr.",
+      };
     }
     if (preferredStartTime && input.timeSlot && deriveMismatch(timeSlot, preferredStartTime)) {
       return { ok: false, error: "Die gewählte Uhrzeit passt nicht zum Tageszeitfenster." };
@@ -155,12 +174,16 @@ export function applyCustomerBooking(
       excludeLeadId: lead.id,
     });
     if (!check.available) {
-      return { ok: false, error: "Dieser Termin ist leider nicht mehr verfügbar. Bitte wählen Sie einen anderen." };
+      return {
+        ok: false,
+        error: "Dieser Termin ist leider nicht mehr verfügbar. Bitte wählen Sie einen anderen.",
+      };
     }
 
     const staffId =
-      (staffConfig.autoAssign ? pickStaffForSlot(staffConfig, occupancy, input.date, timeSlot) : null) ??
-      undefined;
+      (staffConfig.autoAssign
+        ? pickStaffForSlot(staffConfig, occupancy, input.date, timeSlot)
+        : null) ?? undefined;
 
     const appointment = applyPlannedScheduleOnBooking(
       {
@@ -173,7 +196,7 @@ export function applyCustomerBooking(
         staffId,
         proposedDate: undefined,
       },
-      quote.windowCount
+      durationHours
     );
 
     return {
@@ -208,7 +231,9 @@ export function validateAdminSlotAssignment(
 
   const resolvedStaff =
     staffId ??
-    (staffConfig.autoAssign ? pickStaffForSlot(staffConfig, occupancy, date, timeSlot, staffId) : undefined) ??
+    (staffConfig.autoAssign
+      ? pickStaffForSlot(staffConfig, occupancy, date, timeSlot, staffId)
+      : undefined) ??
     undefined;
 
   return { ok: true, staffId: resolvedStaff };

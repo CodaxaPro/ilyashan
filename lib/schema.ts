@@ -98,3 +98,35 @@ export function getServiceSchema() {
     },
   };
 }
+
+/** Separate from Fensterreinigung — use only on Büroreinigung pages. */
+export function getBueroServiceSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${siteConfig.url}/bueroreinigung#service`,
+    name: "Büroreinigung",
+    serviceType: "Büroreinigung",
+    description:
+      "Gewerbliche Büro- und Unterhaltsreinigung mit aufgabenbasierter Kalkulation in der Region Aachen / Baesweiler.",
+    provider: {
+      "@type": "LocalBusiness",
+      name: siteConfig.name,
+      telephone: siteConfig.contact.phone,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: siteConfig.contact.address,
+        addressLocality: siteConfig.contact.city,
+        postalCode: siteConfig.contact.postalCode,
+        addressCountry: "DE",
+      },
+    },
+    areaServed: [
+      siteConfig.contact.city,
+      siteConfig.contact.region,
+      "Aachen",
+      "Baesweiler",
+    ],
+    url: `${siteConfig.url}/bueroreinigung`,
+  };
+}

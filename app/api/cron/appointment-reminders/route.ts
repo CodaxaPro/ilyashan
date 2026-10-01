@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { buildAppointmentReminderEmail } from "@/lib/appointment-email";
+import { buildCleaningReminderEmail } from "@/lib/cleaning/emails";
 import { listLeads, updateLead } from "@/lib/leads-store";
 import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import {
@@ -8,6 +9,7 @@ import {
   findReminderCandidates,
 } from "@/lib/scheduling/appointment-reminders";
 import { berlinIsoDate, berlinTomorrowIso } from "@/lib/scheduling/berlin-date";
+import { isBueroLead } from "@/lib/lead-product";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -36,15 +38,28 @@ export async function GET(request: Request) {
 
   for (const { lead, quote, confirmedDate } of candidates) {
     try {
-      const ctx = await resolveServerQuotePricing(lead);
-      const email = buildAppointmentReminderEmail(
-        quote,
-        lead.anfrageNr ?? lead.id,
-        confirmedDate,
-        ctx,
-        lead.appointment,
-        lead.festpreis
-      );
+      let email: { subject: string; text: string; html: string };
+      if (isBueroLead(lead) && lead.cleaningSnapshot) {
+        email = buildCleaningReminderEmail(
+          lead.cleaningSnapshot,
+          confirmedDate,
+          lead.appointment,
+          lead.festpreis
+        );
+      } else if (quote) {
+        const ctx = await resolveServerQuotePricing(lead);
+        email = buildAppointmentReminderEmail(
+          quote,
+          lead.anfrageNr ?? lead.id,
+          confirmedDate,
+          ctx,
+          lead.appointment,
+          lead.festpreis
+        );
+      } else {
+        results.push({ leadId: lead.id, ok: false, error: "incomplete_quote" });
+        continue;
+      }
 
       const { error } = await resend.emails.send({
         from: fromEmail,

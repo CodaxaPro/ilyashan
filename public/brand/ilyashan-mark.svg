@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" width="1200" height="1200" role="img" aria-label="Ilyashan">
+  <title>Ilyashan</title>
+  <rect width="1200" height="1200" fill="#ffffff"/>
+  <rect x="80" y="80" width="1040" height="1040" rx="220" ry="220" fill="#0369a1"/>
+  <g transform="translate(600 600)">
+    <rect x="-190" y="-280" width="380" height="560" rx="44" ry="44" fill="#ffffff"/>
+    <rect x="-138" y="-228" width="276" height="456" rx="22" ry="22" fill="#e0f2fe"/>
+    <rect x="-24" y="-228" width="48" height="456" fill="#ffffff"/>
+    <rect x="-138" y="-24" width="276" height="48" fill="#ffffff"/>
+    <path d="M-90 -180 L-36 -180 L90 60 L36 60 Z" fill="#ffffff" opacity="0.75"/>
+    <path d="M-58 -180 L-24 -180 L62 40 L28 40 Z" fill="#ffffff" opacity="0.35"/>
+  </g>
+</svg>

@@ -1,6 +1,8 @@
 import type { ConciergeSession } from "@/lib/concierge/types";
 import type { QuoteFormData } from "@/lib/quote-form";
 import type { QuotePriceSnapshot } from "@/lib/quote-pricing-context";
+import type { CleaningQuoteSnapshot } from "@/lib/cleaning/snapshot";
+import type { LeadServiceLine } from "@/lib/lead-product";
 
 export type LeadSource = "quote" | "concierge" | "contact";
 
@@ -70,6 +72,10 @@ export interface StoredLead {
   festpreis?: number;
   /** Soft-archive timestamp — hidden from default lead list. */
   archivedAt?: string;
+  /** Product line — fenster default when absent (legacy leads). */
+  serviceLine?: LeadServiceLine;
+  /** Immutable Büroreinigung calculation snapshot */
+  cleaningSnapshot?: CleaningQuoteSnapshot;
 }
 
 const LEADS_KEY = "ilyashan:leads";

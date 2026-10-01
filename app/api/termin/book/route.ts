@@ -6,10 +6,12 @@ import { getStaffConfig } from "@/lib/staff/config";
 import { applyCustomerBooking, type BookingInput } from "@/lib/scheduling/booking";
 import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
 import { buildAppointmentConfirmationEmail } from "@/lib/appointment-email";
+import { buildCleaningLeadStatusEmail } from "@/lib/cleaning/emails";
 import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import { initialQuoteFormData } from "@/lib/quote-form";
 import { buildEmailNotificationRecord } from "@/lib/lead-workflow";
 import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
+import { isBueroLead, resolveLeadEstimatedHours } from "@/lib/lead-product";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -54,20 +56,43 @@ export async function POST(request: Request) {
   await syncLeadToCalendar(updated);
 
   let emailSent = false;
-  const quote = mergeQuote(updated.quote);
-  if (quote && updated.email?.trim() && resend && updated.appointment?.confirmedDate) {
+  if (updated.email?.trim() && resend && updated.appointment?.confirmedDate) {
     try {
-      const ctx = await resolveServerQuotePricing(updated);
-      const email = buildAppointmentConfirmationEmail(
-        quote,
-        updated.anfrageNr ?? updated.id,
-        updated.appointment.confirmedDate,
-        updated.appointment.note,
-        ctx,
-        updated.appointment,
-        updated.festpreis
-      );
-      const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+      const fromEmail =
+        process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+      let email: { subject: string; text: string; html: string };
+
+      if (isBueroLead(updated) && updated.cleaningSnapshot) {
+        email = buildCleaningLeadStatusEmail("confirm", updated.cleaningSnapshot, {
+          confirmedDate: updated.appointment.confirmedDate,
+          note: updated.appointment.note,
+          appointment: updated.appointment,
+          festpreis: updated.festpreis,
+          estimatedHours: resolveLeadEstimatedHours(updated),
+        });
+      } else {
+        const quote = mergeQuote(updated.quote);
+        if (!quote) {
+          return NextResponse.json({
+            success: true,
+            lead: updated,
+            emailSent: false,
+            confirmedDate: updated.appointment?.confirmedDate,
+            timeSlot: updated.appointment?.timeSlot,
+          });
+        }
+        const ctx = await resolveServerQuotePricing(updated);
+        email = buildAppointmentConfirmationEmail(
+          quote,
+          updated.anfrageNr ?? updated.id,
+          updated.appointment.confirmedDate,
+          updated.appointment.note,
+          ctx,
+          updated.appointment,
+          updated.festpreis
+        );
+      }
+
       const { error } = await resend.emails.send({
         from: fromEmail,
         to: [updated.email.trim()],

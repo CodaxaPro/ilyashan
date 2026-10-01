@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { GoogleAdsTag } from "@/components/GoogleAdsTag";
+import { GoogleAdsTag, updateGoogleAdsConsent } from "@/components/GoogleAdsTag";
 import {
   getCookieConsent,
   setCookieConsent,
@@ -15,12 +15,16 @@ export function CookieConsent() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setChoice(getCookieConsent());
+    const stored = getCookieConsent();
+    setChoice(stored);
     setReady(true);
+    if (stored === "accepted") updateGoogleAdsConsent(true);
+    if (stored === "rejected") updateGoogleAdsConsent(false);
 
     function onChange(event: Event) {
       const detail = (event as CustomEvent<CookieConsentChoice>).detail;
       setChoice(detail);
+      updateGoogleAdsConsent(detail === "accepted");
     }
 
     window.addEventListener("cookie-consent-change", onChange);
@@ -30,13 +34,15 @@ export function CookieConsent() {
   function decide(value: CookieConsentChoice) {
     setCookieConsent(value);
     setChoice(value);
+    updateGoogleAdsConsent(value === "accepted");
   }
 
   if (!ready) return null;
 
   return (
     <>
-      {choice === "accepted" && <GoogleAdsTag />}
+      {/* Tag always present (Consent Mode) so Ads can verify installation */}
+      <GoogleAdsTag />
 
       {choice === null && (
         <div

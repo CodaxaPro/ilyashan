@@ -1,10 +1,11 @@
 import type { LeadAppointment, StoredLead } from "@/lib/leads-store";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
 import { berlinTomorrowIso } from "@/lib/scheduling/berlin-date";
+import { isBueroLead, isCompleteQuoteLead } from "@/lib/lead-product";
 
 export interface ReminderCandidate {
   lead: StoredLead;
-  quote: QuoteFormData;
+  quote: QuoteFormData | null;
   confirmedDate: string;
 }
 
@@ -43,8 +44,7 @@ export function isReminderEligibleLead(
     return { eligible: false, reason: "already_sent" };
   }
 
-  const quote = mergeQuote(lead.quote);
-  if (!quote) {
+  if (!isCompleteQuoteLead(lead)) {
     return { eligible: false, reason: "incomplete_quote" };
   }
 
@@ -60,8 +60,9 @@ export function findReminderCandidates(
   for (const lead of leads) {
     const check = isReminderEligibleLead(lead, targetDate);
     if (!check.eligible) continue;
+    if (!lead.appointment?.confirmedDate) continue;
     const quote = mergeQuote(lead.quote);
-    if (!quote || !lead.appointment?.confirmedDate) continue;
+    if (!isBueroLead(lead) && !quote) continue;
     candidates.push({
       lead,
       quote,
@@ -79,11 +80,13 @@ function mergeQuote(raw: Partial<QuoteFormData> | undefined): QuoteFormData | nu
 
 export function buildReminderAppointmentPatch(
   appointment: LeadAppointment | undefined,
-  confirmedDate: string,
-  sentAt: string = new Date().toISOString()
+  confirmedDate: string
 ): LeadAppointment {
   return {
-    ...(appointment ?? {}),
-    reminderEmail: { sentAt, forDate: confirmedDate },
+    ...appointment,
+    reminderEmail: {
+      sentAt: new Date().toISOString(),
+      forDate: confirmedDate,
+    },
   };
 }

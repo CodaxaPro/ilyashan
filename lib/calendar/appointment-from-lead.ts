@@ -101,31 +101,52 @@ function statusForLead(lead: StoredLead, base: AppointmentStatus): AppointmentSt
   return base;
 }
 
+function isBuero(lead: StoredLead): boolean {
+  return lead.serviceLine === "buero" || Boolean(lead.cleaningSnapshot);
+}
+
 function buildTitle(lead: StoredLead, quote: QuoteFormData | null): string {
+  if (isBuero(lead)) {
+    const m2 = lead.cleaningSnapshot?.input.totalAreaM2;
+    const label = m2 ? `${m2} m² Büro` : "Büroreinigung";
+    const ort =
+      lead.cleaningSnapshot?.contact.city ||
+      lead.quote?.city ||
+      lead.quote?.postalCode ||
+      "";
+    return ort ? `${lead.name} · ${label} · ${ort}` : `${lead.name} · ${label}`;
+  }
   const fluegel = quote?.windowCount ? `${quote.windowCount} Flügel` : "Fensterreinigung";
   const ort = quote?.city || quote?.postalCode || "";
   return ort ? `${lead.name} · ${fluegel} · ${ort}` : `${lead.name} · ${fluegel}`;
 }
 
 function baseFields(lead: StoredLead, quote: QuoteFormData | null) {
+  const buero = isBuero(lead);
   return {
     leadId: lead.id,
     anfrageNr: lead.anfrageNr,
-    kind: resolveKind(quote),
-    timeSlot: resolveTimeSlot(lead, quote),
+    kind: buero ? ("single" as AppointmentKind) : resolveKind(quote),
+    timeSlot: resolveTimeSlot(lead, quote) ?? (buero ? ("flexibel" as CalendarTimeSlot) : undefined),
     staffId: lead.appointment?.staffId,
     plannedStartTime: lead.appointment?.plannedStartTime,
-    estimatedDurationHours: lead.appointment?.estimatedDurationHours,
+    estimatedDurationHours:
+      lead.appointment?.estimatedDurationHours ??
+      (buero ? lead.cleaningSnapshot?.customer.estimatedOnsiteHours : undefined),
     customerName: lead.name,
     customerEmail: lead.email,
     customerPhone: lead.phone,
-    postalCode: quote?.postalCode,
-    city: quote?.city,
+    postalCode: buero
+      ? lead.cleaningSnapshot?.contact.postalCode ?? lead.quote?.postalCode
+      : quote?.postalCode,
+    city: buero
+      ? lead.cleaningSnapshot?.contact.city ?? lead.quote?.city
+      : quote?.city,
     title: buildTitle(lead, quote),
     notes: lead.appointment?.note,
     leadStatus: lead.status,
     source: lead.source,
-    windowCount: quote?.windowCount,
+    windowCount: buero ? undefined : quote?.windowCount,
   };
 }
 
@@ -148,8 +169,10 @@ function makeDerived(
 export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppointment, "id">[] {
   if (lead.source !== "quote") return [];
 
+  const buero = isBuero(lead);
   const quote = mergeQuote(lead.quote);
-  if (!quote) return [];
+  if (!buero && !quote) return [];
+  if (buero && !lead.cleaningSnapshot?.input?.totalAreaM2) return [];
 
   if (lead.status === "abgelehnt") return [];
 
@@ -165,7 +188,7 @@ export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppoi
     items.push(makeDerived(lead, quote, "proposed", proposed, "vorgeschlagen"));
   }
 
-  if (!confirmed && quote.preferredDates?.length) {
+  if (!buero && !confirmed && quote?.preferredDates?.length) {
     quote.preferredDates.slice(0, 3).forEach((iso, index) => {
       const role = `preferred-${index}` as AppointmentRole;
       if (!items.some((item) => item.eventDate === iso && item.role === role)) {
@@ -174,7 +197,9 @@ export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppoi
     });
   }
 
-  items.push(...deriveWartungSeriesAppointments(lead, quote, confirmed));
+  if (!buero && quote) {
+    items.push(...deriveWartungSeriesAppointments(lead, quote, confirmed));
+  }
 
   return items;
 }

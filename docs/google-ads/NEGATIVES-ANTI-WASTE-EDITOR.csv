@@ -1,0 +1,1260 @@
+Campaign,Keyword,Criterion Type,Keyword match type
+IL-AAC-CORE-SEARCH,auto,Negative,Broad
+IL-AAC-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-AAC-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-AAC-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-AAC-CORE-SEARCH,pkw,Negative,Broad
+IL-AAC-CORE-SEARCH,lkw,Negative,Broad
+IL-AAC-CORE-SEARCH,job,Negative,Broad
+IL-AAC-CORE-SEARCH,jobs,Negative,Broad
+IL-AAC-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-AAC-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-AAC-CORE-SEARCH,ausbildung,Negative,Broad
+IL-AAC-CORE-SEARCH,gehalt,Negative,Broad
+IL-AAC-CORE-SEARCH,bewerbung,Negative,Broad
+IL-AAC-CORE-SEARCH,lehrling,Negative,Broad
+IL-AAC-CORE-SEARCH,gratis,Negative,Broad
+IL-AAC-CORE-SEARCH,kostenlos,Negative,Broad
+IL-AAC-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-AAC-CORE-SEARCH,umsonst,Negative,Broad
+IL-AAC-CORE-SEARCH,diy,Negative,Broad
+IL-AAC-CORE-SEARCH,tipps,Negative,Broad
+IL-AAC-CORE-SEARCH,anleitung,Negative,Broad
+IL-AAC-CORE-SEARCH,tutorial,Negative,Broad
+IL-AAC-CORE-SEARCH,fassade,Negative,Broad
+IL-AAC-CORE-SEARCH,selber,Negative,Broad
+IL-AAC-CORE-SEARCH,selbst,Negative,Broad
+IL-AAC-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-AAC-CORE-SEARCH,youtube,Negative,Broad
+IL-AAC-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-AAC-CORE-SEARCH,klarspüler,Negative,Broad
+IL-AAC-CORE-SEARCH,schlieren,Negative,Broad
+IL-AAC-CORE-SEARCH,osmose,Negative,Broad
+IL-AAC-CORE-SEARCH,spülmittel,Negative,Broad
+IL-AAC-CORE-SEARCH,essig,Negative,Broad
+IL-AAC-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-AAC-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-AAC-CORE-SEARCH,bonn,Negative,Broad
+IL-AAC-CORE-SEARCH,köln,Negative,Broad
+IL-AAC-CORE-SEARCH,limburg,Negative,Broad
+IL-AAC-CORE-SEARCH,wuppertal,Negative,Broad
+IL-AAC-CORE-SEARCH,borken,Negative,Broad
+IL-AAC-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-AAC-CORE-SEARCH,nippes,Negative,Broad
+IL-AAC-CORE-SEARCH,dortmund,Negative,Broad
+IL-AAC-CORE-SEARCH,krefeld,Negative,Broad
+IL-AAC-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-AAC-CORE-SEARCH,leverkusen,Negative,Broad
+IL-AAC-CORE-SEARCH,frankfurt,Negative,Broad
+IL-AAC-CORE-SEARCH,hamburg,Negative,Broad
+IL-AAC-CORE-SEARCH,berlin,Negative,Broad
+IL-AAC-CORE-SEARCH,münchen,Negative,Broad
+IL-AAC-CORE-SEARCH,essen,Negative,Broad
+IL-AAC-CORE-SEARCH,duisburg,Negative,Broad
+IL-AAC-CORE-SEARCH,siegen,Negative,Broad
+IL-AAC-CORE-SEARCH,bochum,Negative,Broad
+IL-AAC-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-AAC-CORE-SEARCH,münster,Negative,Broad
+IL-AAC-CORE-SEARCH,maastricht,Negative,Broad
+IL-AAC-CORE-SEARCH,preise,Negative,Phrase
+IL-AAC-CORE-SEARCH,preis,Negative,Phrase
+IL-AAC-CORE-SEARCH,kosten,Negative,Phrase
+IL-AAC-CORE-SEARCH,was kostet,Negative,Phrase
+IL-AAC-CORE-SEARCH,myhammer,Negative,Phrase
+IL-AAC-CORE-SEARCH,groupon,Negative,Phrase
+IL-AAC-CORE-SEARCH,check24,Negative,Phrase
+IL-AAC-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-AAC-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-AAC-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-AAC-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-AAC-CORE-SEARCH,wie putze,Negative,Phrase
+IL-AAC-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-AAC-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-AAC-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-AAC-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-AAC-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-AAC-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-AAC-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-AAC-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-AAC-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-BAE-CORE-SEARCH,auto,Negative,Broad
+IL-BAE-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-BAE-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-BAE-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-BAE-CORE-SEARCH,pkw,Negative,Broad
+IL-BAE-CORE-SEARCH,lkw,Negative,Broad
+IL-BAE-CORE-SEARCH,job,Negative,Broad
+IL-BAE-CORE-SEARCH,jobs,Negative,Broad
+IL-BAE-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-BAE-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-BAE-CORE-SEARCH,ausbildung,Negative,Broad
+IL-BAE-CORE-SEARCH,gehalt,Negative,Broad
+IL-BAE-CORE-SEARCH,bewerbung,Negative,Broad
+IL-BAE-CORE-SEARCH,lehrling,Negative,Broad
+IL-BAE-CORE-SEARCH,gratis,Negative,Broad
+IL-BAE-CORE-SEARCH,kostenlos,Negative,Broad
+IL-BAE-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-BAE-CORE-SEARCH,umsonst,Negative,Broad
+IL-BAE-CORE-SEARCH,diy,Negative,Broad
+IL-BAE-CORE-SEARCH,tipps,Negative,Broad
+IL-BAE-CORE-SEARCH,anleitung,Negative,Broad
+IL-BAE-CORE-SEARCH,tutorial,Negative,Broad
+IL-BAE-CORE-SEARCH,fassade,Negative,Broad
+IL-BAE-CORE-SEARCH,selber,Negative,Broad
+IL-BAE-CORE-SEARCH,selbst,Negative,Broad
+IL-BAE-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-BAE-CORE-SEARCH,youtube,Negative,Broad
+IL-BAE-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-BAE-CORE-SEARCH,klarspüler,Negative,Broad
+IL-BAE-CORE-SEARCH,schlieren,Negative,Broad
+IL-BAE-CORE-SEARCH,osmose,Negative,Broad
+IL-BAE-CORE-SEARCH,spülmittel,Negative,Broad
+IL-BAE-CORE-SEARCH,essig,Negative,Broad
+IL-BAE-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-BAE-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-BAE-CORE-SEARCH,bonn,Negative,Broad
+IL-BAE-CORE-SEARCH,köln,Negative,Broad
+IL-BAE-CORE-SEARCH,limburg,Negative,Broad
+IL-BAE-CORE-SEARCH,wuppertal,Negative,Broad
+IL-BAE-CORE-SEARCH,borken,Negative,Broad
+IL-BAE-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-BAE-CORE-SEARCH,nippes,Negative,Broad
+IL-BAE-CORE-SEARCH,dortmund,Negative,Broad
+IL-BAE-CORE-SEARCH,krefeld,Negative,Broad
+IL-BAE-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-BAE-CORE-SEARCH,leverkusen,Negative,Broad
+IL-BAE-CORE-SEARCH,frankfurt,Negative,Broad
+IL-BAE-CORE-SEARCH,hamburg,Negative,Broad
+IL-BAE-CORE-SEARCH,berlin,Negative,Broad
+IL-BAE-CORE-SEARCH,münchen,Negative,Broad
+IL-BAE-CORE-SEARCH,essen,Negative,Broad
+IL-BAE-CORE-SEARCH,duisburg,Negative,Broad
+IL-BAE-CORE-SEARCH,siegen,Negative,Broad
+IL-BAE-CORE-SEARCH,bochum,Negative,Broad
+IL-BAE-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-BAE-CORE-SEARCH,münster,Negative,Broad
+IL-BAE-CORE-SEARCH,maastricht,Negative,Broad
+IL-BAE-CORE-SEARCH,preise,Negative,Phrase
+IL-BAE-CORE-SEARCH,preis,Negative,Phrase
+IL-BAE-CORE-SEARCH,kosten,Negative,Phrase
+IL-BAE-CORE-SEARCH,was kostet,Negative,Phrase
+IL-BAE-CORE-SEARCH,myhammer,Negative,Phrase
+IL-BAE-CORE-SEARCH,groupon,Negative,Phrase
+IL-BAE-CORE-SEARCH,check24,Negative,Phrase
+IL-BAE-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-BAE-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-BAE-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-BAE-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-BAE-CORE-SEARCH,wie putze,Negative,Phrase
+IL-BAE-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-BAE-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-BAE-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-BAE-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-BAE-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-BAE-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-BAE-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-BAE-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-BAE-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-WUR-CORE-SEARCH,auto,Negative,Broad
+IL-WUR-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-WUR-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-WUR-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-WUR-CORE-SEARCH,pkw,Negative,Broad
+IL-WUR-CORE-SEARCH,lkw,Negative,Broad
+IL-WUR-CORE-SEARCH,job,Negative,Broad
+IL-WUR-CORE-SEARCH,jobs,Negative,Broad
+IL-WUR-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-WUR-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-WUR-CORE-SEARCH,ausbildung,Negative,Broad
+IL-WUR-CORE-SEARCH,gehalt,Negative,Broad
+IL-WUR-CORE-SEARCH,bewerbung,Negative,Broad
+IL-WUR-CORE-SEARCH,lehrling,Negative,Broad
+IL-WUR-CORE-SEARCH,gratis,Negative,Broad
+IL-WUR-CORE-SEARCH,kostenlos,Negative,Broad
+IL-WUR-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-WUR-CORE-SEARCH,umsonst,Negative,Broad
+IL-WUR-CORE-SEARCH,diy,Negative,Broad
+IL-WUR-CORE-SEARCH,tipps,Negative,Broad
+IL-WUR-CORE-SEARCH,anleitung,Negative,Broad
+IL-WUR-CORE-SEARCH,tutorial,Negative,Broad
+IL-WUR-CORE-SEARCH,fassade,Negative,Broad
+IL-WUR-CORE-SEARCH,selber,Negative,Broad
+IL-WUR-CORE-SEARCH,selbst,Negative,Broad
+IL-WUR-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-WUR-CORE-SEARCH,youtube,Negative,Broad
+IL-WUR-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-WUR-CORE-SEARCH,klarspüler,Negative,Broad
+IL-WUR-CORE-SEARCH,schlieren,Negative,Broad
+IL-WUR-CORE-SEARCH,osmose,Negative,Broad
+IL-WUR-CORE-SEARCH,spülmittel,Negative,Broad
+IL-WUR-CORE-SEARCH,essig,Negative,Broad
+IL-WUR-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-WUR-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-WUR-CORE-SEARCH,bonn,Negative,Broad
+IL-WUR-CORE-SEARCH,köln,Negative,Broad
+IL-WUR-CORE-SEARCH,limburg,Negative,Broad
+IL-WUR-CORE-SEARCH,wuppertal,Negative,Broad
+IL-WUR-CORE-SEARCH,borken,Negative,Broad
+IL-WUR-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-WUR-CORE-SEARCH,nippes,Negative,Broad
+IL-WUR-CORE-SEARCH,dortmund,Negative,Broad
+IL-WUR-CORE-SEARCH,krefeld,Negative,Broad
+IL-WUR-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-WUR-CORE-SEARCH,leverkusen,Negative,Broad
+IL-WUR-CORE-SEARCH,frankfurt,Negative,Broad
+IL-WUR-CORE-SEARCH,hamburg,Negative,Broad
+IL-WUR-CORE-SEARCH,berlin,Negative,Broad
+IL-WUR-CORE-SEARCH,münchen,Negative,Broad
+IL-WUR-CORE-SEARCH,essen,Negative,Broad
+IL-WUR-CORE-SEARCH,duisburg,Negative,Broad
+IL-WUR-CORE-SEARCH,siegen,Negative,Broad
+IL-WUR-CORE-SEARCH,bochum,Negative,Broad
+IL-WUR-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-WUR-CORE-SEARCH,münster,Negative,Broad
+IL-WUR-CORE-SEARCH,maastricht,Negative,Broad
+IL-WUR-CORE-SEARCH,preise,Negative,Phrase
+IL-WUR-CORE-SEARCH,preis,Negative,Phrase
+IL-WUR-CORE-SEARCH,kosten,Negative,Phrase
+IL-WUR-CORE-SEARCH,was kostet,Negative,Phrase
+IL-WUR-CORE-SEARCH,myhammer,Negative,Phrase
+IL-WUR-CORE-SEARCH,groupon,Negative,Phrase
+IL-WUR-CORE-SEARCH,check24,Negative,Phrase
+IL-WUR-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-WUR-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-WUR-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-WUR-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-WUR-CORE-SEARCH,wie putze,Negative,Phrase
+IL-WUR-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-WUR-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-WUR-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-WUR-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-WUR-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-WUR-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-WUR-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-WUR-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-WUR-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-ALS-CORE-SEARCH,auto,Negative,Broad
+IL-ALS-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-ALS-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-ALS-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-ALS-CORE-SEARCH,pkw,Negative,Broad
+IL-ALS-CORE-SEARCH,lkw,Negative,Broad
+IL-ALS-CORE-SEARCH,job,Negative,Broad
+IL-ALS-CORE-SEARCH,jobs,Negative,Broad
+IL-ALS-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-ALS-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-ALS-CORE-SEARCH,ausbildung,Negative,Broad
+IL-ALS-CORE-SEARCH,gehalt,Negative,Broad
+IL-ALS-CORE-SEARCH,bewerbung,Negative,Broad
+IL-ALS-CORE-SEARCH,lehrling,Negative,Broad
+IL-ALS-CORE-SEARCH,gratis,Negative,Broad
+IL-ALS-CORE-SEARCH,kostenlos,Negative,Broad
+IL-ALS-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-ALS-CORE-SEARCH,umsonst,Negative,Broad
+IL-ALS-CORE-SEARCH,diy,Negative,Broad
+IL-ALS-CORE-SEARCH,tipps,Negative,Broad
+IL-ALS-CORE-SEARCH,anleitung,Negative,Broad
+IL-ALS-CORE-SEARCH,tutorial,Negative,Broad
+IL-ALS-CORE-SEARCH,fassade,Negative,Broad
+IL-ALS-CORE-SEARCH,selber,Negative,Broad
+IL-ALS-CORE-SEARCH,selbst,Negative,Broad
+IL-ALS-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-ALS-CORE-SEARCH,youtube,Negative,Broad
+IL-ALS-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-ALS-CORE-SEARCH,klarspüler,Negative,Broad
+IL-ALS-CORE-SEARCH,schlieren,Negative,Broad
+IL-ALS-CORE-SEARCH,osmose,Negative,Broad
+IL-ALS-CORE-SEARCH,spülmittel,Negative,Broad
+IL-ALS-CORE-SEARCH,essig,Negative,Broad
+IL-ALS-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-ALS-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-ALS-CORE-SEARCH,bonn,Negative,Broad
+IL-ALS-CORE-SEARCH,köln,Negative,Broad
+IL-ALS-CORE-SEARCH,limburg,Negative,Broad
+IL-ALS-CORE-SEARCH,wuppertal,Negative,Broad
+IL-ALS-CORE-SEARCH,borken,Negative,Broad
+IL-ALS-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-ALS-CORE-SEARCH,nippes,Negative,Broad
+IL-ALS-CORE-SEARCH,dortmund,Negative,Broad
+IL-ALS-CORE-SEARCH,krefeld,Negative,Broad
+IL-ALS-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-ALS-CORE-SEARCH,leverkusen,Negative,Broad
+IL-ALS-CORE-SEARCH,frankfurt,Negative,Broad
+IL-ALS-CORE-SEARCH,hamburg,Negative,Broad
+IL-ALS-CORE-SEARCH,berlin,Negative,Broad
+IL-ALS-CORE-SEARCH,münchen,Negative,Broad
+IL-ALS-CORE-SEARCH,essen,Negative,Broad
+IL-ALS-CORE-SEARCH,duisburg,Negative,Broad
+IL-ALS-CORE-SEARCH,siegen,Negative,Broad
+IL-ALS-CORE-SEARCH,bochum,Negative,Broad
+IL-ALS-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-ALS-CORE-SEARCH,münster,Negative,Broad
+IL-ALS-CORE-SEARCH,maastricht,Negative,Broad
+IL-ALS-CORE-SEARCH,preise,Negative,Phrase
+IL-ALS-CORE-SEARCH,preis,Negative,Phrase
+IL-ALS-CORE-SEARCH,kosten,Negative,Phrase
+IL-ALS-CORE-SEARCH,was kostet,Negative,Phrase
+IL-ALS-CORE-SEARCH,myhammer,Negative,Phrase
+IL-ALS-CORE-SEARCH,groupon,Negative,Phrase
+IL-ALS-CORE-SEARCH,check24,Negative,Phrase
+IL-ALS-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-ALS-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-ALS-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-ALS-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-ALS-CORE-SEARCH,wie putze,Negative,Phrase
+IL-ALS-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-ALS-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-ALS-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-ALS-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-ALS-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-ALS-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-ALS-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-ALS-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-ALS-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-ESC-CORE-SEARCH,auto,Negative,Broad
+IL-ESC-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-ESC-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-ESC-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-ESC-CORE-SEARCH,pkw,Negative,Broad
+IL-ESC-CORE-SEARCH,lkw,Negative,Broad
+IL-ESC-CORE-SEARCH,job,Negative,Broad
+IL-ESC-CORE-SEARCH,jobs,Negative,Broad
+IL-ESC-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-ESC-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-ESC-CORE-SEARCH,ausbildung,Negative,Broad
+IL-ESC-CORE-SEARCH,gehalt,Negative,Broad
+IL-ESC-CORE-SEARCH,bewerbung,Negative,Broad
+IL-ESC-CORE-SEARCH,lehrling,Negative,Broad
+IL-ESC-CORE-SEARCH,gratis,Negative,Broad
+IL-ESC-CORE-SEARCH,kostenlos,Negative,Broad
+IL-ESC-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-ESC-CORE-SEARCH,umsonst,Negative,Broad
+IL-ESC-CORE-SEARCH,diy,Negative,Broad
+IL-ESC-CORE-SEARCH,tipps,Negative,Broad
+IL-ESC-CORE-SEARCH,anleitung,Negative,Broad
+IL-ESC-CORE-SEARCH,tutorial,Negative,Broad
+IL-ESC-CORE-SEARCH,fassade,Negative,Broad
+IL-ESC-CORE-SEARCH,selber,Negative,Broad
+IL-ESC-CORE-SEARCH,selbst,Negative,Broad
+IL-ESC-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-ESC-CORE-SEARCH,youtube,Negative,Broad
+IL-ESC-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-ESC-CORE-SEARCH,klarspüler,Negative,Broad
+IL-ESC-CORE-SEARCH,schlieren,Negative,Broad
+IL-ESC-CORE-SEARCH,osmose,Negative,Broad
+IL-ESC-CORE-SEARCH,spülmittel,Negative,Broad
+IL-ESC-CORE-SEARCH,essig,Negative,Broad
+IL-ESC-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-ESC-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-ESC-CORE-SEARCH,bonn,Negative,Broad
+IL-ESC-CORE-SEARCH,köln,Negative,Broad
+IL-ESC-CORE-SEARCH,limburg,Negative,Broad
+IL-ESC-CORE-SEARCH,wuppertal,Negative,Broad
+IL-ESC-CORE-SEARCH,borken,Negative,Broad
+IL-ESC-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-ESC-CORE-SEARCH,nippes,Negative,Broad
+IL-ESC-CORE-SEARCH,dortmund,Negative,Broad
+IL-ESC-CORE-SEARCH,krefeld,Negative,Broad
+IL-ESC-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-ESC-CORE-SEARCH,leverkusen,Negative,Broad
+IL-ESC-CORE-SEARCH,frankfurt,Negative,Broad
+IL-ESC-CORE-SEARCH,hamburg,Negative,Broad
+IL-ESC-CORE-SEARCH,berlin,Negative,Broad
+IL-ESC-CORE-SEARCH,münchen,Negative,Broad
+IL-ESC-CORE-SEARCH,essen,Negative,Broad
+IL-ESC-CORE-SEARCH,duisburg,Negative,Broad
+IL-ESC-CORE-SEARCH,siegen,Negative,Broad
+IL-ESC-CORE-SEARCH,bochum,Negative,Broad
+IL-ESC-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-ESC-CORE-SEARCH,münster,Negative,Broad
+IL-ESC-CORE-SEARCH,maastricht,Negative,Broad
+IL-ESC-CORE-SEARCH,preise,Negative,Phrase
+IL-ESC-CORE-SEARCH,preis,Negative,Phrase
+IL-ESC-CORE-SEARCH,kosten,Negative,Phrase
+IL-ESC-CORE-SEARCH,was kostet,Negative,Phrase
+IL-ESC-CORE-SEARCH,myhammer,Negative,Phrase
+IL-ESC-CORE-SEARCH,groupon,Negative,Phrase
+IL-ESC-CORE-SEARCH,check24,Negative,Phrase
+IL-ESC-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-ESC-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-ESC-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-ESC-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-ESC-CORE-SEARCH,wie putze,Negative,Phrase
+IL-ESC-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-ESC-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-ESC-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-ESC-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-ESC-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-ESC-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-ESC-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-ESC-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-ESC-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-HER-CORE-SEARCH,auto,Negative,Broad
+IL-HER-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-HER-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-HER-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-HER-CORE-SEARCH,pkw,Negative,Broad
+IL-HER-CORE-SEARCH,lkw,Negative,Broad
+IL-HER-CORE-SEARCH,job,Negative,Broad
+IL-HER-CORE-SEARCH,jobs,Negative,Broad
+IL-HER-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-HER-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-HER-CORE-SEARCH,ausbildung,Negative,Broad
+IL-HER-CORE-SEARCH,gehalt,Negative,Broad
+IL-HER-CORE-SEARCH,bewerbung,Negative,Broad
+IL-HER-CORE-SEARCH,lehrling,Negative,Broad
+IL-HER-CORE-SEARCH,gratis,Negative,Broad
+IL-HER-CORE-SEARCH,kostenlos,Negative,Broad
+IL-HER-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-HER-CORE-SEARCH,umsonst,Negative,Broad
+IL-HER-CORE-SEARCH,diy,Negative,Broad
+IL-HER-CORE-SEARCH,tipps,Negative,Broad
+IL-HER-CORE-SEARCH,anleitung,Negative,Broad
+IL-HER-CORE-SEARCH,tutorial,Negative,Broad
+IL-HER-CORE-SEARCH,fassade,Negative,Broad
+IL-HER-CORE-SEARCH,selber,Negative,Broad
+IL-HER-CORE-SEARCH,selbst,Negative,Broad
+IL-HER-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-HER-CORE-SEARCH,youtube,Negative,Broad
+IL-HER-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-HER-CORE-SEARCH,klarspüler,Negative,Broad
+IL-HER-CORE-SEARCH,schlieren,Negative,Broad
+IL-HER-CORE-SEARCH,osmose,Negative,Broad
+IL-HER-CORE-SEARCH,spülmittel,Negative,Broad
+IL-HER-CORE-SEARCH,essig,Negative,Broad
+IL-HER-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-HER-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-HER-CORE-SEARCH,bonn,Negative,Broad
+IL-HER-CORE-SEARCH,köln,Negative,Broad
+IL-HER-CORE-SEARCH,limburg,Negative,Broad
+IL-HER-CORE-SEARCH,wuppertal,Negative,Broad
+IL-HER-CORE-SEARCH,borken,Negative,Broad
+IL-HER-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-HER-CORE-SEARCH,nippes,Negative,Broad
+IL-HER-CORE-SEARCH,dortmund,Negative,Broad
+IL-HER-CORE-SEARCH,krefeld,Negative,Broad
+IL-HER-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-HER-CORE-SEARCH,leverkusen,Negative,Broad
+IL-HER-CORE-SEARCH,frankfurt,Negative,Broad
+IL-HER-CORE-SEARCH,hamburg,Negative,Broad
+IL-HER-CORE-SEARCH,berlin,Negative,Broad
+IL-HER-CORE-SEARCH,münchen,Negative,Broad
+IL-HER-CORE-SEARCH,essen,Negative,Broad
+IL-HER-CORE-SEARCH,duisburg,Negative,Broad
+IL-HER-CORE-SEARCH,siegen,Negative,Broad
+IL-HER-CORE-SEARCH,bochum,Negative,Broad
+IL-HER-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-HER-CORE-SEARCH,münster,Negative,Broad
+IL-HER-CORE-SEARCH,maastricht,Negative,Broad
+IL-HER-CORE-SEARCH,preise,Negative,Phrase
+IL-HER-CORE-SEARCH,preis,Negative,Phrase
+IL-HER-CORE-SEARCH,kosten,Negative,Phrase
+IL-HER-CORE-SEARCH,was kostet,Negative,Phrase
+IL-HER-CORE-SEARCH,myhammer,Negative,Phrase
+IL-HER-CORE-SEARCH,groupon,Negative,Phrase
+IL-HER-CORE-SEARCH,check24,Negative,Phrase
+IL-HER-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-HER-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-HER-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-HER-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-HER-CORE-SEARCH,wie putze,Negative,Phrase
+IL-HER-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-HER-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-HER-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-HER-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-HER-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-HER-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-HER-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-HER-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-HER-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-STO-CORE-SEARCH,auto,Negative,Broad
+IL-STO-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-STO-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-STO-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-STO-CORE-SEARCH,pkw,Negative,Broad
+IL-STO-CORE-SEARCH,lkw,Negative,Broad
+IL-STO-CORE-SEARCH,job,Negative,Broad
+IL-STO-CORE-SEARCH,jobs,Negative,Broad
+IL-STO-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-STO-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-STO-CORE-SEARCH,ausbildung,Negative,Broad
+IL-STO-CORE-SEARCH,gehalt,Negative,Broad
+IL-STO-CORE-SEARCH,bewerbung,Negative,Broad
+IL-STO-CORE-SEARCH,lehrling,Negative,Broad
+IL-STO-CORE-SEARCH,gratis,Negative,Broad
+IL-STO-CORE-SEARCH,kostenlos,Negative,Broad
+IL-STO-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-STO-CORE-SEARCH,umsonst,Negative,Broad
+IL-STO-CORE-SEARCH,diy,Negative,Broad
+IL-STO-CORE-SEARCH,tipps,Negative,Broad
+IL-STO-CORE-SEARCH,anleitung,Negative,Broad
+IL-STO-CORE-SEARCH,tutorial,Negative,Broad
+IL-STO-CORE-SEARCH,fassade,Negative,Broad
+IL-STO-CORE-SEARCH,selber,Negative,Broad
+IL-STO-CORE-SEARCH,selbst,Negative,Broad
+IL-STO-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-STO-CORE-SEARCH,youtube,Negative,Broad
+IL-STO-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-STO-CORE-SEARCH,klarspüler,Negative,Broad
+IL-STO-CORE-SEARCH,schlieren,Negative,Broad
+IL-STO-CORE-SEARCH,osmose,Negative,Broad
+IL-STO-CORE-SEARCH,spülmittel,Negative,Broad
+IL-STO-CORE-SEARCH,essig,Negative,Broad
+IL-STO-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-STO-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-STO-CORE-SEARCH,bonn,Negative,Broad
+IL-STO-CORE-SEARCH,köln,Negative,Broad
+IL-STO-CORE-SEARCH,limburg,Negative,Broad
+IL-STO-CORE-SEARCH,wuppertal,Negative,Broad
+IL-STO-CORE-SEARCH,borken,Negative,Broad
+IL-STO-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-STO-CORE-SEARCH,nippes,Negative,Broad
+IL-STO-CORE-SEARCH,dortmund,Negative,Broad
+IL-STO-CORE-SEARCH,krefeld,Negative,Broad
+IL-STO-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-STO-CORE-SEARCH,leverkusen,Negative,Broad
+IL-STO-CORE-SEARCH,frankfurt,Negative,Broad
+IL-STO-CORE-SEARCH,hamburg,Negative,Broad
+IL-STO-CORE-SEARCH,berlin,Negative,Broad
+IL-STO-CORE-SEARCH,münchen,Negative,Broad
+IL-STO-CORE-SEARCH,essen,Negative,Broad
+IL-STO-CORE-SEARCH,duisburg,Negative,Broad
+IL-STO-CORE-SEARCH,siegen,Negative,Broad
+IL-STO-CORE-SEARCH,bochum,Negative,Broad
+IL-STO-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-STO-CORE-SEARCH,münster,Negative,Broad
+IL-STO-CORE-SEARCH,maastricht,Negative,Broad
+IL-STO-CORE-SEARCH,preise,Negative,Phrase
+IL-STO-CORE-SEARCH,preis,Negative,Phrase
+IL-STO-CORE-SEARCH,kosten,Negative,Phrase
+IL-STO-CORE-SEARCH,was kostet,Negative,Phrase
+IL-STO-CORE-SEARCH,myhammer,Negative,Phrase
+IL-STO-CORE-SEARCH,groupon,Negative,Phrase
+IL-STO-CORE-SEARCH,check24,Negative,Phrase
+IL-STO-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-STO-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-STO-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-STO-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-STO-CORE-SEARCH,wie putze,Negative,Phrase
+IL-STO-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-STO-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-STO-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-STO-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-STO-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-STO-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-STO-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-STO-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-STO-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-UBP-CORE-SEARCH,auto,Negative,Broad
+IL-UBP-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-UBP-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-UBP-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-UBP-CORE-SEARCH,pkw,Negative,Broad
+IL-UBP-CORE-SEARCH,lkw,Negative,Broad
+IL-UBP-CORE-SEARCH,job,Negative,Broad
+IL-UBP-CORE-SEARCH,jobs,Negative,Broad
+IL-UBP-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-UBP-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-UBP-CORE-SEARCH,ausbildung,Negative,Broad
+IL-UBP-CORE-SEARCH,gehalt,Negative,Broad
+IL-UBP-CORE-SEARCH,bewerbung,Negative,Broad
+IL-UBP-CORE-SEARCH,lehrling,Negative,Broad
+IL-UBP-CORE-SEARCH,gratis,Negative,Broad
+IL-UBP-CORE-SEARCH,kostenlos,Negative,Broad
+IL-UBP-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-UBP-CORE-SEARCH,umsonst,Negative,Broad
+IL-UBP-CORE-SEARCH,diy,Negative,Broad
+IL-UBP-CORE-SEARCH,tipps,Negative,Broad
+IL-UBP-CORE-SEARCH,anleitung,Negative,Broad
+IL-UBP-CORE-SEARCH,tutorial,Negative,Broad
+IL-UBP-CORE-SEARCH,fassade,Negative,Broad
+IL-UBP-CORE-SEARCH,selber,Negative,Broad
+IL-UBP-CORE-SEARCH,selbst,Negative,Broad
+IL-UBP-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-UBP-CORE-SEARCH,youtube,Negative,Broad
+IL-UBP-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-UBP-CORE-SEARCH,klarspüler,Negative,Broad
+IL-UBP-CORE-SEARCH,schlieren,Negative,Broad
+IL-UBP-CORE-SEARCH,osmose,Negative,Broad
+IL-UBP-CORE-SEARCH,spülmittel,Negative,Broad
+IL-UBP-CORE-SEARCH,essig,Negative,Broad
+IL-UBP-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-UBP-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-UBP-CORE-SEARCH,bonn,Negative,Broad
+IL-UBP-CORE-SEARCH,köln,Negative,Broad
+IL-UBP-CORE-SEARCH,limburg,Negative,Broad
+IL-UBP-CORE-SEARCH,wuppertal,Negative,Broad
+IL-UBP-CORE-SEARCH,borken,Negative,Broad
+IL-UBP-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-UBP-CORE-SEARCH,nippes,Negative,Broad
+IL-UBP-CORE-SEARCH,dortmund,Negative,Broad
+IL-UBP-CORE-SEARCH,krefeld,Negative,Broad
+IL-UBP-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-UBP-CORE-SEARCH,leverkusen,Negative,Broad
+IL-UBP-CORE-SEARCH,frankfurt,Negative,Broad
+IL-UBP-CORE-SEARCH,hamburg,Negative,Broad
+IL-UBP-CORE-SEARCH,berlin,Negative,Broad
+IL-UBP-CORE-SEARCH,münchen,Negative,Broad
+IL-UBP-CORE-SEARCH,essen,Negative,Broad
+IL-UBP-CORE-SEARCH,duisburg,Negative,Broad
+IL-UBP-CORE-SEARCH,siegen,Negative,Broad
+IL-UBP-CORE-SEARCH,bochum,Negative,Broad
+IL-UBP-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-UBP-CORE-SEARCH,münster,Negative,Broad
+IL-UBP-CORE-SEARCH,maastricht,Negative,Broad
+IL-UBP-CORE-SEARCH,preise,Negative,Phrase
+IL-UBP-CORE-SEARCH,preis,Negative,Phrase
+IL-UBP-CORE-SEARCH,kosten,Negative,Phrase
+IL-UBP-CORE-SEARCH,was kostet,Negative,Phrase
+IL-UBP-CORE-SEARCH,myhammer,Negative,Phrase
+IL-UBP-CORE-SEARCH,groupon,Negative,Phrase
+IL-UBP-CORE-SEARCH,check24,Negative,Phrase
+IL-UBP-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-UBP-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-UBP-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-UBP-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-UBP-CORE-SEARCH,wie putze,Negative,Phrase
+IL-UBP-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-UBP-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-UBP-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-UBP-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-UBP-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-UBP-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-UBP-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-UBP-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-UBP-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-ROE-CORE-SEARCH,auto,Negative,Broad
+IL-ROE-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-ROE-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-ROE-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-ROE-CORE-SEARCH,pkw,Negative,Broad
+IL-ROE-CORE-SEARCH,lkw,Negative,Broad
+IL-ROE-CORE-SEARCH,job,Negative,Broad
+IL-ROE-CORE-SEARCH,jobs,Negative,Broad
+IL-ROE-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-ROE-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-ROE-CORE-SEARCH,ausbildung,Negative,Broad
+IL-ROE-CORE-SEARCH,gehalt,Negative,Broad
+IL-ROE-CORE-SEARCH,bewerbung,Negative,Broad
+IL-ROE-CORE-SEARCH,lehrling,Negative,Broad
+IL-ROE-CORE-SEARCH,gratis,Negative,Broad
+IL-ROE-CORE-SEARCH,kostenlos,Negative,Broad
+IL-ROE-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-ROE-CORE-SEARCH,umsonst,Negative,Broad
+IL-ROE-CORE-SEARCH,diy,Negative,Broad
+IL-ROE-CORE-SEARCH,tipps,Negative,Broad
+IL-ROE-CORE-SEARCH,anleitung,Negative,Broad
+IL-ROE-CORE-SEARCH,tutorial,Negative,Broad
+IL-ROE-CORE-SEARCH,fassade,Negative,Broad
+IL-ROE-CORE-SEARCH,selber,Negative,Broad
+IL-ROE-CORE-SEARCH,selbst,Negative,Broad
+IL-ROE-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-ROE-CORE-SEARCH,youtube,Negative,Broad
+IL-ROE-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-ROE-CORE-SEARCH,klarspüler,Negative,Broad
+IL-ROE-CORE-SEARCH,schlieren,Negative,Broad
+IL-ROE-CORE-SEARCH,osmose,Negative,Broad
+IL-ROE-CORE-SEARCH,spülmittel,Negative,Broad
+IL-ROE-CORE-SEARCH,essig,Negative,Broad
+IL-ROE-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-ROE-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-ROE-CORE-SEARCH,bonn,Negative,Broad
+IL-ROE-CORE-SEARCH,köln,Negative,Broad
+IL-ROE-CORE-SEARCH,limburg,Negative,Broad
+IL-ROE-CORE-SEARCH,wuppertal,Negative,Broad
+IL-ROE-CORE-SEARCH,borken,Negative,Broad
+IL-ROE-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-ROE-CORE-SEARCH,nippes,Negative,Broad
+IL-ROE-CORE-SEARCH,dortmund,Negative,Broad
+IL-ROE-CORE-SEARCH,krefeld,Negative,Broad
+IL-ROE-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-ROE-CORE-SEARCH,leverkusen,Negative,Broad
+IL-ROE-CORE-SEARCH,frankfurt,Negative,Broad
+IL-ROE-CORE-SEARCH,hamburg,Negative,Broad
+IL-ROE-CORE-SEARCH,berlin,Negative,Broad
+IL-ROE-CORE-SEARCH,münchen,Negative,Broad
+IL-ROE-CORE-SEARCH,essen,Negative,Broad
+IL-ROE-CORE-SEARCH,duisburg,Negative,Broad
+IL-ROE-CORE-SEARCH,siegen,Negative,Broad
+IL-ROE-CORE-SEARCH,bochum,Negative,Broad
+IL-ROE-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-ROE-CORE-SEARCH,münster,Negative,Broad
+IL-ROE-CORE-SEARCH,maastricht,Negative,Broad
+IL-ROE-CORE-SEARCH,preise,Negative,Phrase
+IL-ROE-CORE-SEARCH,preis,Negative,Phrase
+IL-ROE-CORE-SEARCH,kosten,Negative,Phrase
+IL-ROE-CORE-SEARCH,was kostet,Negative,Phrase
+IL-ROE-CORE-SEARCH,myhammer,Negative,Phrase
+IL-ROE-CORE-SEARCH,groupon,Negative,Phrase
+IL-ROE-CORE-SEARCH,check24,Negative,Phrase
+IL-ROE-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-ROE-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-ROE-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-ROE-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-ROE-CORE-SEARCH,wie putze,Negative,Phrase
+IL-ROE-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-ROE-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-ROE-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-ROE-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-ROE-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-ROE-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-ROE-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-ROE-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-ROE-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-JUL-CORE-SEARCH,auto,Negative,Broad
+IL-JUL-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-JUL-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-JUL-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-JUL-CORE-SEARCH,pkw,Negative,Broad
+IL-JUL-CORE-SEARCH,lkw,Negative,Broad
+IL-JUL-CORE-SEARCH,job,Negative,Broad
+IL-JUL-CORE-SEARCH,jobs,Negative,Broad
+IL-JUL-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-JUL-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-JUL-CORE-SEARCH,ausbildung,Negative,Broad
+IL-JUL-CORE-SEARCH,gehalt,Negative,Broad
+IL-JUL-CORE-SEARCH,bewerbung,Negative,Broad
+IL-JUL-CORE-SEARCH,lehrling,Negative,Broad
+IL-JUL-CORE-SEARCH,gratis,Negative,Broad
+IL-JUL-CORE-SEARCH,kostenlos,Negative,Broad
+IL-JUL-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-JUL-CORE-SEARCH,umsonst,Negative,Broad
+IL-JUL-CORE-SEARCH,diy,Negative,Broad
+IL-JUL-CORE-SEARCH,tipps,Negative,Broad
+IL-JUL-CORE-SEARCH,anleitung,Negative,Broad
+IL-JUL-CORE-SEARCH,tutorial,Negative,Broad
+IL-JUL-CORE-SEARCH,fassade,Negative,Broad
+IL-JUL-CORE-SEARCH,selber,Negative,Broad
+IL-JUL-CORE-SEARCH,selbst,Negative,Broad
+IL-JUL-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-JUL-CORE-SEARCH,youtube,Negative,Broad
+IL-JUL-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-JUL-CORE-SEARCH,klarspüler,Negative,Broad
+IL-JUL-CORE-SEARCH,schlieren,Negative,Broad
+IL-JUL-CORE-SEARCH,osmose,Negative,Broad
+IL-JUL-CORE-SEARCH,spülmittel,Negative,Broad
+IL-JUL-CORE-SEARCH,essig,Negative,Broad
+IL-JUL-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-JUL-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-JUL-CORE-SEARCH,bonn,Negative,Broad
+IL-JUL-CORE-SEARCH,köln,Negative,Broad
+IL-JUL-CORE-SEARCH,limburg,Negative,Broad
+IL-JUL-CORE-SEARCH,wuppertal,Negative,Broad
+IL-JUL-CORE-SEARCH,borken,Negative,Broad
+IL-JUL-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-JUL-CORE-SEARCH,nippes,Negative,Broad
+IL-JUL-CORE-SEARCH,dortmund,Negative,Broad
+IL-JUL-CORE-SEARCH,krefeld,Negative,Broad
+IL-JUL-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-JUL-CORE-SEARCH,leverkusen,Negative,Broad
+IL-JUL-CORE-SEARCH,frankfurt,Negative,Broad
+IL-JUL-CORE-SEARCH,hamburg,Negative,Broad
+IL-JUL-CORE-SEARCH,berlin,Negative,Broad
+IL-JUL-CORE-SEARCH,münchen,Negative,Broad
+IL-JUL-CORE-SEARCH,essen,Negative,Broad
+IL-JUL-CORE-SEARCH,duisburg,Negative,Broad
+IL-JUL-CORE-SEARCH,siegen,Negative,Broad
+IL-JUL-CORE-SEARCH,bochum,Negative,Broad
+IL-JUL-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-JUL-CORE-SEARCH,münster,Negative,Broad
+IL-JUL-CORE-SEARCH,maastricht,Negative,Broad
+IL-JUL-CORE-SEARCH,preise,Negative,Phrase
+IL-JUL-CORE-SEARCH,preis,Negative,Phrase
+IL-JUL-CORE-SEARCH,kosten,Negative,Phrase
+IL-JUL-CORE-SEARCH,was kostet,Negative,Phrase
+IL-JUL-CORE-SEARCH,myhammer,Negative,Phrase
+IL-JUL-CORE-SEARCH,groupon,Negative,Phrase
+IL-JUL-CORE-SEARCH,check24,Negative,Phrase
+IL-JUL-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-JUL-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-JUL-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-JUL-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-JUL-CORE-SEARCH,wie putze,Negative,Phrase
+IL-JUL-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-JUL-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-JUL-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-JUL-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-JUL-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-JUL-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-JUL-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-JUL-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-JUL-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-GEI-CORE-SEARCH,auto,Negative,Broad
+IL-GEI-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-GEI-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-GEI-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-GEI-CORE-SEARCH,pkw,Negative,Broad
+IL-GEI-CORE-SEARCH,lkw,Negative,Broad
+IL-GEI-CORE-SEARCH,job,Negative,Broad
+IL-GEI-CORE-SEARCH,jobs,Negative,Broad
+IL-GEI-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-GEI-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-GEI-CORE-SEARCH,ausbildung,Negative,Broad
+IL-GEI-CORE-SEARCH,gehalt,Negative,Broad
+IL-GEI-CORE-SEARCH,bewerbung,Negative,Broad
+IL-GEI-CORE-SEARCH,lehrling,Negative,Broad
+IL-GEI-CORE-SEARCH,gratis,Negative,Broad
+IL-GEI-CORE-SEARCH,kostenlos,Negative,Broad
+IL-GEI-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-GEI-CORE-SEARCH,umsonst,Negative,Broad
+IL-GEI-CORE-SEARCH,diy,Negative,Broad
+IL-GEI-CORE-SEARCH,tipps,Negative,Broad
+IL-GEI-CORE-SEARCH,anleitung,Negative,Broad
+IL-GEI-CORE-SEARCH,tutorial,Negative,Broad
+IL-GEI-CORE-SEARCH,fassade,Negative,Broad
+IL-GEI-CORE-SEARCH,selber,Negative,Broad
+IL-GEI-CORE-SEARCH,selbst,Negative,Broad
+IL-GEI-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-GEI-CORE-SEARCH,youtube,Negative,Broad
+IL-GEI-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-GEI-CORE-SEARCH,klarspüler,Negative,Broad
+IL-GEI-CORE-SEARCH,schlieren,Negative,Broad
+IL-GEI-CORE-SEARCH,osmose,Negative,Broad
+IL-GEI-CORE-SEARCH,spülmittel,Negative,Broad
+IL-GEI-CORE-SEARCH,essig,Negative,Broad
+IL-GEI-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-GEI-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-GEI-CORE-SEARCH,bonn,Negative,Broad
+IL-GEI-CORE-SEARCH,köln,Negative,Broad
+IL-GEI-CORE-SEARCH,limburg,Negative,Broad
+IL-GEI-CORE-SEARCH,wuppertal,Negative,Broad
+IL-GEI-CORE-SEARCH,borken,Negative,Broad
+IL-GEI-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-GEI-CORE-SEARCH,nippes,Negative,Broad
+IL-GEI-CORE-SEARCH,dortmund,Negative,Broad
+IL-GEI-CORE-SEARCH,krefeld,Negative,Broad
+IL-GEI-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-GEI-CORE-SEARCH,leverkusen,Negative,Broad
+IL-GEI-CORE-SEARCH,frankfurt,Negative,Broad
+IL-GEI-CORE-SEARCH,hamburg,Negative,Broad
+IL-GEI-CORE-SEARCH,berlin,Negative,Broad
+IL-GEI-CORE-SEARCH,münchen,Negative,Broad
+IL-GEI-CORE-SEARCH,essen,Negative,Broad
+IL-GEI-CORE-SEARCH,duisburg,Negative,Broad
+IL-GEI-CORE-SEARCH,siegen,Negative,Broad
+IL-GEI-CORE-SEARCH,bochum,Negative,Broad
+IL-GEI-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-GEI-CORE-SEARCH,münster,Negative,Broad
+IL-GEI-CORE-SEARCH,maastricht,Negative,Broad
+IL-GEI-CORE-SEARCH,preise,Negative,Phrase
+IL-GEI-CORE-SEARCH,preis,Negative,Phrase
+IL-GEI-CORE-SEARCH,kosten,Negative,Phrase
+IL-GEI-CORE-SEARCH,was kostet,Negative,Phrase
+IL-GEI-CORE-SEARCH,myhammer,Negative,Phrase
+IL-GEI-CORE-SEARCH,groupon,Negative,Phrase
+IL-GEI-CORE-SEARCH,check24,Negative,Phrase
+IL-GEI-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-GEI-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-GEI-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-GEI-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-GEI-CORE-SEARCH,wie putze,Negative,Phrase
+IL-GEI-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-GEI-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-GEI-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-GEI-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-GEI-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-GEI-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-GEI-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-GEI-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-GEI-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-HEI-CORE-SEARCH,auto,Negative,Broad
+IL-HEI-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-HEI-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-HEI-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-HEI-CORE-SEARCH,pkw,Negative,Broad
+IL-HEI-CORE-SEARCH,lkw,Negative,Broad
+IL-HEI-CORE-SEARCH,job,Negative,Broad
+IL-HEI-CORE-SEARCH,jobs,Negative,Broad
+IL-HEI-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-HEI-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-HEI-CORE-SEARCH,ausbildung,Negative,Broad
+IL-HEI-CORE-SEARCH,gehalt,Negative,Broad
+IL-HEI-CORE-SEARCH,bewerbung,Negative,Broad
+IL-HEI-CORE-SEARCH,lehrling,Negative,Broad
+IL-HEI-CORE-SEARCH,gratis,Negative,Broad
+IL-HEI-CORE-SEARCH,kostenlos,Negative,Broad
+IL-HEI-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-HEI-CORE-SEARCH,umsonst,Negative,Broad
+IL-HEI-CORE-SEARCH,diy,Negative,Broad
+IL-HEI-CORE-SEARCH,tipps,Negative,Broad
+IL-HEI-CORE-SEARCH,anleitung,Negative,Broad
+IL-HEI-CORE-SEARCH,tutorial,Negative,Broad
+IL-HEI-CORE-SEARCH,fassade,Negative,Broad
+IL-HEI-CORE-SEARCH,selber,Negative,Broad
+IL-HEI-CORE-SEARCH,selbst,Negative,Broad
+IL-HEI-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-HEI-CORE-SEARCH,youtube,Negative,Broad
+IL-HEI-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-HEI-CORE-SEARCH,klarspüler,Negative,Broad
+IL-HEI-CORE-SEARCH,schlieren,Negative,Broad
+IL-HEI-CORE-SEARCH,osmose,Negative,Broad
+IL-HEI-CORE-SEARCH,spülmittel,Negative,Broad
+IL-HEI-CORE-SEARCH,essig,Negative,Broad
+IL-HEI-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-HEI-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-HEI-CORE-SEARCH,bonn,Negative,Broad
+IL-HEI-CORE-SEARCH,köln,Negative,Broad
+IL-HEI-CORE-SEARCH,limburg,Negative,Broad
+IL-HEI-CORE-SEARCH,wuppertal,Negative,Broad
+IL-HEI-CORE-SEARCH,borken,Negative,Broad
+IL-HEI-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-HEI-CORE-SEARCH,nippes,Negative,Broad
+IL-HEI-CORE-SEARCH,dortmund,Negative,Broad
+IL-HEI-CORE-SEARCH,krefeld,Negative,Broad
+IL-HEI-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-HEI-CORE-SEARCH,leverkusen,Negative,Broad
+IL-HEI-CORE-SEARCH,frankfurt,Negative,Broad
+IL-HEI-CORE-SEARCH,hamburg,Negative,Broad
+IL-HEI-CORE-SEARCH,berlin,Negative,Broad
+IL-HEI-CORE-SEARCH,münchen,Negative,Broad
+IL-HEI-CORE-SEARCH,essen,Negative,Broad
+IL-HEI-CORE-SEARCH,duisburg,Negative,Broad
+IL-HEI-CORE-SEARCH,siegen,Negative,Broad
+IL-HEI-CORE-SEARCH,bochum,Negative,Broad
+IL-HEI-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-HEI-CORE-SEARCH,münster,Negative,Broad
+IL-HEI-CORE-SEARCH,maastricht,Negative,Broad
+IL-HEI-CORE-SEARCH,preise,Negative,Phrase
+IL-HEI-CORE-SEARCH,preis,Negative,Phrase
+IL-HEI-CORE-SEARCH,kosten,Negative,Phrase
+IL-HEI-CORE-SEARCH,was kostet,Negative,Phrase
+IL-HEI-CORE-SEARCH,myhammer,Negative,Phrase
+IL-HEI-CORE-SEARCH,groupon,Negative,Phrase
+IL-HEI-CORE-SEARCH,check24,Negative,Phrase
+IL-HEI-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-HEI-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-HEI-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-HEI-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-HEI-CORE-SEARCH,wie putze,Negative,Phrase
+IL-HEI-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-HEI-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-HEI-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-HEI-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-HEI-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-HEI-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-HEI-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-HEI-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-HEI-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-ERK-CORE-SEARCH,auto,Negative,Broad
+IL-ERK-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-ERK-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-ERK-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-ERK-CORE-SEARCH,pkw,Negative,Broad
+IL-ERK-CORE-SEARCH,lkw,Negative,Broad
+IL-ERK-CORE-SEARCH,job,Negative,Broad
+IL-ERK-CORE-SEARCH,jobs,Negative,Broad
+IL-ERK-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-ERK-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-ERK-CORE-SEARCH,ausbildung,Negative,Broad
+IL-ERK-CORE-SEARCH,gehalt,Negative,Broad
+IL-ERK-CORE-SEARCH,bewerbung,Negative,Broad
+IL-ERK-CORE-SEARCH,lehrling,Negative,Broad
+IL-ERK-CORE-SEARCH,gratis,Negative,Broad
+IL-ERK-CORE-SEARCH,kostenlos,Negative,Broad
+IL-ERK-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-ERK-CORE-SEARCH,umsonst,Negative,Broad
+IL-ERK-CORE-SEARCH,diy,Negative,Broad
+IL-ERK-CORE-SEARCH,tipps,Negative,Broad
+IL-ERK-CORE-SEARCH,anleitung,Negative,Broad
+IL-ERK-CORE-SEARCH,tutorial,Negative,Broad
+IL-ERK-CORE-SEARCH,fassade,Negative,Broad
+IL-ERK-CORE-SEARCH,selber,Negative,Broad
+IL-ERK-CORE-SEARCH,selbst,Negative,Broad
+IL-ERK-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-ERK-CORE-SEARCH,youtube,Negative,Broad
+IL-ERK-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-ERK-CORE-SEARCH,klarspüler,Negative,Broad
+IL-ERK-CORE-SEARCH,schlieren,Negative,Broad
+IL-ERK-CORE-SEARCH,osmose,Negative,Broad
+IL-ERK-CORE-SEARCH,spülmittel,Negative,Broad
+IL-ERK-CORE-SEARCH,essig,Negative,Broad
+IL-ERK-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-ERK-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-ERK-CORE-SEARCH,bonn,Negative,Broad
+IL-ERK-CORE-SEARCH,köln,Negative,Broad
+IL-ERK-CORE-SEARCH,limburg,Negative,Broad
+IL-ERK-CORE-SEARCH,wuppertal,Negative,Broad
+IL-ERK-CORE-SEARCH,borken,Negative,Broad
+IL-ERK-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-ERK-CORE-SEARCH,nippes,Negative,Broad
+IL-ERK-CORE-SEARCH,dortmund,Negative,Broad
+IL-ERK-CORE-SEARCH,krefeld,Negative,Broad
+IL-ERK-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-ERK-CORE-SEARCH,leverkusen,Negative,Broad
+IL-ERK-CORE-SEARCH,frankfurt,Negative,Broad
+IL-ERK-CORE-SEARCH,hamburg,Negative,Broad
+IL-ERK-CORE-SEARCH,berlin,Negative,Broad
+IL-ERK-CORE-SEARCH,münchen,Negative,Broad
+IL-ERK-CORE-SEARCH,essen,Negative,Broad
+IL-ERK-CORE-SEARCH,duisburg,Negative,Broad
+IL-ERK-CORE-SEARCH,siegen,Negative,Broad
+IL-ERK-CORE-SEARCH,bochum,Negative,Broad
+IL-ERK-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-ERK-CORE-SEARCH,münster,Negative,Broad
+IL-ERK-CORE-SEARCH,maastricht,Negative,Broad
+IL-ERK-CORE-SEARCH,preise,Negative,Phrase
+IL-ERK-CORE-SEARCH,preis,Negative,Phrase
+IL-ERK-CORE-SEARCH,kosten,Negative,Phrase
+IL-ERK-CORE-SEARCH,was kostet,Negative,Phrase
+IL-ERK-CORE-SEARCH,myhammer,Negative,Phrase
+IL-ERK-CORE-SEARCH,groupon,Negative,Phrase
+IL-ERK-CORE-SEARCH,check24,Negative,Phrase
+IL-ERK-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-ERK-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-ERK-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-ERK-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-ERK-CORE-SEARCH,wie putze,Negative,Phrase
+IL-ERK-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-ERK-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-ERK-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-ERK-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-ERK-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-ERK-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-ERK-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-ERK-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-ERK-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-MON-CORE-SEARCH,auto,Negative,Broad
+IL-MON-CORE-SEARCH,autoscheibe,Negative,Broad
+IL-MON-CORE-SEARCH,scheibenwischer,Negative,Broad
+IL-MON-CORE-SEARCH,fahrzeug,Negative,Broad
+IL-MON-CORE-SEARCH,pkw,Negative,Broad
+IL-MON-CORE-SEARCH,lkw,Negative,Broad
+IL-MON-CORE-SEARCH,job,Negative,Broad
+IL-MON-CORE-SEARCH,jobs,Negative,Broad
+IL-MON-CORE-SEARCH,stellenangebot,Negative,Broad
+IL-MON-CORE-SEARCH,stellenanzeige,Negative,Broad
+IL-MON-CORE-SEARCH,ausbildung,Negative,Broad
+IL-MON-CORE-SEARCH,gehalt,Negative,Broad
+IL-MON-CORE-SEARCH,bewerbung,Negative,Broad
+IL-MON-CORE-SEARCH,lehrling,Negative,Broad
+IL-MON-CORE-SEARCH,gratis,Negative,Broad
+IL-MON-CORE-SEARCH,kostenlos,Negative,Broad
+IL-MON-CORE-SEARCH,kostenfrei,Negative,Broad
+IL-MON-CORE-SEARCH,umsonst,Negative,Broad
+IL-MON-CORE-SEARCH,diy,Negative,Broad
+IL-MON-CORE-SEARCH,tipps,Negative,Broad
+IL-MON-CORE-SEARCH,anleitung,Negative,Broad
+IL-MON-CORE-SEARCH,tutorial,Negative,Broad
+IL-MON-CORE-SEARCH,fassade,Negative,Broad
+IL-MON-CORE-SEARCH,selber,Negative,Broad
+IL-MON-CORE-SEARCH,selbst,Negative,Broad
+IL-MON-CORE-SEARCH,gebäudereinigung,Negative,Broad
+IL-MON-CORE-SEARCH,youtube,Negative,Broad
+IL-MON-CORE-SEARCH,hausmitteln,Negative,Broad
+IL-MON-CORE-SEARCH,klarspüler,Negative,Broad
+IL-MON-CORE-SEARCH,schlieren,Negative,Broad
+IL-MON-CORE-SEARCH,osmose,Negative,Broad
+IL-MON-CORE-SEARCH,spülmittel,Negative,Broad
+IL-MON-CORE-SEARCH,essig,Negative,Broad
+IL-MON-CORE-SEARCH,zeitungspapier,Negative,Broad
+IL-MON-CORE-SEARCH,putzanleitung,Negative,Broad
+IL-MON-CORE-SEARCH,bonn,Negative,Broad
+IL-MON-CORE-SEARCH,köln,Negative,Broad
+IL-MON-CORE-SEARCH,limburg,Negative,Broad
+IL-MON-CORE-SEARCH,wuppertal,Negative,Broad
+IL-MON-CORE-SEARCH,borken,Negative,Broad
+IL-MON-CORE-SEARCH,düsseldorf,Negative,Broad
+IL-MON-CORE-SEARCH,nippes,Negative,Broad
+IL-MON-CORE-SEARCH,dortmund,Negative,Broad
+IL-MON-CORE-SEARCH,krefeld,Negative,Broad
+IL-MON-CORE-SEARCH,mönchengladbach,Negative,Broad
+IL-MON-CORE-SEARCH,leverkusen,Negative,Broad
+IL-MON-CORE-SEARCH,frankfurt,Negative,Broad
+IL-MON-CORE-SEARCH,hamburg,Negative,Broad
+IL-MON-CORE-SEARCH,berlin,Negative,Broad
+IL-MON-CORE-SEARCH,münchen,Negative,Broad
+IL-MON-CORE-SEARCH,essen,Negative,Broad
+IL-MON-CORE-SEARCH,duisburg,Negative,Broad
+IL-MON-CORE-SEARCH,siegen,Negative,Broad
+IL-MON-CORE-SEARCH,bochum,Negative,Broad
+IL-MON-CORE-SEARCH,gelsenkirchen,Negative,Broad
+IL-MON-CORE-SEARCH,münster,Negative,Broad
+IL-MON-CORE-SEARCH,maastricht,Negative,Broad
+IL-MON-CORE-SEARCH,preise,Negative,Phrase
+IL-MON-CORE-SEARCH,preis,Negative,Phrase
+IL-MON-CORE-SEARCH,kosten,Negative,Phrase
+IL-MON-CORE-SEARCH,was kostet,Negative,Phrase
+IL-MON-CORE-SEARCH,myhammer,Negative,Phrase
+IL-MON-CORE-SEARCH,groupon,Negative,Phrase
+IL-MON-CORE-SEARCH,check24,Negative,Phrase
+IL-MON-CORE-SEARCH,aroundhome,Negative,Phrase
+IL-MON-CORE-SEARCH,blauarbeit,Negative,Phrase
+IL-MON-CORE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-MON-CORE-SEARCH,ohne streifen,Negative,Phrase
+IL-MON-CORE-SEARCH,wie putze,Negative,Phrase
+IL-MON-CORE-SEARCH,wie putzt,Negative,Phrase
+IL-MON-CORE-SEARCH,wie reinige,Negative,Phrase
+IL-MON-CORE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-MON-CORE-SEARCH,frag mutti,Negative,Phrase
+IL-MON-CORE-SEARCH,mit klarspüler,Negative,Phrase
+IL-MON-CORE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-MON-CORE-SEARCH,richtig fenster,Negative,Phrase
+IL-MON-CORE-SEARCH,how to clean windows,Negative,Phrase
+IL-MON-CORE-SEARCH,window cleaning tip,Negative,Phrase
+IL-AAC-PRICE-SEARCH,auto,Negative,Broad
+IL-AAC-PRICE-SEARCH,autoscheibe,Negative,Broad
+IL-AAC-PRICE-SEARCH,scheibenwischer,Negative,Broad
+IL-AAC-PRICE-SEARCH,fahrzeug,Negative,Broad
+IL-AAC-PRICE-SEARCH,pkw,Negative,Broad
+IL-AAC-PRICE-SEARCH,lkw,Negative,Broad
+IL-AAC-PRICE-SEARCH,job,Negative,Broad
+IL-AAC-PRICE-SEARCH,jobs,Negative,Broad
+IL-AAC-PRICE-SEARCH,stellenangebot,Negative,Broad
+IL-AAC-PRICE-SEARCH,stellenanzeige,Negative,Broad
+IL-AAC-PRICE-SEARCH,ausbildung,Negative,Broad
+IL-AAC-PRICE-SEARCH,gehalt,Negative,Broad
+IL-AAC-PRICE-SEARCH,bewerbung,Negative,Broad
+IL-AAC-PRICE-SEARCH,lehrling,Negative,Broad
+IL-AAC-PRICE-SEARCH,gratis,Negative,Broad
+IL-AAC-PRICE-SEARCH,kostenlos,Negative,Broad
+IL-AAC-PRICE-SEARCH,kostenfrei,Negative,Broad
+IL-AAC-PRICE-SEARCH,umsonst,Negative,Broad
+IL-AAC-PRICE-SEARCH,diy,Negative,Broad
+IL-AAC-PRICE-SEARCH,tipps,Negative,Broad
+IL-AAC-PRICE-SEARCH,anleitung,Negative,Broad
+IL-AAC-PRICE-SEARCH,tutorial,Negative,Broad
+IL-AAC-PRICE-SEARCH,fassade,Negative,Broad
+IL-AAC-PRICE-SEARCH,selber,Negative,Broad
+IL-AAC-PRICE-SEARCH,selbst,Negative,Broad
+IL-AAC-PRICE-SEARCH,gebäudereinigung,Negative,Broad
+IL-AAC-PRICE-SEARCH,youtube,Negative,Broad
+IL-AAC-PRICE-SEARCH,hausmitteln,Negative,Broad
+IL-AAC-PRICE-SEARCH,klarspüler,Negative,Broad
+IL-AAC-PRICE-SEARCH,schlieren,Negative,Broad
+IL-AAC-PRICE-SEARCH,osmose,Negative,Broad
+IL-AAC-PRICE-SEARCH,spülmittel,Negative,Broad
+IL-AAC-PRICE-SEARCH,essig,Negative,Broad
+IL-AAC-PRICE-SEARCH,zeitungspapier,Negative,Broad
+IL-AAC-PRICE-SEARCH,putzanleitung,Negative,Broad
+IL-AAC-PRICE-SEARCH,bonn,Negative,Broad
+IL-AAC-PRICE-SEARCH,köln,Negative,Broad
+IL-AAC-PRICE-SEARCH,limburg,Negative,Broad
+IL-AAC-PRICE-SEARCH,wuppertal,Negative,Broad
+IL-AAC-PRICE-SEARCH,borken,Negative,Broad
+IL-AAC-PRICE-SEARCH,düsseldorf,Negative,Broad
+IL-AAC-PRICE-SEARCH,nippes,Negative,Broad
+IL-AAC-PRICE-SEARCH,dortmund,Negative,Broad
+IL-AAC-PRICE-SEARCH,krefeld,Negative,Broad
+IL-AAC-PRICE-SEARCH,mönchengladbach,Negative,Broad
+IL-AAC-PRICE-SEARCH,leverkusen,Negative,Broad
+IL-AAC-PRICE-SEARCH,frankfurt,Negative,Broad
+IL-AAC-PRICE-SEARCH,hamburg,Negative,Broad
+IL-AAC-PRICE-SEARCH,berlin,Negative,Broad
+IL-AAC-PRICE-SEARCH,münchen,Negative,Broad
+IL-AAC-PRICE-SEARCH,essen,Negative,Broad
+IL-AAC-PRICE-SEARCH,duisburg,Negative,Broad
+IL-AAC-PRICE-SEARCH,siegen,Negative,Broad
+IL-AAC-PRICE-SEARCH,bochum,Negative,Broad
+IL-AAC-PRICE-SEARCH,gelsenkirchen,Negative,Broad
+IL-AAC-PRICE-SEARCH,münster,Negative,Broad
+IL-AAC-PRICE-SEARCH,maastricht,Negative,Broad
+IL-AAC-PRICE-SEARCH,myhammer,Negative,Phrase
+IL-AAC-PRICE-SEARCH,groupon,Negative,Phrase
+IL-AAC-PRICE-SEARCH,check24,Negative,Phrase
+IL-AAC-PRICE-SEARCH,aroundhome,Negative,Phrase
+IL-AAC-PRICE-SEARCH,blauarbeit,Negative,Phrase
+IL-AAC-PRICE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-AAC-PRICE-SEARCH,ohne streifen,Negative,Phrase
+IL-AAC-PRICE-SEARCH,wie putze,Negative,Phrase
+IL-AAC-PRICE-SEARCH,wie putzt,Negative,Phrase
+IL-AAC-PRICE-SEARCH,wie reinige,Negative,Phrase
+IL-AAC-PRICE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-AAC-PRICE-SEARCH,frag mutti,Negative,Phrase
+IL-AAC-PRICE-SEARCH,mit klarspüler,Negative,Phrase
+IL-AAC-PRICE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-AAC-PRICE-SEARCH,richtig fenster,Negative,Phrase
+IL-AAC-PRICE-SEARCH,how to clean windows,Negative,Phrase
+IL-AAC-PRICE-SEARCH,window cleaning tip,Negative,Phrase
+IL-BAE-PRICE-SEARCH,auto,Negative,Broad
+IL-BAE-PRICE-SEARCH,autoscheibe,Negative,Broad
+IL-BAE-PRICE-SEARCH,scheibenwischer,Negative,Broad
+IL-BAE-PRICE-SEARCH,fahrzeug,Negative,Broad
+IL-BAE-PRICE-SEARCH,pkw,Negative,Broad
+IL-BAE-PRICE-SEARCH,lkw,Negative,Broad
+IL-BAE-PRICE-SEARCH,job,Negative,Broad
+IL-BAE-PRICE-SEARCH,jobs,Negative,Broad
+IL-BAE-PRICE-SEARCH,stellenangebot,Negative,Broad
+IL-BAE-PRICE-SEARCH,stellenanzeige,Negative,Broad
+IL-BAE-PRICE-SEARCH,ausbildung,Negative,Broad
+IL-BAE-PRICE-SEARCH,gehalt,Negative,Broad
+IL-BAE-PRICE-SEARCH,bewerbung,Negative,Broad
+IL-BAE-PRICE-SEARCH,lehrling,Negative,Broad
+IL-BAE-PRICE-SEARCH,gratis,Negative,Broad
+IL-BAE-PRICE-SEARCH,kostenlos,Negative,Broad
+IL-BAE-PRICE-SEARCH,kostenfrei,Negative,Broad
+IL-BAE-PRICE-SEARCH,umsonst,Negative,Broad
+IL-BAE-PRICE-SEARCH,diy,Negative,Broad
+IL-BAE-PRICE-SEARCH,tipps,Negative,Broad
+IL-BAE-PRICE-SEARCH,anleitung,Negative,Broad
+IL-BAE-PRICE-SEARCH,tutorial,Negative,Broad
+IL-BAE-PRICE-SEARCH,fassade,Negative,Broad
+IL-BAE-PRICE-SEARCH,selber,Negative,Broad
+IL-BAE-PRICE-SEARCH,selbst,Negative,Broad
+IL-BAE-PRICE-SEARCH,gebäudereinigung,Negative,Broad
+IL-BAE-PRICE-SEARCH,youtube,Negative,Broad
+IL-BAE-PRICE-SEARCH,hausmitteln,Negative,Broad
+IL-BAE-PRICE-SEARCH,klarspüler,Negative,Broad
+IL-BAE-PRICE-SEARCH,schlieren,Negative,Broad
+IL-BAE-PRICE-SEARCH,osmose,Negative,Broad
+IL-BAE-PRICE-SEARCH,spülmittel,Negative,Broad
+IL-BAE-PRICE-SEARCH,essig,Negative,Broad
+IL-BAE-PRICE-SEARCH,zeitungspapier,Negative,Broad
+IL-BAE-PRICE-SEARCH,putzanleitung,Negative,Broad
+IL-BAE-PRICE-SEARCH,bonn,Negative,Broad
+IL-BAE-PRICE-SEARCH,köln,Negative,Broad
+IL-BAE-PRICE-SEARCH,limburg,Negative,Broad
+IL-BAE-PRICE-SEARCH,wuppertal,Negative,Broad
+IL-BAE-PRICE-SEARCH,borken,Negative,Broad
+IL-BAE-PRICE-SEARCH,düsseldorf,Negative,Broad
+IL-BAE-PRICE-SEARCH,nippes,Negative,Broad
+IL-BAE-PRICE-SEARCH,dortmund,Negative,Broad
+IL-BAE-PRICE-SEARCH,krefeld,Negative,Broad
+IL-BAE-PRICE-SEARCH,mönchengladbach,Negative,Broad
+IL-BAE-PRICE-SEARCH,leverkusen,Negative,Broad
+IL-BAE-PRICE-SEARCH,frankfurt,Negative,Broad
+IL-BAE-PRICE-SEARCH,hamburg,Negative,Broad
+IL-BAE-PRICE-SEARCH,berlin,Negative,Broad
+IL-BAE-PRICE-SEARCH,münchen,Negative,Broad
+IL-BAE-PRICE-SEARCH,essen,Negative,Broad
+IL-BAE-PRICE-SEARCH,duisburg,Negative,Broad
+IL-BAE-PRICE-SEARCH,siegen,Negative,Broad
+IL-BAE-PRICE-SEARCH,bochum,Negative,Broad
+IL-BAE-PRICE-SEARCH,gelsenkirchen,Negative,Broad
+IL-BAE-PRICE-SEARCH,münster,Negative,Broad
+IL-BAE-PRICE-SEARCH,maastricht,Negative,Broad
+IL-BAE-PRICE-SEARCH,myhammer,Negative,Phrase
+IL-BAE-PRICE-SEARCH,groupon,Negative,Phrase
+IL-BAE-PRICE-SEARCH,check24,Negative,Phrase
+IL-BAE-PRICE-SEARCH,aroundhome,Negative,Phrase
+IL-BAE-PRICE-SEARCH,blauarbeit,Negative,Phrase
+IL-BAE-PRICE-SEARCH,kleinanzeigen,Negative,Phrase
+IL-BAE-PRICE-SEARCH,ohne streifen,Negative,Phrase
+IL-BAE-PRICE-SEARCH,wie putze,Negative,Phrase
+IL-BAE-PRICE-SEARCH,wie putzt,Negative,Phrase
+IL-BAE-PRICE-SEARCH,wie reinige,Negative,Phrase
+IL-BAE-PRICE-SEARCH,streifenfrei putzen,Negative,Phrase
+IL-BAE-PRICE-SEARCH,frag mutti,Negative,Phrase
+IL-BAE-PRICE-SEARCH,mit klarspüler,Negative,Phrase
+IL-BAE-PRICE-SEARCH,mit hausmitteln,Negative,Phrase
+IL-BAE-PRICE-SEARCH,richtig fenster,Negative,Phrase
+IL-BAE-PRICE-SEARCH,how to clean windows,Negative,Phrase
+IL-BAE-PRICE-SEARCH,window cleaning tip,Negative,Phrase
+IL-BRAND-SEARCH,auto,Negative,Broad
+IL-BRAND-SEARCH,job,Negative,Broad
+IL-BRAND-SEARCH,jobs,Negative,Broad
+IL-BRAND-SEARCH,gratis,Negative,Broad
+IL-BRAND-SEARCH,kostenlos,Negative,Broad
+IL-BRAND-SEARCH,diy,Negative,Broad
+IL-BRAND-SEARCH,anleitung,Negative,Broad
+IL-BRAND-SEARCH,selber,Negative,Broad
+IL-BRAND-SEARCH,youtube,Negative,Broad
+IL-BRAND-SEARCH,hausmitteln,Negative,Broad
+IL-BRAND-SEARCH,klarspüler,Negative,Broad
+IL-BRAND-SEARCH,tutorial,Negative,Broad
+IL-BRAND-SEARCH,myhammer,Negative,Phrase
+IL-BRAND-SEARCH,groupon,Negative,Phrase
+IL-BRAND-SEARCH,check24,Negative,Phrase
+IL-BRAND-SEARCH,wie putze,Negative,Phrase
+IL-BRAND-SEARCH,ohne streifen,Negative,Phrase
+IL-BRAND-SEARCH,frag mutti,Negative,Phrase
+IL-BRAND-SEARCH,kleinanzeigen,Negative,Phrase

@@ -9,9 +9,17 @@ import {
 } from "@/lib/vat-display";
 
 /** Default Festpreis = calculator mid-point (BRUTTO / Endpreis). */
-export function getDefaultFestpreis(lead: Pick<StoredLead, "festpreis" | "priceSnapshot">): number | undefined {
+export function getDefaultFestpreis(
+  lead: Pick<StoredLead, "festpreis" | "priceSnapshot" | "cleaningSnapshot" | "serviceLine">
+): number | undefined {
   if (typeof lead.festpreis === "number" && Number.isFinite(lead.festpreis) && lead.festpreis > 0) {
     return Math.round(lead.festpreis);
+  }
+  if (lead.serviceLine === "buero" || lead.cleaningSnapshot) {
+    const gross = lead.cleaningSnapshot?.customer.grossCents;
+    if (typeof gross === "number" && gross > 0) {
+      return Math.round(gross / 100);
+    }
   }
   const amount = lead.priceSnapshot?.amount;
   if (typeof amount === "number" && Number.isFinite(amount) && amount > 0) {
@@ -28,8 +36,9 @@ export function parseFestpreisInput(value: unknown): number | undefined {
 }
 
 export function getLeadPriceAudience(
-  lead: Pick<StoredLead, "quote"> | null | undefined
+  lead: Pick<StoredLead, "quote" | "serviceLine" | "cleaningSnapshot"> | null | undefined
 ): PriceAudience {
+  if (lead?.serviceLine === "buero" || lead?.cleaningSnapshot) return "gewerbe";
   return resolvePriceAudience(lead?.quote as Partial<QuoteFormData> | undefined);
 }
 
