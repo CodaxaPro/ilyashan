@@ -117,7 +117,9 @@ export function hasBlockingErrors(issues: ValidationIssue[]): boolean {
 
 export function requiresManualReview(input: CustomerInput, issues: ValidationIssue[]): boolean {
   if (input.totalAreaM2 >= 2000) return true;
-  if (issues.some((i) => i.code === "DESK_DENSITY_HIGH" || i.code === "SANITARY_DENSITY")) {
+  // Density warnings stay visible in the form — they must not hide the price indication
+  // (area typing used to spike density and flip the UI to "Individuelles Angebot").
+  if (issues.some((i) => i.code === "SANITARY_DENSITY")) {
     return true;
   }
   if (input.condition === "INITIAL_INTENSIVE" && input.totalAreaM2 >= 800) return true;

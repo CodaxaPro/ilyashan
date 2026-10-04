@@ -75,7 +75,8 @@ function readSubAreas(raw: unknown, total: number): SubAreas {
     draft.corridors +
     draft.reception +
     draft.other;
-  if (sum <= 0 && total > 0) {
+  // Always repair to total — never leave API calc in SUBAREA_MISMATCH from float/partial payloads.
+  if (total > 0 && (sum <= 0 || Math.abs(sum - total) > 0.05)) {
     return redistributeSubAreas(total, draft);
   }
   return draft;
@@ -90,7 +91,7 @@ function readFloors(raw: unknown, total: number): FloorAreas {
     other: clamp(num(o.other), 0, MAX_AREA),
   };
   const sum = draft.carpet + draft.hard + draft.wet + draft.other;
-  if (sum <= 0 && total > 0) {
+  if (total > 0 && (sum <= 0 || Math.abs(sum - total) > 0.05)) {
     return redistributeFloors(total, draft);
   }
   return draft;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   areasSynchronized,
   calculateOfficeCleaningQuote,
@@ -23,6 +23,7 @@ export type CalculatorStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | "contact" | "success" |
 
 export function useCleaningCalculator() {
   const locale: CleaningLocale = "de";
+  const previewRequestId = useRef(0);
   const [input, setInput] = useState<CustomerInput>(() =>
     createInitialCustomerInput({
       totalAreaM2: 200,
@@ -105,11 +106,26 @@ export function useCleaningCalculator() {
     (total: number) => {
       patch((prev) => {
         const totalAreaM2 = Math.max(0, Math.min(50_000, total));
+        const prevArea = prev.totalAreaM2 > 0 ? prev.totalAreaM2 : totalAreaM2;
+        const scale = prevArea > 0 ? totalAreaM2 / prevArea : 1;
+        // Keep workstation density stable when shrinking/growing area (avoids false MANUAL).
+        const workstations =
+          prev.office.officeBinsAutoSuggested || prev.office.workstations > 0
+            ? Math.max(0, Math.round(prev.office.workstations * scale))
+            : prev.office.workstations;
+        const officeBins = prev.office.officeBinsAutoSuggested
+          ? workstations
+          : prev.office.officeBins;
         return {
           ...prev,
           totalAreaM2,
           subAreas: redistributeSubAreas(totalAreaM2, prev.subAreas, prev.subAreaLocks),
           floors: redistributeFloors(totalAreaM2, prev.floors, prev.floorLocks),
+          office: {
+            ...prev.office,
+            workstations,
+            officeBins,
+          },
         };
       });
     },
@@ -181,6 +197,7 @@ export function useCleaningCalculator() {
 
   useEffect(() => {
     const controller = new AbortController();
+    const requestId = ++previewRequestId.current;
     const timer = setTimeout(async () => {
       try {
         const res = await fetch("/api/cleaning/calculate", {
@@ -197,6 +214,8 @@ export function useCleaningCalculator() {
           quote?: CustomerQuoteSummary;
           validation?: { code: string; level: string; message: string }[];
         };
+        // Ignore stale responses from earlier area keystrokes.
+        if (requestId !== previewRequestId.current) return;
         if (data.quote) setServerQuote(data.quote);
         if (data.validation) setServerValidation(data.validation);
       } catch {

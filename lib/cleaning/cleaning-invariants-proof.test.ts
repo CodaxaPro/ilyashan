@@ -459,7 +459,7 @@ describe("cleaning/validation codes", () => {
     }
   });
 
-  it("requiresManualReview for large / intensive / density", () => {
+  it("requiresManualReview for large / intensive; desk density stays warning-only", () => {
     assert.equal(requiresManualReview(FIXTURE_I_MANUAL, []), true);
     assert.equal(
       requiresManualReview(
@@ -467,6 +467,17 @@ describe("cleaning/validation codes", () => {
         []
       ),
       true
+    );
+    assert.equal(
+      requiresManualReview(FIXTURE_C_500, [
+        {
+          code: "DESK_DENSITY_HIGH",
+          level: "WARNING",
+          messageDe: "x",
+          messageTr: "x",
+        },
+      ]),
+      false
     );
   });
 });

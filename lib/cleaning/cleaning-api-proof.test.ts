@@ -13,6 +13,7 @@ import {
   DEFAULT_CLEANING_CONFIG,
   detectPriceInjection,
   generateCleaningQuoteReference,
+  hasBlockingErrors,
   normalizeContactInput,
   normalizeCustomerInput,
   serverCalculateCleaningQuote,
@@ -20,6 +21,21 @@ import {
 } from "./index";
 
 describe("cleaning/normalize-input", () => {
+  it("repairs mismatched subAreas/floors to total instead of blocking", () => {
+    const fixed = normalizeCustomerInput({
+      totalAreaM2: 100,
+      frequency: "2_PER_WEEK",
+      subAreas: { office: 10, meeting: 0, kitchen: 0, sanitary: 0, corridors: 0, reception: 0, other: 0 },
+      floors: { carpet: 10, hard: 0, wet: 0, other: 0 },
+      office: { workstations: 8, officeBins: 8 },
+    });
+    const calc = calculateOfficeCleaningQuote(fixed);
+    assert.equal(calc.customer.quoteStatus, "INDICATION");
+    assert.ok(calc.customer.netCents > 0);
+    assert.ok(calc.customer.estimatedOnsiteHours >= 1.5);
+    assert.equal(hasBlockingErrors(calc.admin.validation), false);
+  });
+
   it("clamps NaN / negative / oversized numbers", () => {
     const input = normalizeCustomerInput({
       totalAreaM2: -50,
@@ -153,10 +169,18 @@ describe("cleaning/snapshot immutability", () => {
 });
 
 describe("cleaning/quote blocking", () => {
-  it("inconsistent areas surface blocking from server calc", () => {
+  it("raw inconsistent areas still block when not normalized", () => {
     const { blocking, calc } = serverCalculateCleaningQuote(FIXTURE_F_INCONSISTENT);
     assert.equal(blocking, true);
     assert.equal(calc.customer.quoteStatus, "MANUAL_REVIEW_REQUIRED");
+  });
+
+  it("public normalize path repairs inconsistent areas into an indication", () => {
+    const fixed = normalizeCustomerInput(FIXTURE_F_INCONSISTENT);
+    const { blocking, calc } = serverCalculateCleaningQuote(fixed);
+    assert.equal(blocking, false);
+    assert.equal(calc.customer.quoteStatus, "INDICATION");
+    assert.ok(calc.customer.netCents > 0);
   });
 });
 
