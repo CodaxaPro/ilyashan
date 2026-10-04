@@ -3,6 +3,9 @@ import { expect, test } from "@playwright/test";
 const PAGES = [
   { name: "home", path: "/de" },
   { name: "angebot", path: "/de/angebot" },
+  { name: "bueroreinigung-angebot", path: "/de/bueroreinigung/angebot" },
+  { name: "fensterreinigung", path: "/de/fensterreinigung" },
+  { name: "gutschein", path: "/de/gutschein" },
   { name: "impressum", path: "/de/impressum" },
   { name: "datenschutz", path: "/de/datenschutz" },
 ];

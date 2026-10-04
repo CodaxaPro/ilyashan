@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatGermanDate } from "@/lib/quote-form";
 import type { DayAvailability } from "@/lib/scheduling/slot-engine";
 import {
@@ -12,6 +12,7 @@ import {
 import type { TerminPortalSummary } from "@/lib/termin-portal";
 import type { TerminWartungContext } from "@/lib/termin-wartung";
 import { siteConfig } from "@/lib/config";
+import { scrollToQuoteWizardTop } from "@/components/quote/quote-wizard-scroll";
 
 interface TerminLeadSummary {
   id: string;
@@ -57,6 +58,7 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showReschedule, setShowReschedule] = useState(false);
+  const portalAnchorRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -110,6 +112,12 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
       current && options.some((o) => o.id === current) ? current : (options[0]?.id ?? null)
     );
   }, [selectedDay]);
+
+  // After booking, layout shortens — re-anchor so success is not parked in the footer.
+  useEffect(() => {
+    if (!success) return;
+    scrollToQuoteWizardTop(portalAnchorRef.current);
+  }, [success]);
 
   async function book(action: "confirm_proposed" | "pick_slot") {
     setSubmitting(true);
@@ -209,7 +217,11 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
   const showPickSlot = canPickSlot && (!alreadyBooked || showReschedule);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10" data-testid="termin-portal">
+    <div
+      ref={portalAnchorRef}
+      className="max-w-2xl mx-auto px-4 py-10 scroll-mt-24 [overflow-anchor:none]"
+      data-testid="termin-portal"
+    >
       <div className="mb-8">
         <p className="text-sm font-semibold text-primary uppercase tracking-wide">Meine Anfrage</p>
         <h1 className="text-3xl font-bold text-foreground mt-1">

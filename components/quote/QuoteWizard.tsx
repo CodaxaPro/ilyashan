@@ -68,7 +68,12 @@ export function QuoteWizard() {
   const showMobilePriceDock = step >= 3 && Boolean(priceEstimate);
 
   return (
-    <div ref={wizardAnchorRef} id="quote-wizard" className="scroll-mt-24">
+    <div
+      ref={wizardAnchorRef}
+      id="quote-wizard"
+      className="scroll-mt-24 [overflow-anchor:none]"
+      data-testid="quote-wizard"
+    >
       {prefillBanner && (
         <div
           data-testid="wizard-prefill-banner"
@@ -128,7 +133,13 @@ export function QuoteWizard() {
 
       {step === 5 && step > 1 && (
         <div className="mt-6">
-          <Button type="button" variant="secondary" size="md" onClick={prevStep}>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onMouseDown={preventChoiceButtonScroll}
+            onClick={prevStep}
+          >
             ← Zurück
           </Button>
         </div>

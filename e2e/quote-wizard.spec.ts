@@ -214,3 +214,34 @@ test.describe("Angebot Wizard – API", () => {
     expect(honeypot.status()).toBe(200);
   });
 });
+
+test.describe("Angebot Wizard – Scroll hygiene", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("step changes keep wizard below header, not in footer", async ({ page }) => {
+    await page.goto(ANGEBOT);
+    await page.getByTestId("service-privat").click();
+    await page.getByTestId("quote-next").click();
+
+    await page.waitForFunction(() => {
+      const el = document.getElementById("quote-wizard");
+      if (!el) return false;
+      const top = el.getBoundingClientRect().top;
+      return top >= 64 && top < window.innerHeight - 80;
+    }, undefined, { timeout: 3_000 });
+
+    await page.getByRole("button", { name: "Wohnung", exact: true }).click();
+    await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
+    await page.getByRole("button", { name: "Ja", exact: true }).click();
+    await page.getByTestId("quote-next").click();
+
+    await page.waitForFunction(() => {
+      const el = document.getElementById("quote-wizard");
+      if (!el) return false;
+      const top = el.getBoundingClientRect().top;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const nearFooter = max > 200 && window.scrollY > max - 40;
+      return top >= 64 && top < window.innerHeight - 80 && !nearFooter;
+    }, undefined, { timeout: 3_000 });
+  });
+});

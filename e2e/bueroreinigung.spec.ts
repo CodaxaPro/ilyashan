@@ -99,6 +99,40 @@ test.describe("Büroreinigung desktop", () => {
     await page.getByTestId("cleaning-goto-contact").click();
     await expect(page.getByRole("heading", { name: "Kontaktdaten" })).toBeVisible();
   });
+
+  test("accordion step stays in view; contact does not park in footer", async ({ page }) => {
+    await page.goto(PATH);
+    await dismissCookieBanner(page);
+
+    for (const step of [2, 4, 7]) {
+      await openAccordion(page, step);
+      await page.waitForFunction(
+        (s) => {
+          const el = document.getElementById(`cleaning-step-${s}-header`);
+          if (!el) return false;
+          const top = el.getBoundingClientRect().top;
+          return top >= 64 && top < window.innerHeight - 100;
+        },
+        step,
+        { timeout: 3_000 }
+      );
+    }
+
+    await page.getByTestId("cleaning-goto-contact").click();
+    await expect(page.getByTestId("cleaning-contact-form")).toBeVisible();
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="cleaning-contact-form"]');
+      if (!el) return false;
+      const top = el.getBoundingClientRect().top;
+      return top >= 64 && top < 480;
+    }, undefined, { timeout: 3_000 });
+
+    const nearFooter = await page.evaluate(() => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      return max > 200 ? window.scrollY > max - 40 : false;
+    });
+    expect(nearFooter).toBe(false);
+  });
 });
 
 test.describe("Büroreinigung mobile sheet", () => {
@@ -112,5 +146,37 @@ test.describe("Büroreinigung mobile sheet", () => {
     await expect(page.getByTestId("cleaning-mobile-sheet")).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("cleaning-mobile-sheet")).toHaveCount(0);
+  });
+
+  test("mobile accordion + field edits do not jump to footer", async ({ page }) => {
+    await page.goto(PATH);
+    await dismissCookieBanner(page);
+
+    await openAccordion(page, 5);
+    await page.waitForFunction(() => {
+      const el = document.getElementById("cleaning-step-5-header");
+      if (!el) return false;
+      const top = el.getBoundingClientRect().top;
+      return top >= 64 && top < window.innerHeight - 100;
+    }, undefined, { timeout: 3_000 });
+
+    // force: skip Playwright's own scroll-into-view; we only assert app scroll hygiene
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    await page.locator('#cleaning-step-5-panel button[aria-label="+"]').first().click({
+      force: true,
+    });
+    await page.waitForTimeout(80);
+    const scrollAfter = await page.evaluate(() => window.scrollY);
+    const maxScroll = await page.evaluate(
+      () => document.documentElement.scrollHeight - window.innerHeight
+    );
+    expect(Math.abs(scrollAfter - scrollBefore)).toBeLessThan(40);
+    if (maxScroll > 200) {
+      expect(scrollAfter).toBeLessThan(maxScroll - 60);
+    }
+    await expect(page.getByTestId("cleaning-accordion-5")).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
   });
 });

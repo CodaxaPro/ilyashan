@@ -26,7 +26,7 @@ export function CleaningAccordionSection({
   const headerId = `cleaning-step-${step}-header`;
 
   return (
-    <section className="border border-border rounded-2xl bg-white overflow-hidden">
+    <section className="border border-border rounded-2xl bg-white overflow-hidden [overflow-anchor:none]">
       <h3>
         <button
           type="button"
@@ -35,7 +35,7 @@ export function CleaningAccordionSection({
           aria-controls={panelId}
           onClick={onToggle}
           onMouseDown={preventChoiceButtonScroll}
-          className="w-full flex items-start gap-3 px-4 sm:px-5 py-4 text-left min-h-14 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
+          className="w-full flex items-start gap-3 px-4 sm:px-5 py-4 text-left min-h-14 scroll-mt-24 hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
           data-testid={`cleaning-accordion-${step}`}
         >
           <span

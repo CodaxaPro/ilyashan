@@ -8,6 +8,9 @@ import type {
   UsageIntensity,
 } from "@/lib/cleaning";
 import {
+  clampWindowScrollToDocument,
+  preventChoiceButtonScroll,
+  scrollElementIntoViewBelowHeader,
   scrollToQuoteWizardTop,
 } from "@/components/quote/quote-wizard-scroll";
 import { CleaningAccordionSection } from "./CleaningAccordionSection";
@@ -231,14 +234,29 @@ export function CleaningCalculator() {
   const anchorRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
-  // Tall accordion → short success: without re-anchor, desktop scroll stays in the footer.
-  // Skip first paint so landing on the page does not steal the hero viewport.
+  // Accordion: keep the active step in view — do NOT yank to calculator top on every toggle
+  // (that left users in the footer after layout collapse). Contact/success still re-anchor.
   useEffect(() => {
     if (!didMountRef.current) {
       didMountRef.current = true;
       return;
     }
-    scrollToQuoteWizardTop(anchorRef.current);
+
+    if (openStep === "success" || openStep === "contact") {
+      scrollToQuoteWizardTop(anchorRef.current);
+      return;
+    }
+
+    if (typeof openStep === "number") {
+      const header = document.getElementById(`cleaning-step-${openStep}-header`);
+      scrollElementIntoViewBelowHeader(header);
+      return;
+    }
+
+    // All steps closed — clamp after height collapse so footer is not parked in view.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(clampWindowScrollToDocument);
+    });
   }, [openStep]);
 
   const toggle = (step: 1 | 2 | 3 | 4 | 5 | 6 | 7) => {
@@ -249,7 +267,7 @@ export function CleaningCalculator() {
     <div
       ref={anchorRef}
       id="cleaning-calculator"
-      className="scroll-mt-24"
+      className="scroll-mt-24 [overflow-anchor:none]"
       data-testid="cleaning-calculator"
     >
       {openStep === "success" ? (
@@ -271,6 +289,7 @@ export function CleaningCalculator() {
               <button
                 type="button"
                 className="text-sm text-primary font-medium mb-4"
+                onMouseDown={preventChoiceButtonScroll}
                 onClick={() => setOpenStep(7)}
               >
                 ← {t(locale, "back")}
@@ -701,6 +720,7 @@ export function CleaningCalculator() {
                   type="button"
                   data-testid="cleaning-goto-contact"
                   className="w-full min-h-12 rounded-xl bg-accent text-white font-semibold mt-2"
+                  onMouseDown={preventChoiceButtonScroll}
                   onClick={() => setOpenStep("contact")}
                 >
                   {t(locale, "requestQuote")}
@@ -732,6 +752,7 @@ export function CleaningCalculator() {
             <button
               type="button"
               className="mt-5 w-full min-h-12 rounded-xl bg-accent text-white font-semibold"
+              onMouseDown={preventChoiceButtonScroll}
               onClick={() => setOpenStep("contact")}
             >
               {t(locale, "requestQuote")}
