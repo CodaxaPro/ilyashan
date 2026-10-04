@@ -64,6 +64,8 @@ test.describe("Büroreinigung desktop", () => {
     await dismissCookieBanner(page);
     await expect(page.getByTestId("cleaning-summary")).toBeVisible();
     await expect(page.getByTestId("cleaning-price-net")).toBeVisible();
+    await expect(page.getByTestId("cleaning-price-month-net")).toBeVisible();
+    await expect(page.getByTestId("cleaning-price-month")).toContainText(/Monat|52/i);
     await openAccordion(page, 4);
     await expect(page.getByTestId("cleaning-desks")).toBeVisible();
   });

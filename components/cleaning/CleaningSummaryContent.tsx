@@ -57,6 +57,23 @@ export function CleaningSummaryContent({
               <span data-testid="cleaning-price-gross">{priceLabel.gross}</span>
             </div>
           </div>
+          {priceLabel.monthlyNet ? (
+            <div className="mt-4 pt-3 border-t border-border/60" data-testid="cleaning-price-month">
+              <p
+                className="text-xl font-extrabold text-foreground leading-none"
+                data-testid="cleaning-price-month-net"
+              >
+                {priceLabel.monthlyNet}
+              </p>
+              <p className="text-sm text-foreground/60 mt-1">{t(locale, "netPerMonth")}</p>
+              <p className="text-xs text-foreground/45 mt-1">{t(locale, "monthNote")}</p>
+              {priceLabel.monthlyGross ? (
+                <p className="text-sm text-foreground/70 mt-2" data-testid="cleaning-price-month-gross">
+                  {t(locale, "gross")}: {priceLabel.monthlyGross}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
 

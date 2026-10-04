@@ -756,6 +756,14 @@ export function CleaningCalculator() {
               {state.priceLabel?.net ?? "—"}
             </p>
             <p className="text-xs text-foreground/60">{t(locale, "netPerClean")}</p>
+            {state.priceLabel?.monthlyNet ? (
+              <p
+                className="text-xs text-foreground/55 mt-0.5 truncate"
+                data-testid="cleaning-price-month-net-mobile"
+              >
+                {state.priceLabel.monthlyNet} {t(locale, "netPerMonth")}
+              </p>
+            ) : null}
           </div>
           <button
             type="button"

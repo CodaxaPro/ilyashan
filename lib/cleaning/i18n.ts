@@ -89,6 +89,8 @@ const de: Dict = {
   manualReviewBody:
     "Für dieses Objekt erstellen wir Ihnen ein individuelles Angebot.",
   netPerClean: "netto / Reinigung",
+  netPerMonth: "ca. netto / Monat",
+  monthNote: "Jahresdurchschnitt (52 Wochen ÷ 12 Monate)",
   vat: "MwSt.",
   gross: "Brutto",
   team: "Empfohlene Teamgröße",
@@ -213,6 +215,8 @@ const tr: Dict = {
   manualReview: "Bireysel teklif",
   manualReviewBody: "Bu tesis için size özel bir teklif hazırlarız.",
   netPerClean: "net / temizlik",
+  netPerMonth: "yak. net / ay",
+  monthNote: "Yıllık ortalama (52 hafta ÷ 12 ay)",
   vat: "KDV",
   gross: "Brüt",
   team: "Önerilen ekip",

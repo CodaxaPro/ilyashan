@@ -237,6 +237,14 @@ export function useCleaningCalculator() {
       net: formatEuroFromCents(quote.netCents, "de-DE"),
       vat: formatEuroFromCents(quote.vatCents, "de-DE"),
       gross: formatEuroFromCents(quote.grossCents, "de-DE"),
+      monthlyNet:
+        quote.monthlyNetCents != null
+          ? formatEuroFromCents(quote.monthlyNetCents, "de-DE")
+          : null,
+      monthlyGross:
+        quote.monthlyGrossCents != null
+          ? formatEuroFromCents(quote.monthlyGrossCents, "de-DE")
+          : null,
     };
   }, [quote]);
 

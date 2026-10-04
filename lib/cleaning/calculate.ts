@@ -6,6 +6,7 @@ import { calculateWorkload, type WorkloadResult } from "./workload";
 import { recommendTeam, type TeamRecommendation } from "./team";
 import { calculateJobCost, type CostBreakdown } from "./cost";
 import { calculatePrice, type PriceBreakdown } from "./pricing";
+import { estimateMonthlyGrossCents, estimateMonthlyNetCents } from "./monthly";
 
 /** Customer-safe quote result — no labor rates, margin internals as optional admin-only. */
 export interface CustomerQuoteSummary {
@@ -13,6 +14,9 @@ export interface CustomerQuoteSummary {
   netCents: number;
   vatCents: number;
   grossCents: number;
+  /** Jahresdurchschnitt: net/visit × visits/week × (52/12). Null for ONE_TIME / incomplete CUSTOM. */
+  monthlyNetCents: number | null;
+  monthlyGrossCents: number | null;
   frequency: CustomerInput["frequency"];
   totalAreaM2: number;
   recommendedWorkers: number;
@@ -93,16 +97,27 @@ function toCustomer(
   input: CustomerInput,
   team: TeamRecommendation,
   price: PriceBreakdown,
-  _config: CleaningEngineConfig = DEFAULT_CLEANING_CONFIG
+  config: CleaningEngineConfig = DEFAULT_CLEANING_CONFIG
 ): CustomerQuoteSummary {
   // Dauer = team onsite from billable person-hours (not raw workload floor alone).
   // Do not inflate multi-person visits by forcing min Pers.-Std. onto clock time.
   const estimatedOnsiteHours = Math.max(team.onsiteHoursRounded, 0.5);
+  const monthlyNetCents = estimateMonthlyNetCents(
+    price.roundedNetCents,
+    input.frequency,
+    input.customFrequencyPerWeek
+  );
+  const monthlyGrossCents =
+    monthlyNetCents != null
+      ? estimateMonthlyGrossCents(monthlyNetCents, config.vatRateBps)
+      : null;
   return {
     quoteStatus: price.quoteStatus,
     netCents: price.roundedNetCents,
     vatCents: price.vatCents,
     grossCents: price.grossCents,
+    monthlyNetCents,
+    monthlyGrossCents,
     frequency: input.frequency,
     totalAreaM2: input.totalAreaM2,
     recommendedWorkers: team.workers,

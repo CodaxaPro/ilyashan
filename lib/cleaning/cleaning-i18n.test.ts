@@ -17,5 +17,8 @@ describe("cleaning/i18n", () => {
     assert.equal(de.customer.netCents, tr.customer.netCents);
     assert.equal(t("de", "netPerClean").includes("netto"), true);
     assert.equal(t("tr", "netPerClean").includes("net"), true);
+    assert.match(t("de", "netPerMonth"), /Monat/);
+    assert.match(t("de", "monthNote"), /52/);
+    assert.equal(de.customer.monthlyNetCents, tr.customer.monthlyNetCents);
   });
 });
