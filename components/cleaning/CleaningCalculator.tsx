@@ -439,17 +439,31 @@ export function CleaningCalculator() {
                   }
                 />
                 <CheckboxRow
-                  label="Regale"
+                  label={t(locale, "shelving")}
                   checked={input.office.shelving}
                   onChange={(shelving) =>
                     patch((p) => ({ ...p, office: { ...p.office, shelving } }))
                   }
                 />
                 <CheckboxRow
-                  label="Fensterbänke"
+                  label={t(locale, "windowSills")}
                   checked={input.office.windowSills}
                   onChange={(windowSills) =>
                     patch((p) => ({ ...p, office: { ...p.office, windowSills } }))
+                  }
+                />
+                <CheckboxRow
+                  label={t(locale, "phoneMonitor")}
+                  checked={input.office.phoneMonitorExterior}
+                  onChange={(phoneMonitorExterior) =>
+                    patch((p) => ({ ...p, office: { ...p.office, phoneMonitorExterior } }))
+                  }
+                />
+                <CheckboxRow
+                  label={t(locale, "whiteboards")}
+                  checked={input.office.whiteboards}
+                  onChange={(whiteboards) =>
+                    patch((p) => ({ ...p, office: { ...p.office, whiteboards } }))
                   }
                 />
               </CleaningAccordionSection>
@@ -470,6 +484,7 @@ export function CleaningCalculator() {
                     ["mirrors", "mirrors"],
                     ["sanitaryBins", "sanitaryBins"],
                     ["showers", "showers"],
+                    ["cubicles", "cubicles"],
                   ] as const
                 ).map(([field, labelKey]) => (
                   <NumberField
@@ -523,6 +538,16 @@ export function CleaningCalculator() {
                       }
                     />
                     <NumberField
+                      label={t(locale, "kitchenChairs")}
+                      value={input.kitchen.chairs}
+                      onChange={(n) =>
+                        patch((p) => ({
+                          ...p,
+                          kitchen: { ...p.kitchen, chairs: Math.max(0, Math.round(n)) },
+                        }))
+                      }
+                    />
+                    <NumberField
                       label={t(locale, "sinks")}
                       value={input.kitchen.sinks}
                       onChange={(n) =>
@@ -533,12 +558,38 @@ export function CleaningCalculator() {
                       }
                     />
                     <NumberField
+                      label={t(locale, "counters")}
+                      value={input.kitchen.countertopUnits}
+                      onChange={(n) =>
+                        patch((p) => ({
+                          ...p,
+                          kitchen: {
+                            ...p.kitchen,
+                            countertopUnits: Math.max(0, Math.round(n)),
+                          },
+                        }))
+                      }
+                    />
+                    <NumberField
                       label={t(locale, "kitchenBins")}
                       value={input.kitchen.bins}
                       onChange={(n) =>
                         patch((p) => ({
                           ...p,
                           kitchen: { ...p.kitchen, bins: Math.max(0, Math.round(n)) },
+                        }))
+                      }
+                    />
+                    <NumberField
+                      label={t(locale, "appliances")}
+                      value={input.kitchen.applianceExteriors}
+                      onChange={(n) =>
+                        patch((p) => ({
+                          ...p,
+                          kitchen: {
+                            ...p.kitchen,
+                            applianceExteriors: Math.max(0, Math.round(n)),
+                          },
                         }))
                       }
                     />
@@ -557,6 +608,27 @@ export function CleaningCalculator() {
                           ...p,
                           kitchen: { ...p.kitchen, refrigeratorInside },
                         }))
+                      }
+                    />
+                    <CheckboxRow
+                      label={t(locale, "dishwasher")}
+                      checked={input.kitchen.dishwasher}
+                      onChange={(dishwasher) =>
+                        patch((p) => ({ ...p, kitchen: { ...p.kitchen, dishwasher } }))
+                      }
+                    />
+                    <CheckboxRow
+                      label={t(locale, "cabinetFronts")}
+                      checked={input.kitchen.cabinetFronts}
+                      onChange={(cabinetFronts) =>
+                        patch((p) => ({ ...p, kitchen: { ...p.kitchen, cabinetFronts } }))
+                      }
+                    />
+                    <CheckboxRow
+                      label={t(locale, "dishes")}
+                      checked={input.kitchen.dishes}
+                      onChange={(dishes) =>
+                        patch((p) => ({ ...p, kitchen: { ...p.kitchen, dishes } }))
                       }
                     />
                   </>
@@ -601,6 +673,26 @@ export function CleaningCalculator() {
                         ...p.additional,
                         glassEntranceDoors: Math.max(0, Math.round(n)),
                       },
+                    }))
+                  }
+                />
+                <CheckboxRow
+                  label={t(locale, "receptionDetail")}
+                  checked={input.additional.receptionDetail}
+                  onChange={(receptionDetail) =>
+                    patch((p) => ({
+                      ...p,
+                      additional: { ...p.additional, receptionDetail },
+                    }))
+                  }
+                />
+                <CheckboxRow
+                  label={t(locale, "highTouch")}
+                  checked={input.additional.highTouchAreas}
+                  onChange={(highTouchAreas) =>
+                    patch((p) => ({
+                      ...p,
+                      additional: { ...p.additional, highTouchAreas },
                     }))
                   }
                 />

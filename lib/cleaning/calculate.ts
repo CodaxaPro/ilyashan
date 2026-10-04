@@ -46,14 +46,15 @@ export function calculateOfficeCleaningQuote(
       requiredPersonMinutes: 0,
       requiredPersonHours: 0,
     };
-    const team = recommendTeam(0, config);
     const cost = calculateJobCost(0, config);
+    // Customer-facing Dauer follows billable visit time (min. Pers.-Std.), not raw workload.
+    const team = recommendTeam(cost.billablePersonHours, config);
     const price = calculatePrice(cost.totalCostCents, input.frequency, config, {
       forceManualReview: true,
       overrideStatus: "MANUAL_REVIEW_REQUIRED",
     });
     return {
-      customer: toCustomer(input, team, price),
+      customer: toCustomer(input, team, price, config),
       admin: {
         configVersionId: config.configVersionId,
         validation,
@@ -66,15 +67,17 @@ export function calculateOfficeCleaningQuote(
   }
 
   const workload = calculateWorkload(input, config);
-  const team = recommendTeam(workload.requiredPersonHours, config);
   const cost = calculateJobCost(workload.requiredPersonHours, config);
+  // Historical Büro invoices (Dyckhoff etc.) billed ~1–2.5 Std, median ~2 Std.
+  // Show commercial onsite from billable hours so UI Dauer matches minimum visit / price.
+  const team = recommendTeam(cost.billablePersonHours, config);
   const forceManual = requiresManualReview(input, validation);
   const price = calculatePrice(cost.totalCostCents, input.frequency, config, {
     forceManualReview: forceManual,
   });
 
   return {
-    customer: toCustomer(input, team, price),
+    customer: toCustomer(input, team, price, config),
     admin: {
       configVersionId: config.configVersionId,
       validation,
@@ -89,8 +92,12 @@ export function calculateOfficeCleaningQuote(
 function toCustomer(
   input: CustomerInput,
   team: TeamRecommendation,
-  price: PriceBreakdown
+  price: PriceBreakdown,
+  _config: CleaningEngineConfig = DEFAULT_CLEANING_CONFIG
 ): CustomerQuoteSummary {
+  // Dauer = team onsite from billable person-hours (not raw workload floor alone).
+  // Do not inflate multi-person visits by forcing min Pers.-Std. onto clock time.
+  const estimatedOnsiteHours = Math.max(team.onsiteHoursRounded, 0.5);
   return {
     quoteStatus: price.quoteStatus,
     netCents: price.roundedNetCents,
@@ -99,7 +106,7 @@ function toCustomer(
     frequency: input.frequency,
     totalAreaM2: input.totalAreaM2,
     recommendedWorkers: team.workers,
-    estimatedOnsiteHours: team.onsiteHoursRounded,
+    estimatedOnsiteHours,
     language: input.language,
   };
 }

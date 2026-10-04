@@ -26,7 +26,6 @@ function taskMinutes(task: TaskRateSeed, quantity: number, factor: number): numb
   if (task.rateType === "MINUTES_PER_UNIT") {
     return quantity * task.baseRate * factor;
   }
-  // UNITS_PER_HOUR
   return (quantity / task.baseRate) * 60 * factor;
 }
 
@@ -66,8 +65,12 @@ function byId(config: CleaningEngineConfig, id: string): TaskRateSeed | undefine
 }
 
 /**
- * Task-based workloading. Floor m² tasks are independent of sanitary fixtures
- * (fixtures exclude wet_floor_clean). Kitchen base suppresses duplicate kitchen_bin lines.
+ * Hybrid workloading (v3):
+ * 1) Primary time from subAreas × RAL-derived room rates
+ * 2) Carpet surcharge from floors.carpet (no full double floor mop)
+ * 3) Wet m² above sanitary room area
+ * 4) Counts / booleans refine density and options
+ * 5) Fixed Rüst-/Wegezeit per visit
  */
 export function calculateWorkload(
   input: CustomerInput,
@@ -76,20 +79,70 @@ export function calculateWorkload(
   const factor = applicableFactor(input, config);
   const lines: TaskLine[] = [];
   const includedOnce = new Set<string>();
+  const { subAreas, floors } = input;
+  const roomSum =
+    subAreas.office +
+    subAreas.meeting +
+    subAreas.kitchen +
+    subAreas.sanitary +
+    subAreas.corridors +
+    subAreas.reception +
+    subAreas.other;
 
-  pushLine(lines, byId(config, "carpet_vacuum"), input.floors.carpet, factor);
-  pushLine(lines, byId(config, "hard_floor_damp_mop"), input.floors.hard, factor);
-  pushLine(lines, byId(config, "wet_floor_clean"), input.floors.wet, factor);
+  // —— Rooms (primary) ——
+  pushLine(lines, byId(config, "room_office"), subAreas.office, factor);
+  pushLine(lines, byId(config, "room_meeting"), subAreas.meeting, factor);
+  pushLine(lines, byId(config, "room_kitchen"), subAreas.kitchen, factor);
+  pushLine(lines, byId(config, "room_sanitary"), subAreas.sanitary, factor);
+  pushLine(lines, byId(config, "room_corridors"), subAreas.corridors, factor);
+  pushLine(lines, byId(config, "room_reception"), subAreas.reception, factor);
+  pushLine(lines, byId(config, "room_other"), subAreas.other, factor);
 
-  pushLine(lines, byId(config, "desk_surfaces"), input.office.workstations, factor);
+  // Fallback if subAreas empty (blocked by validation in normal quotes)
+  if (roomSum <= 0 && input.totalAreaM2 > 0) {
+    pushLine(lines, byId(config, "room_office"), input.totalAreaM2, factor);
+  }
+  pushLine(lines, byId(config, "carpet_surcharge"), floors.carpet, factor);
+  const wetExtra = Math.max(0, floors.wet - subAreas.sanitary);
+  pushLine(lines, byId(config, "wet_floor_clean"), wetExtra, factor);
+
+  // —— Office ——
+  const desks = input.office.workstations;
+  pushLine(lines, byId(config, "desk_surfaces"), desks, factor);
   pushLine(lines, byId(config, "office_bin_empty"), input.office.officeBins, factor);
   pushLine(lines, byId(config, "meeting_chair_wipe"), input.office.meetingChairs, factor);
+  if (input.office.cabinetExterior) {
+    pushLine(lines, byId(config, "cabinet_exterior"), Math.max(desks, 1), factor);
+  }
+  if (input.office.shelving) {
+    pushLine(lines, byId(config, "shelving_wipe"), Math.max(desks, 1), factor);
+  }
+  if (input.office.windowSills) {
+    const sillQty = Math.max(desks, input.office.meetingRooms * 2, 1);
+    pushLine(lines, byId(config, "window_sill_wipe"), sillQty, factor);
+  }
+  if (input.office.phoneMonitorExterior) {
+    pushLine(lines, byId(config, "phone_monitor_exterior"), Math.max(desks, 1), factor);
+  }
+  if (input.office.whiteboards) {
+    pushLine(
+      lines,
+      byId(config, "whiteboard_wipe"),
+      Math.max(input.office.meetingRooms, 1),
+      factor
+    );
+  }
 
+  // —— Sanitary ——
   pushLine(lines, byId(config, "toilet_fixture"), input.sanitary.toilets, factor);
   pushLine(lines, byId(config, "urinal_fixture"), input.sanitary.urinals, factor);
   pushLine(lines, byId(config, "washbasin_fixture"), input.sanitary.washbasins, factor);
   pushLine(lines, byId(config, "mirror_clean"), input.sanitary.mirrors, factor);
+  pushLine(lines, byId(config, "sanitary_bin_empty"), input.sanitary.sanitaryBins, factor);
+  pushLine(lines, byId(config, "shower_fixture"), input.sanitary.showers, factor);
+  pushLine(lines, byId(config, "cubicle_wipe"), input.sanitary.cubicles, factor);
 
+  // —— Kitchen ——
   if (input.kitchen.kitchens > 0) {
     const kitchenBase = byId(config, "kitchen_base");
     pushLine(lines, kitchenBase, input.kitchen.kitchens, factor);
@@ -98,7 +151,6 @@ export function calculateWorkload(
         includedOnce.add(id);
       }
     }
-    // Separate bin task only if not included in kitchen_base
     if (!includedOnce.has("kitchen_bin_empty")) {
       pushLine(lines, byId(config, "kitchen_bin_empty"), input.kitchen.bins, factor);
     } else if (input.kitchen.bins > 0) {
@@ -110,12 +162,55 @@ export function calculateWorkload(
         "kitchen_base"
       );
     }
+    pushLine(lines, byId(config, "kitchen_table"), input.kitchen.tables, factor);
+    pushLine(lines, byId(config, "kitchen_chair"), input.kitchen.chairs, factor);
+    pushLine(lines, byId(config, "kitchen_sink"), input.kitchen.sinks, factor);
+    pushLine(lines, byId(config, "kitchen_counter"), input.kitchen.countertopUnits, factor);
+    pushLine(
+      lines,
+      byId(config, "appliance_exterior"),
+      input.kitchen.applianceExteriors,
+      factor
+    );
     if (input.kitchen.microwaveInside) {
       pushLine(lines, byId(config, "microwave_inside"), input.kitchen.kitchens, factor);
     }
+    if (input.kitchen.refrigeratorInside) {
+      pushLine(lines, byId(config, "refrigerator_inside"), input.kitchen.kitchens, factor);
+    }
+    if (input.kitchen.dishwasher) {
+      pushLine(lines, byId(config, "dishwasher_exterior"), input.kitchen.kitchens, factor);
+    }
+    if (input.kitchen.cabinetFronts) {
+      pushLine(lines, byId(config, "kitchen_cabinet_fronts"), input.kitchen.kitchens, factor);
+    }
+    if (input.kitchen.dishes) {
+      pushLine(lines, byId(config, "dishes_wash"), input.kitchen.kitchens, factor);
+    }
   }
 
+  // —— Additional ——
   pushLine(lines, byId(config, "stair_flight"), input.additional.stairFloors, factor);
+  if (input.additional.elevator) {
+    pushLine(lines, byId(config, "elevator_cabin"), 1, factor);
+  }
+  pushLine(
+    lines,
+    byId(config, "glass_entrance_door"),
+    input.additional.glassEntranceDoors,
+    factor
+  );
+  if (input.additional.receptionDetail) {
+    pushLine(lines, byId(config, "reception_detail"), 1, factor);
+  }
+  if (input.additional.highTouchAreas && input.totalAreaM2 > 0) {
+    pushLine(lines, byId(config, "high_touch_areas"), input.totalAreaM2, factor);
+  }
+
+  const productiveSoFar = lines.reduce((s, l) => s + l.minutes, 0);
+  if (productiveSoFar > 0 || input.totalAreaM2 > 0) {
+    pushLine(lines, byId(config, "setup_travel"), 1, factor);
+  }
 
   const requiredPersonMinutes = lines.reduce((s, l) => s + l.minutes, 0);
   return {
@@ -125,7 +220,6 @@ export function calculateWorkload(
   };
 }
 
-/** Detect if the same taskId appears with positive minutes more than once. */
 export function findDoubleCountedTaskIds(lines: TaskLine[]): string[] {
   const mins = new Map<string, number>();
   for (const line of lines) {

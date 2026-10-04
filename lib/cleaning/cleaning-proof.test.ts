@@ -161,6 +161,20 @@ describe("cleaning/minimum vs workload", () => {
     );
     assert.ok(calc.customer.netCents >= DEFAULT_CLEANING_CONFIG.minimumJobNetCents);
   });
+
+  it("customer Dauer follows team onsite from billable hours, not raw workload alone", () => {
+    const small = calculateOfficeCleaningQuote(FIXTURE_A_SMALL);
+    const mid = calculateOfficeCleaningQuote(FIXTURE_B_NORMAL);
+    assert.ok(
+      small.admin.cost.billablePersonHours >=
+        DEFAULT_CLEANING_CONFIG.minimumBillablePersonHours
+    );
+    assert.ok(small.customer.estimatedOnsiteHours >= 1);
+    assert.ok(mid.customer.estimatedOnsiteHours >= 1.5);
+    assert.ok(
+      mid.admin.cost.billablePersonHours >= mid.admin.cost.requiredPersonHours
+    );
+  });
 });
 
 describe("cleaning/no double counting", () => {
@@ -248,10 +262,22 @@ describe("cleaning/customer-admin separation", () => {
 });
 
 describe("cleaning/seed provenance", () => {
-  it("all seed task rates are CALIBRATION_REQUIRED ADMIN_ESTIMATE", () => {
+  it("active seed tasks remain CALIBRATION_REQUIRED with documented source", () => {
+    const allowedSource = new Set([
+      "ADMIN_ESTIMATE",
+      "PUBLIC_BENCHMARK",
+      "INTERNAL_TIME_STUDY",
+      "LICENSED_STANDARD",
+      "LEGAL_REQUIREMENT",
+    ]);
+    const allowedStatus = new Set(["CALIBRATION_REQUIRED", "DEPRECATED", "APPROVED"]);
     for (const task of DEFAULT_CLEANING_CONFIG.tasks) {
-      assert.equal(task.status, "CALIBRATION_REQUIRED");
-      assert.equal(task.sourceType, "ADMIN_ESTIMATE");
+      assert.ok(allowedStatus.has(task.status), task.id);
+      assert.ok(allowedSource.has(task.sourceType), task.id);
+      assert.ok(task.sourceReference.length > 0, task.id);
+      if (task.active) {
+        assert.equal(task.status, "CALIBRATION_REQUIRED", task.id);
+      }
     }
   });
 
