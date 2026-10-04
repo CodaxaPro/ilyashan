@@ -8,7 +8,6 @@ import type {
   UsageIntensity,
 } from "@/lib/cleaning";
 import {
-  preventChoiceButtonScroll,
   scrollToQuoteWizardTop,
 } from "@/components/quote/quote-wizard-scroll";
 import { CleaningAccordionSection } from "./CleaningAccordionSection";
@@ -228,7 +227,7 @@ function MobileSheet({ state }: { state: CleaningCalculatorState }) {
 
 export function CleaningCalculator() {
   const state = useCleaningCalculator();
-  const { locale, changeLocale, openStep, setOpenStep, input, patch } = state;
+  const { locale, openStep, setOpenStep, input, patch } = state;
   const anchorRef = useRef<HTMLDivElement>(null);
   const didMountRef = useRef(false);
 
@@ -265,29 +264,6 @@ export function CleaningCalculator() {
         </div>
       ) : (
         <>
-      <div className="flex justify-end mb-4">
-        <div
-          className="inline-flex rounded-xl border border-border overflow-hidden"
-          role="group"
-          aria-label="Language"
-          data-testid="cleaning-lang-switch"
-        >
-          {(["de", "tr"] as const).map((code) => (
-            <button
-              key={code}
-              type="button"
-              onMouseDown={preventChoiceButtonScroll}
-              onClick={() => changeLocale(code)}
-              className={`min-h-11 min-w-12 px-3 text-sm font-semibold ${
-                locale === code ? "bg-primary text-white" : "bg-white text-foreground/70"
-              }`}
-            >
-              {t(locale, code === "de" ? "langDE" : "langTR")}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8 lg:items-start">
         <div className="space-y-3 pb-28 lg:pb-0">
           {openStep === "contact" ? (
@@ -653,7 +629,7 @@ export function CleaningCalculator() {
                     : "bg-amber-50 border-amber-200 text-amber-900"
                 }`}
               >
-                {locale === "tr" ? v.messageTr : v.messageDe}
+                {v.messageDe}
               </p>
             ))}
         </div>

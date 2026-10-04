@@ -24,12 +24,11 @@ for (const viewport of VIEWPORTS) {
       expect(overflow, `horizontal overflow on ${viewport.name}`).toBeLessThanOrEqual(1);
     });
 
-    test("DE/TR switch keeps calculator", async ({ page }) => {
+    test("UI is German only (no language switch)", async ({ page }) => {
       await page.goto(PATH);
-      await page.getByTestId("cleaning-lang-switch").getByText("TR", { exact: true }).click();
       await expect(page.getByTestId("cleaning-calculator")).toBeVisible();
-      await page.getByTestId("cleaning-lang-switch").getByText("DE", { exact: true }).click();
-      await expect(page.getByTestId("cleaning-calculator")).toBeVisible();
+      await expect(page.getByTestId("cleaning-lang-switch")).toHaveCount(0);
+      await expect(page.getByTestId("cleaning-summary")).toContainText(/Angebotsübersicht|Angebot/i);
     });
   });
 }

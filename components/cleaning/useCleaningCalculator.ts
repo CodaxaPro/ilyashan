@@ -22,10 +22,11 @@ import type { CleaningLocale } from "@/lib/cleaning/i18n";
 export type CalculatorStep = 1 | 2 | 3 | 4 | 5 | 6 | 7 | "contact" | "success" | null;
 
 export function useCleaningCalculator() {
-  const [locale, setLocale] = useState<CleaningLocale>("de");
+  const locale: CleaningLocale = "de";
   const [input, setInput] = useState<CustomerInput>(() =>
     createInitialCustomerInput({
       totalAreaM2: 200,
+      language: "de",
       subAreas: redistributeSubAreas(200, {
         office: 110,
         meeting: 24,
@@ -92,13 +93,11 @@ export function useCleaningCalculator() {
   const quote = serverQuote ?? localCalc.customer;
   const validation: ValidationIssue[] = localCalc.admin.validation;
 
-  const changeLocale = useCallback((next: CleaningLocale) => {
-    setLocale(next);
-    setInput((prev) => ({ ...prev, language: next }));
-  }, []);
-
   const patch = useCallback((updater: (prev: CustomerInput) => CustomerInput) => {
-    setInput(updater);
+    setInput((prev) => {
+      const next = updater(prev);
+      return next.language === "de" ? next : { ...next, language: "de" };
+    });
     setServerQuote(null);
   }, []);
 
@@ -188,7 +187,7 @@ export function useCleaningCalculator() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            input,
+            input: { ...input, language: "de" },
             clientPreviewNetCents: localCalc.customer.netCents,
           }),
           signal: controller.signal,
@@ -216,11 +215,11 @@ export function useCleaningCalculator() {
   const priceLabel = useMemo(() => {
     if (quote.quoteStatus === "MANUAL_REVIEW_REQUIRED") return null;
     return {
-      net: formatEuroFromCents(quote.netCents, locale === "tr" ? "tr-TR" : "de-DE"),
-      vat: formatEuroFromCents(quote.vatCents, locale === "tr" ? "tr-TR" : "de-DE"),
-      gross: formatEuroFromCents(quote.grossCents, locale === "tr" ? "tr-TR" : "de-DE"),
+      net: formatEuroFromCents(quote.netCents, "de-DE"),
+      vat: formatEuroFromCents(quote.vatCents, "de-DE"),
+      gross: formatEuroFromCents(quote.grossCents, "de-DE"),
     };
-  }, [quote, locale]);
+  }, [quote]);
 
   async function submitQuote(contact: {
     company: string;
@@ -240,7 +239,7 @@ export function useCleaningCalculator() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          input,
+          input: { ...input, language: "de" },
           contact,
           clientPreviewNetCents: quote.netCents,
           website: "",
@@ -270,7 +269,6 @@ export function useCleaningCalculator() {
 
   return {
     locale,
-    changeLocale,
     input,
     patch,
     setTotalArea,

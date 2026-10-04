@@ -105,7 +105,7 @@ export async function POST(request: Request) {
           .filter((v) => v.level === "BLOCKING_ERROR")
           .map((v) => ({
             code: v.code,
-            message: input.language === "tr" ? v.messageTr : v.messageDe,
+            message: v.messageDe,
           })),
       },
       { status: 400 }

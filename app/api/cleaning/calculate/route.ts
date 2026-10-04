@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     validation: calc.admin.validation.map((v) => ({
       code: v.code,
       level: v.level,
-      message: input.language === "tr" ? v.messageTr : v.messageDe,
+      message: v.messageDe,
     })),
     blocking,
     // Explicitly no admin/cost/margin
