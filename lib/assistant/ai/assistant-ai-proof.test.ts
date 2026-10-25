@@ -99,8 +99,31 @@ describe("assistant/ai run — tool price is authoritative", () => {
       provider: mock,
     });
 
-    assert.equal(result.meta.fallbackReason, "blocked_invented_price");
+    // Price ask without tool → forced policy (not model euro text)
+    assert.ok(
+      result.meta.fallbackReason === "forced_price_policy_without_tool" ||
+        result.meta.fallbackReason === "blocked_invented_price"
+    );
     assert.doesNotMatch(result.reply.text, /200/);
+  });
+
+  it("Preisliste without tool → corporate overview, not refusal", async () => {
+    const mock = new MockAiProvider([
+      {
+        type: "text",
+        content: "Leider kann ich keine Preislisten bereitstellen.",
+      },
+    ]);
+
+    const result = await runAssistantAi({
+      message: "merhaba fiyat listeniz nerede",
+      session: createSession("ai3"),
+      provider: mock,
+    });
+
+    assert.equal(result.meta.fallbackReason, "forced_price_policy_without_tool");
+    assert.doesNotMatch(result.reply.text, /keine Preislisten bereitstellen/i);
+    assert.match(result.reply.text, /Preisliste|Preisrechner|Festpreis/i);
   });
 });
 

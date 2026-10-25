@@ -210,6 +210,15 @@ describe("assistant/customer reply — no silent euro for non-fenster", () => {
     assert.equal(reply.emittedEuro, false);
     assert.match(reply.text, /kein Online-Preis|Festpreis nach Prüfung/i);
   });
+
+  it("Preisliste / fiyat listesi → overview with calculator CTAs, no refusal", () => {
+    const reply = buildAssistantPriceReply("merhaba fiyat listeniz nerede");
+    assert.equal(reply.emittedEuro, false);
+    assert.doesNotMatch(reply.text, /kann keine Preis|keine Preisliste bereitstellen/i);
+    assert.match(reply.text, /keine feste PDF-Preisliste|objektbezogen|Preisrechner/i);
+    assert.ok(reply.actions.some((a) => a.href.includes("/angebot")));
+    assert.ok(reply.actions.some((a) => a.href.includes("treppenhausreinigung/angebot")));
+  });
 });
 
 describe("assistant/live concierge regression — flag off unchanged", () => {

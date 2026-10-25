@@ -1,5 +1,7 @@
 import { phoneAction } from "@/lib/concierge/knowledge";
 import type { ConciergeAction } from "@/lib/concierge/types";
+import { siteConfig } from "@/lib/config";
+import { routes } from "@/lib/routes";
 import { resolveProduct } from "./resolve-product";
 import {
   priceBuero,
@@ -22,6 +24,34 @@ export type AssistantCustomerReply = {
 
 function linkAction(label: string, href: string): ConciergeAction {
   return { type: "link", label, href };
+}
+
+/** Preisliste / fiyat listesi / general price ask without named service. */
+export function isGeneralPriceListAsk(message: string): boolean {
+  return /\b(preisliste|preis\s*liste|fiyat\s*list|tarife?|was\s+kostet|wie\s+teuer|preise?\b|kosten\b|orientierung)/i.test(
+    message
+  );
+}
+
+export function buildPriceListOverviewReply(): AssistantCustomerReply {
+  return {
+    product: "unknown",
+    emittedEuro: false,
+    text: `Eine feste PDF-Preisliste gibt es nicht — bei Ilyashan rechnen wir **objektbezogen**.
+
+**So bekommen Sie Ihren Preis:**
+• **Fenster** → Live-Orientierung im Preisrechner, Festpreis nach Prüfung (in ${siteConfig.business.responseTime})
+• **Büro / Treppenhaus** → Online-Kalkulation (Orientierung), Festpreis nach Prüfung
+• **Praxis, Bauend, Renovierung, Entrümpelung** → kurze Anfrage, Festpreis nach Prüfung
+
+Kein Anfahrtszuschlag in ${siteConfig.contact.region}. Welche Leistung brauchen Sie?`,
+    actions: [
+      linkAction("Fenster-Preisrechner", routes.angebot),
+      linkAction("Büro kalkulieren", routes.bueroreinigungAngebot),
+      linkAction("Treppenhaus kalkulieren", routes.treppenhausreinigungAngebot),
+      phoneAction(),
+    ],
+  };
 }
 
 /**
@@ -119,6 +149,10 @@ export function buildAssistantPriceReply(
       actions,
       emittedEuro: false,
     };
+  }
+
+  if (isGeneralPriceListAsk(message)) {
+    return buildPriceListOverviewReply();
   }
 
   return {

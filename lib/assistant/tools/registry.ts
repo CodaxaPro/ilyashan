@@ -20,7 +20,7 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
     name: "get_price_guidance",
     description:
-      "Liefert die verbindliche Preis-/Prozess-Antwort aus den Ilyashan-Preis-APIs und Policies. Niemals selbst einen Preis nennen — dieses Tool nutzen.",
+      "PFLICHT bei Preisliste, Preise, Kosten, Tarifen, fiyat. Liefert die verbindliche Antwort (Rechner-Links / Orientierung / Festpreis-Prozess). Niemals selbst € nennen — dieses Tool nutzen.",
     parameters: {
       type: "object",
       properties: {

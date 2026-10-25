@@ -2,12 +2,17 @@ import type { ConciergeAction, ConciergeReply, ConciergeSession } from "@/lib/co
 import { phoneAction } from "@/lib/concierge/knowledge";
 import type { QuoteFormData } from "@/lib/quote-form";
 import type { QuotePricingContext } from "@/lib/quote-pricing-context";
+import { buildAssistantPriceReply, isGeneralPriceListAsk } from "../reply";
 import { ASSISTANT_TOOL_DEFINITIONS, executeAllowlistedTool } from "../tools/registry";
 import { enforceNoInventedPrice } from "./guards";
 import { buildAssistantSystemPrompt } from "./system-prompt";
 import type { AiMessage, AiProvider, AiRunMeta } from "./types";
 
 const MAX_TOOL_ROUNDS = 4;
+
+function looksLikePriceQuestion(message: string): boolean {
+  return isGeneralPriceListAsk(message) || /\b(preis|kost|teuer|angebot|kalkul|fiyat)/i.test(message);
+}
 
 export type AiRunResult = {
   reply: ConciergeReply;
@@ -42,12 +47,40 @@ export async function runAssistantAi(options: {
     });
 
     if (completion.toolCalls.length === 0) {
+      // Fail-closed: price questions without tool → deterministic policy reply
+      if (!authoritativeText && looksLikePriceQuestion(message)) {
+        const policy = buildAssistantPriceReply(
+          message,
+          options.fensterPartial ?? session.quote,
+          options.pricingCtx
+        );
+        return {
+          reply: {
+            text: policy.text,
+            intent: "price",
+            session: {
+              ...session,
+              turns: session.turns + 1,
+              lastIntent: "price",
+              stage: "idle",
+            },
+            actions: policy.actions,
+            quickReplies: ["Fenster-Preisrechner", "Büro", "Treppenhaus"],
+          },
+          meta: {
+            usedAi: true,
+            providerId: provider.id,
+            toolNames,
+            fallbackReason: "forced_price_policy_without_tool",
+          },
+        };
+      }
+
       const raw = (completion.content ?? "").trim() || "Wie kann ich Ihnen bei der Reinigung helfen?";
       const guarded = enforceNoInventedPrice(
         authoritativeText ?? raw,
         authoritativeText ? authorizedEuro : false
       );
-      // If we have authoritative tool text, always prefer it for price paths
       const text = authoritativeText ?? guarded.text;
       const finalGuarded = authoritativeText
         ? { text, blockedInventedPrice: false }
