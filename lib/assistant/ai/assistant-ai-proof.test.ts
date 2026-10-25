@@ -58,6 +58,7 @@ describe("assistant/ai tool allowlist", () => {
     assert.equal(isAllowlistedTool("resolve_product"), true);
     assert.equal(isAllowlistedTool("upsert_treppenhaus_fields"), true);
     assert.equal(isAllowlistedTool("get_treppenhaus_schema"), true);
+    assert.equal(isAllowlistedTool("get_system_knowledge"), true);
     assert.equal(isAllowlistedTool("delete_all_leads"), false);
     assert.equal(isAllowlistedTool("set_festpreis"), false);
   });

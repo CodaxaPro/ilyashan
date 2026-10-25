@@ -8,11 +8,31 @@ import {
   shouldHandleTreppenhausDialog,
   type TreppenhausStructuredPatch,
 } from "../dialog/treppenhaus";
+import {
+  buildSystemKnowledgeDetail,
+  type SystemKnowledgeTopic,
+} from "../knowledge/system-card";
 import { buildAssistantPriceReply } from "../reply";
 import { resolveProduct } from "../resolve-product";
 import type { AiToolDefinition } from "../ai/types";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
+  {
+    name: "get_system_knowledge",
+    description:
+      "Liest das echte Ilyashan-System (Config + Preismotoren): overview, products, treppenhaus, process, area, contact. Bei Firmen-/Prozess-/Gebietsfragen IMMER nutzen statt zu raten.",
+    parameters: {
+      type: "object",
+      properties: {
+        topic: {
+          type: "string",
+          enum: ["overview", "products", "treppenhaus", "process", "area", "contact"],
+          description: "Welchen Systemteil lesen",
+        },
+      },
+      required: ["topic"],
+    },
+  },
   {
     name: "resolve_product",
     description:
@@ -158,6 +178,28 @@ export function executeAllowlistedTool(
         ok: false,
         error: "invalid_json",
         messageDe: "Tool-Argumente ungültig.",
+      }),
+    };
+  }
+
+  if (name === "get_system_knowledge") {
+    const topicRaw = String(args.topic ?? "overview");
+    const allowed: SystemKnowledgeTopic[] = [
+      "overview",
+      "products",
+      "treppenhaus",
+      "process",
+      "area",
+      "contact",
+    ];
+    const topic = (allowed.includes(topicRaw as SystemKnowledgeTopic)
+      ? topicRaw
+      : "overview") as SystemKnowledgeTopic;
+    return {
+      content: JSON.stringify({
+        ok: true,
+        topic,
+        knowledge: buildSystemKnowledgeDetail(topic),
       }),
     };
   }
