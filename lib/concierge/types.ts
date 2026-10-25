@@ -34,7 +34,21 @@ export interface ConciergeAction {
   href: string;
 }
 
-export type AssistantProduct = "fenster" | "buero" | "treppenhaus";
+export type AssistantProduct =
+  | "fenster"
+  | "buero"
+  | "treppenhaus"
+  | "praxis"
+  | "bauend"
+  | "renovierung"
+  | "entruempelung"
+  | "gutschein";
+
+export type BueroChatDraft = {
+  totalAreaM2?: number;
+  frequency?: "ONE_TIME" | "1_PER_WEEK" | "2_PER_WEEK" | "3_PER_WEEK" | "5_PER_WEEK";
+  workstations?: number;
+};
 
 export interface ConciergeSession {
   id: string;
@@ -46,6 +60,10 @@ export interface ConciergeSession {
   assistantProduct?: AssistantProduct | null;
   /** Partial Treppenhaus inputs collected in conversation. */
   treppenhausDraft?: Partial<TreppenhausInput>;
+  /** Partial Büro inputs for chat orientation. */
+  bueroDraft?: BueroChatDraft;
+  /** Free notes for Festpreis cases (Praxis, Bauend, …). */
+  salesNotes?: string;
 }
 
 export interface ConciergeMessage {

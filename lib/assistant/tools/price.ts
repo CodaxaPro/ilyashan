@@ -132,7 +132,8 @@ export function priceBuero(
       ok: false,
       tool: "price_buero",
       code: "calculator_required",
-      messageDe: `${CALCULATOR_REQUIRED_DISCLAIMER_DE} Bitte nutzen Sie den Büro-Flächenrechner.`,
+      messageDe:
+        "Gerne Büroreinigung — nennen Sie ungefähre m² und Turnus (z. B. 2×/Woche), dann rechne ich die Orientierung. Oder ich nehme Name und Telefon fürs Festpreis-Angebot auf.",
       calculatorHref: routes.bueroreinigungAngebot,
     };
   }
@@ -175,7 +176,7 @@ export function priceManualService(
     ok: false,
     tool: "price_manual_service",
     code: "no_online_price",
-    messageDe: MANUAL_PRICE_DISCLAIMER_DE,
+    messageDe: `${MANUAL_PRICE_DISCLAIMER_DE} Nennen Sie kurz Objekt/Umfang und Ihre Telefonnummer — ich leite die Anfrage an unser Team weiter (Festpreis nach Prüfung).`,
     calculatorHref: href ?? undefined,
   };
 }

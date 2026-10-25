@@ -152,6 +152,8 @@ export async function runAssistantAi(options: {
         (call.name === "advance_treppenhaus_dialog" ||
           call.name === "upsert_treppenhaus_fields" ||
           call.name === "upsert_fenster_fields" ||
+          call.name === "upsert_buero_fields" ||
+          call.name === "open_service_case" ||
           call.name === "submit_customer_lead" ||
           call.name === "get_price_guidance")
       ) {

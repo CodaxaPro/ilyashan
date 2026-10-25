@@ -27,6 +27,13 @@ export function isHotLead(session: ConciergeSession): boolean {
   if (session.assistantProduct === "treppenhaus" && isTreppenhausComplete(getTreppenhausDraft(session))) {
     return true;
   }
+  if (
+    session.assistantProduct === "buero" &&
+    session.bueroDraft?.totalAreaM2 &&
+    session.bueroDraft?.frequency
+  ) {
+    return true;
+  }
   return false;
 }
 
@@ -49,9 +56,21 @@ export function buildLeadSummaryRows(
     rows.push(["Ort", [q.postalCode, q.city].filter(Boolean).join(" ")]);
   }
 
+  if (session.assistantProduct) {
+    rows.push(["Assistent-Produkt", session.assistantProduct]);
+  }
+  if (session.salesNotes) {
+    rows.push(["Kundennotiz", session.salesNotes]);
+  }
+  if (session.bueroDraft?.totalAreaM2) {
+    rows.push(["Büro m²", String(session.bueroDraft.totalAreaM2)]);
+    if (session.bueroDraft.frequency) {
+      rows.push(["Büro-Turnus", session.bueroDraft.frequency]);
+    }
+  }
+
   const trp = getTreppenhausDraft(session);
   if (session.assistantProduct === "treppenhaus" || Object.keys(trp).length > 0) {
-    rows.push(["Assistent-Produkt", "Treppenhausreinigung"]);
     if (trp.stockwerke) rows.push(["Stockwerke", String(trp.stockwerke)]);
     if (trp.wohnungen) rows.push(["Wohnungen", String(trp.wohnungen)]);
     if (trp.stairTurnus) rows.push(["Treppen-Turnus", trp.stairTurnus]);

@@ -73,6 +73,8 @@ export function createConciergeStoredLead(
       turns: session.turns,
       assistantProduct: session.assistantProduct,
       treppenhausDraft: session.treppenhausDraft,
+      bueroDraft: session.bueroDraft,
+      salesNotes: session.salesNotes,
     },
   };
 }

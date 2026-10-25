@@ -16,12 +16,15 @@ import {
   buildSystemKnowledgeDetail,
   type SystemKnowledgeTopic,
 } from "../knowledge/system-card";
+import { applyBueroStructuredFields } from "../dialog/buero";
+import { ALL_SALES_PRODUCTS, openServiceCase } from "../sales/catalog";
 import { listProposedSlots } from "../sales/slots";
 import { submitSalesLead } from "../sales/submit-lead";
 import { buildAssistantPriceReply } from "../reply";
 import { resolveProduct } from "../resolve-product";
 import type { AiToolDefinition } from "../ai/types";
 import type { FloorLevel, DirtLevel, CleaningSide, QuoteServiceId } from "@/lib/quote-form";
+import type { AssistantProduct, BueroChatDraft } from "@/lib/concierge/types";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
@@ -103,6 +106,46 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
         message: { type: "string", description: "Aktuelle Kundenachricht" },
       },
       required: ["message"],
+    },
+  },
+  {
+    name: "open_service_case",
+    description:
+      "Startet den Verkaufsfall für JEDE Leistung (fenster, buero, treppenhaus, praxis, bauend, renovierung, entruempelung, gutschein). Immer zuerst bei erkennbarer Leistung nutzen.",
+    parameters: {
+      type: "object",
+      properties: {
+        product: {
+          type: "string",
+          enum: [
+            "fenster",
+            "buero",
+            "treppenhaus",
+            "praxis",
+            "bauend",
+            "renovierung",
+            "entruempelung",
+            "gutschein",
+          ],
+        },
+      },
+      required: ["product"],
+    },
+  },
+  {
+    name: "upsert_buero_fields",
+    description:
+      "Büroreinigung: m² + Turnus (+ optional Arbeitsplätze) → echter Büro-Preismotor.",
+    parameters: {
+      type: "object",
+      properties: {
+        totalAreaM2: { type: "number" },
+        frequency: {
+          type: "string",
+          enum: ["ONE_TIME", "1_PER_WEEK", "2_PER_WEEK", "3_PER_WEEK", "5_PER_WEEK"],
+        },
+        workstations: { type: "integer" },
+      },
     },
   },
   {
@@ -284,6 +327,56 @@ export async function executeAllowlistedTool(
     };
   }
 
+  if (name === "open_service_case") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const product = String(args.product ?? "") as AssistantProduct;
+    if (!ALL_SALES_PRODUCTS.includes(product)) {
+      return {
+        content: JSON.stringify({ ok: false, error: "unknown_product" }),
+        customerText:
+          "Welche Leistung meinen Sie — Fenster, Büro, Treppenhaus, Praxis, Bauend, Renovierung, Entrümpelung oder Gutschein?",
+      };
+    }
+    const result = openServiceCase(session, product);
+    return {
+      content: JSON.stringify({ ok: true, product, text: result.text }),
+      customerText: result.text,
+      actionsJson: JSON.stringify(result.actions),
+      quickReplies: result.quickReplies,
+      session: result.session,
+    };
+  }
+
+  if (name === "upsert_buero_fields") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const patch: BueroChatDraft = {};
+    if (args.totalAreaM2 !== undefined) patch.totalAreaM2 = Number(args.totalAreaM2);
+    if (typeof args.frequency === "string") {
+      patch.frequency = args.frequency as BueroChatDraft["frequency"];
+    }
+    if (args.workstations !== undefined) patch.workstations = Number(args.workstations);
+    const result = applyBueroStructuredFields(session, patch);
+    return {
+      content: JSON.stringify({
+        ok: true,
+        complete: result.complete,
+        emittedEuro: result.emittedEuro,
+        text: result.text,
+      }),
+      customerText: result.text,
+      emittedEuro: result.emittedEuro,
+      actionsJson: JSON.stringify(result.actions),
+      quickReplies: result.quickReplies,
+      session: result.session,
+    };
+  }
+
   if (name === "upsert_fenster_fields") {
     const session = ctx.session;
     if (!session) {
@@ -429,6 +522,30 @@ export async function executeAllowlistedTool(
         quickReplies: result.quickReplies,
         session: result.session,
       };
+    }
+    if (ctx.session) {
+      const resolved = resolveProduct(message);
+      if (
+        resolved.ok &&
+        resolved.data.product !== "unknown" &&
+        ALL_SALES_PRODUCTS.includes(resolved.data.product as AssistantProduct)
+      ) {
+        const opened = openServiceCase(
+          ctx.session,
+          resolved.data.product as AssistantProduct
+        );
+        return {
+          content: JSON.stringify({
+            ok: true,
+            product: resolved.data.product,
+            text: opened.text,
+          }),
+          customerText: opened.text,
+          actionsJson: JSON.stringify(opened.actions),
+          quickReplies: opened.quickReplies,
+          session: opened.session,
+        };
+      }
     }
     const reply = buildAssistantPriceReply(message, ctx.fensterPartial, ctx.pricingCtx);
     return {
