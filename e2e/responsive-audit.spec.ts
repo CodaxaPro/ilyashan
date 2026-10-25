@@ -42,7 +42,9 @@ for (const viewport of VIEWPORTS) {
       const menuBtn = p.getByRole("button", { name: "Menü öffnen" });
       await expect(menuBtn).toBeVisible();
       await menuBtn.click();
-      await expect(p.getByRole("link", { name: "Anfrage" })).toBeVisible();
+      await expect(
+        p.getByRole("navigation").getByRole("link", { name: "Anfrage" })
+      ).toBeVisible();
     });
 
     test("angebot: wizard step 1 visible", async ({ page: p }) => {

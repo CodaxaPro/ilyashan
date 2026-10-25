@@ -24,6 +24,15 @@ function parsePrice(text: string) {
   return Number(match[1].replace(/\./g, ""));
 }
 
+/** Desktop + mobile dock both render the same test id — scope to first visible. */
+function priceEstimateAmount(page: Page) {
+  return page.getByTestId("price-estimate-amount").first();
+}
+
+function wartungSummary(page: Page) {
+  return page.getByTestId("wartung-summary").first();
+}
+
 test.describe("Angebot Wizard – Validierung", () => {
   test("Schritt 1: Weiter blockiert ohne Leistung", async ({ page }) => {
     await page.goto(ANGEBOT);
@@ -49,7 +58,7 @@ test.describe("Angebot Wizard – Validierung", () => {
     await page.getByRole("button", { name: "Ja", exact: true }).click();
     await page.getByTestId("quote-next").click();
     await expect(page.getByTestId("window-count-display")).toBeVisible();
-    await expect(page.getByTestId("wartung-summary")).toBeVisible();
+    await expect(wartungSummary(page)).toBeVisible();
   });
 
   test("Wartung: häufigeres Intervall → höherer Monatspreis", async ({ page }) => {
@@ -62,9 +71,9 @@ test.describe("Angebot Wizard – Validierung", () => {
     await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
     await page.getByRole("button", { name: "Ja", exact: true }).click();
     await page.getByTestId("quote-next").click();
-    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    await expect(priceEstimateAmount(page)).toBeVisible();
     const priceQuarterly = parsePrice(
-      (await page.getByTestId("price-estimate-amount").textContent()) ?? ""
+      (await priceEstimateAmount(page).textContent()) ?? ""
     );
 
     await page.getByRole("button", { name: "← Zurück" }).click();
@@ -72,9 +81,9 @@ test.describe("Angebot Wizard – Validierung", () => {
     await page.getByTestId("wartung-package-four_weekly").click();
     await page.getByTestId("quote-next").click();
     await page.getByTestId("quote-next").click();
-    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    await expect(priceEstimateAmount(page)).toBeVisible();
     const priceFourWeekly = parsePrice(
-      (await page.getByTestId("price-estimate-amount").textContent()) ?? ""
+      (await priceEstimateAmount(page).textContent()) ?? ""
     );
     expect(priceFourWeekly).toBeGreaterThan(priceQuarterly);
   });
@@ -109,7 +118,7 @@ test.describe("Angebot Wizard – Live-Preis", () => {
   test("Flügel erhöhen → Preis steigt sichtbar", async ({ page }) => {
     await selectPrivatFlow(page);
 
-    const priceEl = page.getByTestId("price-estimate-amount");
+    const priceEl = priceEstimateAmount(page);
     await expect(priceEl).toBeVisible();
 
     const price8 = parsePrice(await priceEl.textContent() ?? "");
@@ -188,7 +197,7 @@ test.describe("Angebot Wizard – Voller Durchlauf", () => {
     await page.getByTestId("contact-city").fill("Baesweiler");
     await page.getByTestId("contact-privacy").check();
 
-    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    await expect(priceEstimateAmount(page)).toBeVisible();
     await expect(page.getByRole("button", { name: /Per E-Mail senden/ })).toBeEnabled();
   });
 

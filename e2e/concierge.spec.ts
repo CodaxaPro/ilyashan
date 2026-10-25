@@ -54,6 +54,6 @@ test.describe("Concierge Assistent", () => {
     await expect(page).toHaveURL(/\/de\/angebot/);
     await expect(page.getByTestId("wizard-prefill-banner")).toBeVisible();
     await expect(page.getByTestId("window-count-display")).toHaveText("10");
-    await expect(page.getByTestId("price-estimate-amount")).toBeVisible();
+    await expect(page.getByTestId("price-estimate-amount").first()).toBeVisible();
   });
 });
