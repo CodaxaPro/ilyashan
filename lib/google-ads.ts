@@ -49,6 +49,8 @@ function fireConversion(kind: AdsConversionKind, transactionId?: string): boolea
   if (sendTo) {
     window.gtag("event", "conversion", {
       send_to: sendTo,
+      value: 1.0,
+      currency: "EUR",
       ...payload,
     });
   }

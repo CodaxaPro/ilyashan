@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Source_Serif_4 } from "next/font/google";
 import { CookieConsent } from "@/components/CookieConsent";
+import { GoogleAdsTag } from "@/components/GoogleAdsTag";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { ConciergeWidget } from "@/components/ConciergeWidget";
 import { siteConfig } from "@/lib/config";
@@ -128,6 +129,7 @@ export default function RootLayout({
         ))}
       </head>
       <body className={`${inter.variable} ${sourceSerif.variable} antialiased`}>
+        <GoogleAdsTag />
         <AnalyticsProvider>
           {children}
           <ConciergeWidget />

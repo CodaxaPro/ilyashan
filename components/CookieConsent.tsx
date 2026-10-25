@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { GoogleAdsTag, updateGoogleAdsConsent } from "@/components/GoogleAdsTag";
+import { updateGoogleAdsConsent } from "@/components/GoogleAdsTag";
 import {
   getCookieConsent,
   setCookieConsent,
@@ -37,49 +37,42 @@ export function CookieConsent() {
     updateGoogleAdsConsent(value === "accepted");
   }
 
-  if (!ready) return null;
+  if (!ready || choice !== null) return null;
 
   return (
-    <>
-      {/* Tag always present (Consent Mode) so Ads can verify installation */}
-      <GoogleAdsTag />
-
-      {choice === null && (
-        <div
-          role="dialog"
-          aria-label="Cookie-Einstellungen"
-          className="fixed inset-x-0 bottom-0 z-60 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
-        >
-          <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-2xl shadow-black/10">
-            <p className="text-sm font-semibold text-foreground mb-2">Cookies & Datenschutz</p>
-            <p className="text-sm text-muted leading-relaxed mb-4">
-              Wir verwenden technisch notwendige Funktionen für die Website. Mit Ihrer Zustimmung
-              nutzen wir zusätzlich Google Ads (Conversion-Messung), um unsere Anzeigen zu
-              verbessern. Details in der{" "}
-              <Link href={routes.datenschutz} className="text-primary underline">
-                Datenschutzerklärung
-              </Link>
-              .
-            </p>
-            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-              <button
-                type="button"
-                onClick={() => decide("rejected")}
-                className="px-5 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-card transition-colors"
-              >
-                Nur notwendige
-              </button>
-              <button
-                type="button"
-                onClick={() => decide("accepted")}
-                className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors"
-              >
-                Akzeptieren
-              </button>
-            </div>
-          </div>
+    <div
+      role="dialog"
+      aria-label="Cookie-Einstellungen"
+      className="fixed inset-x-0 bottom-0 z-60 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+    >
+      <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-white p-5 sm:p-6 shadow-2xl shadow-black/10">
+        <p className="text-sm font-semibold text-foreground mb-2">Cookies & Datenschutz</p>
+        <p className="text-sm text-muted leading-relaxed mb-4">
+          Wir verwenden technisch notwendige Funktionen für die Website. Mit Ihrer Zustimmung
+          nutzen wir zusätzlich Google Ads (Conversion-Messung), um unsere Anzeigen zu
+          verbessern. Details in der{" "}
+          <Link href={routes.datenschutz} className="text-primary underline">
+            Datenschutzerklärung
+          </Link>
+          .
+        </p>
+        <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
+          <button
+            type="button"
+            onClick={() => decide("rejected")}
+            className="px-5 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-card transition-colors"
+          >
+            Nur notwendige
+          </button>
+          <button
+            type="button"
+            onClick={() => decide("accepted")}
+            className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors"
+          >
+            Akzeptieren
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }

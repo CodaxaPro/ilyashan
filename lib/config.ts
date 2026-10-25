@@ -415,8 +415,8 @@ export const siteConfig = {
 
   googleAds: {
     tagId: "AW-18351064202",
-    /** Full send_to from Ads conversion snippet, e.g. AW-18351064202/xxxxx — empty until label is set */
-    requestQuoteSendTo: "",
+    /** Full send_to — fires on successful Anfrage (form / concierge), not on bare page view */
+    requestQuoteSendTo: "AW-18351064202/2rxbCPeli6kdEIqJvK5E",
     /** Set after creating Ads Event action `whatsapp_click` — do not reuse request_quote label */
     whatsappSendTo: "",
     phoneSendTo: "",

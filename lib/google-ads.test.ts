@@ -26,11 +26,13 @@ describe("google-ads conversions", () => {
     assert.ok(calls.some((args) => args[0] === "event" && args[1] === "request_quote"));
     const quoteEvent = calls.find((args) => args[1] === "request_quote");
     assert.deepEqual(quoteEvent?.[2], { transaction_id: "ANF-123" });
-    // Without send_to env, classic conversion event is not required
-    assert.equal(calls.filter((args) => args[1] === "conversion").length, 0);
+    // siteConfig.requestQuoteSendTo is set — classic conversion also fires
+    const conversion = calls.find((args) => args[1] === "conversion");
+    assert.ok(conversion);
+    assert.equal((conversion?.[2] as { send_to: string }).send_to, "AW-18351064202/2rxbCPeli6kdEIqJvK5E");
   });
 
-  it("also fires classic conversion when send_to is set via env", () => {
+  it("env send_to overrides config for classic conversion", () => {
     const prev = process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO;
     process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO = "AW-18351064202/testlabel";
 
@@ -46,6 +48,8 @@ describe("google-ads conversions", () => {
     const conversion = calls.find((args) => args[1] === "conversion");
     assert.deepEqual(conversion?.[2], {
       send_to: "AW-18351064202/testlabel",
+      value: 1.0,
+      currency: "EUR",
       transaction_id: "ANF-9",
     });
 
