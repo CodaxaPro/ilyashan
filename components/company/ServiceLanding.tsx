@@ -136,7 +136,9 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
                 Nennen Sie Ort und Größe. Den Festpreis gibt es nach der Besichtigung
                 {page.serviceKey === "bueroreinigung"
                   ? " — oder zuerst die Fläche online kalkulieren."
-                  : "."}{" "}
+                  : page.serviceKey === "treppenhausreinigung"
+                    ? " — oder zuerst den Preis online kalkulieren."
+                    : "."}{" "}
                 Antwort in der Regel innerhalb von {siteConfig.business.responseTime}.
               </p>
               <a

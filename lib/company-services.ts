@@ -34,6 +34,16 @@ export const companyServices: CompanyService[] = [
     imagePosition: "object-center",
   },
   {
+    href: routes.treppenhausreinigung,
+    title: "Treppenhausreinigung",
+    tag: "Turnus online",
+    line: "Stockwerke, Wohnungen und Keller. Orientierung online, Festpreis nach Prüfung.",
+    nextHref: routes.treppenhausreinigungAngebot,
+    nextLabel: "Preis kalkulieren",
+    image: "/images/bauendreinigung.jpg",
+    imagePosition: "object-[center_25%]",
+  },
+  {
     href: routes.bauendreinigung,
     title: "Bauendreinigung",
     tag: "Nach Übergabe",

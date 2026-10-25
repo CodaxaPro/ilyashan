@@ -26,12 +26,13 @@ export function CompanyHome() {
               Reinigung in Aachen und Baesweiler.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted">
-              Fensterreinigung, Büroreinigung, Bauendreinigung, Renovierungsreinigung, Praxisreinigung
-              und Entrümpelung.
+              Fensterreinigung, Büroreinigung, Treppenhausreinigung, Bauendreinigung,
+              Renovierungsreinigung, Praxisreinigung und Entrümpelung.
             </p>
             <ServiceChoice />
             <p className="mt-4 text-sm text-muted">
-              Fensterpreis sofort. Büro nach Fläche. Die anderen vier Leistungen zum Festpreis nach Besichtigung. Versichert.
+              Fensterpreis sofort. Büro und Treppenhaus online kalkulieren. Die übrigen Leistungen zum
+              Festpreis nach Besichtigung. Versichert.
             </p>
             <a
               href={`tel:${siteConfig.contact.phone}`}
@@ -61,7 +62,7 @@ export function CompanyHome() {
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
           <h2 className="font-serif text-3xl font-medium sm:text-4xl">Leistungen</h2>
           <p className="mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            Sechs Leistungen. Jede Karte führt zur eigenen Seite.
+            Sieben Leistungen. Jede Karte führt zur eigenen Seite.
           </p>
           <div className="service-grid mt-10 grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
             {companyServices.map((service) => (
@@ -170,6 +171,10 @@ export function CompanyHome() {
             <Link href={routes.bueroreinigungAngebot} className="border border-border bg-card p-5 hover:border-primary">
               <span className="block text-xs uppercase tracking-[0.16em] text-muted">Büroreinigung</span>
               <span className="mt-2 block font-serif text-xl">Fläche kalkulieren</span>
+            </Link>
+            <Link href={routes.treppenhausreinigungAngebot} className="border border-border bg-card p-5 hover:border-primary">
+              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Treppenhaus</span>
+              <span className="mt-2 block font-serif text-xl">Preis kalkulieren</span>
             </Link>
           </div>
         </div>

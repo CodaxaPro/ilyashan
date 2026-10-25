@@ -252,6 +252,75 @@ export const servicePages = {
       caption: "Entrümpelung. Wohnung leer, besenrein.",
     },
   },
+  treppenhaus: {
+    path: "/treppenhausreinigung",
+    name: "Treppenhausreinigung",
+    serviceKey: "treppenhausreinigung",
+    metaTitle: "Treppenhausreinigung Aachen und Baesweiler",
+    description:
+      "Treppenhausreinigung in Aachen und Baesweiler. Stockwerke, Wohnungen, Keller und Turnus online kalkulieren. Festpreis nach Prüfung.",
+    eyebrow: "Aachen und Baesweiler",
+    title: "Treppenhaus sauber. Turnus nach Maß.",
+    lede: "Kehren, wischen, Handlauf und Eingang im vereinbarten Rhythmus. Kellerfrequenz kann vom Treppenhaus abweichen — zum Beispiel monatlich.",
+    includes: [
+      "Stufen, Podeste und Flure kehren und feucht wischen",
+      "Handlauf, Geländer und Lichtschalter",
+      "Eingangsbereich und Briefkastenanlage",
+      "Spinnweben und sichtbare Verschmutzung",
+      "Kellerflur nach gewähltem Turnus",
+      "Online-Orientierung nach Stockwerken und Wohnungen",
+    ],
+    excludes: [
+      "Grund- oder Intensivreinigung (gesondert)",
+      "Dachboden und Außenanlagen",
+      "Sondermüll und Entrümpelung im Treppenhaus",
+    ],
+    steps: [
+      {
+        title: "Kalkulieren",
+        text: "Stockwerke, Wohnungen, Turnus und Keller im Rechner angeben.",
+      },
+      {
+        title: "Prüfung",
+        text: "Die Zahl ist eine Orientierung. Wir prüfen das Objekt.",
+      },
+      {
+        title: "Festpreis",
+        text: "Den verbindlichen Monatspreis schicken wir nach der Prüfung.",
+      },
+    ],
+    faq: [
+      {
+        q: "Kann der Keller seltener gereinigt werden?",
+        a: "Ja. Der Keller folgt dem Treppenhaus-Turnus oder monatlich — nicht häufiger als das Treppenhaus.",
+      },
+      {
+        q: "Ist der Online-Preis verbindlich?",
+        a: "Nein. Es ist eine Orientierung. Der Festpreis folgt nach Prüfung oder Besichtigung.",
+      },
+      {
+        q: "Für wen ist die Leistung?",
+        a: "Für Eigentümer, WEGs und Hausverwaltungen in Aachen, Baesweiler und der genannten Region.",
+      },
+      {
+        q: "Gibt es einen Anfahrtszuschlag?",
+        a: "In Aachen, Baesweiler und den genannten Orten nein.",
+      },
+    ],
+    related: [
+      { href: routes.treppenhausreinigungAngebot, label: "Preis kalkulieren" },
+      { href: routes.bueroreinigung, label: "Büroreinigung" },
+      { href: routes.fensterreinigung, label: "Fensterreinigung" },
+    ],
+    primaryHref: routes.treppenhausreinigungAngebot,
+    primaryLabel: "Preis kalkulieren",
+    priceNote: "Die Online-Kalkulation ist eine Orientierung. Der Festpreis folgt nach der Prüfung.",
+    image: {
+      src: "/images/bauendreinigung.jpg",
+      alt: "Heller Flur und Treppenaufgang nach der Reinigung.",
+      caption: "Treppenhausreinigung. Turnus nach Vereinbarung.",
+    },
+  },
   buero: {
     path: "/bueroreinigung",
     name: "Büroreinigung",
@@ -326,11 +395,11 @@ export const servicePages = {
 export const homeFaq = [
   {
     q: "Welche Leistungen bietet Ilyashan?",
-    a: "Fensterreinigung, Büroreinigung, Bauendreinigung, Renovierungsreinigung, Praxisreinigung und Entrümpelung.",
+    a: "Fensterreinigung, Büroreinigung, Treppenhausreinigung, Bauendreinigung, Renovierungsreinigung, Praxisreinigung und Entrümpelung.",
   },
   {
     q: "Wo gibt es sofort einen Preis?",
-    a: "Bei der Fensterreinigung im Rechner, als Schätzung. Den Festpreis gibt es in 24 Stunden. Die Bürofläche lässt sich online kalkulieren. Bau, Renovierung, Praxis und Entrümpelung bekommen den Festpreis nach der Besichtigung.",
+    a: "Bei der Fensterreinigung im Rechner, als Schätzung. Den Festpreis gibt es in 24 Stunden. Bürofläche und Treppenhaus lassen sich online kalkulieren. Bau, Renovierung, Praxis und Entrümpelung bekommen den Festpreis nach der Besichtigung.",
   },
   {
     q: "Wo fahren Sie hin?",

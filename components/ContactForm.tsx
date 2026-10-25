@@ -16,6 +16,7 @@ interface ContactFormProps {
 
 const SERVICE_OPTIONS = [
   { value: "bueroreinigung", label: "Büroreinigung" },
+  { value: "treppenhausreinigung", label: "Treppenhausreinigung" },
   { value: "praxisreinigung", label: "Praxisreinigung" },
   { value: "bauendreinigung", label: "Bauendreinigung" },
   { value: "renovierungsreinigung", label: "Renovierungsreinigung" },

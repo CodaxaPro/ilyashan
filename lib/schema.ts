@@ -135,3 +135,34 @@ export function getBueroServiceSchema() {
     url: `${siteConfig.url}/bueroreinigung`,
   };
 }
+
+export function getTreppenhausServiceSchema() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": `${siteConfig.url}/treppenhausreinigung#service`,
+    name: "Treppenhausreinigung",
+    serviceType: "Treppenhausreinigung",
+    description:
+      "Regelmäßige Treppenhausreinigung mit Online-Orientierung nach Stockwerken, Wohnungen und Turnus in Aachen und Baesweiler.",
+    provider: {
+      "@type": "LocalBusiness",
+      name: siteConfig.name,
+      telephone: siteConfig.contact.phone,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: siteConfig.contact.address,
+        addressLocality: siteConfig.contact.city,
+        postalCode: siteConfig.contact.postalCode,
+        addressCountry: "DE",
+      },
+    },
+    areaServed: [
+      siteConfig.contact.city,
+      siteConfig.contact.region,
+      "Aachen",
+      "Baesweiler",
+    ],
+    url: `${siteConfig.url}/treppenhausreinigung`,
+  };
+}

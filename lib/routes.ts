@@ -4,6 +4,8 @@ export const routes = {
   fensterreinigung: "/de/fensterreinigung",
   bueroreinigung: "/de/bueroreinigung",
   bueroreinigungAngebot: "/de/bueroreinigung/angebot",
+  treppenhausreinigung: "/de/treppenhausreinigung",
+  treppenhausreinigungAngebot: "/de/treppenhausreinigung/angebot",
   bauendreinigung: "/de/bauendreinigung",
   renovierungsreinigung: "/de/renovierungsreinigung",
   praxisreinigung: "/de/praxisreinigung",
