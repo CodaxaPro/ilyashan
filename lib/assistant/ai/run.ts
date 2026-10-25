@@ -119,7 +119,7 @@ export async function runAssistantAi(options: {
 
     for (const call of completion.toolCalls) {
       toolNames.push(call.name);
-      const exec = executeAllowlistedTool(call.name, call.argumentsJson, {
+      const exec = await executeAllowlistedTool(call.name, call.argumentsJson, {
         fensterPartial: options.fensterPartial ?? workingSession.quote,
         pricingCtx: options.pricingCtx,
         session: workingSession,
@@ -146,11 +146,13 @@ export async function runAssistantAi(options: {
         content: exec.content,
       });
 
-      // Authoritative dialog/price text — return immediately (no model paraphrase)
+      // Authoritative sales/price text — return immediately (no model paraphrase)
       if (
         exec.customerText &&
         (call.name === "advance_treppenhaus_dialog" ||
           call.name === "upsert_treppenhaus_fields" ||
+          call.name === "upsert_fenster_fields" ||
+          call.name === "submit_customer_lead" ||
           call.name === "get_price_guidance")
       ) {
         return {

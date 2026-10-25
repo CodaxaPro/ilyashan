@@ -9,12 +9,19 @@ import {
   type TreppenhausStructuredPatch,
 } from "../dialog/treppenhaus";
 import {
+  applyFensterStructuredFields,
+  type FensterStructuredPatch,
+} from "../dialog/fenster";
+import {
   buildSystemKnowledgeDetail,
   type SystemKnowledgeTopic,
 } from "../knowledge/system-card";
+import { listProposedSlots } from "../sales/slots";
+import { submitSalesLead } from "../sales/submit-lead";
 import { buildAssistantPriceReply } from "../reply";
 import { resolveProduct } from "../resolve-product";
 import type { AiToolDefinition } from "../ai/types";
+import type { FloorLevel, DirtLevel, CleaningSide, QuoteServiceId } from "@/lib/quote-form";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
@@ -99,9 +106,66 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
     },
   },
   {
+    name: "upsert_fenster_fields",
+    description:
+      "Fensterreinigung: Flügel/Etage/etc. aus Kundenabsicht mappen und mit dem echten Fenster-Preismotor rechnen.",
+    parameters: {
+      type: "object",
+      properties: {
+        windowCount: { type: "integer" },
+        floorLevel: {
+          type: "string",
+          enum: ["eg", "og1", "og2", "og3", "og4", "og5plus", "dg"],
+        },
+        dirtLevel: {
+          type: "string",
+          enum: ["leicht", "normal", "stark", "extrem"],
+        },
+        cleaningSide: {
+          type: "string",
+          enum: ["innen_aussen", "nur_innen", "nur_aussen"],
+        },
+        services: {
+          type: "array",
+          items: { type: "string", enum: ["privat", "gewerbe", "wartung"] },
+        },
+        postalCode: { type: "string" },
+        city: { type: "string" },
+      },
+    },
+  },
+  {
+    name: "get_available_slots",
+    description:
+      "Liest echte Kalender-Kapazität (Vormittag/Nachmittag) und liefert Terminvorschläge für den Kunden.",
+    parameters: {
+      type: "object",
+      properties: {
+        limit: { type: "integer", description: "Max. Vorschläge, default 8" },
+      },
+    },
+  },
+  {
+    name: "submit_customer_lead",
+    description:
+      "ABSCHLUSS: Speichert Name+Telefon (+Notiz/Terminwunsch) in CRM und mailt an Ilyashan. Immer nutzen wenn Kunde Rückruf/Festpreis/Termin will und Kontaktdaten da sind.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        phone: { type: "string" },
+        customerNote: {
+          type: "string",
+          description: "Terminwunsch, PLZ, besondere Hinweise",
+        },
+      },
+      required: ["name", "phone"],
+    },
+  },
+  {
     name: "get_price_guidance",
     description:
-      "Allgemeine Preisliste / Preisfrage ohne laufende Treppenhaus-Kalkulation. Bei Treppenhaus lieber upsert_treppenhaus_fields.",
+      "Allgemeine Preisliste / Preisfrage. Bei Treppenhaus/Fenster lieber die upsert_*-Tools.",
     parameters: {
       type: "object",
       properties: {
@@ -154,11 +218,11 @@ function parseStructuredPatch(args: Record<string, unknown>): TreppenhausStructu
   return patch;
 }
 
-export function executeAllowlistedTool(
+export async function executeAllowlistedTool(
   name: string,
   argumentsJson: string,
   ctx: ToolExecContext = {}
-): ToolExecResult {
+): Promise<ToolExecResult> {
   if (!isAllowlistedTool(name)) {
     return {
       content: JSON.stringify({
@@ -179,6 +243,77 @@ export function executeAllowlistedTool(
         error: "invalid_json",
         messageDe: "Tool-Argumente ungültig.",
       }),
+    };
+  }
+
+  if (name === "get_available_slots") {
+    const limit = Math.min(12, Math.max(3, Number(args.limit) || 8));
+    const slots = await listProposedSlots(limit);
+    return {
+      content: JSON.stringify({
+        ok: true,
+        slots,
+        hintDe:
+          "Schlage 2–3 Optionen vor. Verbindliche Buchung nach Lead/Prüfung — Wunsch mit submit_customer_lead notieren.",
+      }),
+    };
+  }
+
+  if (name === "submit_customer_lead") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = await submitSalesLead({
+      name: String(args.name ?? ""),
+      phone: String(args.phone ?? ""),
+      customerNote: args.customerNote ? String(args.customerNote) : undefined,
+      session,
+    });
+    if (!result.ok) {
+      return {
+        content: JSON.stringify(result),
+        customerText: result.messageDe,
+      };
+    }
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      session: { ...session, turns: session.turns + 1, stage: "idle" },
+      quickReplies: ["Weitere Frage", "WhatsApp", "Leistungen"],
+    };
+  }
+
+  if (name === "upsert_fenster_fields") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const patch: FensterStructuredPatch = {};
+    if (args.windowCount !== undefined) patch.windowCount = Number(args.windowCount);
+    if (typeof args.floorLevel === "string") patch.floorLevel = args.floorLevel as FloorLevel;
+    if (typeof args.dirtLevel === "string") patch.dirtLevel = args.dirtLevel as DirtLevel;
+    if (typeof args.cleaningSide === "string") {
+      patch.cleaningSide = args.cleaningSide as CleaningSide;
+    }
+    if (Array.isArray(args.services)) {
+      patch.services = args.services as QuoteServiceId[];
+    }
+    if (typeof args.postalCode === "string") patch.postalCode = args.postalCode;
+    if (typeof args.city === "string") patch.city = args.city;
+    const result = applyFensterStructuredFields(session, patch, ctx.pricingCtx);
+    return {
+      content: JSON.stringify({
+        ok: true,
+        complete: result.complete,
+        emittedEuro: result.emittedEuro,
+        text: result.text,
+      }),
+      customerText: result.text,
+      emittedEuro: result.emittedEuro,
+      actionsJson: JSON.stringify(result.actions),
+      quickReplies: result.quickReplies,
+      session: result.session,
     };
   }
 

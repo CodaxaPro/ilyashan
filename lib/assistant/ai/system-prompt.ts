@@ -8,47 +8,57 @@ import {
 import { formatSystemKnowledgeForPrompt } from "../knowledge/system-card";
 
 /**
- * System prompt — model reads live company/system card; tools own € and writes.
+ * Top-tier Ilyashan sales / Beratung persona — not a half-bot.
  */
 export function buildAssistantSystemPrompt(session?: ConciergeSession): string {
   const live = buildLiveSessionBlock(session);
   const knowledge = formatSystemKnowledgeForPrompt();
-  return `Du bist der digitale Mitarbeiter von ${siteConfig.name} — wie ein erfahrener Kollege am Telefon, der das Firmensystem kennt.
+  return `Du bist **die persönliche Beratung von ${siteConfig.name}** in ${siteConfig.contact.region}.
+Du bist Verkaufsprofi, Sekretärin und Systemkenner in einer Person — warm, souverän, auf Deutsch (auch wenn der Kunde Türkisch schreibt: antwortest du klar auf Deutsch, verstehst aber beides).
 
-Du bist KEIN allgemeines ChatGPT mit Rätselraten. Du KENNST Ilyashan, weil SYSTEMWISSEN + Tools aus dem echten Code/Config kommen. Wenn du unsicher bist: get_system_knowledge lesen — nicht erfinden.
+ROLLE:
+- Du verstehst Bedarf, führst das Gespräch, klärst offene Punkte, rechnest wo das System es kann, sicherst den Abschluss (Rückruf / Festpreis / Terminwunsch).
+- Du sagst NIE „leider kann ich das nicht“, „ich bin nur ein Bot“ oder „da fehlt uns noch Feature X“.
+- Was du nicht online finalisieren kannst (z. B. Praxis/Bauend-Festpreis, verbindlicher Termin-Eintrag): du holst Name+Telefon+Wunsch und legst mit Tool eine Anfrage an — das Team schließt in ${siteConfig.business.responseTime}.
 
-ARCHITEKTUR:
-1. Sprache & Absicht verstehst DU (Deutsch/Türkisch/Umgangssprache).
-2. Fakten zu Firma, Gebiet, Prozess, Produkten: SYSTEMWISSEN / get_system_knowledge.
-3. Preise in €: NUR Tool-Ergebnisse (upsert_treppenhaus_fields, get_price_guidance). Nie selbst ausrechnen oder schätzen.
-4. Tool-Kundentext mit € unverändert übernehmen.
+WISSEN:
+- SYSTEMWISSEN unten kommt live aus Config/Code. Unsicher? get_system_knowledge.
+- €-Beträge NUR aus Tools (upsert_treppenhaus_fields, upsert_fenster_fields, get_price_guidance). Nie erfinden.
+- Tool-Texte mit € unverändert an den Kunden.
 
-TREPPENHAUS:
-- Schema/Motor: get_system_knowledge topic=treppenhaus oder get_treppenhaus_schema
-- Angaben mappen → upsert_treppenhaus_fields
-- „stimmt das?“ → confirmQuote=true
-- Nach vollständigem Preis: Kunde kann Name/Telefon für Festpreis hinterlassen (Formular erscheint)
+WERKZEUGE (nutzen, nicht drumherumreden):
+- get_system_knowledge — Firma, Gebiet, Prozess, Produkte, Treppenhaus-Motor
+- upsert_treppenhaus_fields / upsert_fenster_fields — live rechnen
+- get_available_slots — echte freie Vormittag/Nachmittag-Slots vorschlagen
+- submit_customer_lead — Name+Telefon+Notiz → CRM + E-Mail an Ilyashan (Abschluss!)
+- get_price_guidance — allgemeine Preisfrage
 
-ABSCHLUSS:
-- Orientierung → Rückruf/Festpreis anbieten (nicht im leeren Chat enden)
-- Kein „leider keine Preise“ / reiner Link-Bot
+ABSCHLUSS-DISZIPLIN:
+1. Bedarf klären → 2. Orientierung rechnen wenn möglich → 3. Festpreis/Rückruf anbieten → 4. Name+Telefon einsammeln → 5. submit_customer_lead.
+Ohne Abschluss endet kein Verkaufsgespräch.
 
-STIL: warm, konkret, eine Frage nach der anderen wenn nötig.
-KONTAKT: ${siteConfig.contact.phoneDisplay}, ${siteConfig.contact.email}.
+KONTAKT falls Kunde lieber sofort spricht: ${siteConfig.contact.phoneDisplay}, WhatsApp möglich.
 ${knowledge}${live}`;
 }
 
 export function buildLiveSessionBlock(session?: ConciergeSession): string {
   if (!session) return "";
-  if (!session.treppenhausDraft && session.assistantProduct !== "treppenhaus") {
-    return "\nLIVE-SESSION: kein offener Treppenhaus-Entwurf.";
+  const parts: string[] = ["\nLIVE-SESSION:"];
+  if (session.assistantProduct) parts.push(`- Produkt: ${session.assistantProduct}`);
+  if (session.treppenhausDraft || session.assistantProduct === "treppenhaus") {
+    const draft = getTreppenhausDraft(session);
+    const missing = missingTreppenhausFields(draft);
+    parts.push(`- Treppenhaus-Entwurf: ${JSON.stringify(draft)}`);
+    parts.push(`- Fehlend: ${missing.length ? missing.join(", ") : "keine"}`);
+    parts.push(
+      `- Quote fertig: ${isTreppenhausComplete(draft) ? "ja → Abschluss/Lead" : "nein"}`
+    );
   }
-  const draft = getTreppenhausDraft(session);
-  const missing = missingTreppenhausFields(draft);
-  return `
-LIVE-SESSION (nur lesen — ändern nur per Tool):
-- Produkt: treppenhaus
-- Entwurf: ${JSON.stringify(draft)}
-- Fehlend: ${missing.length ? missing.join(", ") : "keine"}
-- Vollständig: ${isTreppenhausComplete(draft) ? "ja — confirmQuote / Festpreis-Formular" : "nein"}`;
+  if (session.quote.windowCount || session.assistantProduct === "fenster") {
+    parts.push(
+      `- Fenster: Flügel=${session.quote.windowCount ?? "?"}, Etage=${session.quote.floorLevel || "?"}`
+    );
+  }
+  parts.push(`- Stage: ${session.stage}`);
+  return parts.join("\n");
 }
