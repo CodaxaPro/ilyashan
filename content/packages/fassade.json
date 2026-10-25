@@ -4,22 +4,22 @@
   "serviceId": "fassade",
   "priceFrom": "auf Anfrage",
   "seo": {
-    "title": "Glasfassaden | Fensterreinigung — Ilyashan Baesweiler",
-    "description": "Glasfassaden in Baesweiler & Aachen: auf Anfrage, streifenfrei garantiert, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★"
+    "title": "Glasfassaden | Fensterreinigung",
+    "description": "Glasfassaden in Baesweiler & Aachen: auf Anfrage, streifenfrei, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★"
   },
   "hero": {
     "eyebrow": "Glasfassaden · Ilyashan",
     "headline": "Glasfassaden — sicher & streifenfrei",
-    "subline": "Professionelle glasfassaden — transparent kalkuliert, versichert, pünktlich. Live-Preisschätzung im Wizard.",
+    "subline": "Professionelle Glasfassadenreinigung — transparent kalkuliert, versichert, pünktlich. Live-Preisschätzung im Wizard.",
     "trust": "4,9★ bei Google · Kein Anfahrtszuschlag · Versichert"
   },
   "essence": {
     "eyebrow": "Glasfassaden",
     "headline": "Glasfassaden — Qualität, die man sieht",
     "paragraphs": [
-      "Glasfassaden von Ilyashan: streifenfrei garantiert, auf Anfrage, kein Anfahrtszuschlag in Baesweiler, Aachen und Umgebung.",
+      "Glasfassaden von Ilyashan: streifenfrei, auf Anfrage, kein Anfahrtszuschlag in Baesweiler, Aachen und Umgebung.",
       "Im Angebots-Wizard sehen Sie sofort eine Live-Preisschätzung — verbindliches Festpreis-Angebot in 24 Stunden.",
-      "Über 500 zufriedene Kunden vertrauen uns — seit 2020 regional verwurzelt in Baesweiler."
+      "4,9 aus 17 Google-Bewertungen. Sitz in Baesweiler, seit 2020."
     ]
   },
   "emotions": {
@@ -29,12 +29,12 @@
       {
         "word": "Klarheit",
         "headline": "Streifenfrei",
-        "text": "Kristallklare Ergebnisse — garantiert."
+        "text": "Kristallklare Ergebnisse."
       },
       {
         "word": "Vertrauen",
         "headline": "Versichert",
-        "text": "Betriebshaftpflicht inklusive."
+        "text": "Die Arbeit ist versichert."
       },
       {
         "word": "Fairness",
@@ -53,7 +53,7 @@
       },
       {
         "word": "Wertschätzung",
-        "headline": "500+ Kunden",
+        "headline": "4,9 bei Google",
         "text": "4,9★ bei Google."
       }
     ]
@@ -104,7 +104,7 @@
       {
         "num": "04",
         "title": "Ergebnis",
-        "text": "Streifenfrei garantiert."
+        "text": "Streifenfrei."
       }
     ]
   },

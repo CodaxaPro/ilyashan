@@ -19,7 +19,7 @@ export function buildFensterPutzen(_type: IntentType, loc: LocationContext): Bui
   const home = isHome(loc.slug);
   return assembleIntentPage("fenster-putzen", loc, {
     seo: {
-      title: `Fenster putzen ${c} | Selbst oder Profi? — Ilyashan`,
+      title: `Fenster putzen ${c} | Selbst oder Profi?`,
       description: home
         ? `Fenster putzen in Baesweiler: Leiter, Eimer, Streifen? Wir übernehmen ab 49 € — ansässig, versichert, kein Anfahrtszuschlag.`
         : `Fenster putzen in ${c}: ${travelFrom(loc)}. Streifenfrei vom Profi — Live-Preis im Wizard, Festpreis in 24h.`,
@@ -50,7 +50,7 @@ export function buildFensterPutzen(_type: IntentType, loc: LocationContext): Bui
         { word: "Ergebnis", headline: "Wirklich streifenfrei", text: "Nicht halb sauber — klarer Durchblick." },
         { word: "Planbarkeit", headline: "Festpreis vorab", text: "Live-Schätzung online, Angebot in 24h." },
         { word: "Fairness", headline: "Kein Anfahrtszuschlag", text: `Gilt auch für ${c}.` },
-        { word: "Vertrauen", headline: `${siteConfig.business.rating}★ regional`, text: siteConfig.business.customers + " Kunden." },
+        { word: "Vertrauen", headline: `${String(siteConfig.business.rating).replace(".", ",")} bei Google`, text: `${siteConfig.business.reviews} Bewertungen.` },
       ],
     },
     localProof: { eyebrow: "Stimmen", headline: "Wer Fensterputzen abgibt, ist froh", quotes: SHARED_QUOTES },
@@ -83,7 +83,7 @@ export function buildFensterreinigungPreis(_type: IntentType, loc: LocationConte
   const home = isHome(loc.slug);
   return assembleIntentPage("fensterreinigung-preis", loc, {
     seo: {
-      title: `Fensterreinigung Preis ${c} | Ab 49 € · Festpreis — Ilyashan`,
+      title: `Fensterreinigung Preis ${c} | Ab 49 € · Festpreis`,
       description: `Fensterreinigung Preis in ${c}: Privat ab 49 €, Rahmen ab 79 €, Solar ab 99 €. Live im Wizard — verbindliches Angebot in 24h. Kein Anfahrtszuschlag.`,
     },
     hero: {
@@ -142,7 +142,7 @@ export function buildFensterreinigungKosten(_type: IntentType, loc: LocationCont
   const c = city(loc);
   return assembleIntentPage("fensterreinigung-kosten", loc, {
     seo: {
-      title: `Fensterreinigung Kosten ${c} | Was Sie wirklich zahlen — Ilyashan`,
+      title: `Fensterreinigung Kosten ${c} | Was Sie wirklich zahlen`,
       description: `Fensterreinigung Kosten in ${c} erklärt: Privat, Rahmen, Solar, Gewerbe. Kein Anfahrtszuschlag. ${travelFrom(loc)}.`,
     },
     hero: {
@@ -201,13 +201,13 @@ export function buildFensterreinigungFirma(_type: IntentType, loc: LocationConte
   const c = city(loc);
   return assembleIntentPage("fensterreinigung-firma", loc, {
     seo: {
-      title: `Fensterreinigung Firma ${c} | Regional & versichert — Ilyashan`,
+      title: `Fensterreinigung Firma ${c} | Regional & versichert`,
       description: `Fensterreinigung Firma für ${c}: Ansässig in Baesweiler, ${travelFrom(loc)}. Versichert, ${siteConfig.business.rating}★, Festpreis in 24h.`,
     },
     hero: {
       eyebrow: `Firma · ${c}`,
       headline: `Fensterreinigung Firma für ${c} — nicht anonym, nicht weit weg.`,
-      subline: "Regional verwurzelt seit 2020 — ein Team, feste Ansprechpartner, Betriebshaftpflicht.",
+      subline: "Regional verwurzelt seit 2020 — ein Team, feste Ansprechpartner.",
       trust: `${TRUST} · Seit ${siteConfig.business.founded}`,
     },
     essence: {
@@ -215,7 +215,7 @@ export function buildFensterreinigungFirma(_type: IntentType, loc: LocationConte
       headline: "Seriös, erreichbar, haftbar.",
       paragraphs: [
         `Eine Fensterreinigung-Firma für ${c} sollte erreichbar sein, wenn etwas klemmt — und haften, wenn etwas passiert.`,
-        `Ilyashan: Sitz in Baesweiler (Kückstr. 29), ${siteConfig.business.customers} Kunden, ${siteConfig.business.rating}★. Keine Subunternehmer-Kette.`,
+        `Ilyashan: Sitz in Baesweiler, Kückstr. 29. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
         `${travelFrom(loc)}. Festpreis-Kultur: Wizard + Angebot in 24h — Privat und Gewerbe.`,
       ],
     },
@@ -224,9 +224,9 @@ export function buildFensterreinigungFirma(_type: IntentType, loc: LocationConte
       headline: "Firma, der Sie vertrauen können",
       items: [
         { word: "Regional", headline: "Aus Baesweiler", text: "Kurze Wege — schnelle Termine." },
-        { word: "Haftung", headline: "Versichert", text: "Betriebshaftpflicht — nicht Schwarzarbeit." },
+        { word: "Haftung", headline: "Versichert", text: "Versichert." },
         { word: "Erreichbar", headline: "Telefon & E-Mail", text: siteConfig.contact.phoneDisplay },
-        { word: "Erfahrung", headline: siteConfig.business.customers + " Kunden", text: "Referenzen aus der Region." },
+        { word: "Erfahrung", headline: `${siteConfig.business.reviews} Bewertungen`, text: "Google-Bewertungen aus der Region." },
         { word: "Qualität", headline: "Streifenfrei-Standard", text: "Gleiche Qualität jedes Mal." },
         { word: "Fairness", headline: "Kein Anfahrtszuschlag", text: `Auch nach ${c}.` },
       ],
@@ -260,7 +260,7 @@ export function buildSolaranlagenReinigung(_type: IntentType, loc: LocationConte
   const c = city(loc);
   return assembleIntentPage("solaranlagen-reinigung", loc, {
     seo: {
-      title: `Solaranlagen-Reinigung ${c} | PV ab 99 € — Ilyashan`,
+      title: `Solaranlagen-Reinigung ${c} | PV ab 99 €`,
       description: `Solaranlagen-Reinigung in ${c}: Mehr Ertrag durch saubere Module. Ab 99 €, materialschonend, versichert. ${travelFrom(loc)}.`,
     },
     hero: {
@@ -319,7 +319,7 @@ export function buildGlasfassadenReinigung(_type: IntentType, loc: LocationConte
   const c = city(loc);
   return assembleIntentPage("glasfassaden-reinigung", loc, {
     seo: {
-      title: `Glasfassaden-Reinigung ${c} | Gewerbe & Büro — Ilyashan`,
+      title: `Glasfassaden-Reinigung ${c} | Gewerbe & Büro`,
       description: `Glasfassaden-Reinigung in ${c}: Büro, Praxis, Showroom — streifenfrei, versichert. Flexible Termine. Festpreis auf Anfrage.`,
     },
     hero: {
@@ -333,7 +333,7 @@ export function buildGlasfassadenReinigung(_type: IntentType, loc: LocationConte
       headline: "Fassade = Visitenkarte.",
       paragraphs: [
         `Eine Glasfassade in ${c} transportiert Qualität — Verschmutzung transportiert das Gegenteil.`,
-        "Ilyashan reinigt Bürofassaden, Praxen und Showrooms — auch außerhalb der Öffnungszeiten, mit Betriebshaftpflicht.",
+        "Ilyashan reinigt Bürofassaden, Praxen und Showrooms — auch außerhalb der Öffnungszeiten, versichert.",
         "Aufmaß vor Ort für große Objekte — Festpreis oder Wartungsvertrag.",
       ],
     },
@@ -364,7 +364,7 @@ export function buildGlasfassadenReinigung(_type: IntentType, loc: LocationConte
       { q: `Glasfassaden-Reinigung ${c} — Gewerbe?`, a: "Ja — Büro, Klinik, Showroom, MFH." },
       { q: "Wie oft?", a: "2–4× jährlich je nach Lage (Staub, Verkehr)." },
       { q: "Außerhalb Öffnungszeiten?", a: "Ja — auf Anfrage." },
-      { q: "Versicherung?", a: "Betriebshaftpflicht inklusive." },
+      { q: "Versicherung?", a: "Versichert." },
     ],
     closing: {
       headline: `Glasfassaden-Reinigung ${c} — Angebot anfordern.`,
@@ -378,7 +378,7 @@ export function buildSchaufensterReinigung(_type: IntentType, loc: LocationConte
   const c = city(loc);
   return assembleIntentPage("schaufenster-reinigung", loc, {
     seo: {
-      title: `Schaufenster-Reinigung ${c} | Laden & Praxis — Ilyashan`,
+      title: `Schaufenster-Reinigung ${c} | Laden & Praxis`,
       description: `Schaufenster-Reinigung in ${c}: Streifenfrei vor Öffnung — Einzelhandel, Café, Praxis. Flexibel, versichert.`,
     },
     hero: {
@@ -437,7 +437,7 @@ export function buildWintergartenReinigung(_type: IntentType, loc: LocationConte
   const c = city(loc);
   return assembleIntentPage("wintergarten-reinigung", loc, {
     seo: {
-      title: `Wintergarten-Reinigung ${c} | Veranda & Glasdach — Ilyashan`,
+      title: `Wintergarten-Reinigung ${c} | Veranda & Glasdach`,
       description: `Wintergarten-Reinigung in ${c}: Viele Flächen, schwer erreichbar — wir reinigen Wintergarten & Veranda streifenfrei.`,
     },
     hero: {
@@ -496,7 +496,7 @@ export function buildHausmeisterFenster(_type: IntentType, loc: LocationContext)
   const c = city(loc);
   return assembleIntentPage("hausmeister-fenster", loc, {
     seo: {
-      title: `Hausmeister Fenster ${c} | Hausverwaltung Partner — Ilyashan`,
+      title: `Hausmeister Fenster ${c} | Hausverwaltung Partner`,
       description: `Fenster für Hausverwaltung in ${c}: Treppenhaus, MFH, WEG — planbare Termine, Festpreis, versichert.`,
     },
     hero: {
@@ -555,7 +555,7 @@ export function buildWartungsvertragFenster(_type: IntentType, loc: LocationCont
   const c = city(loc);
   return assembleIntentPage("wartungsvertrag-fenster", loc, {
     seo: {
-      title: `Wartungsvertrag Fenster ${c} | Ab 59 €/Monat — Ilyashan`,
+      title: `Wartungsvertrag Fenster ${c} | Ab 59 €/Monat`,
       description: `Wartungsvertrag Fensterreinigung in ${c}: Regelmäßig klare Fenster ab 59 €/Monat. Planbar, versichert, kein Anfahrtszuschlag.`,
     },
     hero: {

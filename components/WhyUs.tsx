@@ -12,9 +12,8 @@ export function WhyUs() {
               Ihr Partner für kristallklare Fenster in {siteConfig.contact.region}
             </h2>
             <p className="text-muted text-lg mb-8 leading-relaxed">
-              Seit {siteConfig.business.founded} reinigen wir Fenster mit Leidenschaft und Präzision.
-              Über {siteConfig.business.customers} zufriedene Kunden vertrauen auf unsere Qualität –
-              und das mit gutem Grund.
+              Seit {siteConfig.business.founded} reinigen wir Fenster in {siteConfig.contact.region}.{" "}
+              {String(siteConfig.business.rating).replace(".", ",")} aus {siteConfig.business.reviews} Google-Bewertungen.
             </p>
 
             <div className="space-y-6">
@@ -36,7 +35,7 @@ export function WhyUs() {
             <div className="bg-white rounded-3xl shadow-2xl shadow-primary/10 p-6 sm:p-8 border border-border">
               <div className="relative aspect-4/3 overflow-hidden rounded-2xl ring-1 ring-black/5">
                 <Image
-                  src="/images/fenster-vorher-nachher.png"
+                  src="/images/fenster-vorher-nachher.jpg"
                   alt="Fensterreinigung Vorher und Nachher – streifenfreies Ergebnis in Baesweiler"
                   fill
                   className="object-cover"
@@ -67,7 +66,7 @@ export function WhyUs() {
                     <svg className="h-4 w-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                     </svg>
-                    <span className="text-sm font-semibold text-foreground">Streifenfrei garantiert</span>
+                    <span className="text-sm font-semibold text-foreground">Streifenfrei</span>
                   </div>
                 </div>
               </div>
@@ -75,7 +74,7 @@ export function WhyUs() {
               <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
                 {[
                   { label: "Erfahrung", value: `${new Date().getFullYear() - parseInt(siteConfig.business.founded)}+ Jahre` },
-                  { label: "Kunden", value: siteConfig.business.customers },
+                  { label: "Google-Bewertungen", value: String(siteConfig.business.reviews) },
                   { label: "Bewertung", value: `${siteConfig.business.rating}★` },
                 ].map((item) => (
                   <div key={item.label} className="text-center rounded-xl bg-card p-3 sm:p-4">

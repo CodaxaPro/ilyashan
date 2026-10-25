@@ -135,7 +135,7 @@ function ContactForm({ state }: { state: CleaningCalculatorState }) {
         type="submit"
         disabled={submitting}
         data-testid="cleaning-submit"
-        className="w-full min-h-12 rounded-xl bg-accent text-white font-semibold hover:bg-emerald-600 disabled:opacity-60"
+        className="w-full min-h-12 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark disabled:opacity-60"
       >
         {submitting ? t(locale, "submitting") : t(locale, "submit")}
       </button>

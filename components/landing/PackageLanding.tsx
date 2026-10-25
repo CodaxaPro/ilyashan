@@ -15,6 +15,15 @@ type Props = {
   page: PackagePageContent;
 };
 
+const PACKAGE_NAMES: Record<string, string> = {
+  privat: "Privatfenster",
+  gewerbe: "Gewerbefenster",
+  rahmen: "Rahmen und Falz",
+  solar: "Solaranlagen",
+  fassade: "Glasfassade",
+  wartung: "Wartung",
+};
+
 export function PackageLanding({ page }: Props) {
   const angebotUrl = getAngebotUrl({ channel: "package", slug: page.slug });
   const gutscheinUrl = getGutscheinUrl({ channel: "package", slug: page.slug });
@@ -23,12 +32,12 @@ export function PackageLanding({ page }: Props) {
     <>
       <section className="gradient-hero text-white section-padding pt-28 md:pt-32">
         <div className="landing-container max-w-3xl">
-          <p className="eyebrow !text-sky-200 mb-4">{page.hero.eyebrow}</p>
+          <p className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-white/70">{page.hero.eyebrow}</p>
           <h1 className="headline-xl text-white mb-5">{page.hero.headline}</h1>
           <p className="text-lg text-white/85 leading-relaxed mb-4">{page.hero.subline}</p>
           <p className="text-sm text-white/60 mb-8">{page.hero.trust}</p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button href={angebotUrl} variant="primary" size="lg">
+            <Button href={angebotUrl} variant="onDark" size="lg">
               {page.closing.cta}
             </Button>
             <Button href={gutscheinUrl} variant="outline" size="lg">
@@ -102,9 +111,9 @@ export function PackageLanding({ page }: Props) {
         </div>
         <div className="grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {PACKAGE_SLUGS.filter((s) => s !== page.slug).map((slug) => (
-            <Link key={slug} href={`/fensterreinigung/${slug}`} className="bg-card border border-border rounded-xl p-6 hover:border-primary/40">
-              <h3 className="font-bold capitalize mb-1">{slug}</h3>
-              <span className="text-sm text-primary">Entdecken →</span>
+            <Link key={slug} href={`/fensterreinigung/${slug}`} className="border border-border bg-card p-6 hover:border-primary/40">
+              <h3 className="mb-1 font-serif text-xl">{PACKAGE_NAMES[slug] ?? slug}</h3>
+              <span className="text-sm text-primary">Weiter</span>
             </Link>
           ))}
         </div>

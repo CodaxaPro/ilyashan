@@ -148,7 +148,7 @@ export function QuoteConfirmationDocument({ data, anfrageNr, ctx }: QuoteConfirm
           </View>
         )}
 
-        <Text style={styles.badge}>✓ Kein Anfahrtszuschlag · ✓ Streifenfrei garantiert · ✓ Vollversichert</Text>
+        <Text style={styles.badge}>✓ Kein Anfahrtszuschlag · ✓ Streifenfrei · ✓ Versichert</Text>
 
         <View style={styles.footer}>
           <Text>{siteConfig.name}</Text>

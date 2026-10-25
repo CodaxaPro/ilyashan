@@ -4,9 +4,9 @@ import {
 
 export const siteConfig = {
   name: "Ilyashan Fensterreinigung",
-  tagline: "Professionelle Fensterreinigung",
+  tagline: "Reinigung",
   description:
-    "Streifenfreie Fensterreinigung in Baesweiler, Aachen und Umgebung. Live-Preisschätzung im Angebots-Wizard – verbindliches Festpreis-Angebot in 24 Stunden. Kein Anfahrtszuschlag, versichert.",
+    "Reinigungsfirma in Baesweiler und Aachen: Fenster, Büro, Praxis, Bauendreinigung, Renovierung und Entrümpelung. Versichert. Festpreis nach Besichtigung, Fensterpreis sofort im Rechner.",
   url: "https://ilyashan.de/de",
   locale: "de-DE",
 
@@ -55,9 +55,8 @@ export const siteConfig = {
 
   business: {
     founded: "2020",
-    customers: "500+",
     rating: 4.9,
-    reviews: 9,
+    reviews: 17,
     responseTime: "24 Stunden",
   },
 
@@ -75,7 +74,7 @@ export const siteConfig = {
     heroLead:
       "Professionelle Fensterreinigung für Privat- und Gewerbekunden. In unserem Angebots-Wizard sehen Sie sofort eine transparente Preisschätzung – berechnet nach Fensterflügeln, Etage, Verschmutzung und Extras.",
     heroFollow:
-      "Nach dem Absenden erhalten Sie innerhalb von 24 Stunden Ihr verbindliches Festpreis-Angebot – versichert, pünktlich, streifenfrei garantiert.",
+      "Nach dem Absenden erhalten Sie innerhalb von 24 Stunden Ihr verbindliches Festpreis-Angebot – versichert, pünktlich, streifenfrei.",
     angebotIntro:
       "In 5 Schritten zur Sofort-Kalkulation: Mit jeder Auswahl aktualisiert sich Ihr Preis live. Nach dem Absenden erhalten Sie innerhalb von 24 Stunden Ihr verbindliches Festpreis-Angebot – inkl. PDF-Eingangsbestätigung.",
     contactIntro:
@@ -85,7 +84,7 @@ export const siteConfig = {
     servicesFootnote:
       "Im Angebots-Wizard sehen Sie eine live aktualisierte Preisschätzung – Ihr verbindliches Festpreis-Angebot folgt innerhalb von 24 Stunden.",
     footerTagline:
-      "Professionelle Fensterreinigung mit Live-Preisschätzung online. Verbindliches Festpreis-Angebot in 24 Stunden – kein Anfahrtszuschlag, versichert, streifenfrei.",
+      "Reinigung in Baesweiler, Aachen und Umgebung. Fenster, Büro, Praxis, Bauende, Renovierung und Entrümpelung. Festpreis, versichert, kein Anfahrtszuschlag.",
     sectionTitle: "Jetzt Preis berechnen",
     wizardCardTitle: "5-Schritte Preisrechner",
     wizardCardDesc:
@@ -175,12 +174,12 @@ export const siteConfig = {
 
   usps: [
     {
-      title: "Streifenfrei garantiert",
+      title: "Streifenfrei",
       description: "Professionelle Technik für kristallklare Ergebnisse – jedes Mal.",
     },
     {
-      title: "Vollversichert",
-      description: "Betriebshaftpflichtversicherung für Ihre Sicherheit und unser Vertrauen.",
+      title: "Versichert",
+      description: "Die Arbeit ist versichert.",
     },
     {
       title: "Transparente Preiskalkulation",
@@ -189,7 +188,7 @@ export const siteConfig = {
     },
     {
       title: "Pünktlich & zuverlässig",
-      description: "Termintreue ist unser Versprechen. Über 500 zufriedene Kunden.",
+      description: "Termintreue. Der Festpreis steht vor der Arbeit.",
     },
   ],
 
@@ -358,7 +357,7 @@ export const siteConfig = {
         "versicherung vorhanden",
       ],
       answer:
-        "Ja, wir verfügen über eine umfassende Betriebshaftpflichtversicherung. Ihr Eigentum ist bei uns in sicheren Händen.",
+        "Ja. Die Arbeit ist versichert.",
     },
     {
       id: "winter",

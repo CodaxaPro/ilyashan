@@ -57,7 +57,7 @@ const ARTICLE_DEFS: Record<
   }
 > = {
   "was-kostet-fensterreinigung": {
-    title: "Was kostet Fensterreinigung? | Preise NRW 2026 — Ilyashan",
+    title: "Was kostet Fensterreinigung? | Preise NRW 2026",
     description: "Fensterreinigung Kosten: ab 49 € Privat, Rahmen ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis in 24h. Kein Anfahrtszuschlag.",
     headline: "Was kostet Fensterreinigung wirklich?",
     subline: "Transparente Preise für Baesweiler, Aachen und Umgebung — ohne versteckte Kosten.",
@@ -94,7 +94,7 @@ const ARTICLE_DEFS: Record<
     takeaways: ["Live-Schätzung im Wizard", "Festpreis in 24h", "Kein Anfahrtszuschlag", "Ab 49 € Privat"],
   },
   "fensterreinigung-selber-machen-vs-profi": {
-    title: "Fenster selber putzen vs. Profi | Ratgeber — Ilyashan",
+    title: "Fenster selber putzen vs. Profi | Ratgeber",
     description: "Selber machen oder Profi? Zeit, Streifen, Sicherheit — ehrlicher Vergleich für Fensterreinigung in der Region Aachen.",
     headline: "Selber putzen oder Profi beauftragen?",
     subline: "Zeit, Ergebnis und Risiko — was wirklich dahintersteckt.",
@@ -120,7 +120,7 @@ const ARTICLE_DEFS: Record<
     ],
   },
   "streifenfreie-fenster-tipps": {
-    title: "Streifenfreie Fenster Tipps | Profi-Geheimnisse — Ilyashan",
+    title: "Streifenfreie Fenster Tipps | Profi-Geheimnisse",
     description: "Streifenfreie Fenster: Technik, Reiniger, Wetter — Tipps von Ilyashan Fensterreinigung Baesweiler.",
     headline: "Streifenfreie Fenster — so geht's wirklich",
     subline: "Was Profis anders machen als Haushaltsreiniger.",
@@ -134,11 +134,11 @@ const ARTICLE_DEFS: Record<
         bullets: ["Rahmen und Falz zuerst", "Profiprodukte statt Haushaltsmittel", "Bei Bewölkung putzen", "Mikrofasertücher wechseln"],
       },
     ],
-    faq: [{ q: "Garantiert Ilyashan streifenfrei?", a: "Ja — streifenfrei garantiert bei jeder Beauftragung." }],
+    faq: [{ q: "Werden die Fenster streifenfrei?", a: "Die Scheiben werden streifenfrei gereinigt." }],
     related: [{ href: "/fensterreinigung", label: "Leistungen", hint: "Hub" }],
   },
   "fensterreinigung-winter": {
-    title: "Fensterreinigung im Winter | Ratgeber — Ilyashan",
+    title: "Fensterreinigung im Winter | Ratgeber",
     description: "Fensterreinigung Winter: ab wann möglich? Frost, Temperatur, Tipps. Ilyashan reinigt bei über -5 °C.",
     headline: "Fensterreinigung im Winter — geht das?",
     subline: "Ja — mit Profis und richtiger Planung.",
@@ -155,7 +155,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung-baesweiler", label: "Termin", hint: "Regional" }],
   },
   "fensterreinigung-gewerbe-tipps": {
-    title: "Fensterreinigung Gewerbe Tipps | Büro & Praxis — Ilyashan",
+    title: "Fensterreinigung Gewerbe Tipps | Büro & Praxis",
     description: "Gewerbefenster reinigen: Termine, Sicherheit, Wartungsvertrag. Tipps für Büro, Praxis, Laden.",
     headline: "Gewerbefenster professionell reinigen",
     subline: "Image, Hygiene und planbare Kosten.",
@@ -171,7 +171,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung/gewerbe", label: "Gewerbe", hint: "Leistung" }],
   },
   "solaranlage-reinigung-guide": {
-    title: "Solaranlage reinigen | Guide — Ilyashan",
+    title: "Solaranlage reinigen | Guide",
     description: "Solaranlage Reinigung: Kosten ab 99 €, Ertrag, Sicherheit. Professionelle PV-Reinigung Baesweiler & Aachen.",
     headline: "Solaranlage reinigen — Ertrag sichern",
     subline: "Verschmutzte Module liefern weniger Strom.",
@@ -187,7 +187,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung/solar", label: "Solar", hint: "ab 99 €" }],
   },
   "rahmen-falz-warum-wichtig": {
-    title: "Rahmen & Falz reinigen | Warum wichtig — Ilyashan",
+    title: "Rahmen & Falz reinigen | Warum wichtig",
     description: "Rahmen und Falz reinigen: Schimmel vermeiden, längere Haltbarkeit. Komplettpaket ab 79 €.",
     headline: "Rahmen & Falz — oft vergessen, aber wichtig",
     subline: "Saubere Scheiben reichen nicht.",
@@ -203,7 +203,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung/rahmen", label: "Rahmen & Falz", hint: "ab 79 €" }],
   },
   "fensterreinigung-haeufigkeit": {
-    title: "Wie oft Fenster putzen? | Häufigkeit — Ilyashan",
+    title: "Wie oft Fenster putzen? | Häufigkeit",
     description: "Fensterreinigung Häufigkeit: Privat 2×/Jahr, Gewerbe monatlich. Wartungsvertrag ab 59 €/Monat.",
     headline: "Wie oft sollten Fenster professionell gereinigt werden?",
     subline: "Privat, Gewerbe und Solar — unterschiedliche Rhythmen.",
@@ -218,7 +218,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung/wartung", label: "Wartung", hint: "Vertrag" }],
   },
   "fensterreinigung-umzug-einzug": {
-    title: "Fensterreinigung Umzug & Einzug | Ratgeber — Ilyashan",
+    title: "Fensterreinigung Umzug & Einzug | Ratgeber",
     description: "Fensterreinigung bei Umzug: Einzug, Auszug, Übergabe. Streifenfrei für die Wohnungsübergabe.",
     headline: "Umzug & Einzug — Fenster glänzen lassen",
     subline: "Übergabe, Einzug, frischer Start.",
@@ -235,7 +235,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/fensterreinigung/privat", label: "Privat", hint: "ab 49 €" }],
   },
   "erste-beauftragung-fensterprofi": {
-    title: "Erste Beauftragung Fensterprofi | Ratgeber — Ilyashan",
+    title: "Erste Beauftragung Fensterprofi | Ratgeber",
     description: "Erstes Mal Fensterprofi beauftragen? Ablauf, Vorbereitung, Was Sie wissen sollten — Ilyashan.",
     headline: "Erste Beauftragung — so läuft's ab",
     subline: "Vom Wizard bis zu streifenfreien Fenstern.",
@@ -251,7 +251,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/de/angebot", label: "Wizard", hint: "Start" }],
   },
   "gutschein-fensterreinigung-tipps": {
-    title: "Gutschein Fensterreinigung Tipps | Geschenk — Ilyashan",
+    title: "Gutschein Fensterreinigung Tipps | Geschenk",
     description: "Fensterreinigung Gutschein verschenken: Anlässe, Beträge, Bestellung. TreuePay — sofort online.",
     headline: "Fensterreinigung Gutschein — Tipps zum Verschenken",
     subline: "Zeit und Klarheit statt Standardgeschenk.",
@@ -267,7 +267,7 @@ const ARTICLE_DEFS: Record<
     related: [{ href: "/gutschein", label: "Gutschein Hub", hint: "Alle Anlässe" }],
   },
   "glasfassade-reinigung-sicherheit": {
-    title: "Glasfassade reinigen | Sicherheit — Ilyashan",
+    title: "Glasfassade reinigen | Sicherheit",
     description: "Glasfassade Reinigung: Sicherheit, Höhe, Aufmaß. Professionelle Fassadenreinigung Baesweiler & Aachen.",
     headline: "Glasfassade — Sicherheit geht vor",
     subline: "Höhe, Zugang, Versicherung — Profis erforderlich.",
@@ -309,7 +309,7 @@ export function buildGuideHub(): GuideHubContent {
     slug: "hub",
     path: "/ratgeber",
     seo: {
-      title: "Ratgeber Fensterreinigung | Tipps & Preise — Ilyashan",
+      title: "Ratgeber Fensterreinigung | Tipps & Preise",
       description: "Ratgeber: Kosten, Streifenfrei-Tipps, Winter, Gewerbe, Solar, Gutschein. Ilyashan Fensterreinigung Baesweiler & Aachen.",
     },
     hero: {

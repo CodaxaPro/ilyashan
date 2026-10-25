@@ -4,22 +4,22 @@
   "serviceId": "privat",
   "priceFrom": "ab 49 €",
   "seo": {
-    "title": "Privatfenster | Fensterreinigung — Ilyashan Baesweiler",
-    "description": "Privatfenster in Baesweiler & Aachen: ab 49 €, streifenfrei garantiert, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★"
+    "title": "Privatfenster | Fensterreinigung",
+    "description": "Privatfenster in Baesweiler & Aachen: ab 49 €, streifenfrei, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★"
   },
   "hero": {
     "eyebrow": "Privatfenster · Ilyashan",
     "headline": "Privatfenster streifenfrei — ab 49 €",
-    "subline": "Professionelle privatfenster — transparent kalkuliert, versichert, pünktlich. Live-Preisschätzung im Wizard.",
+    "subline": "Professionelle Privatfenster — transparent kalkuliert, versichert, pünktlich. Live-Preisschätzung im Wizard.",
     "trust": "4,9★ bei Google · Kein Anfahrtszuschlag · Versichert"
   },
   "essence": {
     "eyebrow": "Privatfenster",
     "headline": "Privatfenster — Qualität, die man sieht",
     "paragraphs": [
-      "Privatfenster von Ilyashan: streifenfrei garantiert, ab 49 €, kein Anfahrtszuschlag in Baesweiler, Aachen und Umgebung.",
+      "Privatfenster von Ilyashan: streifenfrei, ab 49 €, kein Anfahrtszuschlag in Baesweiler, Aachen und Umgebung.",
       "Im Angebots-Wizard sehen Sie sofort eine Live-Preisschätzung — verbindliches Festpreis-Angebot in 24 Stunden.",
-      "Über 500 zufriedene Kunden vertrauen uns — seit 2020 regional verwurzelt in Baesweiler."
+      "4,9 aus 17 Google-Bewertungen. Sitz in Baesweiler, seit 2020."
     ]
   },
   "emotions": {
@@ -29,12 +29,12 @@
       {
         "word": "Klarheit",
         "headline": "Streifenfrei",
-        "text": "Kristallklare Ergebnisse — garantiert."
+        "text": "Kristallklare Ergebnisse."
       },
       {
         "word": "Vertrauen",
         "headline": "Versichert",
-        "text": "Betriebshaftpflicht inklusive."
+        "text": "Die Arbeit ist versichert."
       },
       {
         "word": "Fairness",
@@ -53,7 +53,7 @@
       },
       {
         "word": "Wertschätzung",
-        "headline": "500+ Kunden",
+        "headline": "4,9 bei Google",
         "text": "4,9★ bei Google."
       }
     ]
@@ -64,7 +64,7 @@
     "items": [
       "Mindestauftrag Wohnung ab 49 €",
       "Reinigungsumfang (innen/außen) im Wizard",
-      "Streifenfrei garantiert",
+      "Streifenfrei",
       "Kein Anfahrtszuschlag"
     ]
   },
@@ -104,7 +104,7 @@
       {
         "num": "04",
         "title": "Ergebnis",
-        "text": "Streifenfrei garantiert."
+        "text": "Streifenfrei."
       }
     ]
   },

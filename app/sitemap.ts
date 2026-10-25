@@ -3,7 +3,6 @@ import type { MetadataRoute } from "next";
 import {
   GIFT_SLUGS,
   GUIDE_SLUGS,
-  INTENT_SEO_LINKS,
   LOCATION_SLUGS,
   PACKAGE_SLUGS,
 } from "@/lib/landing-pages";
@@ -42,13 +41,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const intentPages = INTENT_SEO_LINKS.map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified,
-    changeFrequency: "monthly" as const,
-    priority: 0.78,
-  }));
-
   return [
     { url: baseUrl, lastModified, changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/fensterreinigung`, lastModified, changeFrequency: "weekly", priority: 0.9 },
@@ -58,16 +50,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...locationPages,
     { url: `${baseUrl}/ratgeber`, lastModified, changeFrequency: "monthly", priority: 0.75 },
     ...guidePages,
-    ...intentPages,
     { url: `${baseUrl}/angebot`, lastModified, changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/bueroreinigung`, lastModified, changeFrequency: "weekly", priority: 0.88 },
+    { url: `${baseUrl}/bauendreinigung`, lastModified, changeFrequency: "monthly", priority: 0.86 },
+    { url: `${baseUrl}/renovierungsreinigung`, lastModified, changeFrequency: "monthly", priority: 0.86 },
+    { url: `${baseUrl}/praxisreinigung`, lastModified, changeFrequency: "monthly", priority: 0.86 },
+    { url: `${baseUrl}/entruempelung`, lastModified, changeFrequency: "monthly", priority: 0.86 },
     {
       url: `${baseUrl}/bueroreinigung/angebot`,
       lastModified,
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    { url: `${baseUrl}/impressum`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/datenschutz`, lastModified, changeFrequency: "yearly", priority: 0.3 },
   ];
 }

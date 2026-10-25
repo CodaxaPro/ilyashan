@@ -1,35 +1,19 @@
 "use client";
 
+import { BrandLogo } from "@/components/BrandLogo";
 import { siteConfig } from "@/lib/config";
 import { Button, PhoneIcon } from "@/components/ui/Button";
-import { isHomePath, routes } from "@/lib/routes";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navLinks = [
-  { href: "#einsatzgebiet", label: "Einsatzgebiet", isPage: false },
-  { href: "#leistungen", label: "Leistungen", isPage: false },
-  { href: "#vorteile", label: "Vorteile", isPage: false },
-  { href: "#ablauf", label: "Ablauf", isPage: false },
-  { href: "#bewertungen", label: "Bewertungen", isPage: false },
-  { href: "#faq", label: "FAQ", isPage: false },
-  { href: routes.angebot, label: siteConfig.messaging.navAngebot, isPage: true },
+  { href: "/de#leistungen", label: "Leistungen" },
+  { href: "/de#einsatzgebiet", label: "Einsatzgebiet" },
+  { href: "/de#kontakt", label: "Kontakt" },
 ];
 
 export function Header() {
-  const pathname = usePathname();
-  const isHome = isHomePath(pathname);
-  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const solid = !isHome || scrolled;
-  const showSolid = solid || menuOpen;
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -42,89 +26,41 @@ export function Header() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        showSolid
-          ? "bg-white/95 backdrop-blur-md shadow-md py-3"
-          : "bg-transparent py-5"
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background py-3"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          <Link href={routes.home} className="flex items-center gap-2 group">
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg transition-colors ${
-                showSolid
-                  ? "bg-primary text-white"
-                  : "bg-white/20 text-white backdrop-blur"
-              }`}
-            >
-              I
-            </div>
-            <div>
-              <span
-                className={`font-bold text-lg leading-tight block ${
-                  showSolid ? "text-foreground" : "text-white"
-                }`}
-              >
-                {siteConfig.name}
-              </span>
-              <span
-                className={`text-xs ${
-                  showSolid ? "text-muted" : "text-white/80"
-                }`}
-              >
-                {siteConfig.contact.region}
-              </span>
-            </div>
-          </Link>
+          <BrandLogo size="header" />
 
           <nav className="hidden lg:flex items-center gap-6">
-            {navLinks.map((link) =>
-              link.isPage ? (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    showSolid ? "text-foreground/80" : "text-white/90"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a
-                  key={link.href}
-                  href={isHome ? link.href : `${routes.home}${link.href}`}
-                  className={`text-sm font-medium transition-colors hover:text-primary ${
-                    showSolid ? "text-foreground/80" : "text-white/90"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
             <a
               href={`tel:${siteConfig.contact.phone}`}
               data-analytics-id="header-phone"
-              className={`flex items-center gap-2 text-sm font-semibold transition-colors ${
-                showSolid ? "text-primary" : "text-white"
-              }`}
+              className="flex items-center gap-2 text-sm font-semibold text-primary"
             >
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
-            <Button href={routes.angebot} variant="primary" size="sm" data-analytics-id="header-cta-angebot">
-              {siteConfig.messaging.ctaPrimary}
+            <Button href="/de#kontakt" variant="primary" size="sm" data-analytics-id="header-cta-anfrage">
+              Anfrage
             </Button>
           </div>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`lg:hidden p-2 rounded-lg ${
-              showSolid ? "text-foreground" : "text-white"
-            }`}
+            className="lg:hidden p-2 text-foreground"
             aria-label={menuOpen ? "Menü schließen" : "Menü öffnen"}
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -139,47 +75,28 @@ export function Header() {
 
         {menuOpen && (
           <nav
-            className={`lg:hidden mt-4 pb-4 pt-4 space-y-3 ${
-              showSolid ? "border-t border-border" : "border-t border-white/20"
-            }`}
+            className="lg:hidden mt-4 space-y-3 border-t border-border pb-4 pt-4"
           >
-            {navLinks.map((link) =>
-              link.isPage ? (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`block text-sm font-medium py-2 ${
-                    showSolid ? "text-foreground" : "text-white"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ) : (
-                <a
-                  key={link.href}
-                  href={isHome ? link.href : `${routes.home}${link.href}`}
-                  onClick={() => setMenuOpen(false)}
-                  className={`block text-sm font-medium py-2 ${
-                    showSolid ? "text-foreground" : "text-white"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="block py-2 text-sm font-medium text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
             <a
               href={`tel:${siteConfig.contact.phone}`}
               data-analytics-id="header-phone"
-              className={`flex items-center gap-2 text-sm font-semibold py-2 ${
-                showSolid ? "text-primary" : "text-white"
-              }`}
+              className="flex items-center gap-2 py-2 text-sm font-semibold text-primary"
             >
               <PhoneIcon className="w-4 h-4" />
               {siteConfig.contact.phoneDisplay}
             </a>
-            <Button href={routes.angebot} variant="primary" size="md" className="w-full">
-              {siteConfig.messaging.ctaPrimary}
+            <Button href="/de#kontakt" variant="primary" size="md" className="w-full">
+              Anfrage
             </Button>
           </nav>
         )}

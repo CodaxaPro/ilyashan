@@ -169,11 +169,11 @@ export function PriceEstimateCard({
           </li>
           <li className="flex items-center gap-2 text-sm text-foreground">
             <span className="text-accent font-bold">✓</span>
-            Streifenfrei garantiert
+            Streifenfrei
           </li>
           <li className="flex items-center gap-2 text-sm text-foreground">
             <span className="text-accent font-bold">✓</span>
-            Vollversichert
+            Versichert
           </li>
         </ul>
       )}

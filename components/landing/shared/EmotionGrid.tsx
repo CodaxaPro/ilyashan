@@ -15,9 +15,9 @@ export function EmotionGrid({ eyebrow, headline, items }: Props) {
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <div key={item.word} className="bg-card border border-border rounded-2xl p-8">
-            <p className="eyebrow mb-2 text-accent">{item.word}</p>
-            <h3 className="text-xl font-bold mb-3">{item.headline}</h3>
+          <div key={item.word} className="border border-border bg-card p-8">
+            <p className="eyebrow mb-2">{item.word}</p>
+            <h3 className="mb-3 font-serif text-2xl font-medium">{item.headline}</h3>
             <p className="text-muted text-sm leading-relaxed">{item.text}</p>
           </div>
         ))}

@@ -22,12 +22,12 @@ export default function BueroeinigungAngebotPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
       />
       <Header />
-      <main className="min-h-screen bg-slate-50">
-        <section className="bg-primary pt-28 sm:pt-32 pb-12">
+      <main className="min-h-screen bg-background">
+        <section className="bg-primary pt-28 pb-12 sm:pt-32">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <p className="text-white/80 text-sm font-medium mb-3">Büroreinigung · Gewerbe</p>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-              Büroreinigung kalkulieren
+            <p className="mb-3 text-sm text-white/70">Büroreinigung · Aachen und Baesweiler</p>
+            <h1 className="mb-3 font-serif text-3xl font-medium text-white sm:text-4xl">
+              Bürofläche kalkulieren
             </h1>
             <p className="text-white/90 text-base sm:text-lg max-w-2xl leading-relaxed">
               Strukturierte Angebotsübersicht für Ihre Immobilie. Aufgabenbasierte Kalkulation –
@@ -38,12 +38,12 @@ export default function BueroeinigungAngebotPage() {
 
         <section className="py-10 sm:py-14">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="mb-6 rounded-2xl border border-border bg-white px-5 py-4 text-sm text-foreground/85 leading-relaxed">
+            <div className="mb-6 border border-border bg-card px-5 py-4 text-sm leading-relaxed text-foreground/85">
               <strong className="text-foreground">Hinweis:</strong> Fensterreinigung /
               Glasreinigung wird in diesem Rechner nicht berechnet – dafür steht der separate
               Fenster-Angebotsprozess zur Verfügung.
             </div>
-            <div className="rounded-3xl border border-border bg-white p-4 sm:p-6 lg:p-8 shadow-sm">
+            <div className="border border-border bg-white p-4 sm:p-6 lg:p-8">
               <CleaningCalculator />
             </div>
           </div>

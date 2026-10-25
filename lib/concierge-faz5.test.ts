@@ -41,7 +41,7 @@ describe("concierge faz5 – faq match", () => {
   it("matches FAQ with typos via fuzzy", () => {
     const answer = findFaqAnswer("sind sie versichert haftpflicht");
     assert.ok(answer);
-    assert.match(answer, /Betriebshaftpflicht/);
+    assert.match(answer, /versichert/);
   });
 
   it("matches winter FAQ with typo", () => {

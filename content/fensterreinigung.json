@@ -2,14 +2,14 @@
   "slug": "hub",
   "path": "/fensterreinigung",
   "seo": {
-    "title": "Fensterreinigung Baesweiler & Aachen | Streifenfrei — Ilyashan",
-    "description": "Professionelle Fensterreinigung: streifenfrei garantiert, ab 49 €, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★ · versichert."
+    "title": "Fensterreinigung Baesweiler & Aachen | Streifenfrei",
+    "description": "Professionelle Fensterreinigung: streifenfrei, ab 49 €, kein Anfahrtszuschlag. Live-Preisschätzung, Festpreis in 24h. 4,9★ · versichert."
   },
   "hero": {
     "eyebrow": "Fensterreinigung · Baesweiler & Aachen",
     "headline": "Klare Fenster. Klarer Preis. Kein Anfahrtszuschlag.",
     "subline": "Professionelle Fensterreinigung mit Live-Preisschätzung im Wizard — verbindliches Festpreis-Angebot in 24 Stunden.",
-    "trust": "4,9★ bei Google · 500+ Kunden · Versichert"
+    "trust": "4,9 aus 17 Google-Bewertungen · Versichert"
   },
   "pain": {
     "eyebrow": "Kennen Sie das?",
@@ -22,7 +22,7 @@
   },
   "promise": {
     "eyebrow": "Unser Versprechen",
-    "headline": "Live-Preisschätzung. Festpreis in 24h. Streifenfrei garantiert.",
+    "headline": "Live-Preisschätzung. Festpreis in 24h. Streifenfrei.",
     "text": "Transparent von Anfang an — kein Anfahrtszuschlag in unserem Einsatzgebiet."
   },
   "stats": [
@@ -31,8 +31,8 @@
       "label": "Google Bewertung"
     },
     {
-      "value": "500+",
-      "label": "Zufriedene Kunden"
+      "value": "17",
+      "label": "Google-Bewertungen"
     },
     {
       "value": "24h",
@@ -46,11 +46,11 @@
       {
         "word": "Klarheit",
         "headline": "Kristallklare Fenster",
-        "text": "Endlich wieder durchblicken — streifenfrei garantiert."
+        "text": "Endlich wieder durchblicken — streifenfrei."
       },
       {
         "word": "Vertrauen",
-        "headline": "Vollversichert",
+        "headline": "Versichert",
         "text": "Ihr Zuhause in sicheren Händen."
       },
       {
@@ -61,7 +61,7 @@
       {
         "word": "Präzision",
         "headline": "Profi-Technik",
-        "text": "Streifenfrei — jedes Mal."
+        "text": "Streifenfrei."
       },
       {
         "word": "Zeit",
@@ -70,7 +70,7 @@
       },
       {
         "word": "Wertschätzung",
-        "headline": "500+ Kunden",
+        "headline": "4,9 bei Google",
         "text": "4,9★ bei Google."
       }
     ]
@@ -105,7 +105,7 @@
       {
         "num": "04",
         "title": "Durchblicken",
-        "text": "Klare Fenster — garantiert."
+        "text": "Klare Fenster."
       }
     ]
   },
@@ -120,7 +120,7 @@
     },
     {
       "q": "Versichert?",
-      "a": "Ja — Betriebshaftpflicht inklusive."
+      "a": "Ja. Die Arbeit ist versichert."
     }
   ],
   "closing": {

@@ -170,6 +170,35 @@ export function guidePageSchemas(page: GuidePageContent) {
   ];
 }
 
+export function serviceLandingSchemas(page: {
+  name: string;
+  title: string;
+  description: string;
+  path: string;
+  faq: { q: string; a: string }[];
+}) {
+  return [
+    webPageSchema(page.title, page.description, page.path),
+    breadcrumbSchema([
+      { name: "Start", path: "/" },
+      { name: page.name, path: page.path },
+    ]),
+    faqSchema(page.faq),
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      name: page.name,
+      description: page.description,
+      url: canonicalUrl(page.path),
+      provider: provider(),
+      areaServed: [
+        { "@type": "City", name: "Aachen" },
+        { "@type": "City", name: "Baesweiler" },
+      ],
+    },
+  ];
+}
+
 export function hubPageSchemas(title: string, description: string, path: string, name: string) {
   return [
     webPageSchema(title, description, path),

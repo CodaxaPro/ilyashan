@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
+import { legalOwnerName } from "@/lib/legal-owner";
 import { routes } from "@/lib/routes";
 import { pageMetadata } from "@/lib/seo-meta";
 import Link from "next/link";
@@ -7,11 +8,18 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-export const metadata: Metadata = pageMetadata({
-  title: `Impressum | ${siteConfig.name}`,
-  description: `Impressum und Kontakt — ${siteConfig.name}, ${siteConfig.contact.address}, ${siteConfig.contact.city}.`,
-  path: "/impressum",
-});
+export const metadata: Metadata = {
+  ...pageMetadata({
+    title: "Impressum",
+    description: `Impressum und Kontakt — ${siteConfig.name}, ${siteConfig.contact.address}, ${siteConfig.contact.city}.`,
+    path: "/impressum",
+  }),
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
+};
 
 export default function ImpressumPage() {
   return (
@@ -23,9 +31,10 @@ export default function ImpressumPage() {
 
           <div className="prose prose-slate max-w-none space-y-6 text-muted">
             <section>
-              <h2 className="text-xl font-bold text-foreground">Angaben gemäß § 5 TMG</h2>
+              <h2 className="text-xl font-bold text-foreground">Angaben gemäß § 5 DDG</h2>
               <p>
                 {siteConfig.name}<br />
+                Inhaber: {legalOwnerName}<br />
                 {siteConfig.contact.address}<br />
                 {siteConfig.contact.postalCode} {siteConfig.contact.city}
               </p>
@@ -68,11 +77,6 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-xl font-bold text-foreground">Streitschlichtung</h2>
               <p>
-                Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{" "}
-                <a href="https://ec.europa.eu/consumers/odr/" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-                  https://ec.europa.eu/consumers/odr/
-                </a>
-                <br />
                 Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer
                 Verbraucherschlichtungsstelle teilzunehmen.
               </p>
@@ -81,8 +85,8 @@ export default function ImpressumPage() {
             <section>
               <h2 className="text-xl font-bold text-foreground">Haftung für Inhalte</h2>
               <p>
-                Als Diensteanbieter sind wir gemäß § 7 Abs.1 TMG für eigene Inhalte auf diesen Seiten
-                nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir als
+                Als Diensteanbieter sind wir gemäß § 7 Abs. 1 DDG für eigene Inhalte auf diesen Seiten
+                nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 DDG sind wir als
                 Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
                 Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige
                 Tätigkeit hinweisen.

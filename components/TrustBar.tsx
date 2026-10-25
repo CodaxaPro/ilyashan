@@ -1,7 +1,7 @@
 import { siteConfig } from "@/lib/config";
 
 const trustItems = [
-  { icon: "shield", label: "Vollversichert" },
+  { icon: "shield", label: "Versichert" },
   { icon: "clock", label: "Pünktlich & zuverlässig" },
   { icon: "star", label: `${siteConfig.business.rating}★ Google Bewertung` },
   { icon: "euro", label: siteConfig.messaging.trustLivePrice },

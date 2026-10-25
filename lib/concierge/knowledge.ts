@@ -130,7 +130,7 @@ Kurz: Die Schätzung zeigt Ihnen sofort die Richtung – das Festpreis-Angebot i
 }
 
 export function buildInsuranceInfo(): string {
-  return `Ja, wir sind **vollversichert** (Betriebshaftpflichtversicherung). Ihr Eigentum ist bei uns in sicheren Händen – das ist für uns selbstverständlich und Teil unseres Qualitätsversprechens.`;
+  return `Ja. Die Arbeit ist versichert.`;
 }
 
 export function buildWinterInfo(): string {
@@ -185,5 +185,5 @@ Stellen Sie Ihre Frage oder wählen Sie einen Vorschlag unten.`;
 }
 
 export function buildTrustFooter(): string {
-  return `\n\n✓ ${siteConfig.serviceArea.noTravelFeeLabel} · ✓ Streifenfrei garantiert · ✓ Vollversichert · ✓ ${siteConfig.business.rating}★ Google`;
+  return `\n\n✓ ${siteConfig.serviceArea.noTravelFeeLabel} · ✓ Streifenfrei · ✓ Versichert · ✓ ${siteConfig.business.rating}★ Google`;
 }

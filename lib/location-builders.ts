@@ -1,5 +1,5 @@
 import { siteConfig } from "./config";
-import { getLocationMeta, type LocationMeta } from "./location-data";
+import { getLocationMeta } from "./location-data";
 import type { LocationSlug } from "./seo-config";
 
 type EmotionItem = { word: string; headline: string; text: string };
@@ -26,7 +26,7 @@ export type BuiltLocationPage = {
   closing: { headline: string; text: string; cta: string };
 };
 
-const TRUST = `${siteConfig.business.rating}★ bei Google · ${siteConfig.business.customers} Kunden · Kein Anfahrtszuschlag`;
+const TRUST = `${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen · Kein Anfahrtszuschlag`;
 
 function isHome(slug: LocationSlug): boolean {
   return slug === "baesweiler";
@@ -41,8 +41,8 @@ function defaultEmotions(city: string): EmotionItem[] {
     },
     {
       word: "Vertrauen",
-      headline: "Vollversichert",
-      text: "Ihr Zuhause in sicheren Händen — Betriebshaftpflicht inklusive.",
+      headline: "Versichert",
+      text: "Die Arbeit ist versichert.",
     },
     {
       word: "Fairness",
@@ -51,8 +51,8 @@ function defaultEmotions(city: string): EmotionItem[] {
     },
     {
       word: "Präzision",
-      headline: "Streifenfrei garantiert",
-      text: "Profi-Technik und Erfahrung — jedes Mal dasselbe Ergebnis.",
+      headline: "Streifenfrei",
+      text: "Profi-Technik und Erfahrung.",
     },
     {
       word: "Zeit",
@@ -61,19 +61,18 @@ function defaultEmotions(city: string): EmotionItem[] {
     },
     {
       word: "Wertschätzung",
-      headline: `${siteConfig.business.customers} zufriedene Kunden`,
-      text: `${siteConfig.business.rating}★ bei Google — Empfehlungen aus der Region.`,
+      headline: `${String(siteConfig.business.rating).replace(".", ",")} bei Google`,
+      text: `${siteConfig.business.reviews} Bewertungen aus der Region.`,
     },
   ];
 }
 
-function defaultQuotes(meta: LocationMeta) {
-  const t = siteConfig.testimonials;
-  const local = meta.localQuote;
-  return [
-    local ?? { text: t[0].text, name: t[0].name, location: meta.city },
-    { text: t[1].text, name: t[1].name, location: meta.region.split("·")[0]?.trim() ?? meta.city },
-  ];
+function defaultQuotes() {
+  return siteConfig.testimonials.slice(0, 2).map((review) => ({
+    text: review.text,
+    name: review.name,
+    location: "Google",
+  }));
 }
 
 export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
@@ -86,11 +85,11 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
     path: `/fensterreinigung-${slug}`,
     seo: {
       title: home
-        ? `Fensterreinigung Baesweiler | Streifenfrei · Festpreis in 24h — Ilyashan`
-        : `Fensterreinigung ${meta.city} | Streifenfrei · Kein Anfahrtszuschlag — Ilyashan`,
+        ? `Fensterreinigung Baesweiler | Streifenfrei · Festpreis in 24h`
+        : `Fensterreinigung ${meta.city} | Streifenfrei · Kein Anfahrtszuschlag`,
       description: home
-        ? `Fensterreinigung in Baesweiler: Ansaessig am Kueckstr. 29, ab 49 €, kein Anfahrtszuschlag. Live-Preisschaetzung online, Festpreis in 24h. ${siteConfig.business.rating}★ · versichert.`
-        : `Fensterreinigung in ${meta.city}: ${travel}. Ab 49 €, kein Anfahrtszuschlag, Live-Preisschaetzung im Wizard, Festpreis in 24h. ${siteConfig.business.rating}★ · Ilyashan Baesweiler.`,
+        ? `Fensterreinigung in Baesweiler, Kückstr. 29. Ab 49 €, kein Anfahrtszuschlag. Live-Preisschätzung online, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
+        : `Fensterreinigung in ${meta.city}: ${travel}. Ab 49 €, kein Anfahrtszuschlag, Live-Preisschätzung im Rechner, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
     },
     city: meta.city,
     region: meta.region,
@@ -118,12 +117,12 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
         ? [
             "Sie suchen Fensterreinigung in Baesweiler und wollen wissen, wer wirklich kommt — und was es kostet, bevor der Termin steht.",
             "Ilyashan ist hier ansässig: Privatfenster ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Im Wizard sehen Sie sofort eine Live-Preisschätzung — danach erhalten Sie Ihr verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
-            `Über ${siteConfig.business.customers} Kunden in der Region vertrauen uns — streifenfrei, versichert, ohne Anfahrtszuschlag in Baesweiler und Umgebung.`,
+            `${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen. Versichert, ohne Anfahrtszuschlag in Baesweiler und Umgebung.`,
           ]
         : [
             `Sie suchen Fensterreinigung in ${meta.city} und wollen keine Überraschungen: Wer kommt? Was kostet es? Wann ist es fertig?`,
             `Ilyashan ist in Baesweiler ansässig — ${travel}. Privat ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis-Angebot in 24 Stunden — kein Anfahrtszuschlag für ${meta.city}.`,
-            `Ob Einfamilienhaus, Wohnung oder Gewerbe: Wir reinigen streifenfrei, pünktlich und versichert — ${siteConfig.business.rating}★ bei Google, ${siteConfig.business.customers} zufriedene Kunden.`,
+            `Ob Einfamilienhaus, Wohnung oder Gewerbe: Wir reinigen streifenfrei, pünktlich und versichert — ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
           ],
     },
     emotions: {
@@ -133,8 +132,8 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
     },
     localProof: {
       eyebrow: "Stimmen aus der Region",
-      headline: `Was Kunden aus ${meta.city} sagen`,
-      quotes: defaultQuotes(meta),
+      headline: "Was Kunden sagen",
+      quotes: defaultQuotes(),
     },
     journey: {
       eyebrow: "So einfach geht's",
@@ -160,7 +159,7 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
         {
           num: "04",
           title: "Klare Fenster",
-          text: home ? "Durchblicken und entspannt zurücklehnen." : `Klare Fenster in ${meta.city} — garantiert streifenfrei.`,
+          text: home ? "Durchblicken und entspannt zurücklehnen." : `Klare Fenster in ${meta.city}.`,
         },
       ],
     },
@@ -181,13 +180,13 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
       },
       {
         q: "Sind Sie versichert?",
-        a: "Ja — umfassende Betriebshaftpflichtversicherung. Ihr Eigentum ist bei uns geschützt.",
+        a: "Ja. Die Arbeit ist versichert.",
       },
     ],
     closing: {
       headline: home ? "Klare Fenster. Klarer Preis. Jetzt in Baesweiler." : `Klare Fenster in ${meta.city} — jetzt Preis berechnen.`,
       text: home
-        ? "Live-Preisschätzung online — Festpreis in 24 Stunden. Streifenfrei garantiert."
+        ? "Live-Preisschätzung online — Festpreis in 24 Stunden. Streifenfrei."
         : `${travel}. Kein Anfahrtszuschlag — Festpreis in 24 Stunden.`,
       cta: "Preis jetzt berechnen",
     },

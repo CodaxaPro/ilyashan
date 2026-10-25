@@ -17,7 +17,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
   const home = isHome(loc.slug);
   return assembleIntentPage("fensterputzer", loc, {
     seo: {
-      title: `Fensterputzer ${loc.city} | Streifenfrei · Festpreis — Ilyashan`,
+      title: `Fensterputzer ${loc.city} | Streifenfrei · Festpreis`,
       description: home
         ? `Fensterputzer Baesweiler: Ansaessig am Kueckstr. 29, ab 49 €, kein Anfahrtszuschlag. Der kommt wirklich — ${siteConfig.business.rating}★.`
         : `Fensterputzer nahe ${loc.city}: ${travelFrom(loc)}. Streifenfrei, versichert, Festpreis in 24h. Ilyashan Baesweiler.`,
@@ -37,7 +37,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
         `„Fensterputzer ${loc.city}" bedeutet für viele: unzuverlässig, teuer, Streifen. Wir machen es anders — ansässig in Baesweiler, ${siteConfig.business.rating}★ bei Google.`,
         "Im Wizard sehen Sie sofort eine Live-Preisschätzung. Nach Ihrer Anfrage: verbindliches Festpreis-Angebot in 24 Stunden — kein Anfahrtszuschlag.",
         home
-          ? "Privat ab 49 €, Rahmen & Falz ab 79 €. Über 500 Kunden in der Region vertrauen uns."
+          ? `Privat ab 49 €, Rahmen & Falz ab 79 €. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
           : `Kunden aus ${loc.city} schätzen: pünktlich, freundlich, streifenfrei — ${travelFrom(loc)}.`,
       ],
     },
@@ -45,12 +45,12 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
       eyebrow: "Warum Ilyashan",
       headline: `Fensterputzer ${loc.city}`,
       items: [
-        { word: "Klarheit", headline: "Kristallklare Scheiben", text: `Streifenfrei in ${loc.city} — garantiert.` },
+        { word: "Klarheit", headline: "Kristallklare Scheiben", text: `Streifenfrei in ${loc.city} .` },
         { word: "Vertrauen", headline: "Der kommt wirklich", text: "Ansässig in Baesweiler — kein Subunternehmer." },
         { word: "Fairness", headline: "Kein Anfahrtszuschlag", text: "Festpreis gilt — ohne versteckte Fahrtkosten." },
         { word: "Präzision", headline: "Profi-Technik", text: "Rahmen, Falz, Solar — alles aus einer Hand." },
         { word: "Zeit", headline: "Mehr Zeit für Sie", text: "Leiter, Eimer, Frust — übernehmen wir." },
-        { word: "Wertschätzung", headline: `${siteConfig.business.customers} Kunden`, text: `${siteConfig.business.rating}★ bei Google.` },
+        { word: "Wertschätzung", headline: `${siteConfig.business.reviews} Bewertungen`, text: `${String(siteConfig.business.rating).replace(".", ",")} bei Google.` },
       ],
     },
     localProof: { eyebrow: "Stimmen", headline: "Was Kunden sagen", quotes: SHARED_QUOTES },
@@ -61,13 +61,13 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
         { num: "01", title: "Preis berechnen", text: "Wizard: Flügel, Etage, Extras — live sichtbar." },
         { num: "02", title: "Festpreis", text: "Verbindliches Angebot in 24 Stunden." },
         { num: "03", title: "Termin", text: home ? "Pünktlich in Baesweiler." : `Reinigung in ${loc.city}.` },
-        { num: "04", title: "Streifenfrei", text: "Klare Fenster — garantiert." },
+        { num: "04", title: "Streifenfrei", text: "Klare Fenster." },
       ],
     },
     faq: [
       { q: `Fensterputzer ${loc.city} — Anfahrt?`, a: `${travelFrom(loc)}. Kein Anfahrtszuschlag.` },
       { q: "Was kostet ein Fensterputzer?", a: "Privat ab 49 €. Live-Schätzung im Wizard." },
-      { q: "Versichert?", a: "Ja — Betriebshaftpflicht inklusive." },
+      { q: "Versichert?", a: "Ja. Die Arbeit ist versichert." },
       { q: "Kommt wirklich jemand?", a: "Ja — festes Team aus Baesweiler, keine Vermittler." },
     ],
     closing: {
@@ -81,7 +81,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
 function buildGlasreinigung(_type: IntentType, loc: LocationContext): BuiltIntentPage {
   return assembleIntentPage("glasreinigung", loc, {
     seo: {
-      title: `Glasreinigung ${loc.city} | Streifenfrei & sicher — Ilyashan`,
+      title: `Glasreinigung ${loc.city} | Streifenfrei & sicher`,
       description: `Glasreinigung in ${loc.city}: Fenster, Vitrinen, Solar — streifenfrei, versichert. ${travelFrom(loc)}. Ab 49 € · Festpreis in 24h.`,
     },
     hero: {
@@ -140,7 +140,7 @@ function buildFensterreiniger(_type: IntentType, loc: LocationContext): BuiltInt
   const home = isHome(loc.slug);
   return assembleIntentPage("fensterreiniger", loc, {
     seo: {
-      title: `Fensterreiniger ${loc.city} | Lokal aus Baesweiler — Ilyashan`,
+      title: `Fensterreiniger ${loc.city} | Lokal aus Baesweiler`,
       description: `Fensterreiniger nahe ${loc.city}: Ansässig in Baesweiler, ${travelFrom(loc)}. Streifenfrei, ab 49 €, kein Anfahrtszuschlag.`,
     },
     hero: {
@@ -169,7 +169,7 @@ function buildFensterreiniger(_type: IntentType, loc: LocationContext): BuiltInt
         { word: "Erreichbar", headline: "Telefon & Mail", text: siteConfig.contact.phoneDisplay },
         { word: "Termine", headline: "Pünktlich", text: "Wir kommen, wenn wir es sagen." },
         { word: "Preis", headline: "Transparent", text: "Wizard + Festpreis in 24h." },
-        { word: "Vertrauen", headline: "Versichert", text: "Betriebshaftpflicht inklusive." },
+        { word: "Vertrauen", headline: "Versichert", text: "Versichert." },
       ],
     },
     localProof: { eyebrow: "Stammkunden", headline: "Wiederbucher aus der Region", quotes: SHARED_QUOTES },
@@ -200,7 +200,7 @@ function buildFensterreiniger(_type: IntentType, loc: LocationContext): BuiltInt
 function buildGebaeudereinigung(_type: IntentType, loc: LocationContext): BuiltIntentPage {
   return assembleIntentPage("gebaeudereinigung", loc, {
     seo: {
-      title: `Gebäudereinigung Fenster ${loc.city} | Gewerbe & MFH — Ilyashan`,
+      title: `Gebäudereinigung Fenster ${loc.city} | Gewerbe & MFH`,
       description: `Fenster in ${loc.city} — Gewerbe, Praxis, Mehrfamilienhaus. Flexible Termine, Wartungsvertrag ab 59 €/Monat. Versichert.`,
     },
     hero: {
@@ -224,7 +224,7 @@ function buildGebaeudereinigung(_type: IntentType, loc: LocationContext): BuiltI
       items: [
         { word: "Image", headline: "Saubere Fassade", text: `Gewerbe in ${loc.city} — erster Eindruck zählt.` },
         { word: "Planbarkeit", headline: "Feste Termine", text: "Auch außerhalb der Öffnungszeiten möglich." },
-        { word: "Vertrauen", headline: "Versichert", text: "Betriebshaftpflicht für Büro, Praxis, Laden." },
+        { word: "Vertrauen", headline: "Versichert", text: "Versichert." },
         { word: "Fairness", headline: "Transparente Preise", text: "Festpreis-Angebot in 24 Stunden." },
         { word: "Präzision", headline: "Streifenfrei", text: "Professionelle Technik — auch bei großen Flächen." },
         { word: "Partnerschaft", headline: "Wartungsvertrag", text: "Ab 59 €/Monat — regelmäßig klare Fenster." },
@@ -245,7 +245,7 @@ function buildGebaeudereinigung(_type: IntentType, loc: LocationContext): BuiltI
       { q: `Gebäudereinigung Fenster ${loc.city}?`, a: "Ja — Büro, Praxis, MFH, Laden." },
       { q: "Wartungsvertrag?", a: "Ab 59 €/Monat — Turnus nach Bedarf." },
       { q: "Hausverwaltung?", a: "Ja — Sammelrechnung möglich." },
-      { q: "Versicherung?", a: "Betriebshaftpflicht inklusive." },
+      { q: "Versicherung?", a: "Versichert." },
     ],
     closing: {
       headline: `Gebäudereinigung Fenster ${loc.city} — Angebot anfordern.`,
@@ -258,8 +258,8 @@ function buildGebaeudereinigung(_type: IntentType, loc: LocationContext): BuiltI
 function buildProfessionelle(_type: IntentType, loc: LocationContext): BuiltIntentPage {
   return assembleIntentPage("professionelle-fensterreinigung", loc, {
     seo: {
-      title: `Professionelle Fensterreinigung ${loc.city} | Versichert · Festpreis — Ilyashan`,
-      description: `Professionelle Fensterreinigung ${loc.city}: Streifenfrei garantiert, versichert, Festpreis in 24h. ${siteConfig.business.rating}★ · ${siteConfig.business.customers} Kunden.`,
+      title: `Professionelle Fensterreinigung ${loc.city} | Versichert · Festpreis`,
+      description: `Professionelle Fensterreinigung ${loc.city}: Streifenfrei, versichert, Festpreis in 24h. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
     },
     hero: {
       eyebrow: `Professionell · ${loc.city}`,
@@ -271,17 +271,17 @@ function buildProfessionelle(_type: IntentType, loc: LocationContext): BuiltInte
       eyebrow: "Qualität zählt",
       headline: "Professionell heißt: Ergebnis, Versicherung, Fairness.",
       paragraphs: [
-        `Professionelle Fensterreinigung in ${loc.city} — nicht halbherzig, nicht mit Streifen. Ilyashan: ${siteConfig.business.rating}★, ${siteConfig.business.customers} Kunden, seit ${siteConfig.business.founded}.`,
+        `Professionelle Fensterreinigung in ${loc.city}. Ilyashan: ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen, seit ${siteConfig.business.founded}.`,
         "Live-Preisschätzung im Wizard, verbindliches Festpreis-Angebot in 24 Stunden. Kein Anfahrtszuschlag.",
-        "Betriebshaftpflicht inklusive — Ihr Zuhause und Ihre Fenster in sicheren Händen.",
+        "Versichert.",
       ],
     },
     emotions: {
       eyebrow: "Professionell",
       headline: `Qualität in ${loc.city}`,
       items: [
-        { word: "Qualität", headline: "Professionell, nicht halbherzig", text: "Streifenfrei garantiert — jedes Mal." },
-        { word: "Vertrauen", headline: "Vollversichert", text: `${siteConfig.business.rating}★ · ${siteConfig.business.customers} Kunden` },
+        { word: "Qualität", headline: "Professionell, nicht halbherzig", text: "Streifenfrei." },
+        { word: "Vertrauen", headline: "Versichert", text: `${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen` },
         { word: "Transparenz", headline: "Festpreis in 24h", text: "Live-Schätzung im Wizard — keine Überraschungen." },
         { word: "Fairness", headline: "Kein Anfahrtszuschlag", text: `Für ${loc.city} und die gesamte Region.` },
         { word: "Erfahrung", headline: "Seit 2020", text: "Regional verwurzelt in Baesweiler." },
@@ -316,7 +316,7 @@ function buildProfessionelle(_type: IntentType, loc: LocationContext): BuiltInte
 function buildGeschenk(_type: IntentType, loc: LocationContext): BuiltIntentPage {
   return assembleIntentPage("geschenk", loc, {
     seo: {
-      title: `Fensterreinigung Geschenk ${loc.city} | Gutschein — Ilyashan`,
+      title: `Fensterreinigung Geschenk ${loc.city} | Gutschein`,
       description: `Fensterreinigung verschenken in ${loc.city}: Gutschein für streifenfreie Fenster — Zeit statt Zeug. Sofort online · ab 49 €.`,
     },
     hero: {
@@ -341,7 +341,7 @@ function buildGeschenk(_type: IntentType, loc: LocationContext): BuiltIntentPage
         { word: "Zeit", headline: "Zeit statt Zeug", text: `Ein Gutschein für klare Fenster in ${loc.city} — das bleibt.` },
         { word: "Überraschung", headline: "Unerwartet & unvergessen", text: "Kein Standardgeschenk — echte Entlastung." },
         { word: "Klarheit", headline: "Durchblick schenken", text: "Streifenfreie Fenster — sichtbarer als Blumen." },
-        { word: "Vertrauen", headline: "Seriös & versichert", text: "Ilyashan — 4,9★, 500+ Kunden in der Region." },
+        { word: "Vertrauen", headline: "Versichert", text: `${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.` },
         { word: "Fairness", headline: "Kein Anfahrtszuschlag", text: "Einlösbar in Baesweiler und Umgebung." },
         { word: "Wertschätzung", headline: "Sie sehen sie", text: "Ein Geschenk, das ankommt — nicht im Schrank landet." },
       ],
@@ -354,7 +354,7 @@ function buildGeschenk(_type: IntentType, loc: LocationContext): BuiltIntentPage
         { num: "01", title: "Bestellen", text: "Online — sofort per E-Mail." },
         { num: "02", title: "Verschenken", text: "Print@Home oder digital." },
         { num: "03", title: "Einlösen", text: `Termin in ${loc.city} oder Region.` },
-        { num: "04", title: "Freude", text: "Klare Fenster — garantiert." },
+        { num: "04", title: "Freude", text: "Klare Fenster." },
       ],
     },
     faq: [

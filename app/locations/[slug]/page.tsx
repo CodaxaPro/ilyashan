@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import JsonLd from "@/components/landing/JsonLd";
 import { LandingShell } from "@/components/landing/LandingShell";
 import { LocationLanding } from "@/components/landing/LocationLanding";
-import { getLocationPage, getLocationRelatedLinks, LOCATION_SLUGS } from "@/lib/landing-pages";
+import { getLocationPage, LOCATION_SLUGS } from "@/lib/landing-pages";
 import { locationPageSchemas } from "@/lib/landing-schema";
 import { pageMetadata } from "@/lib/seo-meta";
 
@@ -34,10 +34,7 @@ export default async function LocationPage({ params }: Props) {
   return (
     <LandingShell>
       <JsonLd data={locationPageSchemas(page)} />
-      <LocationLanding
-        page={page}
-        relatedLinks={getLocationRelatedLinks(slug as (typeof LOCATION_SLUGS)[number])}
-      />
+      <LocationLanding page={page} />
     </LandingShell>
   );
 }

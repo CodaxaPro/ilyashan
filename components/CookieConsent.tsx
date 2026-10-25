@@ -72,7 +72,7 @@ export function CookieConsent() {
               <button
                 type="button"
                 onClick={() => decide("accepted")}
-                className="px-5 py-2.5 rounded-xl bg-accent text-white text-sm font-semibold hover:bg-emerald-600 transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors"
               >
                 Akzeptieren
               </button>

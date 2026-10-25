@@ -37,7 +37,7 @@ type OccasionDef = {
 const OCCASIONS: OccasionDef[] = [
   {
     slug: "fensterreinigung-geschenk",
-    title: "Fensterreinigung Geschenk | Gutschein — Ilyashan",
+    title: "Fensterreinigung Geschenk | Gutschein",
     eyebrow: "Fensterreinigung · Geschenk",
     headline: "Sie schenken keine Reinigung. Sie schenken Zeit und Klarheit.",
     subline: "Ein Gutschein für streifenfreie Fenster — sofort online, per E-Mail, Print@Home.",
@@ -50,7 +50,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "muttertag",
-    title: "Muttertag Geschenk | Fensterreinigung Gutschein — Ilyashan",
+    title: "Muttertag Geschenk | Fensterreinigung Gutschein",
     eyebrow: "Muttertag · Geschenk",
     headline: "Mama gibt immer. Diesmal: empfangen.",
     subline: "Fensterreinigung Gutschein zum Muttertag — Entlastung statt Staub.",
@@ -63,7 +63,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "weihnachten",
-    title: "Weihnachtsgeschenk | Fensterreinigung Gutschein — Ilyashan",
+    title: "Weihnachtsgeschenk | Fensterreinigung Gutschein",
     eyebrow: "Weihnachten · Geschenk",
     headline: "Stille unter dem Baum — Klarheit im neuen Jahr.",
     subline: "Weihnachtsgeschenk, das wirklich hilft: streifenfreie Fenster.",
@@ -76,7 +76,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "valentinstag",
-    title: "Valentinstag Geschenk | Fensterreinigung — Ilyashan",
+    title: "Valentinstag Geschenk | Fensterreinigung",
     eyebrow: "Valentinstag · Geschenk",
     headline: "Liebe zeigt sich in kleinen Entlastungen.",
     subline: "Valentinstags-Gutschein — Zeit zu zweit statt Leiter stemmen.",
@@ -89,20 +89,20 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "paar",
-    title: "Geschenk für Paare | Fensterreinigung — Ilyashan",
+    title: "Geschenk für Paare | Fensterreinigung",
     eyebrow: "Paar · Geschenk",
     headline: "Gemeinsam entspannen — wir putzen.",
     subline: "Fensterreinigung Gutschein für Paare — Entlastung zu zweit.",
     essenceHeadline: "Zeit zu zweit — ohne Hausarbeit.",
     paragraphs: [
       "Rahmen & Falz ab 79 € — perfekt für das gemeinsame Zuhause.",
-      "Streifenfrei garantiert.",
+      "Streifenfrei.",
       "Einlösbar in der gesamten Region.",
     ],
   },
   {
     slug: "geburtstag",
-    title: "Geburtstagsgeschenk | Fensterreinigung — Ilyashan",
+    title: "Geburtstagsgeschenk | Fensterreinigung",
     eyebrow: "Geburtstag · Geschenk",
     headline: "Stille statt Staub — das Geschenk, das bleibt.",
     subline: "Geburtstags-Gutschein für klare Fenster.",
@@ -115,7 +115,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "freundin",
-    title: "Geschenk für Freundin | Fensterreinigung — Ilyashan",
+    title: "Geschenk für Freundin | Fensterreinigung",
     eyebrow: "Freundin · Geschenk",
     headline: "Sie trägt alles — schenken Sie Klarheit.",
     subline: "Fensterreinigung Gutschein für die beste Freundin.",
@@ -128,7 +128,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "vatertag",
-    title: "Vatertagsgeschenk | Fensterreinigung — Ilyashan",
+    title: "Vatertagsgeschenk | Fensterreinigung",
     eyebrow: "Vatertag · Geschenk",
     headline: "Ruhe statt Werkzeug — für Papa.",
     subline: "Vatertags-Gutschein — praktisch und überraschend.",
@@ -141,7 +141,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "ostern",
-    title: "Ostergeschenk | Fensterreinigung — Ilyashan",
+    title: "Ostergeschenk | Fensterreinigung",
     eyebrow: "Ostern · Geschenk",
     headline: "Schokolade schmilzt. Klarheit bleibt.",
     subline: "Oster-Gutschein — frisch in den Frühling.",
@@ -154,7 +154,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "last-minute",
-    title: "Last Minute Geschenk | Fensterreinigung — Ilyashan",
+    title: "Last Minute Geschenk | Fensterreinigung",
     eyebrow: "Last Minute · Geschenk",
     headline: "In 2 Minuten bestellt — sofort per E-Mail.",
     subline: "Last-Minute-Gutschein — Print@Home, digital, sofort.",
@@ -167,7 +167,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "danke",
-    title: "Dankeschön Geschenk | Fensterreinigung — Ilyashan",
+    title: "Dankeschön Geschenk | Fensterreinigung",
     eyebrow: "Danke · Geschenk",
     headline: "Danke sagen — mit Klarheit.",
     subline: "Dankeschön-Gutschein — Wertschätzung, die man spürt.",
@@ -180,7 +180,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "hochzeit",
-    title: "Hochzeitsgeschenk | Fensterreinigung — Ilyashan",
+    title: "Hochzeitsgeschenk | Fensterreinigung",
     eyebrow: "Hochzeit · Geschenk",
     headline: "Nach dem Ja — Klarheit im neuen Zuhause.",
     subline: "Hochzeits-Gutschein — praktisch und originell.",
@@ -193,7 +193,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "jubilaeum",
-    title: "Jubiläum Geschenk | Fensterreinigung — Ilyashan",
+    title: "Jubiläum Geschenk | Fensterreinigung",
     eyebrow: "Jubiläum · Geschenk",
     headline: "Jahre zusammen — Zeit füreinander schenken.",
     subline: "Jubiläums-Gutschein — Entlastung zu zweit.",
@@ -206,7 +206,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "abschied",
-    title: "Abschiedsgeschenk | Fensterreinigung — Ilyashan",
+    title: "Abschiedsgeschenk | Fensterreinigung",
     eyebrow: "Abschied · Geschenk",
     headline: "Danke sagen — Kollegin, Team, Nachbar.",
     subline: "Abschieds-Gutschein — Wertschätzung spürbar.",
@@ -219,7 +219,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "firmen-geschenk",
-    title: "Firmengeschenk | Fensterreinigung — Ilyashan",
+    title: "Firmengeschenk | Fensterreinigung",
     eyebrow: "Firma · Geschenk",
     headline: "Mitarbeiter wertschätzen — praktisch.",
     subline: "Firmengeschenk Fensterreinigung — auch als Teamevent-Ersatz.",
@@ -232,7 +232,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "ruhestand",
-    title: "Ruhestand Geschenk | Fensterreinigung — Ilyashan",
+    title: "Ruhestand Geschenk | Fensterreinigung",
     eyebrow: "Ruhestand · Geschenk",
     headline: "Endlich Zeit — ohne Leiter.",
     subline: "Ruhestands-Gutschein — Entlastung für den neuen Lebensabschnitt.",
@@ -245,7 +245,7 @@ const OCCASIONS: OccasionDef[] = [
   },
   {
     slug: "team-geschenk",
-    title: "Team-Geschenk | Fensterreinigung — Ilyashan",
+    title: "Team-Geschenk | Fensterreinigung",
     eyebrow: "Team · Geschenk",
     headline: "Team wertschätzen — praktisch statt Event.",
     subline: "Team-Gutscheine — Entlastung für Kolleginnen und Kollegen.",

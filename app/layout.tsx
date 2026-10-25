@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import { CookieConsent } from "@/components/CookieConsent";
 import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 import { ConciergeWidget } from "@/components/ConciergeWidget";
 import { siteConfig } from "@/lib/config";
-import { getLocalBusinessSchema, getFAQSchema, getServiceSchema } from "@/lib/schema";
+import { getLocalBusinessSchema } from "@/lib/schema";
 import "./globals.css";
 
 const inter = Inter({
@@ -16,14 +16,28 @@ const inter = Inter({
   adjustFontFallback: true,
 });
 
+const sourceSerif = Source_Serif_4({
+  variable: "--font-source-serif",
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} – ${siteConfig.tagline} in ${siteConfig.contact.region}`,
-    template: `%s | ${siteConfig.name}`,
+    default: `Ilyashan – Reinigung in ${siteConfig.contact.region}`,
+    template: "%s | Ilyashan",
   },
   description: siteConfig.description,
   keywords: [
+    "Reinigungsfirma Aachen",
+    "Reinigungsfirma Baesweiler",
+    "Büroreinigung",
+    "Bauendreinigung",
+    "Praxisreinigung",
+    "Entrümpelung",
+    "Renovierungsreinigung",
     "Fensterreinigung",
     "Fenster putzen",
     "Glasreinigung",
@@ -37,12 +51,16 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
+  icons: {
+    icon: [{ url: "/brand/ilyashan-logo.jpg", type: "image/jpeg" }],
+    apple: [{ url: "/brand/ilyashan-logo.jpg" }],
+  },
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
     url: siteConfig.url,
-    siteName: siteConfig.name,
-    title: `${siteConfig.name} – Streifenfreie Fensterreinigung`,
+    siteName: "Ilyashan",
+    title: "Ilyashan – Reinigung in Aachen und Baesweiler",
     description: siteConfig.description,
   },
   robots: {
@@ -75,7 +93,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const schemas = [getLocalBusinessSchema(), getFAQSchema(), getServiceSchema()];
+  const schemas = [getLocalBusinessSchema()];
 
   return (
     <html lang="de">
@@ -88,7 +106,7 @@ export default function RootLayout({
           />
         ))}
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${inter.variable} ${sourceSerif.variable} antialiased`}>
         <AnalyticsProvider>
           {children}
           <ConciergeWidget />

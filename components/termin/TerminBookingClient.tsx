@@ -381,7 +381,7 @@ export function TerminBookingClient({ token }: TerminBookingClientProps) {
             disabled={submitting}
             data-testid="termin-confirm-proposed"
             onClick={() => void book("confirm_proposed")}
-            className="mt-6 w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50"
+            className="mt-6 w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary-dark disabled:opacity-50"
           >
             {submitting ? "Wird bestätigt…" : "Termin bestätigen"}
           </button>

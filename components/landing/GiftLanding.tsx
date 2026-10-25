@@ -24,11 +24,11 @@ export function GiftLanding({ page, showOccasions = false }: Props) {
     <>
       <section className="gradient-hero text-white section-padding pt-28 md:pt-32">
         <div className="landing-container max-w-3xl">
-          <p className="eyebrow !text-sky-200 mb-4">{page.hero.eyebrow}</p>
+          <p className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-white/70">{page.hero.eyebrow}</p>
           <h1 className="headline-xl text-white mb-5">{page.hero.headline}</h1>
           <p className="text-lg text-white/85 leading-relaxed mb-4">{page.hero.subline}</p>
           <p className="text-sm text-white/60 mb-8">{page.hero.trust}</p>
-          <Button href={gutscheinUrl} variant="primary" size="lg">
+          <Button href={gutscheinUrl} variant="onDark" size="lg">
             {page.closing.cta}
           </Button>
         </div>
@@ -113,8 +113,8 @@ export function GiftLanding({ page, showOccasions = false }: Props) {
         </div>
       </Section>
 
-      <Section className="bg-foreground text-white text-center">
-        <p className="eyebrow !text-sky-300 mb-6">Stimmen unserer Kunden</p>
+      <Section className="bg-primary text-white text-center">
+        <p className="mb-6 text-xs font-medium uppercase tracking-[0.16em] text-white/70">Stimmen unserer Kunden</p>
         <blockquote className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed mb-4">
           &ldquo;{featuredReview.text.slice(0, 160)}…&rdquo;
         </blockquote>

@@ -5,7 +5,7 @@ import { WhatsAppIcon } from "@/components/ui/Button";
 
 export function WhatsAppButton() {
   const message = encodeURIComponent(
-    "Hallo, ich möchte ein Angebot für Fensterreinigung anfordern."
+    "Hallo, ich möchte ein Angebot für eine Reinigung anfordern."
   );
 
   return (
@@ -14,7 +14,7 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       data-analytics-id="floating-whatsapp"
-      className="fixed z-50 w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg shadow-green-500/30 hover:bg-[#20bd5a] hover:scale-110 transition-all duration-200 pulse-ring bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))]"
+      className="fixed z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#128C7E] text-white bottom-[max(1.5rem,env(safe-area-inset-bottom))] right-[max(1.5rem,env(safe-area-inset-right))] hover:bg-[#0E6E63]"
       aria-label="WhatsApp Kontakt"
     >
       <WhatsAppIcon className="w-7 h-7" />

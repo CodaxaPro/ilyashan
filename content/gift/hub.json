@@ -2,7 +2,7 @@
   "slug": "hub",
   "path": "/gutschein",
   "seo": {
-    "title": "Fensterreinigung Gutschein | Geschenk — Ilyashan",
+    "title": "Fensterreinigung Gutschein | Geschenk",
     "description": "Sie schenken keine Reinigung. Sie schenken Zeit und Klarheit. Gutschein sofort online, ab 49 €. 4,9★ · Baesweiler & Aachen."
   },
   "hero": {
@@ -37,7 +37,7 @@
       {
         "word": "Vertrauen",
         "headline": "Seriös & versichert",
-        "text": "4,9★ · 500+ Kunden."
+        "text": "4,9 aus 17 Google-Bewertungen."
       },
       {
         "word": "Fairness",
@@ -277,7 +277,7 @@
       {
         "num": "04",
         "title": "Freude",
-        "text": "Streifenfrei — garantiert."
+        "text": "Streifenfrei."
       }
     ]
   },

@@ -349,7 +349,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
 
                     {key === "blinds" && selected && (
                       <p
-                        className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                        className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
                         data-testid="blinds-innen-notice"
                       >
                         <strong>Jalousien:</strong> Preis gilt für innenliegende Lamellenjalousien.
@@ -385,7 +385,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                           onChange={(flyScreensCount) => onChange({ flyScreensCount })}
                         />
                         <p
-                          className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                          className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
                           data-testid="flyscreens-notice"
                         >
                           <strong>Fliegengitter:</strong> Preis gilt für ausbaubare / innen zugängliche
@@ -407,7 +407,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                           onChange={(canopySqm) => onChange({ canopySqm })}
                         />
                         <p
-                          className="text-xs leading-relaxed rounded-lg border border-sky-200 bg-sky-50 text-sky-950 px-3 py-2"
+                          className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
                           data-testid="canopy-glas-notice"
                         >
                           <strong>Nur Glas:</strong> Stoffmarkisen / textile Vordächer sind nicht enthalten.

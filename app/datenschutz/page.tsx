@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { siteConfig } from "@/lib/config";
+import { legalOwnerName } from "@/lib/legal-owner";
 import { routes } from "@/lib/routes";
 import { pageMetadata } from "@/lib/seo-meta";
 import Link from "next/link";
@@ -7,11 +8,18 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-export const metadata: Metadata = pageMetadata({
-  title: `Datenschutz | ${siteConfig.name}`,
-  description: `Datenschutzerklärung — ${siteConfig.name}. Informationen zur Datenverarbeitung auf ilyashan.de.`,
-  path: "/datenschutz",
-});
+export const metadata: Metadata = {
+  ...pageMetadata({
+    title: "Datenschutz",
+    description: `Datenschutzerklärung — ${siteConfig.name}. Informationen zur Datenverarbeitung auf ilyashan.de.`,
+    path: "/datenschutz",
+  }),
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
+};
 
 export default function DatenschutzPage() {
   return (
@@ -35,6 +43,7 @@ export default function DatenschutzPage() {
             <section>
               <h2 className="text-xl font-bold text-foreground">2. Verantwortliche Stelle</h2>
               <p>
+                {legalOwnerName}<br />
                 {siteConfig.name}<br />
                 {siteConfig.contact.address}<br />
                 {siteConfig.contact.postalCode} {siteConfig.contact.city}<br />

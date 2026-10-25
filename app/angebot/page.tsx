@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = pageMetadata({
   title: `Preis berechnen – Fensterreinigung ${siteConfig.contact.region}`,
-  description: `Sofort-Preisschätzung im Angebots-Wizard für Fensterreinigung in ${siteConfig.contact.region}. Verbindliches Festpreis-Angebot in 24 Stunden. Streifenfrei garantiert.`,
+  description: `Sofort-Preisschätzung im Angebots-Wizard für Fensterreinigung in ${siteConfig.contact.region}. Verbindliches Festpreis-Angebot in 24 Stunden. Streifenfrei.`,
   path: "/angebot",
 });
 
@@ -19,14 +19,11 @@ export default function AngebotPage() {
     <>
       <Header />
       <main className="min-h-screen">
-        <section className="gradient-hero pt-32 pb-16">
+        <section className="gradient-hero pt-32 pb-16 text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur rounded-full px-4 py-2 text-white text-sm font-medium mb-6">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              {siteConfig.messaging.livePricingBadge}
-            </div>
-            <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
-              Preis berechnen & Angebot anfordern
+            <p className="mb-4 text-xs font-medium uppercase tracking-[0.16em] text-white/70">Fensterreinigung</p>
+            <h1 className="mb-4 font-serif text-3xl font-medium text-white sm:text-5xl">
+              Fensterpreis berechnen
             </h1>
             <p className="text-white/90 text-lg max-w-2xl mx-auto mb-8">
               {siteConfig.messaging.angebotIntro}

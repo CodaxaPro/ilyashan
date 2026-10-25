@@ -6,7 +6,7 @@ interface ButtonProps {
   href?: string;
   onClick?: () => void;
   onMouseDown?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>;
-  variant?: "primary" | "secondary" | "outline" | "whatsapp";
+  variant?: "primary" | "onDark" | "secondary" | "outline" | "whatsapp";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
@@ -17,14 +17,11 @@ interface ButtonProps {
 }
 
 const variants = {
-  primary:
-    "bg-accent text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40",
-  secondary:
-    "bg-primary text-white hover:bg-primary-dark shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40",
-  outline:
-    "border-2 border-white/80 text-white hover:bg-white hover:text-primary",
-  whatsapp:
-    "bg-[#25D366] text-white hover:bg-[#20bd5a] shadow-lg shadow-green-500/25",
+  primary: "bg-primary text-white hover:bg-primary-dark",
+  onDark: "bg-white text-primary hover:bg-primary-light",
+  secondary: "bg-white text-primary border border-primary hover:bg-primary-light",
+  outline: "border border-current text-inherit hover:bg-white hover:text-primary",
+  whatsapp: "bg-[#128C7E] text-white hover:bg-[#0E6E63]",
 };
 
 const sizes = {
@@ -46,7 +43,7 @@ export function Button({
   "data-testid": dataTestId,
   "data-analytics-id": dataAnalyticsId,
 }: ButtonProps) {
-  const classes = `inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 ${variants[variant]} ${sizes[size]} ${className}`;
+  const classes = `inline-flex items-center justify-center gap-2 rounded-sm font-medium transition-colors ${variants[variant]} ${sizes[size]} ${className}`;
 
   if (href) {
     const isExternal = href.startsWith("http") || href.startsWith("tel:") || href.startsWith("mailto:");

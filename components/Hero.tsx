@@ -46,7 +46,7 @@ export function Hero() {
             <div className="lg:hidden grid grid-cols-2 gap-3 mb-8">
               {[
                 { value: siteConfig.business.rating, label: "Google ★", suffix: "" },
-                { value: siteConfig.business.customers, label: "Kunden", suffix: "" },
+                { value: String(siteConfig.business.reviews), label: "Google-Bewertungen", suffix: "" },
                 { value: siteConfig.business.responseTime, label: "Antwortzeit", suffix: "" },
                 { value: "100%", label: "Zufriedenheit", suffix: "" },
               ].map((stat) => (
@@ -74,13 +74,13 @@ export function Hero() {
                 <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                 </svg>
-                Vollversichert
+                Versichert
               </div>
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
                 </svg>
-                {siteConfig.business.customers} zufriedene Kunden
+                {siteConfig.business.reviews} Google-Bewertungen
               </div>
             </div>
           </div>
@@ -90,7 +90,7 @@ export function Hero() {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 {[
                   { value: siteConfig.business.rating, label: "Google Bewertung", suffix: "★" },
-                  { value: siteConfig.business.customers, label: "Kunden", suffix: "" },
+                  { value: String(siteConfig.business.reviews), label: "Google-Bewertungen", suffix: "" },
                   { value: siteConfig.business.responseTime, label: "Antwortzeit", suffix: "" },
                   { value: "100%", label: "Zufriedenheit", suffix: "" },
                 ].map((stat) => (
