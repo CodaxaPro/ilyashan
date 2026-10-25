@@ -115,6 +115,7 @@ describe("sales catalog — system + tools ready for full close", () => {
       "book_appointment",
       "request_callback",
       "request_human_handoff",
+      "open_whatsapp_handoff",
       "get_system_knowledge",
     ]) {
       assert.equal(isAllowlistedTool(tool), true, tool);

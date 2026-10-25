@@ -13,6 +13,14 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import {
+  getTreppenhausDraft,
+  isTreppenhausComplete,
+} from "@/lib/assistant/dialog/treppenhaus";
+import {
+  calculateTreppenhausQuote,
+  formatEuroFromCents,
+} from "@/lib/treppenhaus/pricing";
 
 export function buildConciergeWhatsAppMessage(
   session: ConciergeSession,
@@ -23,6 +31,10 @@ export function buildConciergeWhatsAppMessage(
     "Guten Tag, ich habe über den Ilyashan Website-Assistenten eine Anfrage:",
     "",
   ];
+
+  if (session.assistantProduct) {
+    lines.push(`Produkt: ${session.assistantProduct}`);
+  }
 
   if (q.services?.length) {
     lines.push(`Leistung: ${q.services.map((s) => quoteServiceLabels[s]).join(", ")}`);
@@ -43,6 +55,30 @@ export function buildConciergeWhatsAppMessage(
     lines.push(`Ort: ${[q.postalCode, q.city].filter(Boolean).join(" ")}`);
   }
 
+  if (session.bueroDraft?.totalAreaM2) {
+    lines.push(`Büro: ca. ${session.bueroDraft.totalAreaM2} m²`);
+    if (session.bueroDraft.frequency) {
+      lines.push(`Büro-Turnus: ${session.bueroDraft.frequency}`);
+    }
+  }
+
+  const trp = getTreppenhausDraft(session);
+  if (session.assistantProduct === "treppenhaus" || Object.keys(trp).length > 0) {
+    if (trp.stockwerke) lines.push(`Stockwerke: ${trp.stockwerke}`);
+    if (trp.wohnungen) lines.push(`Wohnungen: ${trp.wohnungen}`);
+    if (trp.stairTurnus) lines.push(`Treppen-Turnus: ${trp.stairTurnus}`);
+    if (isTreppenhausComplete(trp)) {
+      const quote = calculateTreppenhausQuote(trp);
+      lines.push(
+        `Treppenhaus-Orientierung brutto/Monat: ca. ${formatEuroFromCents(quote.monthlyGrossCents)}`
+      );
+    }
+  }
+
+  if (session.salesNotes?.trim()) {
+    lines.push(`Notiz: ${session.salesNotes.trim()}`);
+  }
+
   const estimateData = quoteDataForEstimate(q);
   if (estimateData) {
     const estimate = calculatePriceEstimate(
@@ -57,7 +93,7 @@ export function buildConciergeWhatsAppMessage(
     }
   }
 
-  lines.push("", "Bitte um verbindliches Festpreis-Angebot. Vielen Dank!");
+  lines.push("", "Bitte um verbindliches Festpreis-Angebot und Terminvorschlag. Vielen Dank!");
   return lines.join("\n");
 }
 

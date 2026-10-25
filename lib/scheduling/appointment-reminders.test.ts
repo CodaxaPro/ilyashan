@@ -7,6 +7,7 @@ import {
   needsReminderForDate,
 } from "./appointment-reminders";
 import type { StoredLead } from "@/lib/leads-store";
+import { calculateTreppenhausQuote } from "@/lib/treppenhaus/pricing";
 
 function lead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -66,8 +67,67 @@ describe("appointment reminders", () => {
   });
 
   it("builds reminder patch", () => {
-    const patch = buildReminderAppointmentPatch({ confirmedDate: "2026-07-13" }, "2026-07-13", "2026-07-12T16:00:00.000Z");
+    const patch = buildReminderAppointmentPatch(
+      { confirmedDate: "2026-07-13" },
+      "2026-07-13",
+      "eve",
+      "2026-07-12T16:00:00.000Z"
+    );
     assert.equal(patch.reminderEmail?.forDate, "2026-07-13");
+    assert.equal(patch.reminderEmail?.sentAt, "2026-07-12T16:00:00.000Z");
     assert.equal(patch.confirmedDate, "2026-07-13");
+  });
+
+  it("supports morning wave separately from eve", () => {
+    const afterEve = lead({
+      appointment: {
+        confirmedDate: "2026-07-13",
+        reminderEmail: { sentAt: "x", forDate: "2026-07-13" },
+      },
+    });
+    assert.equal(isReminderEligibleLead(afterEve, "2026-07-13", "eve").eligible, false);
+    assert.equal(isReminderEligibleLead(afterEve, "2026-07-13", "morning").eligible, true);
+
+    const morningPatch = buildReminderAppointmentPatch(
+      afterEve.appointment,
+      "2026-07-13",
+      "morning",
+      "2026-07-13T05:00:00.000Z"
+    );
+    assert.equal(morningPatch.morningReminderEmail?.forDate, "2026-07-13");
+  });
+
+  it("includes treppenhaus bookable leads", () => {
+    const input = {
+      stockwerke: 4,
+      wohnungen: 8,
+      stairTurnus: "biweekly" as const,
+      dirtLevel: "normal" as const,
+      keller: false,
+      kellerTurnus: "monthly" as const,
+      aufzug: false,
+      glasHandlauf: false,
+    };
+    const trp = lead({
+      id: "trp",
+      serviceLine: "treppenhaus",
+      quote: { firstName: "Anna" },
+      treppenhausSnapshot: {
+        quoteReference: "TRP-1",
+        capturedAt: "2026-01-01T00:00:00.000Z",
+        input,
+        quote: calculateTreppenhausQuote(input),
+        contact: {
+          name: "Anna",
+          email: "anna@test.de",
+          phone: "0173",
+          postalCode: "52499",
+          city: "Baesweiler",
+          privacyAccepted: true,
+        },
+      },
+    });
+    const candidates = findReminderCandidates([trp], "2026-07-13");
+    assert.equal(candidates.length, 1);
   });
 });

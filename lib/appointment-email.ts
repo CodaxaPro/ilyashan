@@ -215,38 +215,48 @@ export function buildAppointmentReminderEmail(
   confirmedDate: string,
   ctx: QuotePricingContext = defaultQuotePricingContext(),
   appointment?: LeadAppointment,
-  festpreis?: number
+  festpreis?: number,
+  options?: { terminUrl?: string | null; wave?: "eve" | "morning" }
 ) {
   const { firstName, services, audience } = quoteEmailContext(data, anfrageNr, ctx);
   const dateLabel = formatGermanDate(confirmedDate);
   const plan = resolveAppointmentTimePlan(appointment, data.windowCount);
   const festpreisLine = festpreisTextLine(festpreis, audience);
+  const wave = options?.wave ?? "eve";
+  const whenLabel = wave === "morning" ? "heute" : "morgen";
+  const terminUrl = options?.terminUrl;
 
   const body = `
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
       Guten Tag ${escapeHtml(firstName)},
     </p>
     <p style="margin:0 0 16px;font-size:15px;color:#334155;line-height:1.7;">
-      kurze Erinnerung: <strong>morgen</strong> findet Ihr Termin für die
+      kurze Erinnerung: <strong>${whenLabel}</strong> findet Ihr Termin für die
       <strong>Fensterreinigung</strong> (${escapeHtml(services)}) statt.
     </p>
     ${scheduleInfoBox(dateLabel, plan)}
     ${festpreisInfoBox(festpreis, audience)}
     ${buildInfoBox(
       `<strong>Bitte beachten:</strong> Stellen Sie sicher, dass alle Fenster zugänglich sind. ` +
-        "Bei kurzfristigen Änderungen erreichen Sie uns telefonisch."
+        "Bei kurzfristigen Änderungen erreichen Sie uns telefonisch oder über den Termin-Link."
     )}
+    ${
+      terminUrl
+        ? buildButton(terminUrl, "Termin online verwalten / verschieben", "#059669")
+        : ""
+    }
     ${quoteSummaryBlock(data, anfrageNr, ctx)}
     ${contactFooter()}`;
 
   const text = [
     `Guten Tag ${firstName},`,
     "",
-    `Erinnerung: Morgen (${dateLabel}) ist Ihr Termin für Fensterreinigung (${services}).`,
+    `Erinnerung: ${whenLabel === "heute" ? "Heute" : "Morgen"} (${dateLabel}) ist Ihr Termin für Fensterreinigung (${services}).`,
     ...buildArrivalLinesDe(dateLabel, plan),
     festpreisLine,
     "",
     "Bitte stellen Sie sicher, dass die Fenster zugänglich sind.",
+    terminUrl ? `Termin online: ${terminUrl}` : "",
     "",
     `Anfrage-Nr.: ${anfrageNr}`,
     "",
@@ -257,12 +267,12 @@ export function buildAppointmentReminderEmail(
     .join("\n");
 
   return {
-    subject: `Erinnerung: Termin morgen ${dateLabel} – ${anfrageNr}`,
+    subject: `Erinnerung: Termin ${whenLabel} ${dateLabel} – ${anfrageNr}`,
     text,
     html: buildEmailLayout({
-      preheader: `Morgen: Fensterreinigung am ${dateLabel}`,
+      preheader: `${whenLabel === "heute" ? "Heute" : "Morgen"}: Fensterreinigung am ${dateLabel}`,
       title: "Terminerinnerung",
-      subtitle: `${anfrageNr} · morgen · ${dateLabel}`,
+      subtitle: `${anfrageNr} · ${whenLabel} · ${dateLabel}`,
       body,
     }),
   };

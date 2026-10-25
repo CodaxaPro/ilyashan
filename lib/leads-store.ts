@@ -32,8 +32,10 @@ export interface LeadAppointment {
   customerBookedAt?: string;
   note?: string;
   lastEmail?: LeadEmailNotification;
-  /** Vortag reminder — tracks which confirmedDate was reminded. */
+  /** Vortag (eve) reminder — tracks which confirmedDate was reminded. */
   reminderEmail?: LeadReminderEmail;
+  /** Same-day morning reminder (show-rate). */
+  morningReminderEmail?: LeadReminderEmail;
 }
 
 export interface LeadReminderEmail {

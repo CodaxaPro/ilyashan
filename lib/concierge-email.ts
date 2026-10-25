@@ -1,42 +1,51 @@
 import { siteConfig } from "@/lib/config";
-import { buildDataTable, buildEmailLayout, buildInfoBox, escapeHtml } from "@/lib/email-templates";
+import { buildDataTable, buildEmailLayout, escapeHtml } from "@/lib/email-templates";
 import type { ConciergeSession } from "@/lib/concierge/types";
 import { buildLeadSummaryRows, isHotLead } from "@/lib/concierge/lead";
 import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import {
+  buildSpeedToLeadAdminBlock,
+  type SpeedToLeadPriority,
+} from "@/lib/leads/speed-to-lead";
 
 export function buildConciergeLeadAdminEmail(
   session: ConciergeSession,
   name: string,
   phone: string,
   photoCount = 0,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  priorityOverride?: SpeedToLeadPriority
 ) {
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const hot = isHotLead(session);
   const rows = buildLeadSummaryRows(session, ctx);
+  const noteBlob = [session.salesNotes, session.quote.additionalInfo]
+    .filter(Boolean)
+    .join("\n")
+    .toLowerCase();
+  const handoff =
+    noteBlob.includes("mitarbeiter") || noteBlob.includes("übergabe") || noteBlob.includes("handoff");
+  const priority: SpeedToLeadPriority =
+    priorityOverride ?? (handoff ? "handoff" : hot ? "hot" : "normal");
+  const speed = buildSpeedToLeadAdminBlock({ name, phone, priority });
 
   const body = `
-    ${buildInfoBox(
-      `<strong>${hot ? "🔥 Heiße Anfrage" : "Neue Anfrage"}</strong> über Website-Assistent · ${escapeHtml(timestamp)}`
-    )}
+    ${speed.html}
     ${buildDataTable([
       ["Name", name],
       ["Telefon", phone],
+      ["Kanal", "Website-Assistent"],
+      ["Zeit", timestamp],
       ...(photoCount > 0 ? ([["Fotos", `${photoCount} im Anhang`]] as [string, string][]) : []),
       ...rows,
-    ])}
-    <p style="margin:16px 0 0;font-size:13px;color:#64748b;">
-      <a href="tel:${escapeHtml(phone.replace(/\s/g, ""))}" style="color:#0369a1;font-weight:600;">Direkt anrufen</a>
-      ·
-      <a href="https://wa.me/${siteConfig.contact.whatsapp}" style="color:#059669;font-weight:600;">WhatsApp</a>
-    </p>`;
+    ])}`;
 
   const text = [
     "NEUE CONCIERGE-ANFRAGE – ilyashan.de",
-    hot ? "(Heiße Anfrage mit Preisschätzung)" : "",
+    speed.text,
     "",
     `Name: ${name}`,
     `Telefon: ${phone}`,
@@ -44,17 +53,18 @@ export function buildConciergeLeadAdminEmail(
     ...rows.map(([k, v]) => `${k}: ${v}`),
     "",
     `Eingegangen: ${timestamp}`,
+    `Ilyashan WhatsApp (Firma): https://wa.me/${siteConfig.contact.whatsapp}`,
   ]
     .filter(Boolean)
     .join("\n");
 
   return {
-    subject: `${hot ? "🔥 " : ""}Assistent-Rückruf: ${name} (${phone})`,
+    subject: `${speed.subjectPrefix}Assistent-Rückruf: ${name} (${phone})`,
     text,
     html: buildEmailLayout({
-      preheader: `Rückruf-Anfrage von ${name}`,
+      preheader: `Rückruf von ${name} — speed-to-lead`,
       title: "Neue Assistent-Anfrage",
-      subtitle: hot ? "Mit Live-Preisschätzung" : "Rückruf gewünscht",
+      subtitle: priority === "handoff" ? "Mitarbeiter-Übergabe" : hot ? "Heiß · Live-Orientierung" : "Rückruf gewünscht",
       body,
     }),
   };

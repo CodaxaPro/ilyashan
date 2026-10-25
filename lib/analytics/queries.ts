@@ -331,7 +331,29 @@ export async function getConciergeStats(days = 30) {
     }
   }
 
-  return { counts, intents };
+  const opens = counts.concierge_open ?? 0;
+  const messages = counts.concierge_message ?? 0;
+  const leads = counts.concierge_lead_submit ?? 0;
+  const calls = counts.concierge_call_tap ?? 0;
+  const callbacks = counts.concierge_callback_tap ?? 0;
+  const whatsapp = counts.concierge_whatsapp_click ?? 0;
+  const closeActions = leads + calls + callbacks + whatsapp;
+
+  /** Chat conversion funnel for service-business KPIs */
+  const funnel = {
+    opens,
+    messages,
+    leads,
+    calls,
+    callbacks,
+    whatsapp,
+    closeActions,
+    messageRate: opens > 0 ? Math.round((messages / opens) * 100) : 0,
+    leadRate: opens > 0 ? Math.round((leads / opens) * 100) : 0,
+    closeRate: opens > 0 ? Math.round((closeActions / opens) * 100) : 0,
+  };
+
+  return { counts, intents, funnel };
 }
 
 export async function listSessions(limit = 50, offset = 0, days = 30) {

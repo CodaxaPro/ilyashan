@@ -236,6 +236,7 @@ describe("meta-tests — proof suite integrity", () => {
     const widget = readFileSync(join(ROOT, "components/ConciergeWidget.tsx"), "utf8");
     assert.match(widget, /concierge-call-now/);
     assert.match(widget, /concierge-callback-tap/);
-    assert.match(widget, /forceLeadForm|forceLeadForm/);
+    assert.match(widget, /concierge-whatsapp-tap/);
+    assert.match(widget, /forceLeadForm/);
   });
 });

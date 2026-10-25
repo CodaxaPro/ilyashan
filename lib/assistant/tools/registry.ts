@@ -29,6 +29,7 @@ import type { AiToolDefinition } from "../ai/types";
 import type { FloorLevel, DirtLevel, CleaningSide, QuoteServiceId } from "@/lib/quote-form";
 import type { AssistantProduct, BueroChatDraft } from "@/lib/concierge/types";
 import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
+import { getConciergeWhatsAppUrl } from "@/lib/concierge/whatsapp-handoff";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
@@ -249,6 +250,15 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
     },
   },
   {
+    name: "open_whatsapp_handoff",
+    description:
+      "Erzeugt einen WhatsApp-Link mit vollem Session-Kontext (Produkt, m², Flügel, Treppenhaus). Nutzen wenn Kunde lieber per WhatsApp schreibt.",
+    parameters: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
     name: "submit_customer_lead",
     description:
       "ABSCHLUSS ohne festen Slot: Speichert Name+Telefon (+Notiz) in CRM und mailt an Ilyashan. Für Festpreis/Rückruf wenn kein book_appointment möglich.",
@@ -436,6 +446,23 @@ export async function executeAllowlistedTool(
       quickReplies: result.ok
         ? ["Danke", "Anrufen"]
         : ["Nochmal versuchen", "Anrufen"],
+    };
+  }
+
+  if (name === "open_whatsapp_handoff") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const url = getConciergeWhatsAppUrl(session, ctx.pricingCtx);
+    return {
+      content: JSON.stringify({ ok: true, url }),
+      customerText:
+        "Hier ist der WhatsApp-Link mit Ihren Angaben — tippen Sie darauf und senden Sie die Nachricht an uns. Wir antworten persönlich.",
+      actionsJson: JSON.stringify([
+        { type: "whatsapp", label: "WhatsApp öffnen", href: url },
+      ]),
+      quickReplies: ["Rückruf statt WhatsApp", "Anrufen", "Weitere Frage"],
     };
   }
 

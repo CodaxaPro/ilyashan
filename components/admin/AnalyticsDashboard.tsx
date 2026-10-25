@@ -63,6 +63,11 @@ const EVENT_LABELS_TR: Record<string, string> = {
   concierge_open: "Asistan açıldı",
   concierge_message: "Asistan mesajı",
   concierge_lead_submit: "Asistan lead",
+  concierge_call_tap: "Asistan ara",
+  concierge_callback_tap: "Asistan rückruf",
+  concierge_whatsapp_click: "Asistan WhatsApp",
+  concierge_proactive_nudge: "Proaktif nudge",
+  concierge_exit_intent: "Exit intent",
 };
 
 function formatDuration(sec: number) {
@@ -166,6 +171,18 @@ export function AnalyticsDashboard() {
   const [concierge, setConcierge] = useState<{
     counts: Record<string, number>;
     intents: Record<string, number>;
+    funnel?: {
+      opens: number;
+      messages: number;
+      leads: number;
+      calls: number;
+      callbacks: number;
+      whatsapp: number;
+      closeActions: number;
+      messageRate: number;
+      leadRate: number;
+      closeRate: number;
+    };
   } | null>(null);
   const [sessions, setSessions] = useState<AnalyticsSessionRow[]>([]);
   const [sessionsTotal, setSessionsTotal] = useState(0);
@@ -618,28 +635,44 @@ export function AnalyticsDashboard() {
           </table>
         </div>
       ) : tab === "concierge" && concierge ? (
-        <div className="grid lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl border border-border p-5">
-            <h2 className="font-bold mb-4">Asistan event&apos;leri</h2>
-            <ul className="space-y-2 text-sm">
-              {Object.entries(concierge.counts).map(([key, count]) => (
-                <li key={key} className="flex justify-between border-b border-border/60 pb-2">
-                  <span>{EVENT_LABELS_TR[key] ?? key}</span>
-                  <strong>{count}</strong>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="bg-white rounded-2xl border border-border p-5">
-            <h2 className="font-bold mb-4">Intent dağılımı</h2>
-            <ul className="space-y-2 text-sm">
-              {Object.entries(concierge.intents).map(([intent, count]) => (
-                <li key={intent} className="flex justify-between border-b border-border/60 pb-2">
-                  <span>{intent}</span>
-                  <strong>{count}</strong>
-                </li>
-              ))}
-            </ul>
+        <div className="space-y-6">
+          {concierge.funnel && (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard label="Chat açılış" value={concierge.funnel.opens} />
+              <StatCard
+                label="Mesaj oranı"
+                value={`%${concierge.funnel.messageRate}`}
+              />
+              <StatCard label="Lead oranı" value={`%${concierge.funnel.leadRate}`} />
+              <StatCard
+                label="Kapanış (lead+ara+WA+rückruf)"
+                value={`%${concierge.funnel.closeRate}`}
+              />
+            </div>
+          )}
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl border border-border p-5">
+              <h2 className="font-bold mb-4">Asistan event&apos;leri</h2>
+              <ul className="space-y-2 text-sm">
+                {Object.entries(concierge.counts).map(([key, count]) => (
+                  <li key={key} className="flex justify-between border-b border-border/60 pb-2">
+                    <span>{EVENT_LABELS_TR[key] ?? key}</span>
+                    <strong>{count}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-white rounded-2xl border border-border p-5">
+              <h2 className="font-bold mb-4">Intent dağılımı</h2>
+              <ul className="space-y-2 text-sm">
+                {Object.entries(concierge.intents).map(([intent, count]) => (
+                  <li key={intent} className="flex justify-between border-b border-border/60 pb-2">
+                    <span>{intent}</span>
+                    <strong>{count}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       ) : tab === "sessions" ? (

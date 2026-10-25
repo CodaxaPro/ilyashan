@@ -14,6 +14,7 @@ import {
   shouldShowExitIntent,
 } from "@/lib/concierge/exit-intent";
 import { saveWizardPrefillFromSession } from "@/lib/concierge/wizard-bridge";
+import { getConciergeWhatsAppUrl } from "@/lib/concierge/whatsapp-handoff";
 import { routes } from "@/lib/routes";
 import { trackConciergeEvent } from "@/lib/concierge-analytics";
 import { PhotoUploader } from "@/components/PhotoUploader";
@@ -157,13 +158,16 @@ export function ConciergeWidget() {
 
     const timer = window.setTimeout(() => {
       if (!sessionStorage.getItem(EXIT_INTENT_KEY)) {
-        setNudge(getProactiveNudge(pathname));
-        trackConciergeEvent("concierge_proactive_nudge", { page_path: pathname });
+        setNudge(getProactiveNudge(pathname, session));
+        trackConciergeEvent("concierge_proactive_nudge", {
+          session_id: session.id,
+          page_path: pathname,
+        });
       }
     }, PROACTIVE_DELAY_MS);
 
     return () => window.clearTimeout(timer);
-  }, [ready, open, pathname]);
+  }, [ready, open, pathname, session]);
 
   useEffect(() => {
     if (!ready || open) return;
@@ -535,7 +539,22 @@ export function ConciergeWidget() {
                 })
               }
             >
-              Anrufen · {siteConfig.contact.phoneDisplay}
+              Anrufen
+            </a>
+            <a
+              href={getConciergeWhatsAppUrl(session)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2.5 rounded-xl border border-emerald-600 text-emerald-700 text-xs font-semibold text-center hover:bg-emerald-50"
+              data-testid="concierge-whatsapp-tap"
+              onClick={() =>
+                trackConciergeEvent("concierge_whatsapp_click", {
+                  session_id: session.id,
+                  page_path: pathname,
+                })
+              }
+            >
+              WhatsApp
             </a>
             {!showLeadForm && (
               <button
@@ -550,7 +569,7 @@ export function ConciergeWidget() {
                   });
                 }}
               >
-                Rückruf 1-Tap
+                Rückruf
               </button>
             )}
           </div>

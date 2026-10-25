@@ -7,9 +7,13 @@ import { resolveServerQuotePricing } from "@/lib/quote-pricing-context";
 import {
   buildReminderAppointmentPatch,
   findReminderCandidates,
+  type ReminderWave,
 } from "@/lib/scheduling/appointment-reminders";
 import { berlinIsoDate, berlinTomorrowIso } from "@/lib/scheduling/berlin-date";
-import { isBueroLead } from "@/lib/lead-product";
+import { isBueroLead, isTreppenhausLead } from "@/lib/lead-product";
+import { buildTerminPageUrl } from "@/lib/termin-token";
+import { siteConfig } from "@/lib/config";
+import { initialQuoteFormData } from "@/lib/quote-form";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -18,6 +22,12 @@ function authorizeCron(request: Request): boolean {
   if (!secret) return process.env.NODE_ENV !== "production";
   const auth = request.headers.get("authorization");
   return auth === `Bearer ${secret}`;
+}
+
+function resolveWave(request: Request): ReminderWave {
+  const url = new URL(request.url);
+  const q = url.searchParams.get("wave");
+  return q === "morning" ? "morning" : "eve";
 }
 
 export async function GET(request: Request) {
@@ -29,15 +39,18 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "RESEND_API_KEY yapılandırılmamış." }, { status: 503 });
   }
 
-  const targetDate = berlinTomorrowIso();
+  const wave = resolveWave(request);
+  const targetDate = wave === "morning" ? berlinIsoDate() : berlinTomorrowIso();
   const leads = await listLeads(200);
-  const candidates = findReminderCandidates(leads, targetDate);
+  const candidates = findReminderCandidates(leads, targetDate, wave);
   const fromEmail = process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+  const origin = siteConfig.url.replace(/\/de\/?$/, "") || "https://ilyashan.de";
 
   const results: Array<{ leadId: string; ok: boolean; error?: string }> = [];
 
   for (const { lead, quote, confirmedDate } of candidates) {
     try {
+      const terminUrl = buildTerminPageUrl(origin, lead.id);
       let email: { subject: string; text: string; html: string };
       if (isBueroLead(lead) && lead.cleaningSnapshot) {
         email = buildCleaningReminderEmail(
@@ -45,6 +58,27 @@ export async function GET(request: Request) {
           confirmedDate,
           lead.appointment,
           lead.festpreis
+        );
+      } else if (isTreppenhausLead(lead)) {
+        const ctx = await resolveServerQuotePricing(lead);
+        const synthetic = {
+          ...initialQuoteFormData,
+          ...quote,
+          firstName: lead.name.split(/\s+/)[0] ?? lead.name,
+          lastName: lead.name.split(/\s+/).slice(1).join(" "),
+          email: lead.email ?? "",
+          phone: lead.phone ?? "",
+          windowCount: quote?.windowCount && quote.windowCount > 0 ? quote.windowCount : 1,
+          services: quote?.services?.length ? quote.services : ["privat"],
+        };
+        email = buildAppointmentReminderEmail(
+          synthetic,
+          lead.anfrageNr ?? lead.id,
+          confirmedDate,
+          ctx,
+          lead.appointment,
+          lead.festpreis,
+          { terminUrl, wave }
         );
       } else if (quote) {
         const ctx = await resolveServerQuotePricing(lead);
@@ -54,7 +88,8 @@ export async function GET(request: Request) {
           confirmedDate,
           ctx,
           lead.appointment,
-          lead.festpreis
+          lead.festpreis,
+          { terminUrl, wave }
         );
       } else {
         results.push({ leadId: lead.id, ok: false, error: "incomplete_quote" });
@@ -75,7 +110,7 @@ export async function GET(request: Request) {
       }
 
       await updateLead(lead.id, {
-        appointment: buildReminderAppointmentPatch(lead.appointment, confirmedDate),
+        appointment: buildReminderAppointmentPatch(lead.appointment, confirmedDate, wave),
       });
       results.push({ leadId: lead.id, ok: true });
     } catch (err) {
@@ -93,6 +128,7 @@ export async function GET(request: Request) {
   return NextResponse.json({
     success: true,
     berlinToday: berlinIsoDate(),
+    wave,
     targetDate,
     candidates: candidates.length,
     sent,

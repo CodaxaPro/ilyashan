@@ -7,12 +7,7 @@ import { siteConfig } from "@/lib/config";
 import type { ConciergeSession } from "@/lib/concierge/types";
 import { validateLeadContact } from "@/lib/concierge/lead";
 import { syncLeadToCalendar } from "@/lib/calendar/calendar-service";
-import {
-  buildDataTable,
-  buildEmailLayout,
-  buildInfoBox,
-  escapeHtml,
-} from "@/lib/email-templates";
+import { buildDataTable, buildEmailLayout } from "@/lib/email-templates";
 import { listLeads, saveLead, updateLead } from "@/lib/leads-store";
 import { getStaffConfig } from "@/lib/staff/config";
 import { applyCustomerBooking } from "@/lib/scheduling/booking";
@@ -21,6 +16,8 @@ import {
   type BookableTimeSlot,
 } from "@/lib/scheduling/slot-engine";
 import type { QuotePricingContext } from "@/lib/quote-pricing-context";
+import { buildSpeedToLeadAdminBlock } from "@/lib/leads/speed-to-lead";
+import { buildTerminPageUrl } from "@/lib/termin-token";
 import { materializeBookableLeadFromSession } from "./materialize-bookable-lead";
 
 export type BookFromChatInput = {
@@ -57,33 +54,45 @@ function buildAdminBookingEmail(args: {
 }) {
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
   const slotLabel = TIME_SLOT_LABELS_DE[args.timeSlot];
+  const speed = buildSpeedToLeadAdminBlock({
+    name: args.name,
+    phone: args.phone,
+    priority: "booked",
+  });
+  const terminUrl = buildTerminPageUrl(
+    siteConfig.url.replace(/\/de\/?$/, "") || "https://ilyashan.de",
+    args.leadId
+  );
   const body = `
-    ${buildInfoBox(`<strong>✅ Chat-Termin gebucht</strong> · ${escapeHtml(timestamp)}`)}
+    ${speed.html}
     ${buildDataTable([
       ["Name", args.name],
       ["Telefon", args.phone],
       ["Termin", `${args.date} · ${slotLabel}`],
       ["Lead-ID", args.leadId],
+      ...(terminUrl ? ([["Kundenportal", terminUrl]] as [string, string][]) : []),
       ["Details", args.summary.slice(0, 800)],
-    ])}
-    <p style="margin:16px 0 0;font-size:13px;color:#64748b;">
-      <a href="tel:${escapeHtml(args.phone.replace(/\s/g, ""))}" style="color:#0369a1;font-weight:600;">Direkt anrufen</a>
-    </p>`;
+      ["Zeit", timestamp],
+    ])}`;
 
   return {
-    subject: `✅ Chat-Termin: ${args.name} · ${args.date} ${slotLabel}`,
+    subject: `${speed.subjectPrefix}Chat-Termin: ${args.name} · ${args.date} ${slotLabel}`,
     text: [
       "CHAT-TERMIN BUCHUNG – ilyashan.de",
+      speed.text,
       "",
       `Name: ${args.name}`,
       `Telefon: ${args.phone}`,
       `Termin: ${args.date} · ${slotLabel}`,
       `Lead-ID: ${args.leadId}`,
+      terminUrl ? `Portal: ${terminUrl}` : "",
       "",
       args.summary,
       "",
       `Eingegangen: ${timestamp}`,
-    ].join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
     html: buildEmailLayout({
       preheader: `Termin ${args.date} für ${args.name}`,
       title: "Chat-Termin bestätigt",
