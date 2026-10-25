@@ -74,9 +74,8 @@ export function buildAssistantPriceReply(
 
   if (product === "treppenhaus") {
     const priced = priceTreppenhaus(null);
-    if (priced.calculatorHref) {
-      actions.push(linkAction("Treppenhaus kalkulieren", priced.calculatorHref));
-    }
+    const href = !priced.ok ? priced.calculatorHref : calculatorHref;
+    if (href) actions.push(linkAction("Treppenhaus kalkulieren", href));
     actions.push(phoneAction());
     return {
       text: priced.ok ? priced.data.labelDe : priced.messageDe,
@@ -88,9 +87,8 @@ export function buildAssistantPriceReply(
 
   if (product === "buero") {
     const priced = priceBuero(null);
-    if (priced.calculatorHref) {
-      actions.push(linkAction("Büro kalkulieren", priced.calculatorHref));
-    }
+    const href = !priced.ok ? priced.calculatorHref : calculatorHref;
+    if (href) actions.push(linkAction("Büro kalkulieren", href));
     actions.push(phoneAction());
     return {
       text: priced.ok ? priced.data.labelDe : priced.messageDe,
@@ -108,12 +106,10 @@ export function buildAssistantPriceReply(
     product === "gutschein"
   ) {
     const priced = priceManualService(product);
-    if (priced.calculatorHref) {
+    const href = !priced.ok ? priced.calculatorHref : calculatorHref;
+    if (href) {
       actions.push(
-        linkAction(
-          product === "gutschein" ? "Gutschein ansehen" : "Anfrage senden",
-          priced.calculatorHref
-        )
+        linkAction(product === "gutschein" ? "Gutschein ansehen" : "Anfrage senden", href)
       );
     }
     actions.push(phoneAction());

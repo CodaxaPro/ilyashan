@@ -13,7 +13,8 @@ export class MockAiProvider implements AiProvider {
 
   constructor(private readonly script: MockAiScript[]) {}
 
-  async complete(_req: AiCompletionRequest): Promise<AiCompletionResponse> {
+  async complete(req: AiCompletionRequest): Promise<AiCompletionResponse> {
+    void req;
     const next = this.script[this.step++] ?? { type: "text" as const, content: "Wie kann ich helfen?" };
     if (next.type === "text") {
       return { content: next.content, toolCalls: [], model: "mock" };
