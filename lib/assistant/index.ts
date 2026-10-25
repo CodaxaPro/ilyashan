@@ -1,6 +1,12 @@
-export { isAssistantToolsEnabled } from "./feature-flag";
+export {
+  isAssistantToolsEnabled,
+  isAssistantAiEnabled,
+  isAssistantAiConfigured,
+  canRunAssistantAi,
+} from "./feature-flag";
 export { resolveProduct } from "./resolve-product";
 export { buildAssistantPriceReply } from "./reply";
+export { processConciergeMessageAsync } from "./process";
 export {
   mayEmitEuroAmount,
   priceDisclosureFor,
@@ -20,3 +26,4 @@ export type {
   AssistantToolResult,
   OrientierungPriceData,
 } from "./types";
+export type { AiRunMeta } from "./ai/types";

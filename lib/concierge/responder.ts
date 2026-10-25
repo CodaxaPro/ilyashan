@@ -40,11 +40,9 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
-import {
-  buildAssistantPriceReply,
-  isAssistantToolsEnabled,
-  resolveProduct,
-} from "@/lib/assistant";
+import { isAssistantToolsEnabled } from "@/lib/assistant/feature-flag";
+import { buildAssistantPriceReply } from "@/lib/assistant/reply";
+import { resolveProduct } from "@/lib/assistant/resolve-product";
 
 function defaultQuickReplies(): string[] {
   return [...CONCIERGE_QUICK_REPLIES];

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { processConciergeMessage, createSession } from "@/lib/concierge";
+import { createSession } from "@/lib/concierge";
 import type { ConciergeSession } from "@/lib/concierge";
+import { processConciergeMessageAsync } from "@/lib/assistant/process";
 import { recordUnknownMessage, shouldLogUnknownMessage } from "@/lib/concierge/unknown-queue";
 import { getConciergeEnabled } from "@/lib/concierge-settings";
 import { getFensterPricingConfig } from "@/lib/pricing-config";
@@ -45,7 +46,11 @@ export async function POST(request: Request) {
     const pricingConfig = await getFensterPricingConfig();
     const pricingCtx = createQuotePricingContext(pricingConfig);
 
-    const reply = processConciergeMessage(message, session, pricingCtx);
+    const { reply, meta } = await processConciergeMessageAsync(
+      message,
+      session,
+      pricingCtx
+    );
 
     if (shouldLogUnknownMessage(reply.intent)) {
       void recordUnknownMessage({
@@ -62,6 +67,11 @@ export async function POST(request: Request) {
       session: reply.session,
       actions: reply.actions,
       quickReplies: reply.quickReplies,
+      // Ops diagnostics only — not shown in widget UI
+      assistantMeta: {
+        usedAi: meta.usedAi,
+        fallbackReason: meta.fallbackReason,
+      },
     });
   } catch {
     return NextResponse.json(
