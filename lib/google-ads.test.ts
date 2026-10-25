@@ -32,7 +32,7 @@ describe("google-ads conversions", () => {
 
   it("also fires classic conversion when send_to is set via env", () => {
     const prev = process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO;
-    process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO = "AW-18191480247/testlabel";
+    process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO = "AW-18351064202/testlabel";
 
     const calls: unknown[][] = [];
     (globalThis as { window: Window }).window = {
@@ -45,7 +45,7 @@ describe("google-ads conversions", () => {
     assert.ok(calls.some((args) => args[1] === "request_quote"));
     const conversion = calls.find((args) => args[1] === "conversion");
     assert.deepEqual(conversion?.[2], {
-      send_to: "AW-18191480247/testlabel",
+      send_to: "AW-18351064202/testlabel",
       transaction_id: "ANF-9",
     });
 

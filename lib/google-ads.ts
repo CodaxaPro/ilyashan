@@ -2,7 +2,7 @@ import { siteConfig } from "@/lib/config";
 
 type AdsConversionKind = "request_quote" | "whatsapp_click" | "phone_click";
 
-/** Full send_to from Google Ads event snippet, e.g. AW-18191480247/AbCdEfGh */
+/** Full send_to from Google Ads event snippet, e.g. AW-18351064202/AbCdEfGh */
 function getSendTo(kind: AdsConversionKind): string | null {
   if (kind === "request_quote") {
     const fromEnv = process.env.NEXT_PUBLIC_GOOGLE_ADS_REQUEST_QUOTE_SEND_TO?.trim();
