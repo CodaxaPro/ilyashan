@@ -152,6 +152,21 @@ export async function POST(request: Request) {
       website?: string;
     };
 
+    // Calculator services must not create thin contact leads (no prices / options).
+    const calculatorOnly: Record<string, string> = {
+      treppenhausreinigung: "/de/treppenhausreinigung/angebot",
+      bueroreinigung: "/de/bueroreinigung/angebot",
+      fensterreinigung: "/de/angebot",
+    };
+    if (typeof service === "string" && calculatorOnly[service]) {
+      return NextResponse.json(
+        {
+          error: `Bitte nutzen Sie die Preiskalkulation unter ${calculatorOnly[service]} — dort werden Auswahl und Orientierung mitgesendet.`,
+        },
+        { status: 400 }
+      );
+    }
+
     if (!name || !phone || !plz || !service) {
       return NextResponse.json(
         { error: "Bitte füllen Sie alle Pflichtfelder aus." },

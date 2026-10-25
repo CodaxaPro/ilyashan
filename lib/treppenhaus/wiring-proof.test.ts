@@ -54,9 +54,13 @@ describe("treppenhaus/wiring proof", () => {
     assert.match(sitemap, /treppenhausreinigung\/angebot/);
   });
 
-  it("ContactForm includes treppenhausreinigung option", () => {
+  it("ContactForm steers Treppenhaus to calculator (no thin contact option)", () => {
     const form = readFileSync(join(root, "components/ContactForm.tsx"), "utf8");
-    assert.match(form, /treppenhausreinigung/);
+    assert.match(form, /treppenhausreinigungAngebot/);
+    assert.doesNotMatch(form, /value:\s*"treppenhausreinigung"/);
+    const contactApi = readFileSync(join(root, "app/api/contact/route.ts"), "utf8");
+    assert.match(contactApi, /calculatorOnly/);
+    assert.match(contactApi, /treppenhausreinigung/);
   });
 
   it("calculator enforces Keller sync UX copy + allowed options API", () => {

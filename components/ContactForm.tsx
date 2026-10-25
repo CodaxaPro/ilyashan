@@ -14,24 +14,43 @@ interface ContactFormProps {
   defaultService?: string;
 }
 
+/** Short contact form — only services without a price calculator. */
 const SERVICE_OPTIONS = [
-  { value: "bueroreinigung", label: "Büroreinigung" },
-  { value: "treppenhausreinigung", label: "Treppenhausreinigung" },
   { value: "praxisreinigung", label: "Praxisreinigung" },
   { value: "bauendreinigung", label: "Bauendreinigung" },
   { value: "renovierungsreinigung", label: "Renovierungsreinigung" },
   { value: "entruempelung", label: "Entrümpelung" },
-  { value: "fensterreinigung", label: "Fensterreinigung" },
 ] as const;
+
+const CALCULATOR_REDIRECTS: Record<string, { href: string; label: string }> = {
+  treppenhausreinigung: {
+    href: routes.treppenhausreinigungAngebot,
+    label: "Treppenhaus — Preis kalkulieren",
+  },
+  bueroreinigung: {
+    href: routes.bueroreinigungAngebot,
+    label: "Büro — Preis kalkulieren",
+  },
+  fensterreinigung: {
+    href: routes.angebot,
+    label: "Fenster — Preis kalkulieren",
+  },
+};
 
 export function ContactForm({ compact = false, defaultService }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const calculatorRedirect =
+    defaultService && CALCULATOR_REDIRECTS[defaultService]
+      ? CALCULATOR_REDIRECTS[defaultService]
+      : null;
+
   useEffect(() => {
+    if (calculatorRedirect) return;
     trackAnalytics("form_start", { payload: { form: "contact" } });
-  }, []);
+  }, [calculatorRedirect]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,6 +59,14 @@ export function ContactForm({ compact = false, defaultService }: ContactFormProp
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
+    const service = String(data.service ?? "");
+    if (CALCULATOR_REDIRECTS[service]) {
+      setLoading(false);
+      setError(
+        `Bitte nutzen Sie die Preiskalkulation: ${CALCULATOR_REDIRECTS[service].label}.`
+      );
+      return;
+    }
 
     try {
       const response = await fetch("/api/contact", {
@@ -63,6 +90,20 @@ export function ContactForm({ compact = false, defaultService }: ContactFormProp
     } finally {
       setLoading(false);
     }
+  }
+
+  if (calculatorRedirect) {
+    return (
+      <div className="rounded-xl border border-primary/20 bg-primary-light/40 px-5 py-6 text-center space-y-4">
+        <p className="text-sm text-muted leading-relaxed">
+          Für diese Leistung brauchen wir Stockwerke, Turnus und eine Preisorientierung —
+          bitte über die Kalkulation anfragen.
+        </p>
+        <Button href={calculatorRedirect.href} variant="primary" size="lg" className="w-full">
+          {calculatorRedirect.label}
+        </Button>
+      </div>
+    );
   }
 
   if (submitted) {
