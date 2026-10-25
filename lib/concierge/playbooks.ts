@@ -87,7 +87,7 @@ export function buildPlaybookCopy(
       };
     case "home":
       return {
-        nudge: `Live-Orientierung in 1 Minute — Fenster, Büro oder Treppenhaus in ${siteConfig.contact.region}.`,
+        nudge: `Live-Preisschätzung in 1 Minute — Fenster, Büro oder Treppenhaus in ${siteConfig.contact.region}.`,
         exit: `Bevor Sie gehen: Live-Preisschätzung in unter 2 Minuten – ich helfe bei Fensterreinigung in ${siteConfig.contact.region}.`,
         quickReplies: ["Fensterpreis", "Büro", "Rückruf"],
       };

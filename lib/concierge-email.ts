@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/config";
-import { buildDataTable, buildEmailLayout, escapeHtml } from "@/lib/email-templates";
+import { buildDataTable, buildEmailLayout } from "@/lib/email-templates";
 import type { ConciergeSession } from "@/lib/concierge/types";
 import { buildLeadSummaryRows, isHotLead } from "@/lib/concierge/lead";
 import {
