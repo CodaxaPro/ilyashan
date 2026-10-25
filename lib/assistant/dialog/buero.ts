@@ -26,7 +26,8 @@ function formatEuro(cents: number): string {
   return `${(cents / 100).toFixed(2).replace(".", ",")} €`;
 }
 
-function buildBueroInput(draft: BueroChatDraft) {
+/** Shared with chat→CRM materialization — same engine inputs as live orientation. */
+export function buildBueroInputFromDraft(draft: BueroChatDraft) {
   const area = Math.max(20, Math.min(2000, Math.round(draft.totalAreaM2 ?? 0)));
   const frequency = (draft.frequency ?? "2_PER_WEEK") as CleaningFrequency;
   const workstations = Math.max(0, Math.min(200, Math.round(draft.workstations ?? Math.max(1, Math.round(area / 12)))));
@@ -127,7 +128,7 @@ export function applyBueroStructuredFields(
     };
   }
 
-  const input = buildBueroInput(draft);
+  const input = buildBueroInputFromDraft(draft);
   const { customer } = calculateOfficeCleaningQuote(input);
   nextSession.stage = "price_ready";
 

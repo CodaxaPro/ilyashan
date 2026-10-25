@@ -20,11 +20,15 @@ import { applyBueroStructuredFields } from "../dialog/buero";
 import { ALL_SALES_PRODUCTS, openServiceCase } from "../sales/catalog";
 import { listProposedSlots } from "../sales/slots";
 import { submitSalesLead } from "../sales/submit-lead";
+import { bookAppointmentFromChat } from "../sales/book-from-chat";
+import { requestCallback } from "../sales/request-callback";
+import { requestHumanHandoff } from "../sales/request-handoff";
 import { buildAssistantPriceReply } from "../reply";
 import { resolveProduct } from "../resolve-product";
 import type { AiToolDefinition } from "../ai/types";
 import type { FloorLevel, DirtLevel, CleaningSide, QuoteServiceId } from "@/lib/quote-form";
 import type { AssistantProduct, BueroChatDraft } from "@/lib/concierge/types";
+import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
@@ -180,7 +184,7 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
     name: "get_available_slots",
     description:
-      "Liest echte Kalender-Kapazität (Vormittag/Nachmittag) und liefert Terminvorschläge für den Kunden.",
+      "Liest echte Kalender-Kapazität (Vormittag/Nachmittag) und liefert Terminvorschläge. Danach bei Zustimmung book_appointment nutzen.",
     parameters: {
       type: "object",
       properties: {
@@ -189,9 +193,65 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
     },
   },
   {
+    name: "book_appointment",
+    description:
+      "VERBINDLICHE Terminbuchung: prüft Kapazität, speichert Lead (CRM), schreibt Kalender, mailt Admin. Nur mit Name+Telefon+Datum+timeSlot (vormittag|nachmittag|flexibel). Nie Termin nur vorschlagen ohne dieses Tool.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        phone: { type: "string" },
+        date: { type: "string", description: "YYYY-MM-DD" },
+        timeSlot: {
+          type: "string",
+          enum: ["vormittag", "nachmittag", "flexibel"],
+        },
+        preferredStartTime: {
+          type: "string",
+          description: "Optional HH:MM Ankunftszeit",
+        },
+      },
+      required: ["name", "phone", "date", "timeSlot"],
+    },
+  },
+  {
+    name: "request_callback",
+    description:
+      "1-Tap Rückruf: Name+Telefon → CRM + Admin-Mail mit Priorität. Nutzen wenn Kunde anrufen lassen will oder Termin noch nicht buchbar.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        phone: { type: "string" },
+        reason: {
+          type: "string",
+          description: "Wunschzeitfenster, Dringlichkeit, Kurznotiz",
+        },
+      },
+      required: ["name", "phone"],
+    },
+  },
+  {
+    name: "request_human_handoff",
+    description:
+      "Mitarbeiter-Übergabe: älterer Kunde, Stress, Beschwerde, Sprachbarriere — strukturierte Prioritäts-Anfrage an das Team.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        phone: { type: "string" },
+        context: {
+          type: "string",
+          description: "Warum Übergabe nötig ist",
+        },
+      },
+      required: ["name", "phone"],
+    },
+  },
+  {
     name: "submit_customer_lead",
     description:
-      "ABSCHLUSS: Speichert Name+Telefon (+Notiz/Terminwunsch) in CRM und mailt an Ilyashan. Immer nutzen wenn Kunde Rückruf/Festpreis/Termin will und Kontaktdaten da sind.",
+      "ABSCHLUSS ohne festen Slot: Speichert Name+Telefon (+Notiz) in CRM und mailt an Ilyashan. Für Festpreis/Rückruf wenn kein book_appointment möglich.",
     parameters: {
       type: "object",
       properties: {
@@ -297,8 +357,85 @@ export async function executeAllowlistedTool(
         ok: true,
         slots,
         hintDe:
-          "Schlage 2–3 Optionen vor. Verbindliche Buchung nach Lead/Prüfung — Wunsch mit submit_customer_lead notieren.",
+          "Schlage 2–3 Optionen vor. Bei Zustimmung des Kunden SOFORT book_appointment mit name+phone+date+timeSlot aufrufen — nicht nur notieren.",
       }),
+    };
+  }
+
+  if (name === "book_appointment") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = await bookAppointmentFromChat({
+      name: String(args.name ?? ""),
+      phone: String(args.phone ?? ""),
+      date: String(args.date ?? ""),
+      timeSlot: String(args.timeSlot ?? "") as BookableTimeSlot,
+      preferredStartTime: args.preferredStartTime
+        ? String(args.preferredStartTime)
+        : undefined,
+      session,
+      pricingCtx: ctx.pricingCtx,
+    });
+    if (!result.ok) {
+      return {
+        content: JSON.stringify(result),
+        customerText: result.messageDe,
+        quickReplies: ["Andere Uhrzeit", "Rückruf statt Termin", "Anrufen"],
+      };
+    }
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      session: { ...session, turns: session.turns + 1, stage: "idle" },
+      quickReplies: ["Weitere Frage", "WhatsApp", "Anrufen"],
+    };
+  }
+
+  if (name === "request_callback") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = await requestCallback({
+      name: String(args.name ?? ""),
+      phone: String(args.phone ?? ""),
+      reason: args.reason ? String(args.reason) : undefined,
+      session,
+    });
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      session: result.ok
+        ? { ...session, turns: session.turns + 1, stage: "idle" }
+        : session,
+      quickReplies: result.ok
+        ? ["Weitere Frage", "WhatsApp", "Anrufen"]
+        : ["Nochmal versuchen", "Anrufen"],
+    };
+  }
+
+  if (name === "request_human_handoff") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = await requestHumanHandoff({
+      name: String(args.name ?? ""),
+      phone: String(args.phone ?? ""),
+      context: args.context ? String(args.context) : undefined,
+      session,
+    });
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      session: result.ok
+        ? { ...session, turns: session.turns + 1, stage: "idle" }
+        : session,
+      quickReplies: result.ok
+        ? ["Danke", "Anrufen"]
+        : ["Nochmal versuchen", "Anrufen"],
     };
   }
 

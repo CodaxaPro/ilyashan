@@ -34,7 +34,9 @@ export type AnalyticsEventType =
   | "concierge_wizard_handoff"
   | "concierge_exit_intent"
   | "concierge_proactive_nudge"
-  | "concierge_whatsapp_click";
+  | "concierge_whatsapp_click"
+  | "concierge_call_tap"
+  | "concierge_callback_tap";
 
 export interface AnalyticsDeviceInfo {
   deviceType: "mobile" | "tablet" | "desktop";

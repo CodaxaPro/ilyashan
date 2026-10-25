@@ -24,14 +24,14 @@ export function isTreppenhausLead(
   return lead.serviceLine === "treppenhaus" || Boolean(lead.treppenhausSnapshot);
 }
 
-/** Complete enough for termin / status email / calendar (product-aware). */
-export function isCompleteQuoteLead(
+/** Product payload complete enough to schedule (source-agnostic). */
+export function hasBookableProductData(
   lead: Pick<
     StoredLead,
-    "source" | "serviceLine" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote"
+    "serviceLine" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote" | "status"
   >
 ): boolean {
-  if (lead.source !== "quote") return false;
+  if (lead.status === "abgelehnt" || lead.status === "abgeschlossen") return false;
   if (isBueroLead(lead)) {
     return Boolean(lead.cleaningSnapshot?.input?.totalAreaM2);
   }
@@ -39,6 +39,35 @@ export function isCompleteQuoteLead(
     return Boolean(lead.treppenhausSnapshot?.input?.stockwerke);
   }
   return Boolean(lead.quote?.windowCount);
+}
+
+/**
+ * Online customer booking gate — same scheduler as Termin-Portal.
+ * Requires quote source so calendar sync (`deriveAppointmentsFromLead`) accepts the lead.
+ */
+export function canCustomerBookOnline(
+  lead: Pick<
+    StoredLead,
+    | "source"
+    | "serviceLine"
+    | "cleaningSnapshot"
+    | "treppenhausSnapshot"
+    | "quote"
+    | "status"
+  >
+): boolean {
+  if (lead.source !== "quote") return false;
+  return hasBookableProductData(lead);
+}
+
+/** Complete enough for termin / status email / calendar (product-aware). */
+export function isCompleteQuoteLead(
+  lead: Pick<
+    StoredLead,
+    "source" | "serviceLine" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote"
+  >
+): boolean {
+  return canCustomerBookOnline(lead);
 }
 
 export function getBueroSnapshot(

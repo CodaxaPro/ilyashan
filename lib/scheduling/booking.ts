@@ -18,7 +18,12 @@ import {
   isWartungQuote,
   wartungWeekdayErrorDe,
 } from "@/lib/termin-wartung";
-import { isBueroLead, resolveLeadEstimatedHours } from "@/lib/lead-product";
+import {
+  canCustomerBookOnline,
+  isBueroLead,
+  isTreppenhausLead,
+  resolveLeadEstimatedHours,
+} from "@/lib/lead-product";
 
 export type BookingAction = "confirm_proposed" | "pick_slot";
 
@@ -75,17 +80,23 @@ export function applyCustomerBooking(
   input: BookingInput,
   now: Date = new Date()
 ): BookingResult {
-  if (lead.source !== "quote") {
+  if (!canCustomerBookOnline(lead)) {
+    if (lead.status === "abgelehnt" || lead.status === "abgeschlossen") {
+      return { ok: false, error: "Für diese Anfrage ist keine Terminbuchung mehr möglich." };
+    }
     return { ok: false, error: "Diese Anfrage unterstützt keine Online-Terminbuchung." };
-  }
-  if (lead.status === "abgelehnt" || lead.status === "abgeschlossen") {
-    return { ok: false, error: "Für diese Anfrage ist keine Terminbuchung mehr möglich." };
   }
 
   const buero = isBueroLead(lead);
+  const treppenhaus = isTreppenhausLead(lead);
   const quote = mergeQuote(lead.quote);
-  if (!buero && !quote) return { ok: false, error: "Anfragedaten unvollständig." };
+  if (!buero && !treppenhaus && !quote) {
+    return { ok: false, error: "Anfragedaten unvollständig." };
+  }
   if (buero && !lead.cleaningSnapshot?.input?.totalAreaM2) {
+    return { ok: false, error: "Anfragedaten unvollständig." };
+  }
+  if (treppenhaus && !lead.treppenhausSnapshot?.input?.stockwerke) {
     return { ok: false, error: "Anfragedaten unvollständig." };
   }
 
@@ -100,6 +111,7 @@ export function applyCustomerBooking(
     }
     if (
       !buero &&
+      !treppenhaus &&
       quote &&
       isWartungQuote(quote) &&
       quote.wartungPreferredWeekday &&
@@ -151,6 +163,7 @@ export function applyCustomerBooking(
     }
     if (
       !buero &&
+      !treppenhaus &&
       quote &&
       isWartungQuote(quote) &&
       quote.wartungPreferredWeekday &&

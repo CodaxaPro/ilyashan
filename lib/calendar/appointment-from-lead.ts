@@ -105,12 +105,26 @@ function isBuero(lead: StoredLead): boolean {
   return lead.serviceLine === "buero" || Boolean(lead.cleaningSnapshot);
 }
 
+function isTreppenhaus(lead: StoredLead): boolean {
+  return lead.serviceLine === "treppenhaus" || Boolean(lead.treppenhausSnapshot);
+}
+
 function buildTitle(lead: StoredLead, quote: QuoteFormData | null): string {
   if (isBuero(lead)) {
     const m2 = lead.cleaningSnapshot?.input.totalAreaM2;
     const label = m2 ? `${m2} m² Büro` : "Büroreinigung";
     const ort =
       lead.cleaningSnapshot?.contact.city ||
+      lead.quote?.city ||
+      lead.quote?.postalCode ||
+      "";
+    return ort ? `${lead.name} · ${label} · ${ort}` : `${lead.name} · ${label}`;
+  }
+  if (isTreppenhaus(lead)) {
+    const floors = lead.treppenhausSnapshot?.input.stockwerke;
+    const label = floors ? `Treppenhaus ${floors} Stw.` : "Treppenhaus";
+    const ort =
+      lead.treppenhausSnapshot?.contact.city ||
       lead.quote?.city ||
       lead.quote?.postalCode ||
       "";
@@ -123,11 +137,15 @@ function buildTitle(lead: StoredLead, quote: QuoteFormData | null): string {
 
 function baseFields(lead: StoredLead, quote: QuoteFormData | null) {
   const buero = isBuero(lead);
+  const treppenhaus = isTreppenhaus(lead);
+  const productSingle = buero || treppenhaus;
   return {
     leadId: lead.id,
     anfrageNr: lead.anfrageNr,
-    kind: buero ? ("single" as AppointmentKind) : resolveKind(quote),
-    timeSlot: resolveTimeSlot(lead, quote) ?? (buero ? ("flexibel" as CalendarTimeSlot) : undefined),
+    kind: productSingle ? ("single" as AppointmentKind) : resolveKind(quote),
+    timeSlot:
+      resolveTimeSlot(lead, quote) ??
+      (productSingle ? ("flexibel" as CalendarTimeSlot) : undefined),
     staffId: lead.appointment?.staffId,
     plannedStartTime: lead.appointment?.plannedStartTime,
     estimatedDurationHours:
@@ -138,15 +156,19 @@ function baseFields(lead: StoredLead, quote: QuoteFormData | null) {
     customerPhone: lead.phone,
     postalCode: buero
       ? lead.cleaningSnapshot?.contact.postalCode ?? lead.quote?.postalCode
-      : quote?.postalCode,
+      : treppenhaus
+        ? lead.treppenhausSnapshot?.contact.postalCode ?? lead.quote?.postalCode
+        : quote?.postalCode,
     city: buero
       ? lead.cleaningSnapshot?.contact.city ?? lead.quote?.city
-      : quote?.city,
+      : treppenhaus
+        ? lead.treppenhausSnapshot?.contact.city ?? lead.quote?.city
+        : quote?.city,
     title: buildTitle(lead, quote),
     notes: lead.appointment?.note,
     leadStatus: lead.status,
     source: lead.source,
-    windowCount: buero ? undefined : quote?.windowCount,
+    windowCount: productSingle ? undefined : quote?.windowCount,
   };
 }
 
@@ -170,9 +192,11 @@ export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppoi
   if (lead.source !== "quote") return [];
 
   const buero = isBuero(lead);
+  const treppenhaus = isTreppenhaus(lead);
   const quote = mergeQuote(lead.quote);
-  if (!buero && !quote) return [];
+  if (!buero && !treppenhaus && !quote) return [];
   if (buero && !lead.cleaningSnapshot?.input?.totalAreaM2) return [];
+  if (treppenhaus && !lead.treppenhausSnapshot?.input?.stockwerke) return [];
 
   if (lead.status === "abgelehnt") return [];
 
@@ -188,7 +212,7 @@ export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppoi
     items.push(makeDerived(lead, quote, "proposed", proposed, "vorgeschlagen"));
   }
 
-  if (!buero && !confirmed && quote?.preferredDates?.length) {
+  if (!buero && !treppenhaus && !confirmed && quote?.preferredDates?.length) {
     quote.preferredDates.slice(0, 3).forEach((iso, index) => {
       const role = `preferred-${index}` as AppointmentRole;
       if (!items.some((item) => item.eventDate === iso && item.role === role)) {
@@ -197,7 +221,7 @@ export function deriveAppointmentsFromLead(lead: StoredLead): Omit<CalendarAppoi
     });
   }
 
-  if (!buero && quote) {
+  if (!buero && !treppenhaus && quote) {
     items.push(...deriveWartungSeriesAppointments(lead, quote, confirmed));
   }
 

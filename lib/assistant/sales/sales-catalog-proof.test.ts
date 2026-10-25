@@ -112,6 +112,9 @@ describe("sales catalog — system + tools ready for full close", () => {
       "upsert_treppenhaus_fields",
       "submit_customer_lead",
       "get_available_slots",
+      "book_appointment",
+      "request_callback",
+      "request_human_handoff",
       "get_system_knowledge",
     ]) {
       assert.equal(isAllowlistedTool(tool), true, tool);

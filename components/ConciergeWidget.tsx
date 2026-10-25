@@ -111,10 +111,11 @@ export function ConciergeWidget() {
   const [leadSuccess, setLeadSuccess] = useState<string | null>(null);
   const [leadError, setLeadError] = useState<string | null>(null);
   const [leadPhotos, setLeadPhotos] = useState<PhotoPayload[]>([]);
+  const [forceLeadForm, setForceLeadForm] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const greeted = useRef(false);
 
-  const showLeadForm = isHotLead(session) && !leadSuccess;
+  const showLeadForm = (isHotLead(session) || forceLeadForm) && !leadSuccess;
 
   useEffect(() => {
     if (showLeadForm) {
@@ -518,6 +519,43 @@ export function ConciergeWidget() {
           </div>
         )}
 
+        {!leadSuccess && (
+          <div
+            className="px-3 py-2 flex gap-2 shrink-0 border-t border-border bg-slate-50"
+            data-testid="concierge-urgent-actions"
+          >
+            <a
+              href={`tel:${siteConfig.contact.phone}`}
+              className="flex-1 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold text-center hover:bg-primary/90"
+              data-testid="concierge-call-now"
+              onClick={() =>
+                trackConciergeEvent("concierge_call_tap", {
+                  session_id: session.id,
+                  page_path: pathname,
+                })
+              }
+            >
+              Anrufen · {siteConfig.contact.phoneDisplay}
+            </a>
+            {!showLeadForm && (
+              <button
+                type="button"
+                className="flex-1 py-2.5 rounded-xl border-2 border-accent text-accent text-xs font-semibold hover:bg-accent-light/40"
+                data-testid="concierge-callback-tap"
+                onClick={() => {
+                  setForceLeadForm(true);
+                  trackConciergeEvent("concierge_callback_tap", {
+                    session_id: session.id,
+                    page_path: pathname,
+                  });
+                }}
+              >
+                Rückruf 1-Tap
+              </button>
+            )}
+          </div>
+        )}
+
         <form
           className="p-3 border-t border-border bg-white shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
           onSubmit={(e) => {
@@ -546,7 +584,7 @@ export function ConciergeWidget() {
             </button>
           </div>
           <p className="text-[10px] text-muted mt-2 text-center">
-            Beratung · Live-Orientierung · Festpreis & Termin nach Prüfung
+            Beratung · Live-Orientierung · Terminbuchung & Rückruf
           </p>
         </form>
       </div>

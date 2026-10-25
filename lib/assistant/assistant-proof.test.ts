@@ -188,7 +188,8 @@ describe("assistant/price tools — engine parity", () => {
       assert.equal(tool.ok, false);
       if (tool.ok) continue;
       assert.equal(tool.code, "no_online_price");
-      assert.equal(tool.messageDe, MANUAL_PRICE_DISCLAIMER_DE);
+      assert.ok(tool.messageDe.startsWith(MANUAL_PRICE_DISCLAIMER_DE));
+      assert.match(tool.messageDe, /Telefonnummer|Anfrage/i);
       assert.ok(tool.calculatorHref);
       assert.doesNotMatch(tool.messageDe, /€|\d+\s*Euro/i);
     }
