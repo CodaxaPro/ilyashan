@@ -40,6 +40,11 @@ import {
   defaultQuotePricingContext,
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import {
+  buildAssistantPriceReply,
+  isAssistantToolsEnabled,
+  resolveProduct,
+} from "@/lib/assistant";
 
 function defaultQuickReplies(): string[] {
   return [...CONCIERGE_QUICK_REPLIES];
@@ -130,6 +135,39 @@ export function processConciergeMessage(
       actions: [wizardActionFromSession(scopedSession)],
       quickReplies: defaultQuickReplies(),
     };
+  }
+
+  /**
+   * Phase A multi-product routing — ONLY when ASSISTANT_TOOLS_ENABLED=true.
+   * Default off: live Fenster concierge unchanged.
+   * Non-Fenster price questions → policy reply (calculator / manual), never invented €.
+   */
+  if (isAssistantToolsEnabled()) {
+    const wantsPrice = /\b(preis|kost|teuer|angebot|kalkul|rechner|orientierung|was\s+kostet|wie\s+viel)/i.test(
+      trimmed
+    );
+    if (wantsPrice) {
+      const resolved = resolveProduct(trimmed);
+      if (
+        resolved.ok &&
+        resolved.data.product !== "fenster" &&
+        resolved.data.product !== "unknown"
+      ) {
+        const assistant = buildAssistantPriceReply(trimmed, session.quote, pricingCtx);
+        return {
+          text: assistant.text,
+          intent: "price",
+          session: {
+            ...session,
+            turns: session.turns + 1,
+            lastIntent: "price",
+            stage: "idle",
+          },
+          actions: assistant.actions,
+          quickReplies: ["Preisrechner", "Rückruf anfordern", "Andere Leistung"],
+        };
+      }
+    }
   }
 
   let intent = classifyIntent(trimmed);
