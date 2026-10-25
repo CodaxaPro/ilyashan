@@ -3,6 +3,8 @@ import { routes } from "@/lib/routes";
 export type ServicePageContent = {
   path: string;
   name: string;
+  /** Value for contact form / CRM */
+  serviceKey: string;
   metaTitle: string;
   description: string;
   eyebrow: string;
@@ -22,7 +24,7 @@ export type ServicePageContent = {
 const visitSteps = [
   {
     title: "Anfrage",
-    text: "Leistung, Ort und Größe. Telefon, E-Mail oder WhatsApp.",
+    text: "Leistung, Ort und Größe. Telefon, Formular oder WhatsApp.",
   },
   {
     title: "Besichtigung",
@@ -38,12 +40,13 @@ export const servicePages = {
   bau: {
     path: "/bauendreinigung",
     name: "Bauendreinigung",
+    serviceKey: "bauendreinigung",
     metaTitle: "Bauendreinigung Aachen und Baesweiler",
     description:
       "Bauendreinigung nach Abschluss der Arbeiten in Aachen und Baesweiler. Staub, Farbe, Folie und Sanitär zur Übergabe. Festpreis nach Besichtigung.",
     eyebrow: "Aachen und Baesweiler",
-    title: "Bauendreinigung in Aachen und Baesweiler.",
-    lede: "Die Handwerker sind raus. Staub, Farbe, Folie und Klebereste bleiben. Wir machen den Neubau übergabefertig.",
+    title: "Neubau übergabefertig. Ohne Baustaub.",
+    lede: "Die Handwerker sind raus. Staub, Farbe, Folie und Klebereste bleiben. Wir machen den Neubau übergabefertig — Festpreis nach Besichtigung.",
     includes: [
       "Baustaub auf Böden, Wänden und Flächen",
       "Farb-, Lack- und Mörtelreste",
@@ -79,8 +82,8 @@ export const servicePages = {
       { href: routes.renovierungsreinigung, label: "Renovierungsreinigung" },
       { href: routes.fensterreinigung, label: "Fensterreinigung" },
     ],
-    primaryHref: `mailto:info@ilyashan.de?subject=Bauendreinigung`,
-    primaryLabel: "Anfrage per E-Mail",
+    primaryHref: "#anfrage",
+    primaryLabel: "Anfrage senden",
     priceNote: "Festpreis nach Besichtigung. Sitz: Kückstr. 29, 52499 Baesweiler.",
     image: {
       src: "/images/bauendreinigung.jpg",
@@ -91,11 +94,12 @@ export const servicePages = {
   renovierung: {
     path: "/renovierungsreinigung",
     name: "Renovierungsreinigung",
+    serviceKey: "renovierungsreinigung",
     metaTitle: "Renovierungsreinigung Aachen und Baesweiler",
     description:
       "Renovierungsreinigung in Aachen und Baesweiler. Feinstaub, Farbspritzer und Übergabe nach Farbe, Putz oder neuem Boden. Festpreis nach Besichtigung.",
     eyebrow: "Aachen und Baesweiler",
-    title: "Renovierungsreinigung in Aachen und Baesweiler.",
+    title: "Nach Farbe und Putz: bezugsfertig.",
     lede: "Es wurde gestrichen, gespachtelt oder der Boden erneuert. Der feine Staub liegt in der bestehenden Wohnung oder im Büro. Das ist keine Neubau-Übergabe.",
     includes: [
       "Feinstaub nach Schleif- und Malerarbeiten",
@@ -132,8 +136,8 @@ export const servicePages = {
       { href: routes.bauendreinigung, label: "Bauendreinigung" },
       { href: routes.bueroreinigung, label: "Büroreinigung" },
     ],
-    primaryHref: "mailto:info@ilyashan.de?subject=Renovierungsreinigung",
-    primaryLabel: "Anfrage per E-Mail",
+    primaryHref: "#anfrage",
+    primaryLabel: "Anfrage senden",
     priceNote: "Festpreis nach Besichtigung. Sitz: Kückstr. 29, 52499 Baesweiler.",
     image: {
       src: "/images/renovierungsreinigung.jpg",
@@ -144,12 +148,13 @@ export const servicePages = {
   praxis: {
     path: "/praxisreinigung",
     name: "Praxisreinigung",
+    serviceKey: "praxisreinigung",
     metaTitle: "Praxisreinigung Aachen und Baesweiler",
     description:
       "Praxisreinigung für Arzt, Zahnarzt und Physiotherapie in Aachen und Baesweiler. Wartezimmer, Behandlung, Empfang und Sanitär nach Ihrem Hygieneplan.",
     eyebrow: "Aachen und Baesweiler",
-    title: "Praxisreinigung in Aachen und Baesweiler.",
-    lede: "Wartezimmer, Behandlung, Empfang und Sanitär für Arzt, Zahnarzt und Physiotherapie. Die Reinigung folgt Ihrem Hygieneplan.",
+    title: "Praxisreinigung nach Ihrem Hygieneplan.",
+    lede: "Wartezimmer, Behandlung, Empfang und Sanitär für Arzt, Zahnarzt und Physiotherapie. Die Reinigung folgt Ihrem Hygieneplan — auch außerhalb der Sprechzeit.",
     includes: [
       "Wartezimmer, Empfang und Personalraum",
       "Behandlungsräume und Liegen",
@@ -185,8 +190,8 @@ export const servicePages = {
       { href: routes.bueroreinigung, label: "Büroreinigung" },
       { href: routes.fensterreinigung, label: "Fensterreinigung" },
     ],
-    primaryHref: "mailto:info@ilyashan.de?subject=Praxisreinigung",
-    primaryLabel: "Anfrage per E-Mail",
+    primaryHref: "#anfrage",
+    primaryLabel: "Anfrage senden",
     priceNote: "Festpreis nach Besichtigung. Sitz: Kückstr. 29, 52499 Baesweiler.",
     image: {
       src: "/images/praxisreinigung.jpg",
@@ -197,11 +202,12 @@ export const servicePages = {
   entruempelung: {
     path: "/entruempelung",
     name: "Entrümpelung",
+    serviceKey: "entruempelung",
     metaTitle: "Entrümpelung Aachen und Baesweiler",
     description:
       "Entrümpelung und Wohnungsauflösung in Aachen und Baesweiler. Wohnung leeren, besenrein übergeben. Kein Umzug in eine neue Wohnung.",
     eyebrow: "Aachen und Baesweiler",
-    title: "Entrümpelung in Aachen und Baesweiler.",
+    title: "Wohnung leer und besenrein übergeben.",
     lede: "Die Wohnung muss leer und besenrein an den Vermieter. Wir räumen Wohnung, Haus oder Keller. Möbel in eine neue Wohnung bringen wir nicht.",
     includes: [
       "Wohnungs- oder Haushaltsauflösung",
@@ -237,8 +243,8 @@ export const servicePages = {
       { href: routes.renovierungsreinigung, label: "Renovierungsreinigung" },
       { href: routes.bauendreinigung, label: "Bauendreinigung" },
     ],
-    primaryHref: "mailto:info@ilyashan.de?subject=Entrümpelung",
-    primaryLabel: "Anfrage per E-Mail",
+    primaryHref: "#anfrage",
+    primaryLabel: "Anfrage senden",
     priceNote: "Festpreis nach Besichtigung. Sitz: Kückstr. 29, 52499 Baesweiler.",
     image: {
       src: "/images/entruempelung.jpg",
@@ -249,18 +255,20 @@ export const servicePages = {
   buero: {
     path: "/bueroreinigung",
     name: "Büroreinigung",
+    serviceKey: "bueroreinigung",
     metaTitle: "Büroreinigung Aachen und Baesweiler",
     description:
       "Büroreinigung in Aachen und Baesweiler. Boden, Schreibtische, Sanitär und Teeküche im Turnus. Fläche online kalkulieren, Festpreis nach Prüfung.",
     eyebrow: "Aachen und Baesweiler",
-    title: "Büroreinigung in Aachen und Baesweiler.",
-    lede: "Boden, Schreibtische, Sanitär und Teeküche. Wiederkehrend, vor Arbeitsbeginn. Kein einmaliger Abschluss nach dem Bau.",
+    title: "Büroreinigung im Turnus. Vor Arbeitsbeginn.",
+    lede: "Boden, Schreibtische, Sanitär und Teeküche — wiederkehrend, oft bevor das Team kommt. Kein einmaliger Abschluss nach dem Bau.",
     includes: [
-      "Böden und Verkehrsflächen",
-      "Schreibtische und Arbeitsplätze",
-      "Sanitär",
-      "Teeküche",
-      "Turnus, auch vor Öffnung des Büros",
+      "Böden und Verkehrsflächen saugen und wischen",
+      "Schreibtische und Arbeitsplätze abwischen",
+      "Sanitäranlagen und Armaturen reinigen",
+      "Teeküche und gemeinsame Flächen",
+      "Vereinbarter Turnus, auch vor Öffnung des Büros",
+      "Orientierung online nach Fläche — Festpreis nach Prüfung",
     ],
     excludes: [
       "Bauendreinigung und Bauschutt",

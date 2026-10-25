@@ -6,6 +6,7 @@ import { routes } from "@/lib/routes";
 import type { ServicePageContent } from "@/lib/service-pages";
 import { serviceLandingSchemas } from "@/lib/landing-schema";
 import { Button } from "@/components/ui/Button";
+import { ContactForm } from "@/components/ContactForm";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -123,6 +124,30 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
                   <p className="mt-2 text-sm leading-relaxed text-muted">{item.a}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="anfrage" className="scroll-mt-24 border-t border-border">
+          <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
+            <div>
+              <h2 className="font-serif text-3xl font-medium">Anfrage</h2>
+              <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
+                Nennen Sie Ort und Größe. Den Festpreis gibt es nach der Besichtigung
+                {page.serviceKey === "bueroreinigung"
+                  ? " — oder zuerst die Fläche online kalkulieren."
+                  : "."}{" "}
+                Antwort in der Regel innerhalb von {siteConfig.business.responseTime}.
+              </p>
+              <a
+                href={`tel:${siteConfig.contact.phone}`}
+                className="mt-6 inline-block text-sm font-medium underline decoration-border underline-offset-4 hover:text-primary"
+              >
+                {siteConfig.contact.phoneDisplay}
+              </a>
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+              <ContactForm compact defaultService={page.serviceKey} />
             </div>
           </div>
         </section>

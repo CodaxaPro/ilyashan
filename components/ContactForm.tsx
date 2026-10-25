@@ -10,9 +10,20 @@ import { useEffect, useState } from "react";
 
 interface ContactFormProps {
   compact?: boolean;
+  /** Preselect Art der Reinigung (company service key) */
+  defaultService?: string;
 }
 
-export function ContactForm({ compact = false }: ContactFormProps) {
+const SERVICE_OPTIONS = [
+  { value: "bueroreinigung", label: "Büroreinigung" },
+  { value: "praxisreinigung", label: "Praxisreinigung" },
+  { value: "bauendreinigung", label: "Bauendreinigung" },
+  { value: "renovierungsreinigung", label: "Renovierungsreinigung" },
+  { value: "entruempelung", label: "Entrümpelung" },
+  { value: "fensterreinigung", label: "Fensterreinigung" },
+] as const;
+
+export function ContactForm({ compact = false, defaultService }: ContactFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -159,15 +170,15 @@ export function ContactForm({ compact = false }: ContactFormProps) {
           id="service"
           name="service"
           required
+          defaultValue={defaultService ?? ""}
           className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
         >
           <option value="">Bitte wählen...</option>
-          <option value="privat">Privatfenster</option>
-          <option value="gewerbe">Gewerbefenster</option>
-          <option value="rahmen">Rahmen & Falz</option>
-          <option value="solar">Solaranlagen</option>
-          <option value="fassade">Glasfassade</option>
-          <option value="wartung">Wartungsvertrag</option>
+          {SERVICE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -180,7 +191,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
           name="message"
           rows={3}
           className="w-full px-4 py-3 rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors resize-none"
-          placeholder="z.B. Anzahl Fenster, Stockwerk, gewünschter Termin..."
+          placeholder="Ort, Größe, gewünschter Zeitraum…"
         />
       </div>
 
@@ -230,7 +241,7 @@ export function ContactForm({ compact = false }: ContactFormProps) {
             Jetzt anrufen
           </Button>
           <Button
-            href={`https://wa.me/${siteConfig.contact.whatsapp}?text=Hallo,%20ich%20möchte%20ein%20Angebot%20für%20Fensterreinigung%20anfordern.`}
+            href={`https://wa.me/${siteConfig.contact.whatsapp}?text=${encodeURIComponent("Hallo, ich möchte eine Anfrage an Ilyashan senden.")}`}
             data-analytics-id="contact-form-whatsapp"
             variant="whatsapp"
             size="md"
