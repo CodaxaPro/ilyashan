@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
 import { routes } from "@/lib/routes";
+import { trackRequestQuoteConversion } from "@/lib/google-ads";
+import { trackAnalytics } from "@/lib/analytics/client";
 import {
   allowedKellerTurnus,
   calculateTreppenhausQuote,
@@ -43,6 +45,18 @@ export function TreppenhausCalculator() {
   const [aufzug, setAufzug] = useState(false);
   const [glasHandlauf, setGlasHandlauf] = useState(false);
 
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [city, setCity] = useState("");
+  const [street, setStreet] = useState("");
+  const [notes, setNotes] = useState("");
+  const [privacy, setPrivacy] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [anfrageNr, setAnfrageNr] = useState<string | null>(null);
+
   const kellerOptions = useMemo(() => allowedKellerTurnus(stairTurnus), [stairTurnus]);
 
   function onStairTurnusChange(next: StairTurnus) {
@@ -55,7 +69,7 @@ export function TreppenhausCalculator() {
     if (enabled) setKellerTurnus(syncKellerTurnus(stairTurnus, stairTurnus));
   }
 
-  const quote = calculateTreppenhausQuote({
+  const input = {
     stockwerke,
     wohnungen,
     stairTurnus,
@@ -64,7 +78,75 @@ export function TreppenhausCalculator() {
     kellerTurnus,
     aufzug,
     glasHandlauf,
-  });
+  };
+
+  const quote = calculateTreppenhausQuote(input);
+
+  async function submitQuote(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const res = await fetch("/api/treppenhaus/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input,
+          contact: {
+            name,
+            email,
+            phone,
+            postalCode,
+            city,
+            street: street || undefined,
+            notes: notes || undefined,
+            privacyAccepted: privacy,
+          },
+        }),
+      });
+      const data = (await res.json()) as { error?: string; anfrageNr?: string };
+      if (!res.ok) {
+        throw new Error(data.error ?? "Senden fehlgeschlagen");
+      }
+      trackRequestQuoteConversion(data.anfrageNr);
+      trackAnalytics("form_submit", {
+        payload: { form: "treppenhaus_quote", anfrageNr: data.anfrageNr },
+      });
+      setAnfrageNr(data.anfrageNr ?? null);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (anfrageNr) {
+    return (
+      <div className="mx-auto max-w-xl border border-border bg-card p-8 text-center">
+        <p className="text-sm font-medium text-primary">Anfrage gesendet</p>
+        <h2 className="mt-3 font-serif text-3xl">Vielen Dank</h2>
+        <p className="mt-2 text-sm text-muted">Anfrage-Nr.: {anfrageNr}</p>
+        <p className="mt-4 text-sm leading-relaxed text-muted">
+          Wir haben Ihre Kalkulation erhalten. Den Festpreis nennen wir nach der Prüfung —
+          in der Regel innerhalb von {siteConfig.business.responseTime}.
+        </p>
+        <p className="mt-6 text-lg font-medium">
+          Orientierung: {formatEuroFromCents(quote.monthlyNetCents)} netto / Monat
+        </p>
+        <div className="mt-8 flex flex-col gap-2">
+          <Button href={`tel:${siteConfig.contact.phone}`} variant="primary" size="lg">
+            {siteConfig.contact.phoneDisplay}
+          </Button>
+          <Link href={routes.treppenhausreinigung} className="text-sm text-muted hover:text-primary">
+            Zur Leistungsseite
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const field =
+    "w-full rounded-xl border border-border bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30";
 
   return (
     <div className="grid gap-10 lg:grid-cols-12">
@@ -80,7 +162,7 @@ export function TreppenhausCalculator() {
                 max={12}
                 value={stockwerke}
                 onChange={(e) => setStockwerke(Number(e.target.value) || 1)}
-                className="w-full rounded-xl border border-border bg-white px-4 py-3"
+                className={field}
               />
             </label>
             <label className="block text-sm">
@@ -91,7 +173,7 @@ export function TreppenhausCalculator() {
                 max={40}
                 value={wohnungen}
                 onChange={(e) => setWohnungen(Number(e.target.value) || 1)}
-                className="w-full rounded-xl border border-border bg-white px-4 py-3"
+                className={field}
               />
             </label>
           </div>
@@ -208,7 +290,8 @@ export function TreppenhausCalculator() {
             <div>
               <p className="font-serif text-2xl">Besichtigung nötig</p>
               <p className="mt-2 text-sm text-muted">
-                Ab 9 Stockwerken oder 17 Wohnungen kalkulieren wir nur vor Ort.
+                Ab 9 Stockwerken oder 17 Wohnungen kalkulieren wir nur vor Ort — Anfrage trotzdem
+                möglich.
               </p>
             </div>
           ) : (
@@ -245,22 +328,77 @@ export function TreppenhausCalculator() {
             )}
           </dl>
 
-          <p className="text-xs leading-relaxed text-muted">
-            Unverbindliche Indikation. Der Festpreis folgt nach Prüfung bzw. Besichtigung.
-            Kein Anfahrtszuschlag in Aachen, Baesweiler und der genannten Region.
-          </p>
-
-          <div className="flex flex-col gap-2">
-            <Button href={`tel:${siteConfig.contact.phone}`} variant="primary" size="lg">
-              {siteConfig.contact.phoneDisplay}
-            </Button>
-            <Button href={`${routes.treppenhausreinigung}#anfrage`} variant="secondary" size="lg">
-              Anfrage senden
-            </Button>
-            <Link href={routes.treppenhausreinigung} className="text-center text-sm text-muted hover:text-primary">
-              Zur Leistungsseite
-            </Link>
-          </div>
+          <form className="space-y-3 border-t border-border pt-5" onSubmit={submitQuote}>
+            <p className="font-serif text-lg">Kalkulation senden</p>
+            <p className="text-xs leading-relaxed text-muted">
+              Wie bei Büro und Fenster: Angaben + Preis gehen direkt als Anfrage an uns.
+            </p>
+            {(
+              [
+                ["Name *", name, setName, "name", "text"],
+                ["E-Mail *", email, setEmail, "email", "email"],
+                ["Telefon *", phone, setPhone, "phone", "tel"],
+                ["PLZ *", postalCode, setPostalCode, "postalCode", "text"],
+                ["Ort *", city, setCity, "city", "text"],
+                ["Straße", street, setStreet, "street", "text"],
+              ] as const
+            ).map(([label, value, setter, auto, type]) => (
+              <label key={label} className="block text-sm">
+                <span className="mb-1 block font-medium">{label}</span>
+                <input
+                  required={!label.startsWith("Straße")}
+                  type={type}
+                  autoComplete={auto}
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className={field}
+                />
+              </label>
+            ))}
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">Notiz</span>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                className={`${field} resize-none`}
+              />
+            </label>
+            <label className="flex items-start gap-2 text-xs text-muted">
+              <input
+                type="checkbox"
+                required
+                checked={privacy}
+                onChange={(e) => setPrivacy(e.target.checked)}
+                className="mt-0.5"
+              />
+              <span>
+                Ich stimme der Verarbeitung gemäß{" "}
+                <Link href={routes.datenschutz} className="underline hover:text-primary">
+                  Datenschutzerklärung
+                </Link>{" "}
+                zu. *
+              </span>
+            </label>
+            {submitError ? (
+              <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                {submitError}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60"
+            >
+              {submitting ? "Wird gesendet…" : "Kalkulation verbindlich anfragen"}
+            </button>
+            <a
+              href={`tel:${siteConfig.contact.phone}`}
+              className="block text-center text-sm text-muted hover:text-primary"
+            >
+              Oder anrufen: {siteConfig.contact.phoneDisplay}
+            </a>
+          </form>
         </div>
       </aside>
     </div>

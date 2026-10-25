@@ -2,28 +2,41 @@ import type { StoredLead } from "@/lib/leads-store";
 import type { CleaningQuoteSnapshot } from "@/lib/cleaning/snapshot";
 import { centsToEuros } from "@/lib/cleaning/money";
 
-export type LeadServiceLine = "fenster" | "buero";
+export type LeadServiceLine = "fenster" | "buero" | "treppenhaus";
 
 export function getLeadServiceLine(
-  lead: Pick<StoredLead, "serviceLine" | "cleaningSnapshot" | "quote">
+  lead: Pick<StoredLead, "serviceLine" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote">
 ): LeadServiceLine {
   if (lead.serviceLine === "buero" || lead.cleaningSnapshot) return "buero";
+  if (lead.serviceLine === "treppenhaus" || lead.treppenhausSnapshot) return "treppenhaus";
   return "fenster";
 }
 
 export function isBueroLead(
   lead: Pick<StoredLead, "serviceLine" | "cleaningSnapshot">
 ): boolean {
-  return getLeadServiceLine(lead) === "buero";
+  return lead.serviceLine === "buero" || Boolean(lead.cleaningSnapshot);
+}
+
+export function isTreppenhausLead(
+  lead: Pick<StoredLead, "serviceLine" | "treppenhausSnapshot">
+): boolean {
+  return lead.serviceLine === "treppenhaus" || Boolean(lead.treppenhausSnapshot);
 }
 
 /** Complete enough for termin / status email / calendar (product-aware). */
 export function isCompleteQuoteLead(
-  lead: Pick<StoredLead, "source" | "serviceLine" | "cleaningSnapshot" | "quote">
+  lead: Pick<
+    StoredLead,
+    "source" | "serviceLine" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote"
+  >
 ): boolean {
   if (lead.source !== "quote") return false;
   if (isBueroLead(lead)) {
     return Boolean(lead.cleaningSnapshot?.input?.totalAreaM2);
+  }
+  if (isTreppenhausLead(lead)) {
+    return Boolean(lead.treppenhausSnapshot?.input?.stockwerke);
   }
   return Boolean(lead.quote?.windowCount);
 }
@@ -36,7 +49,10 @@ export function getBueroSnapshot(
 
 /** Duration hours for schedule emails / booking — product-aware. */
 export function resolveLeadEstimatedHours(
-  lead: Pick<StoredLead, "appointment" | "cleaningSnapshot" | "quote" | "serviceLine">
+  lead: Pick<
+    StoredLead,
+    "appointment" | "cleaningSnapshot" | "treppenhausSnapshot" | "quote" | "serviceLine"
+  >
 ): number {
   if (typeof lead.appointment?.estimatedDurationHours === "number") {
     return lead.appointment.estimatedDurationHours;
@@ -45,6 +61,12 @@ export function resolveLeadEstimatedHours(
     const h = lead.cleaningSnapshot?.customer.estimatedOnsiteHours;
     if (typeof h === "number" && h > 0) return h;
     return 3;
+  }
+  if (isTreppenhausLead(lead)) {
+    const floors = lead.treppenhausSnapshot?.input.stockwerke ?? 3;
+    if (floors <= 3) return 1.5;
+    if (floors <= 5) return 2;
+    return 2.5;
   }
   const n = lead.quote?.windowCount ?? 0;
   if (n <= 6) return 1.5;
