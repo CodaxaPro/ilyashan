@@ -13,7 +13,7 @@ import { berlinIsoDate, berlinTomorrowIso } from "@/lib/scheduling/berlin-date";
 import { isBueroLead, isTreppenhausLead } from "@/lib/lead-product";
 import { buildTerminPageUrl } from "@/lib/termin-token";
 import { siteConfig } from "@/lib/config";
-import { initialQuoteFormData } from "@/lib/quote-form";
+import { initialQuoteFormData, type QuoteFormData, type QuoteServiceId } from "@/lib/quote-form";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -61,7 +61,9 @@ export async function GET(request: Request) {
         );
       } else if (isTreppenhausLead(lead)) {
         const ctx = await resolveServerQuotePricing(lead);
-        const synthetic = {
+        const services: QuoteServiceId[] =
+          quote?.services && quote.services.length > 0 ? quote.services : ["privat"];
+        const synthetic: QuoteFormData = {
           ...initialQuoteFormData,
           ...quote,
           firstName: lead.name.split(/\s+/)[0] ?? lead.name,
@@ -69,7 +71,7 @@ export async function GET(request: Request) {
           email: lead.email ?? "",
           phone: lead.phone ?? "",
           windowCount: quote?.windowCount && quote.windowCount > 0 ? quote.windowCount : 1,
-          services: quote?.services?.length ? quote.services : ["privat"],
+          services,
         };
         email = buildAppointmentReminderEmail(
           synthetic,
