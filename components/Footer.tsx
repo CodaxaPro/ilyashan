@@ -66,8 +66,19 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="mx-auto max-w-7xl border-t border-white/10 px-4 py-6 text-sm text-white/50 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 border-t border-white/10 px-4 py-6 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
         <p>&copy; {new Date().getFullYear()} Ilyashan</p>
+        <p>
+          Website &amp; Software:{" "}
+          <a
+            href="https://treuepay.de"
+            className="text-white/60 underline-offset-2 hover:text-white hover:underline"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            TreuePay
+          </a>
+        </p>
       </div>
     </footer>
   );
