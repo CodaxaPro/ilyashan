@@ -40,8 +40,8 @@ export const companyServices: CompanyService[] = [
     line: "Stockwerke, Wohnungen und Keller. Orientierung online, Festpreis nach Prüfung.",
     nextHref: routes.treppenhausreinigungAngebot,
     nextLabel: "Preis kalkulieren",
-    image: "/images/bauendreinigung.jpg",
-    imagePosition: "object-[center_25%]",
+    image: "/images/treppenhausreinigung.jpg",
+    imagePosition: "object-[center_40%]",
   },
   {
     href: routes.bauendreinigung,

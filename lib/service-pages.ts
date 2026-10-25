@@ -316,8 +316,8 @@ export const servicePages = {
     primaryLabel: "Preis kalkulieren",
     priceNote: "Die Online-Kalkulation ist eine Orientierung. Der Festpreis folgt nach der Prüfung.",
     image: {
-      src: "/images/bauendreinigung.jpg",
-      alt: "Heller Flur und Treppenaufgang nach der Reinigung.",
+      src: "/images/treppenhausreinigung.jpg",
+      alt: "Helles Treppenhaus mit Stufen, Podest und Handlauf nach der Reinigung.",
       caption: "Treppenhausreinigung. Turnus nach Vereinbarung.",
     },
   },
