@@ -357,7 +357,7 @@ export const siteConfig = {
         "versicherung vorhanden",
       ],
       answer:
-        "Ja. Die Arbeit ist versichert.",
+        "Ja. Die Arbeit ist versichert — Betriebshaftpflicht inklusive. Bei Fragen zu Deckungsumfang erreichen Sie uns jederzeit telefonisch.",
     },
     {
       id: "winter",

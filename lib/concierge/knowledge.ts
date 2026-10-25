@@ -130,7 +130,7 @@ Kurz: Die Schätzung zeigt Ihnen sofort die Richtung – das Festpreis-Angebot i
 }
 
 export function buildInsuranceInfo(): string {
-  return `Ja. Die Arbeit ist versichert.`;
+  return `Ja. Die Arbeit ist **versichert** — Betriebshaftpflicht inklusive. Bei Fragen zum Deckungsumfang rufen Sie uns gerne an: **${siteConfig.contact.phoneDisplay}**.`;
 }
 
 export function buildWinterInfo(): string {
