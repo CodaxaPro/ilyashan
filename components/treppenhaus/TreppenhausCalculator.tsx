@@ -16,6 +16,7 @@ import {
   type StairTurnus,
 } from "@/lib/treppenhaus/pricing";
 import { Button } from "@/components/ui/Button";
+import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 
 const STAIR_OPTIONS: { value: StairTurnus; label: string }[] = [
   { value: "weekly", label: "Wöchentlich" },
@@ -33,6 +34,55 @@ function kellerLabel(turnus: KellerTurnus): string {
   if (turnus === "weekly") return "Wöchentlich (wie Treppenhaus)";
   if (turnus === "biweekly") return "Alle 14 Tage (wie Treppenhaus)";
   return "Monatlich";
+}
+
+/** Large +/- controls — native number inputs are unusable on mobile. */
+function QuantityStepper({
+  label,
+  value,
+  min,
+  max,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange: (n: number) => void;
+}) {
+  return (
+    <div className="block text-sm">
+      <span className="mb-1.5 block font-medium">{label}</span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onMouseDown={preventChoiceButtonScroll}
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+          aria-label={`${label} verringern`}
+          className="h-12 w-12 shrink-0 rounded-xl border border-border bg-white text-xl font-semibold hover:border-primary disabled:opacity-40 touch-manipulation"
+        >
+          −
+        </button>
+        <div
+          className="flex h-12 min-w-0 flex-1 items-center justify-center rounded-xl border border-border bg-white text-lg font-semibold tabular-nums"
+          aria-live="polite"
+        >
+          {value}
+        </div>
+        <button
+          type="button"
+          onMouseDown={preventChoiceButtonScroll}
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+          aria-label={`${label} erhöhen`}
+          className="h-12 w-12 shrink-0 rounded-xl border border-border bg-white text-xl font-semibold hover:border-primary disabled:opacity-40 touch-manipulation"
+        >
+          +
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function TreppenhausCalculator() {
@@ -154,28 +204,20 @@ export function TreppenhausCalculator() {
         <fieldset className="space-y-4">
           <legend className="font-serif text-xl">Objekt</legend>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block text-sm">
-              <span className="mb-1.5 block font-medium">Stockwerke</span>
-              <input
-                type="number"
-                min={1}
-                max={12}
-                value={stockwerke}
-                onChange={(e) => setStockwerke(Number(e.target.value) || 1)}
-                className={field}
-              />
-            </label>
-            <label className="block text-sm">
-              <span className="mb-1.5 block font-medium">Wohnungen / Parteien</span>
-              <input
-                type="number"
-                min={1}
-                max={40}
-                value={wohnungen}
-                onChange={(e) => setWohnungen(Number(e.target.value) || 1)}
-                className={field}
-              />
-            </label>
+            <QuantityStepper
+              label="Stockwerke"
+              value={stockwerke}
+              min={1}
+              max={12}
+              onChange={setStockwerke}
+            />
+            <QuantityStepper
+              label="Wohnungen / Parteien"
+              value={wohnungen}
+              min={1}
+              max={40}
+              onChange={setWohnungen}
+            />
           </div>
         </fieldset>
 
