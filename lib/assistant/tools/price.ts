@@ -11,7 +11,6 @@ import { calculateOfficeCleaningQuote } from "@/lib/cleaning/calculate";
 import type { CustomerInput } from "@/lib/cleaning/types";
 import { routes } from "@/lib/routes";
 import {
-  CALCULATOR_REQUIRED_DISCLAIMER_DE,
   MANUAL_PRICE_DISCLAIMER_DE,
   ORIENTIERUNG_DISCLAIMER_DE,
   calculatorHrefFor,
