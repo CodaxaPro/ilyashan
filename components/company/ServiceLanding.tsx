@@ -149,7 +149,26 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
               </a>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
-              <ContactForm compact defaultService={page.serviceKey} />
+              {page.serviceKey === "treppenhausreinigung" || page.serviceKey === "bueroreinigung" ? (
+                <div className="space-y-4">
+                  <p className="text-sm leading-relaxed text-muted">
+                    {page.serviceKey === "treppenhausreinigung"
+                      ? "Zuerst online kalkulieren — die Angaben und der Orientierungspreis gehen direkt als Anfrage an uns (wie Fenster und Büro)."
+                      : "Zuerst die Fläche online kalkulieren — die Angaben gehen direkt als Anfrage an uns."}
+                  </p>
+                  <Button href={page.primaryHref} variant="primary" size="lg">
+                    {page.primaryLabel}
+                  </Button>
+                  <p className="text-xs text-muted">
+                    Ohne Rechner:{" "}
+                    <a href={`tel:${siteConfig.contact.phone}`} className="underline hover:text-primary">
+                      {siteConfig.contact.phoneDisplay}
+                    </a>
+                  </p>
+                </div>
+              ) : (
+                <ContactForm compact defaultService={page.serviceKey} />
+              )}
             </div>
           </div>
         </section>

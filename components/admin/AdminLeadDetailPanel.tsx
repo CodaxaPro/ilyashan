@@ -38,6 +38,12 @@ import {
   vatFootnote,
   VAT_PERCENT_LABEL,
 } from "@/lib/vat-display";
+import { isTreppenhausLead } from "@/lib/lead-product";
+import {
+  buildTreppenhausAdminRows,
+  treppenhausEstimateLabel,
+} from "@/lib/treppenhaus/admin-summary";
+import { formatEuroFromCents } from "@/lib/treppenhaus/pricing";
 
 export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
@@ -364,29 +370,41 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
     lead.priceSnapshot?.priceLabel ??
     (quote ? getPriceLabelFromContext(quote, quotePricing) : "–");
 
+  const treppenhausSnap = lead.treppenhausSnapshot ?? null;
+  const treppenhausRows = treppenhausSnap ? buildTreppenhausAdminRows(treppenhausSnap) : [];
+
   const quickReply = useMemo(() => {
     if (!lead.phone && !lead.email) return null;
+    const services = quote
+      ? getServicesLabel(quote)
+      : isTreppenhausLead(lead)
+        ? "Treppenhausreinigung"
+        : lead.serviceLine === "buero"
+          ? "Büroreinigung"
+          : lead.summary?.split("\n")[0]?.replace(/^Service:\s*/i, "") || "Reinigung";
+    const estimate =
+      treppenhausSnap
+        ? treppenhausEstimateLabel(treppenhausSnap)
+        : priceLabel !== "–"
+          ? priceLabel
+          : undefined;
     return buildLeadQuickReplyLinks({
       name: lead.name,
       phone: lead.phone,
       email: lead.email,
       anfrageNr: lead.anfrageNr || lead.id,
-      services: quote ? getServicesLabel(quote) : lead.summary || "Fensterreinigung",
+      services,
       festpreis: festpreisForEmail,
       audience: priceAudience,
-      estimateLabel: priceLabel !== "–" ? priceLabel : undefined,
+      estimateLabel: estimate,
     });
   }, [
-    lead.phone,
-    lead.email,
-    lead.name,
-    lead.anfrageNr,
-    lead.id,
-    lead.summary,
+    lead,
     quote,
     festpreisForEmail,
     priceAudience,
     priceLabel,
+    treppenhausSnap,
   ]);
 
   return (
@@ -509,6 +527,27 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
                   <strong>Wunschtermin:</strong> {getTerminLabel(quote)}
                 </p>
                 <p className="text-sm text-primary font-semibold">{priceLabel}</p>
+              </AdminPanel>
+            </section>
+          )}
+
+          {treppenhausSnap && (
+            <section className="space-y-3" data-testid="admin-treppenhaus-summary">
+              <h3 className="font-bold text-foreground">Treppenhaus-Kalkulation</h3>
+              <AdminPanel className="p-4">
+                <dl className="space-y-2 text-sm">
+                  {treppenhausRows.map(([key, value]) => (
+                    <div key={key} className="grid grid-cols-[1fr,1.2fr] gap-2">
+                      <dt className="text-muted">{key}</dt>
+                      <dd className="font-medium text-foreground">{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-3 text-sm text-primary font-semibold">
+                  {formatEuroFromCents(treppenhausSnap.quote.monthlyNetCents)} netto / Monat
+                  {" · "}
+                  {formatEuroFromCents(treppenhausSnap.quote.monthlyGrossCents)} brutto
+                </p>
               </AdminPanel>
             </section>
           )}
@@ -834,9 +873,16 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
             </section>
           )}
 
-          {!quote && (
+          {!quote && !treppenhausSnap && (
             <AdminPanel className="p-4">
+              <p className="text-xs font-semibold text-muted uppercase mb-2">Kurzinfo</p>
               <p className="text-sm text-muted whitespace-pre-wrap">{lead.summary}</p>
+              {lead.source === "contact" && (
+                <p className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                  Bu kayıt genel iletişim formundan geldi — içinde kat/daire/fiyat yok. Tam
+                  kalkülasyon için müşteriyi Rechner üzerinden yönlendirin.
+                </p>
+              )}
             </AdminPanel>
           )}
 

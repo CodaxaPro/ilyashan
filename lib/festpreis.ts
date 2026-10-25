@@ -10,13 +10,22 @@ import {
 
 /** Default Festpreis = calculator mid-point (BRUTTO / Endpreis). */
 export function getDefaultFestpreis(
-  lead: Pick<StoredLead, "festpreis" | "priceSnapshot" | "cleaningSnapshot" | "serviceLine">
+  lead: Pick<
+    StoredLead,
+    "festpreis" | "priceSnapshot" | "cleaningSnapshot" | "treppenhausSnapshot" | "serviceLine"
+  >
 ): number | undefined {
   if (typeof lead.festpreis === "number" && Number.isFinite(lead.festpreis) && lead.festpreis > 0) {
     return Math.round(lead.festpreis);
   }
   if (lead.serviceLine === "buero" || lead.cleaningSnapshot) {
     const gross = lead.cleaningSnapshot?.customer.grossCents;
+    if (typeof gross === "number" && gross > 0) {
+      return Math.round(gross / 100);
+    }
+  }
+  if (lead.serviceLine === "treppenhaus" || lead.treppenhausSnapshot) {
+    const gross = lead.treppenhausSnapshot?.quote.monthlyGrossCents;
     if (typeof gross === "number" && gross > 0) {
       return Math.round(gross / 100);
     }
