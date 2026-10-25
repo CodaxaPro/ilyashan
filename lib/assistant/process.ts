@@ -9,6 +9,10 @@ import { createOpenAiProviderFromEnv } from "./ai/openai-provider";
 import { runAssistantAi } from "./ai/run";
 import type { AiProvider, AiRunMeta } from "./ai/types";
 import {
+  advanceTreppenhausDialog,
+  shouldHandleTreppenhausDialog,
+} from "./dialog/treppenhaus";
+import {
   canRunAssistantAi,
   isAssistantAiEnabled,
   isAssistantAiConfigured,
@@ -20,9 +24,33 @@ export type ProcessConciergeResult = {
   meta: AiRunMeta;
 };
 
+function treppenhausReply(
+  session: ConciergeSession,
+  message: string
+): ProcessConciergeResult {
+  const d = advanceTreppenhausDialog(session, message);
+  return {
+    reply: {
+      text: d.text,
+      intent: "price",
+      session: d.session,
+      actions: d.actions,
+      quickReplies: d.quickReplies,
+    },
+    meta: {
+      usedAi: false,
+      providerId: null,
+      toolNames: ["advance_treppenhaus_dialog"],
+      fallbackReason: d.complete ? "treppenhaus_quote" : "treppenhaus_collect",
+    },
+  };
+}
+
 /**
- * Async entry: AI+tools when flags+key ready; else sync classic/tools path.
- * Fail closed — any AI error falls back to deterministic responder.
+ * Async entry:
+ * 1) Treppenhaus live dialog (deterministic, engine-backed) when tools on
+ * 2) AI+tools when flags+key ready
+ * 3) Classic concierge
  */
 export async function processConciergeMessageAsync(
   message: string,
@@ -37,9 +65,16 @@ export async function processConciergeMessageAsync(
     fallbackReason: null,
   });
 
+  const session = sessionInput ?? createSession();
+
+  // Human Q&A calculation for Treppenhaus — highest priority when tools enabled
+  if (isAssistantToolsEnabled() && shouldHandleTreppenhausDialog(session, message)) {
+    return treppenhausReply(session, message);
+  }
+
   if (isAssistantAiEnabled()) {
     if (!isAssistantAiConfigured() && !providerOverride) {
-      const reply = processConciergeMessage(message, sessionInput, pricingCtx);
+      const reply = processConciergeMessage(message, session, pricingCtx);
       return {
         reply,
         meta: {
@@ -53,7 +88,6 @@ export async function processConciergeMessageAsync(
       const provider = providerOverride ?? createOpenAiProviderFromEnv();
       if (provider) {
         try {
-          const session = sessionInput ?? createSession();
           const result = await runAssistantAi({
             message,
             session,
@@ -64,7 +98,7 @@ export async function processConciergeMessageAsync(
           return result;
         } catch (error) {
           console.error("[assistant-ai] fallback to deterministic:", error);
-          const reply = processConciergeMessage(message, sessionInput, pricingCtx);
+          const reply = processConciergeMessage(message, session, pricingCtx);
           return {
             reply,
             meta: {
@@ -77,7 +111,7 @@ export async function processConciergeMessageAsync(
     }
   }
 
-  const reply = processConciergeMessage(message, sessionInput, pricingCtx);
+  const reply = processConciergeMessage(message, session, pricingCtx);
   return {
     reply,
     meta: {

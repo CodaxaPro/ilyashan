@@ -1,4 +1,5 @@
 import type { QuoteFormData } from "@/lib/quote-form";
+import type { TreppenhausInput } from "@/lib/treppenhaus/pricing";
 
 export type ConciergeIntent =
   | "greeting"
@@ -33,12 +34,18 @@ export interface ConciergeAction {
   href: string;
 }
 
+export type AssistantProduct = "fenster" | "buero" | "treppenhaus";
+
 export interface ConciergeSession {
   id: string;
   stage: ConciergeStage;
   quote: Partial<QuoteFormData>;
   lastIntent?: ConciergeIntent;
   turns: number;
+  /** Active multi-product assistant dialog (chat calculation). */
+  assistantProduct?: AssistantProduct | null;
+  /** Partial Treppenhaus inputs collected in conversation. */
+  treppenhausDraft?: Partial<TreppenhausInput>;
 }
 
 export interface ConciergeMessage {

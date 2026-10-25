@@ -1,4 +1,8 @@
-import type { ConciergeAction, ConciergeReply, ConciergeSession } from "@/lib/concierge/types";
+import type {
+  ConciergeAction,
+  ConciergeReply,
+  ConciergeSession,
+} from "@/lib/concierge/types";
 import { phoneAction } from "@/lib/concierge/knowledge";
 import type { QuoteFormData } from "@/lib/quote-form";
 import type { QuotePricingContext } from "@/lib/quote-pricing-context";
@@ -20,7 +24,7 @@ export type AiRunResult = {
 };
 
 /**
- * AI + API loop: model may only call allowlisted tools; price text from tools wins.
+ * AI + API loop: model may only call allowlisted tools; dialog/price tool text wins.
  */
 export async function runAssistantAi(options: {
   message: string;
@@ -36,9 +40,11 @@ export async function runAssistantAi(options: {
   ];
 
   const toolNames: string[] = [];
+  let workingSession = session;
   let authorizedEuro = false;
   let authoritativeText: string | null = null;
   let actions: ConciergeAction[] = [phoneAction()];
+  let quickReplies = ["Preisrechner", "Leistungen", "Kontakt"];
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const completion = await provider.complete({
@@ -47,11 +53,10 @@ export async function runAssistantAi(options: {
     });
 
     if (completion.toolCalls.length === 0) {
-      // Fail-closed: price questions without tool → deterministic policy reply
       if (!authoritativeText && looksLikePriceQuestion(message)) {
         const policy = buildAssistantPriceReply(
           message,
-          options.fensterPartial ?? session.quote,
+          options.fensterPartial ?? workingSession.quote,
           options.pricingCtx
         );
         return {
@@ -59,8 +64,8 @@ export async function runAssistantAi(options: {
             text: policy.text,
             intent: "price",
             session: {
-              ...session,
-              turns: session.turns + 1,
+              ...workingSession,
+              turns: workingSession.turns + 1,
               lastIntent: "price",
               stage: "idle",
             },
@@ -76,34 +81,32 @@ export async function runAssistantAi(options: {
         };
       }
 
-      const raw = (completion.content ?? "").trim() || "Wie kann ich Ihnen bei der Reinigung helfen?";
+      const raw =
+        (completion.content ?? "").trim() || "Wie kann ich Ihnen bei der Reinigung helfen?";
       const guarded = enforceNoInventedPrice(
         authoritativeText ?? raw,
         authoritativeText ? authorizedEuro : false
       );
       const text = authoritativeText ?? guarded.text;
-      const finalGuarded = authoritativeText
-        ? { text, blockedInventedPrice: false }
-        : guarded;
 
       return {
         reply: {
-          text: finalGuarded.text,
+          text,
           intent: authoritativeText ? "price" : "unknown",
           session: {
-            ...session,
-            turns: session.turns + 1,
+            ...workingSession,
+            turns: workingSession.turns + 1,
             lastIntent: authoritativeText ? "price" : "unknown",
             stage: "idle",
           },
           actions,
-          quickReplies: ["Preisrechner", "Leistungen", "Kontakt"],
+          quickReplies,
         },
         meta: {
           usedAi: true,
           providerId: provider.id,
           toolNames,
-          fallbackReason: finalGuarded.blockedInventedPrice ? "blocked_invented_price" : null,
+          fallbackReason: guarded.blockedInventedPrice ? "blocked_invented_price" : null,
         },
       };
     }
@@ -117,10 +120,12 @@ export async function runAssistantAi(options: {
     for (const call of completion.toolCalls) {
       toolNames.push(call.name);
       const exec = executeAllowlistedTool(call.name, call.argumentsJson, {
-        fensterPartial: options.fensterPartial ?? session.quote,
+        fensterPartial: options.fensterPartial ?? workingSession.quote,
         pricingCtx: options.pricingCtx,
+        session: workingSession,
       });
 
+      if (exec.session) workingSession = exec.session;
       if (exec.customerText) {
         authoritativeText = exec.customerText;
         authorizedEuro = Boolean(exec.emittedEuro);
@@ -129,9 +134,10 @@ export async function runAssistantAi(options: {
         try {
           actions = JSON.parse(exec.actionsJson) as ConciergeAction[];
         } catch {
-          /* keep phone */
+          /* keep */
         }
       }
+      if (exec.quickReplies?.length) quickReplies = exec.quickReplies;
 
       messages.push({
         role: "tool",
@@ -139,25 +145,45 @@ export async function runAssistantAi(options: {
         name: call.name,
         content: exec.content,
       });
+
+      // Authoritative dialog/price text — return immediately (no model paraphrase)
+      if (
+        exec.customerText &&
+        (call.name === "advance_treppenhaus_dialog" ||
+          call.name === "get_price_guidance")
+      ) {
+        return {
+          reply: {
+            text: exec.customerText,
+            intent: "price",
+            session: workingSession,
+            actions,
+            quickReplies,
+          },
+          meta: {
+            usedAi: true,
+            providerId: provider.id,
+            toolNames,
+            fallbackReason: null,
+          },
+        };
+      }
     }
   }
 
-  const fallbackText =
-    authoritativeText ??
-    "Bitte nutzen Sie den Preisrechner auf der Website oder rufen Sie uns an — ich helfe Ihnen gern zum richtigen Formular.";
-
   return {
     reply: {
-      text: fallbackText,
+      text:
+        authoritativeText ??
+        "Gerne helfe ich weiter — sagen Sie mir kurz Stockwerke und Wohnungen, oder rufen Sie uns an.",
       intent: authoritativeText ? "price" : "unknown",
       session: {
-        ...session,
-        turns: session.turns + 1,
+        ...workingSession,
+        turns: workingSession.turns + 1,
         lastIntent: authoritativeText ? "price" : "unknown",
-        stage: "idle",
       },
       actions,
-      quickReplies: ["Preisrechner", "Anrufen"],
+      quickReplies,
     },
     meta: {
       usedAi: true,

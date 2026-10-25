@@ -8,7 +8,7 @@ type Rule = {
 };
 
 const RULES: Rule[] = [
-  { product: "treppenhaus", pattern: /\b(treppenhaus|treppen\s*haus|kellerflur|wohneinheit|stockwerke?\b.*wohn)/i, confidence: "high" },
+  { product: "treppenhaus", pattern: /treppenhaus|treppen\s*haus|kellerflur|wohneinheit|stockwerke?\b.*wohn/i, confidence: "high" },
   { product: "buero", pattern: /\b(büro|buero|office|teeküche|teekueche|arbeitsplatz)/i, confidence: "high" },
   { product: "praxis", pattern: /\b(praxis|zahnarzt|arztpraxis|physiotherapie)/i, confidence: "high" },
   { product: "bauend", pattern: /\b(bauend|neubau|baureinigung|übergabe.*bau|bau.*übergabe)/i, confidence: "high" },

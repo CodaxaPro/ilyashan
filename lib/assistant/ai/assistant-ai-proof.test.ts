@@ -5,7 +5,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createSession } from "@/lib/concierge/types";
-import { routes } from "@/lib/routes";
 import {
   canRunAssistantAi,
   isAssistantAiEnabled,
@@ -63,7 +62,7 @@ describe("assistant/ai tool allowlist", () => {
 });
 
 describe("assistant/ai run — tool price is authoritative", () => {
-  it("uses get_price_guidance text for treppenhaus (no invented euro)", async () => {
+  it("uses get_price_guidance → treppenhaus dialog ask (no invented euro)", async () => {
     const mock = new MockAiProvider([
       {
         type: "tool",
@@ -83,9 +82,7 @@ describe("assistant/ai run — tool price is authoritative", () => {
     assert.ok(result.meta.toolNames.includes("get_price_guidance"));
     assert.doesNotMatch(result.reply.text, /999/);
     assert.doesNotMatch(result.reply.text, /\d+[.,]\d+\s*€/);
-    assert.ok(
-      result.reply.actions.some((a) => a.href.includes(routes.treppenhausreinigungAngebot))
-    );
+    assert.match(result.reply.text, /Stockwerke/i);
   });
 
   it("blocks free-text invented euro when model skips tools", async () => {
@@ -168,29 +165,19 @@ describe("assistant/ai process async — fallback without flags", () => {
     else process.env.OPENAI_API_KEY = prevK;
   });
 
-  it("AI+tools with mock provider routes treppenhaus without inventing euro", async () => {
+  it("tools-on treppenhaus uses live dialog (asks Stockwerke), not AI invent", async () => {
     const prevT = process.env.ASSISTANT_TOOLS_ENABLED;
     const prevA = process.env.ASSISTANT_AI_ENABLED;
     process.env.ASSISTANT_TOOLS_ENABLED = "true";
     process.env.ASSISTANT_AI_ENABLED = "true";
 
-    const mock = new MockAiProvider([
-      {
-        type: "tool",
-        name: "get_price_guidance",
-        arguments: { message: "Treppenhaus Preis?" },
-      },
-      { type: "text", content: "Hier die Orientierung." },
-    ]);
-
     const { reply, meta } = await processConciergeMessageAsync(
       "Treppenhaus Preis?",
-      createSession("p3"),
-      undefined,
-      mock
+      createSession("p3")
     );
 
-    assert.equal(meta.usedAi, true);
+    assert.equal(meta.fallbackReason, "treppenhaus_collect");
+    assert.match(reply.text, /Stockwerke/i);
     assert.doesNotMatch(reply.text, /\d+[.,]\d+\s*€/);
 
     if (prevT === undefined) delete process.env.ASSISTANT_TOOLS_ENABLED;
