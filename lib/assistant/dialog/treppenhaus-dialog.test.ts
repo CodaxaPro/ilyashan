@@ -5,8 +5,10 @@ import { calculateTreppenhausQuote, formatEuroFromCents } from "@/lib/treppenhau
 import { processConciergeMessageAsync } from "../process";
 import {
   advanceTreppenhausDialog,
+  applyTreppenhausStructuredFields,
   extractTreppenhausPatch,
   formatTreppenhausQuoteText,
+  getTreppenhausSystemCard,
   isTreppenhausComplete,
 } from "./treppenhaus";
 
@@ -60,6 +62,30 @@ describe("assistant/treppenhaus dialog — human Q&A + engine", () => {
     assert.equal(r.emittedEuro, true);
     assert.equal(r.session.treppenhausDraft?.stockwerke, 3);
     assert.equal(r.session.treppenhausDraft?.wohnungen, 8);
+  });
+
+  it("AI structured upsert maps NL intent without regex teaching", () => {
+    let r = applyTreppenhausStructuredFields(createSession("ai1"), {});
+    assert.equal(r.complete, false);
+    r = applyTreppenhausStructuredFields(r.session, {
+      stockwerke: 4,
+      wohnungen: 6,
+      stairTurnus: "weekly",
+      dirtLevel: "heavy",
+      keller: false,
+    });
+    assert.equal(r.complete, true);
+    assert.equal(r.emittedEuro, true);
+    assert.match(r.text, /610,14/);
+
+    r = applyTreppenhausStructuredFields(r.session, { confirmQuote: true });
+    assert.match(r.text, /Preismotor|610,14/i);
+  });
+
+  it("system card exposes missing fields for the model", () => {
+    const card = getTreppenhausSystemCard(createSession("card"));
+    assert.equal(card.engine, "calculateTreppenhausQuote");
+    assert.ok(card.missing.includes("stockwerke"));
   });
 
   it("exits dialog when customer switches to another service", () => {

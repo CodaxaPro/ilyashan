@@ -56,6 +56,8 @@ describe("assistant/ai tool allowlist", () => {
   it("only known tools are allowlisted", () => {
     assert.equal(isAllowlistedTool("get_price_guidance"), true);
     assert.equal(isAllowlistedTool("resolve_product"), true);
+    assert.equal(isAllowlistedTool("upsert_treppenhaus_fields"), true);
+    assert.equal(isAllowlistedTool("get_treppenhaus_schema"), true);
     assert.equal(isAllowlistedTool("delete_all_leads"), false);
     assert.equal(isAllowlistedTool("set_festpreis"), false);
   });
@@ -165,11 +167,13 @@ describe("assistant/ai process async — fallback without flags", () => {
     else process.env.OPENAI_API_KEY = prevK;
   });
 
-  it("tools-on treppenhaus uses live dialog (asks Stockwerke), not AI invent", async () => {
+  it("tools-on + AI without key → Treppenhaus engine fallback (asks Stockwerke)", async () => {
     const prevT = process.env.ASSISTANT_TOOLS_ENABLED;
     const prevA = process.env.ASSISTANT_AI_ENABLED;
+    const prevK = process.env.OPENAI_API_KEY;
     process.env.ASSISTANT_TOOLS_ENABLED = "true";
     process.env.ASSISTANT_AI_ENABLED = "true";
+    delete process.env.OPENAI_API_KEY;
 
     const { reply, meta } = await processConciergeMessageAsync(
       "Treppenhaus Preis?",
@@ -179,6 +183,46 @@ describe("assistant/ai process async — fallback without flags", () => {
     assert.equal(meta.fallbackReason, "treppenhaus_collect");
     assert.match(reply.text, /Stockwerke/i);
     assert.doesNotMatch(reply.text, /\d+[.,]\d+\s*€/);
+
+    if (prevT === undefined) delete process.env.ASSISTANT_TOOLS_ENABLED;
+    else process.env.ASSISTANT_TOOLS_ENABLED = prevT;
+    if (prevA === undefined) delete process.env.ASSISTANT_AI_ENABLED;
+    else process.env.ASSISTANT_AI_ENABLED = prevA;
+    if (prevK === undefined) delete process.env.OPENAI_API_KEY;
+    else process.env.OPENAI_API_KEY = prevK;
+  });
+
+  it("AI interprets NL via upsert_treppenhaus_fields — engine owns euro", async () => {
+    const prevT = process.env.ASSISTANT_TOOLS_ENABLED;
+    const prevA = process.env.ASSISTANT_AI_ENABLED;
+    process.env.ASSISTANT_TOOLS_ENABLED = "true";
+    process.env.ASSISTANT_AI_ENABLED = "true";
+
+    const mock = new MockAiProvider([
+      {
+        type: "tool",
+        name: "upsert_treppenhaus_fields",
+        arguments: {
+          stockwerke: 4,
+          wohnungen: 6,
+          stairTurnus: "weekly",
+          dirtLevel: "heavy",
+          keller: false,
+        },
+      },
+    ]);
+
+    const { reply, meta } = await processConciergeMessageAsync(
+      "Treppenhaus: 4 Stock, 6 Wohnungen, 1 mal die Woche, stark, ohne Keller",
+      createSession("p4"),
+      undefined,
+      mock
+    );
+
+    assert.equal(meta.usedAi, true);
+    assert.ok(meta.toolNames.includes("upsert_treppenhaus_fields"));
+    assert.match(reply.text, /610,14/);
+    assert.match(reply.text, /brutto/i);
 
     if (prevT === undefined) delete process.env.ASSISTANT_TOOLS_ENABLED;
     else process.env.ASSISTANT_TOOLS_ENABLED = prevT;

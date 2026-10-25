@@ -297,64 +297,54 @@ export function formatTreppenhausQuoteText(input: TreppenhausInput): string {
   return lines.join("\n");
 }
 
-/**
- * Advance Treppenhaus chat: extract → merge → ask or quote.
- */
-export function advanceTreppenhausDialog(
+function quoteActions(): ConciergeAction[] {
+  return [
+    link("Im Rechner öffnen", routes.treppenhausreinigungAngebot),
+    link("Festpreis anfragen", routes.treppenhausreinigungAngebot),
+    phoneAction(),
+  ];
+}
+
+function exitResult(session: ConciergeSession): TreppenhausDialogResult {
+  return {
+    session: clearTreppenhausDialog({ ...session, turns: session.turns + 1 }),
+    text: "Alles klar — dann lassen wir die Treppenhaus-Kalkulation beiseite. Wobei kann ich Ihnen helfen: Fenster, Büro oder etwas anderes?",
+    actions: [
+      link("Fenster-Preisrechner", routes.angebot),
+      link("Büro kalkulieren", routes.bueroreinigungAngebot),
+      phoneAction(),
+    ],
+    quickReplies: ["Fenster", "Büro", "Leistungen"],
+    emittedEuro: false,
+    complete: false,
+    exited: true,
+  };
+}
+
+/** Shared: draft → engine quote or next question. */
+function finalizeTreppenhausDraft(
   session: ConciergeSession,
-  message: string
+  draft: TreppenhausDraft,
+  options: { madeProgress: boolean; hadDraft: boolean }
 ): TreppenhausDialogResult {
-  if (wantsExitTreppenhausDialog(message) && !/treppenhaus/i.test(message)) {
-    return {
-      session: clearTreppenhausDialog({ ...session, turns: session.turns + 1 }),
-      text: "Alles klar — dann lassen wir die Treppenhaus-Kalkulation beiseite. Wobei kann ich Ihnen helfen: Fenster, Büro oder etwas anderes?",
-      actions: [
-        link("Fenster-Preisrechner", routes.angebot),
-        link("Büro kalkulieren", routes.bueroreinigungAngebot),
-        phoneAction(),
-      ],
-      quickReplies: ["Fenster", "Büro", "Leistungen"],
-      emittedEuro: false,
-      complete: false,
-      exited: true,
-    };
-  }
-
-  const pending = missingTreppenhausFields(getTreppenhausDraft(session))[0];
-  let draft = getTreppenhausDraft(session);
-  draft = applyYesNoForPending(draft, message, pending);
-  draft = mergeDraft(draft, extractTreppenhausPatch(message));
-  draft = applyBareNumber(draft, message, pending);
-
   const nextSession = withTreppenhausDraft(
     { ...session, turns: session.turns + 1 },
     draft
   );
 
   if (isTreppenhausComplete(draft)) {
-    const input = draft as TreppenhausInput;
     return {
       session: nextSession,
-      text: formatTreppenhausQuoteText(input),
-      actions: [
-        link("Im Rechner öffnen", routes.treppenhausreinigungAngebot),
-        link("Festpreis anfragen", routes.treppenhausreinigungAngebot),
-        phoneAction(),
-      ],
+      text: formatTreppenhausQuoteText(draft),
+      actions: quoteActions(),
       quickReplies: ["Ohne Keller", "Wöchentlich", "5 Stockwerke", "Andere Leistung"],
       emittedEuro: true,
       complete: true,
     };
   }
 
-  // Nothing understood while already collecting — gentle re-ask
-  const beforeKeys = Object.keys(getTreppenhausDraft(session)).length;
-  const afterMissing = missingTreppenhausFields(draft).length;
-  const beforeMissing = missingTreppenhausFields(getTreppenhausDraft(session)).length;
-  const madeProgress = afterMissing < beforeMissing || beforeKeys === 0;
-
   const ask = askNext(draft);
-  if (!madeProgress && beforeKeys > 0) {
+  if (!options.madeProgress && options.hadDraft) {
     return {
       session: nextSession,
       text: `Kurz nochmal — ${ask.text}`,
@@ -373,6 +363,143 @@ export function advanceTreppenhausDialog(
     emittedEuro: false,
     complete: false,
   };
+}
+
+export type TreppenhausStructuredPatch = {
+  stockwerke?: number;
+  wohnungen?: number;
+  stairTurnus?: StairTurnus;
+  dirtLevel?: DirtLevel;
+  keller?: boolean;
+  kellerTurnus?: StairTurnus;
+  aufzug?: boolean;
+  glasHandlauf?: boolean;
+  /** Leave Treppenhaus dialog. */
+  exit?: boolean;
+  /** Re-emit current engine quote if complete (e.g. customer asks „stimmt das?“). */
+  confirmQuote?: boolean;
+};
+
+function sanitizeStructuredPatch(patch: TreppenhausStructuredPatch): TreppenhausDraft {
+  const out: TreppenhausDraft = {};
+  if (typeof patch.stockwerke === "number" && patch.stockwerke >= 1 && patch.stockwerke <= 12) {
+    out.stockwerke = Math.round(patch.stockwerke);
+  }
+  if (typeof patch.wohnungen === "number" && patch.wohnungen >= 1 && patch.wohnungen <= 40) {
+    out.wohnungen = Math.round(patch.wohnungen);
+  }
+  if (patch.stairTurnus === "weekly" || patch.stairTurnus === "biweekly" || patch.stairTurnus === "monthly") {
+    out.stairTurnus = patch.stairTurnus;
+  }
+  if (patch.dirtLevel === "normal" || patch.dirtLevel === "medium" || patch.dirtLevel === "heavy") {
+    out.dirtLevel = patch.dirtLevel;
+  }
+  if (typeof patch.keller === "boolean") out.keller = patch.keller;
+  if (
+    patch.kellerTurnus === "weekly" ||
+    patch.kellerTurnus === "biweekly" ||
+    patch.kellerTurnus === "monthly"
+  ) {
+    out.kellerTurnus = patch.kellerTurnus;
+  }
+  if (typeof patch.aufzug === "boolean") out.aufzug = patch.aufzug;
+  if (typeof patch.glasHandlauf === "boolean") out.glasHandlauf = patch.glasHandlauf;
+  return out;
+}
+
+/**
+ * AI path: model interprets natural language → structured fields → engine.
+ * No regex teaching for every phrase; € only from calculateTreppenhausQuote.
+ */
+export function applyTreppenhausStructuredFields(
+  session: ConciergeSession,
+  patch: TreppenhausStructuredPatch
+): TreppenhausDialogResult {
+  if (patch.exit) return exitResult(session);
+
+  const before = getTreppenhausDraft(session);
+  const beforeMissing = missingTreppenhausFields(before).length;
+  const hadDraft = Object.keys(before).length > 0 || session.assistantProduct === "treppenhaus";
+
+  if (patch.confirmQuote && isTreppenhausComplete(before)) {
+    return {
+      session: withTreppenhausDraft({ ...session, turns: session.turns + 1 }, before),
+      text: [
+        `Ja — die Beträge kommen direkt aus unserem Treppenhaus-Preismotor (keine Schätzung aus dem Chat).`,
+        ``,
+        formatTreppenhausQuoteText(before),
+      ].join("\n"),
+      actions: quoteActions(),
+      quickReplies: ["5 Stockwerke", "Ohne Keller", "Wöchentlich", "Festpreis anfragen"],
+      emittedEuro: true,
+      complete: true,
+    };
+  }
+
+  const draft = mergeDraft(before, sanitizeStructuredPatch(patch));
+  const afterMissing = missingTreppenhausFields(draft).length;
+  return finalizeTreppenhausDraft(session, draft, {
+    madeProgress: afterMissing < beforeMissing || !hadDraft,
+    hadDraft,
+  });
+}
+
+/** Card the model may read — system knowledge, never invent final €. */
+export function getTreppenhausSystemCard(session?: ConciergeSession) {
+  const draft = session ? getTreppenhausDraft(session) : {};
+  return {
+    product: "treppenhaus",
+    engine: "calculateTreppenhausQuote",
+    rule: "Nie selbst € nennen. Felder mit upsert_treppenhaus_fields setzen; Beträge nur aus Tool-Antwort.",
+    fields: {
+      stockwerke: "1–12 (EG mitgezählt)",
+      wohnungen: "1–40",
+      stairTurnus: ["weekly", "biweekly", "monthly"],
+      dirtLevel: ["normal", "medium", "heavy"],
+      keller: "boolean",
+      kellerTurnus: "nur wenn keller=true; muss zu stairTurnus passen",
+      aufzug: "boolean, default false",
+      glasHandlauf: "boolean, default false",
+    },
+    interpretationHints: {
+      "1x / einmal / 1 mal pro Woche / her hafta": "stairTurnus=weekly",
+      "alle 14 Tage / 14-täglich": "stairTurnus=biweekly",
+      "monatlich / 1x im Monat": "stairTurnus=monthly",
+      EG: "allein keine Stockwerkzahl — nachfragen wie viele Stockwerke inkl. EG",
+      "stimmt das? / doğru mu?": "confirmQuote=true wenn Entwurf vollständig",
+    },
+    currentDraft: draft,
+    missing: missingTreppenhausFields(draft),
+    complete: isTreppenhausComplete(draft),
+  };
+}
+
+/**
+ * Deterministic fallback (AI off / error): extract → merge → ask or quote.
+ */
+export function advanceTreppenhausDialog(
+  session: ConciergeSession,
+  message: string
+): TreppenhausDialogResult {
+  if (wantsExitTreppenhausDialog(message) && !/treppenhaus/i.test(message)) {
+    return exitResult(session);
+  }
+
+  const pending = missingTreppenhausFields(getTreppenhausDraft(session))[0];
+  const before = getTreppenhausDraft(session);
+  const beforeMissing = missingTreppenhausFields(before).length;
+  const hadDraft = Object.keys(before).length > 0;
+
+  let draft = before;
+  draft = applyYesNoForPending(draft, message, pending);
+  draft = mergeDraft(draft, extractTreppenhausPatch(message));
+  draft = applyBareNumber(draft, message, pending);
+
+  const afterMissing = missingTreppenhausFields(draft).length;
+  return finalizeTreppenhausDraft(session, draft, {
+    madeProgress: afterMissing < beforeMissing || !hadDraft,
+    hadDraft,
+  });
 }
 
 export function shouldHandleTreppenhausDialog(

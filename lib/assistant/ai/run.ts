@@ -35,7 +35,7 @@ export async function runAssistantAi(options: {
 }): Promise<AiRunResult> {
   const { message, session, provider } = options;
   const messages: AiMessage[] = [
-    { role: "system", content: buildAssistantSystemPrompt() },
+    { role: "system", content: buildAssistantSystemPrompt(session) },
     { role: "user", content: message },
   ];
 
@@ -150,6 +150,7 @@ export async function runAssistantAi(options: {
       if (
         exec.customerText &&
         (call.name === "advance_treppenhaus_dialog" ||
+          call.name === "upsert_treppenhaus_fields" ||
           call.name === "get_price_guidance")
       ) {
         return {

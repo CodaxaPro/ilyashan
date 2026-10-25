@@ -24,9 +24,10 @@ export type ProcessConciergeResult = {
   meta: AiRunMeta;
 };
 
-function treppenhausReply(
+function treppenhausFallbackReply(
   session: ConciergeSession,
-  message: string
+  message: string,
+  reason: string
 ): ProcessConciergeResult {
   const d = advanceTreppenhausDialog(session, message);
   return {
@@ -41,15 +42,15 @@ function treppenhausReply(
       usedAi: false,
       providerId: null,
       toolNames: ["advance_treppenhaus_dialog"],
-      fallbackReason: d.complete ? "treppenhaus_quote" : "treppenhaus_collect",
+      fallbackReason: d.complete ? "treppenhaus_quote" : reason,
     },
   };
 }
 
 /**
- * Async entry:
- * 1) Treppenhaus live dialog (deterministic, engine-backed) when tools on
- * 2) AI+tools when flags+key ready
+ * Async entry (enterprise):
+ * 1) AI + tools when ready — AI understands language; engines own €
+ * 2) Deterministic Treppenhaus dialog if tools on but AI unavailable
  * 3) Classic concierge
  */
 export async function processConciergeMessageAsync(
@@ -66,14 +67,14 @@ export async function processConciergeMessageAsync(
   });
 
   const session = sessionInput ?? createSession();
-
-  // Human Q&A calculation for Treppenhaus — highest priority when tools enabled
-  if (isAssistantToolsEnabled() && shouldHandleTreppenhausDialog(session, message)) {
-    return treppenhausReply(session, message);
-  }
+  const treppenhausCtx =
+    isAssistantToolsEnabled() && shouldHandleTreppenhausDialog(session, message);
 
   if (isAssistantAiEnabled()) {
     if (!isAssistantAiConfigured() && !providerOverride) {
+      if (treppenhausCtx) {
+        return treppenhausFallbackReply(session, message, "treppenhaus_collect");
+      }
       const reply = processConciergeMessage(message, session, pricingCtx);
       return {
         reply,
@@ -88,16 +89,18 @@ export async function processConciergeMessageAsync(
       const provider = providerOverride ?? createOpenAiProviderFromEnv();
       if (provider) {
         try {
-          const result = await runAssistantAi({
+          return await runAssistantAi({
             message,
             session,
             provider,
             fensterPartial: session.quote,
             pricingCtx,
           });
-          return result;
         } catch (error) {
-          console.error("[assistant-ai] fallback to deterministic:", error);
+          console.error("[assistant-ai] fallback:", error);
+          if (treppenhausCtx) {
+            return treppenhausFallbackReply(session, message, "treppenhaus_collect");
+          }
           const reply = processConciergeMessage(message, session, pricingCtx);
           return {
             reply,
@@ -109,6 +112,11 @@ export async function processConciergeMessageAsync(
         }
       }
     }
+  }
+
+  // Tools on, AI off → still offer live Treppenhaus engine dialog
+  if (treppenhausCtx) {
+    return treppenhausFallbackReply(session, message, "treppenhaus_collect");
   }
 
   const reply = processConciergeMessage(message, session, pricingCtx);
