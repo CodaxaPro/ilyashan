@@ -460,9 +460,12 @@ export function ConciergeWidget() {
               className="rounded-2xl border-2 border-accent/30 bg-accent-light/30 p-4 space-y-3"
               data-testid="concierge-lead-form"
             >
-              <p className="text-sm font-semibold text-foreground">Persönlicher Rückruf gewünscht?</p>
+              <p className="text-sm font-semibold text-foreground">
+                Verbindliches Festpreis-Angebot / Rückruf?
+              </p>
               <p className="text-xs text-muted">
-                Wir rufen Sie mit Ihrer Live-Preisschätzung innerhalb von {siteConfig.business.responseTime} zurück.
+                Name und Telefon genügen — wir melden uns innerhalb von{" "}
+                {siteConfig.business.responseTime} mit Festpreis (nach Prüfung). Ihre Chat-Angaben gehen mit.
               </p>
               <input
                 type="text"
@@ -543,7 +546,7 @@ export function ConciergeWidget() {
             </button>
           </div>
           <p className="text-[10px] text-muted mt-2 text-center">
-            Assistent · Nur Fensterreinigung · Preise unverbindlich bis Festpreis-Angebot
+            Assistent · Orientierung im Chat · Festpreis nach Prüfung
           </p>
         </form>
       </div>

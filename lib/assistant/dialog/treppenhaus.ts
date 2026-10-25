@@ -53,7 +53,8 @@ export function withTreppenhausDraft(
     ...session,
     assistantProduct: "treppenhaus",
     treppenhausDraft: draft,
-    stage: "idle",
+    // Complete quote → hot lead (Rückruf-Formular im Widget)
+    stage: isTreppenhausComplete(draft) ? "price_ready" : "idle",
     lastIntent: "price",
   };
 }
@@ -292,7 +293,9 @@ export function formatTreppenhausQuoteText(input: TreppenhausInput): string {
   }
   lines.push(
     ``,
-    `Möchten Sie etwas ändern? Schreiben Sie z. B. „5 Stockwerke“, „wöchentlich“ oder „ohne Keller“ — ich rechne **sofort neu**. Oder wir nehmen Ihre Daten für ein verbindliches Festpreis-Angebot auf.`
+    `**Nächster Schritt:** Hinterlassen Sie unten Ihren Namen und Ihre Telefonnummer — wir melden uns mit dem **verbindlichen Festpreis** (nach kurzer Prüfung).`,
+    ``,
+    `Angaben ändern? Schreiben Sie z. B. „5 Stockwerke“ oder „ohne Keller“ — ich rechne sofort neu.`
   );
   return lines.join("\n");
 }
@@ -337,7 +340,7 @@ function finalizeTreppenhausDraft(
       session: nextSession,
       text: formatTreppenhausQuoteText(draft),
       actions: quoteActions(),
-      quickReplies: ["Ohne Keller", "Wöchentlich", "5 Stockwerke", "Andere Leistung"],
+      quickReplies: ["Festpreis anfragen", "5 Stockwerke", "Ohne Keller", "Andere Leistung"],
       emittedEuro: true,
       complete: true,
     };

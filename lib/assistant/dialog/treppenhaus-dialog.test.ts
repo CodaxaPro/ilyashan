@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { createSession } from "@/lib/concierge/types";
+import { isHotLead } from "@/lib/concierge/lead";
 import { calculateTreppenhausQuote, formatEuroFromCents } from "@/lib/treppenhaus/pricing";
 import { processConciergeMessageAsync } from "../process";
 import {
@@ -77,6 +78,9 @@ describe("assistant/treppenhaus dialog — human Q&A + engine", () => {
     assert.equal(r.complete, true);
     assert.equal(r.emittedEuro, true);
     assert.match(r.text, /610,14/);
+    assert.equal(r.session.stage, "price_ready");
+    assert.equal(isHotLead(r.session), true);
+    assert.match(r.text, /Festpreis|Telefon/i);
 
     r = applyTreppenhausStructuredFields(r.session, { confirmQuote: true });
     assert.match(r.text, /Preismotor|610,14/i);

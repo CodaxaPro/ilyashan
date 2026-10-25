@@ -71,6 +71,8 @@ export function createConciergeStoredLead(
       stage: session.stage,
       quote: session.quote,
       turns: session.turns,
+      assistantProduct: session.assistantProduct,
+      treppenhausDraft: session.treppenhausDraft,
     },
   };
 }

@@ -12,9 +12,22 @@ import {
   type QuotePricingContext,
 } from "@/lib/quote-pricing-context";
 import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
+import {
+  calculateTreppenhausQuote,
+  formatEuroFromCents,
+} from "@/lib/treppenhaus/pricing";
+import {
+  getTreppenhausDraft,
+  isTreppenhausComplete,
+} from "@/lib/assistant/dialog/treppenhaus";
 
 export function isHotLead(session: ConciergeSession): boolean {
-  return session.stage === "price_ready" || (!!session.quote.windowCount && !!session.quote.floorLevel);
+  if (session.stage === "price_ready") return true;
+  if (session.quote.windowCount && session.quote.floorLevel) return true;
+  if (session.assistantProduct === "treppenhaus" && isTreppenhausComplete(getTreppenhausDraft(session))) {
+    return true;
+  }
+  return false;
 }
 
 export function buildLeadSummaryRows(
@@ -34,6 +47,28 @@ export function buildLeadSummaryRows(
   if (q.cleaningSide) rows.push(["Umfang", cleaningSideLabels[q.cleaningSide]]);
   if (q.postalCode || q.city) {
     rows.push(["Ort", [q.postalCode, q.city].filter(Boolean).join(" ")]);
+  }
+
+  const trp = getTreppenhausDraft(session);
+  if (session.assistantProduct === "treppenhaus" || Object.keys(trp).length > 0) {
+    rows.push(["Assistent-Produkt", "Treppenhausreinigung"]);
+    if (trp.stockwerke) rows.push(["Stockwerke", String(trp.stockwerke)]);
+    if (trp.wohnungen) rows.push(["Wohnungen", String(trp.wohnungen)]);
+    if (trp.stairTurnus) rows.push(["Treppen-Turnus", trp.stairTurnus]);
+    if (trp.dirtLevel) rows.push(["Verschmutzung", trp.dirtLevel]);
+    if (trp.keller !== undefined) {
+      rows.push([
+        "Keller",
+        trp.keller ? `ja (${trp.kellerTurnus ?? "—"})` : "nein",
+      ]);
+    }
+    if (isTreppenhausComplete(trp)) {
+      const quote = calculateTreppenhausQuote(trp);
+      rows.push([
+        "Treppenhaus-Orientierung",
+        `${formatEuroFromCents(quote.monthlyGrossCents)} brutto / Monat`,
+      ]);
+    }
   }
 
   const data = quoteDataForEstimate(q);
