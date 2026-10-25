@@ -93,7 +93,8 @@ export function priceTreppenhaus(
       ok: false,
       tool: "price_treppenhaus",
       code: "calculator_required",
-      messageDe: `${CALCULATOR_REQUIRED_DISCLAIMER_DE} Bitte nutzen Sie den Treppenhaus-Rechner.`,
+      messageDe:
+        "Gerne rechne ich die Treppenhausreinigung durch. Schreiben Sie z. B. „Treppenhaus“ — ich frage Stockwerke, Wohnungen und Turnus und kalkuliere live mit unserem Preismotor.",
       calculatorHref: routes.treppenhausreinigungAngebot,
     };
   }

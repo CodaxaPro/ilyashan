@@ -24,7 +24,7 @@ export function enforceNoInventedPrice(
     return { text, blockedInventedPrice: false };
   }
   return {
-    text: "Einen verbindlichen Preis nenne ich nicht aus dem Chat. Bitte nutzen Sie den passenden Preisrechner oder fordern Sie ein Festpreis-Angebot nach Prüfung an — ich helfe Ihnen zum richtigen Formular.",
+    text: "Einen Euro-Betrag nenne ich nur, wenn unser Preismotor ihn berechnet hat. Sagen Sie mir kurz die Leistung (z. B. Treppenhaus oder Fenster) — ich frage die nötigen Angaben und rechne live.",
     blockedInventedPrice: true,
   };
 }

@@ -50,6 +50,27 @@ describe("assistant/treppenhaus dialog — human Q&A + engine", () => {
     );
   });
 
+  it("accepts multi-field answer in one message", () => {
+    let r = advanceTreppenhausDialog(createSession("d3"), "Treppenhaus Preis");
+    r = advanceTreppenhausDialog(
+      r.session,
+      "3 Stockwerke, 8 Wohnungen, alle 14 Tage, normal, ohne Keller"
+    );
+    assert.equal(r.complete, true);
+    assert.equal(r.emittedEuro, true);
+    assert.equal(r.session.treppenhausDraft?.stockwerke, 3);
+    assert.equal(r.session.treppenhausDraft?.wohnungen, 8);
+  });
+
+  it("exits dialog when customer switches to another service", () => {
+    let r = advanceTreppenhausDialog(createSession("d4"), "Treppenhaus");
+    assert.equal(r.session.assistantProduct, "treppenhaus");
+    r = advanceTreppenhausDialog(r.session, "doch lieber Fensterreinigung");
+    assert.equal(r.exited, true);
+    assert.equal(r.session.assistantProduct, undefined);
+    assert.match(r.text, /Fenster|Büro/i);
+  });
+
   it("recalculates when customer changes stockwerke", () => {
     const steps = [
       "Treppenhaus Preis",

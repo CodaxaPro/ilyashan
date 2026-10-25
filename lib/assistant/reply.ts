@@ -37,14 +37,14 @@ export function buildPriceListOverviewReply(): AssistantCustomerReply {
   return {
     product: "unknown",
     emittedEuro: false,
-    text: `Eine feste PDF-Preisliste gibt es nicht — bei Ilyashan rechnen wir **objektbezogen**.
+    text: `Gerne — eine feste PDF-Preisliste gibt es bei uns nicht, weil jedes Objekt anders ist. Wir rechnen **objektbezogen**:
 
-**So bekommen Sie Ihren Preis:**
-• **Fenster** → Live-Orientierung im Preisrechner, Festpreis nach Prüfung (in ${siteConfig.business.responseTime})
-• **Büro / Treppenhaus** → Online-Kalkulation (Orientierung), Festpreis nach Prüfung
-• **Praxis, Bauend, Renovierung, Entrümpelung** → kurze Anfrage, Festpreis nach Prüfung
+• **Fenster** — Flügelanzahl + Höhe → Live-Orientierung, Festpreis nach Prüfung (meist in ${siteConfig.business.responseTime})
+• **Treppenhaus** — Stockwerke, Wohnungen, Turnus → kann ich **hier im Chat** durchrechnen
+• **Büro** — Fläche / Aufgaben → Online-Kalkulation
+• **Praxis, Bauend, Renovierung, Entrümpelung** — kurze Anfrage, Festpreis nach Prüfung
 
-Kein Anfahrtszuschlag in ${siteConfig.contact.region}. Welche Leistung brauchen Sie?`,
+Kein Anfahrtszuschlag in ${siteConfig.contact.region}. **Welche Leistung** soll ich Ihnen durchrechnen?`,
     actions: [
       linkAction("Fenster-Preisrechner", routes.angebot),
       linkAction("Büro kalkulieren", routes.bueroreinigungAngebot),
