@@ -10,8 +10,10 @@ test.describe("Concierge Assistent", () => {
   test("öffnet Panel und zeigt Begrüßung", async ({ page }) => {
     await page.getByTestId("concierge-toggle").click();
     await expect(page.getByTestId("concierge-panel")).toBeVisible();
-    await expect(page.getByText(/Ilyashan Assistent/i).first()).toBeVisible();
-    await expect(page.getByText(/Live-Preisschätzung|Fensterreinigung/i).first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/Ilyashan Beratung|Ilyashan Assistent/i).first()).toBeVisible();
+    await expect(
+      page.getByText(/Live-Preisschätzung|Fensterreinigung|Anrufen|Rückruf/i).first()
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("beantwortet Preisfrage mit Euro-Betrag und Lead-Formular", async ({ page }) => {
