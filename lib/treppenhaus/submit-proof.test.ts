@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 import { createTreppenhausStoredLead } from "./lead-bridge";
@@ -51,7 +51,6 @@ describe("treppenhaus/submit flow proof", () => {
   });
 
   it("calculator UI posts to treppenhaus quote API", () => {
-    const { readFileSync } = require("node:fs") as typeof import("node:fs");
     const ui = readFileSync(join(root, "components/treppenhaus/TreppenhausCalculator.tsx"), "utf8");
     assert.match(ui, /\/api\/treppenhaus\/quote/);
     assert.match(ui, /trackRequestQuoteConversion/);
