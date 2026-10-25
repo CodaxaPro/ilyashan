@@ -1,0 +1,21 @@
+{
+  "name": "Ilyashan Gebäudereinigung",
+  "short_name": "Ilyashan",
+  "description": "Reinigung in Aachen und Baesweiler",
+  "start_url": "/de",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0b1f3a",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

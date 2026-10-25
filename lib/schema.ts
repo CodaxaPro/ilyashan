@@ -8,6 +8,11 @@ export function getLocalBusinessSchema() {
     name: siteConfig.name,
     description: siteConfig.description,
     url: siteConfig.url,
+    logo: `${siteConfig.url.replace(/\/de$/, "")}/brand/mark-h.png`,
+    image: [
+      `${siteConfig.url.replace(/\/de$/, "")}/brand/og-default.png`,
+      `${siteConfig.url.replace(/\/de$/, "")}/brand/mark-h.png`,
+    ],
     telephone: siteConfig.contact.phone,
     email: siteConfig.contact.email,
     address: {

@@ -10,7 +10,7 @@ export function Footer() {
     <footer className="bg-primary text-white/80">
       <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div>
-          <BrandLogo size="footer" className="rounded-sm bg-white p-1" />
+          <BrandLogo size="footer" className="rounded-sm bg-white px-2 py-1.5" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed">
             Reinigung in Baesweiler, Aachen und Umgebung. Festpreis. Kein Anfahrtszuschlag.
           </p>
