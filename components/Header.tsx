@@ -2,7 +2,8 @@
 
 import { BrandLogo } from "@/components/BrandLogo";
 import { siteConfig } from "@/lib/config";
-import { Button, PhoneIcon } from "@/components/ui/Button";
+import { buildWhatsAppUrl, contactReachabilityLine } from "@/lib/contact-channels";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
@@ -45,16 +46,17 @@ export function Header() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3">
-            <a
-              href={`tel:${siteConfig.contact.phone}`}
-              data-analytics-id="header-phone"
-              className="flex items-center gap-2 text-sm font-semibold text-primary"
+            <Button
+              href={buildWhatsAppUrl()}
+              variant="secondary"
+              size="sm"
+              data-analytics-id="header-whatsapp"
             >
-              <PhoneIcon className="w-4 h-4" />
-              {siteConfig.contact.phoneDisplay}
-            </a>
+              <WhatsAppIcon className="w-4 h-4" />
+              WhatsApp
+            </Button>
             <Button href="/de#kontakt" variant="primary" size="sm" data-analytics-id="header-cta-anfrage">
-              Anfrage
+              {siteConfig.messaging.ctaAnfrage}
             </Button>
           </div>
 
@@ -87,17 +89,27 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <a
-              href={`tel:${siteConfig.contact.phone}`}
-              data-analytics-id="header-phone"
-              className="flex items-center gap-2 py-2 text-sm font-semibold text-primary"
+            <Button
+              href={buildWhatsAppUrl()}
+              variant="secondary"
+              size="md"
+              className="w-full"
+              data-analytics-id="header-whatsapp"
             >
-              <PhoneIcon className="w-4 h-4" />
-              {siteConfig.contact.phoneDisplay}
-            </a>
-            <Button href="/de#kontakt" variant="primary" size="md" className="w-full">
-              Anfrage
+              <WhatsAppIcon className="w-4 h-4" />
+              {siteConfig.messaging.ctaWhatsApp}
             </Button>
+            <Button href="/de#kontakt" variant="primary" size="md" className="w-full" data-analytics-id="header-cta-anfrage">
+              {siteConfig.messaging.ctaAnfrage}
+            </Button>
+            <p className="pt-1 text-xs leading-relaxed text-muted">
+              {contactReachabilityLine()}
+              <br />
+              Telefon:{" "}
+              <a href={`tel:${siteConfig.contact.phone}`} className="text-foreground/80 underline-offset-2 hover:underline">
+                {siteConfig.contact.phoneDisplay}
+              </a>
+            </p>
           </nav>
         )}
       </div>

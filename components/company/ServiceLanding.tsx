@@ -5,12 +5,13 @@ import { companyServices } from "@/lib/company-services";
 import { routes } from "@/lib/routes";
 import type { ServicePageContent } from "@/lib/service-pages";
 import { serviceLandingSchemas } from "@/lib/landing-schema";
-import { Button } from "@/components/ui/Button";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { ContactForm } from "@/components/ContactForm";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import JsonLd from "@/components/landing/JsonLd";
+import { buildWhatsAppUrl, contactReachabilityLine } from "@/lib/contact-channels";
 
 const facts = [
   { label: "Sitz", value: `${siteConfig.contact.address}, ${siteConfig.contact.postalCode} ${siteConfig.contact.city}` },
@@ -42,14 +43,21 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
               <h1 className="mt-3 font-serif text-4xl font-medium leading-[1.12] sm:text-5xl">{page.title}</h1>
               <p className="mt-5 max-w-xl pr-16 text-lg leading-relaxed text-muted sm:pr-0">{page.lede}</p>
               <div className="mt-8 flex max-w-[calc(100%-4.5rem)] flex-col gap-3 sm:max-w-none sm:flex-row">
-                <Button href={`tel:${siteConfig.contact.phone}`} variant="primary" size="lg">
-                  {siteConfig.contact.phoneDisplay}
-                </Button>
-                <Button href={page.primaryHref} variant="secondary" size="lg">
+                <Button href={page.primaryHref} variant="primary" size="lg">
                   {page.primaryLabel}
+                </Button>
+                <Button href={buildWhatsAppUrl()} variant="secondary" size="lg" data-analytics-id="service-landing-whatsapp">
+                  <WhatsAppIcon />
+                  {siteConfig.messaging.ctaWhatsApp}
                 </Button>
               </div>
               <p className="mt-4 max-w-xl text-sm text-muted">{page.priceNote}</p>
+              <p className="mt-2 max-w-xl text-xs text-muted">
+                {contactReachabilityLine()} · Telefon{" "}
+                <a href={`tel:${siteConfig.contact.phone}`} className="underline decoration-border underline-offset-2 hover:text-primary">
+                  {siteConfig.contact.phoneDisplay}
+                </a>
+              </p>
             </div>
             {page.image ? (
               <figure className="lg:col-span-6">
@@ -139,14 +147,24 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
                   : page.serviceKey === "treppenhausreinigung"
                     ? " — oder zuerst den Preis online kalkulieren."
                     : "."}{" "}
-                Antwort in der Regel innerhalb von {siteConfig.business.responseTime}.
+                {contactReachabilityLine()}
               </p>
-              <a
-                href={`tel:${siteConfig.contact.phone}`}
-                className="mt-6 inline-block text-sm font-medium underline decoration-border underline-offset-4 hover:text-primary"
-              >
-                {siteConfig.contact.phoneDisplay}
-              </a>
+              <div className="mt-6 flex flex-col gap-2 text-sm">
+                <a
+                  href={buildWhatsAppUrl()}
+                  className="inline-flex items-center gap-2 font-medium underline decoration-border underline-offset-4 hover:text-primary"
+                  data-analytics-id="service-landing-anfrage-whatsapp"
+                >
+                  <WhatsAppIcon className="h-4 w-4" />
+                  {siteConfig.messaging.ctaWhatsApp}
+                </a>
+                <a
+                  href={`tel:${siteConfig.contact.phone}`}
+                  className="text-muted underline decoration-border underline-offset-4 hover:text-primary"
+                >
+                  Telefon {siteConfig.contact.phoneDisplay}
+                </a>
+              </div>
             </div>
             <div className="rounded-2xl border border-border bg-card p-5 sm:p-6">
               {page.serviceKey === "treppenhausreinigung" || page.serviceKey === "bueroreinigung" ? (
@@ -161,6 +179,10 @@ export function ServiceLanding({ page }: { page: ServicePageContent }) {
                   </Button>
                   <p className="text-xs text-muted">
                     Ohne Rechner:{" "}
+                    <a href={buildWhatsAppUrl()} className="underline hover:text-primary">
+                      WhatsApp
+                    </a>
+                    {" · "}
                     <a href={`tel:${siteConfig.contact.phone}`} className="underline hover:text-primary">
                       {siteConfig.contact.phoneDisplay}
                     </a>

@@ -84,9 +84,9 @@ export function buildQuoteCustomerEmail(
   const tableRows = buildQuoteTableRowsFromContext(data, anfrageNr, ctx);
   const detailRows = tableRows.filter(([k]) => k !== siteConfig.messaging.priceEstimateRowLabel);
   const priceRow = tableRows.find(([k]) => k === siteConfig.messaging.priceEstimateRowLabel);
-  const followUpText = siteConfig.messaging.emailFollowUp.replace(
+  const followUpText = (siteConfig.messaging.emailFollowUp ?? "").replace(
     "24 Stunden",
-    siteConfig.business.responseTime
+    siteConfig.business.responseTime || "24 Stunden"
   );
 
   const body = `

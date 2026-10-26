@@ -15,8 +15,9 @@ import {
   type KellerTurnus,
   type StairTurnus,
 } from "@/lib/treppenhaus/pricing";
-import { Button } from "@/components/ui/Button";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
+import { buildWhatsAppUrl } from "@/lib/contact-channels";
 
 const STAIR_OPTIONS: { value: StairTurnus; label: string }[] = [
   { value: "weekly", label: "Wöchentlich" },
@@ -184,12 +185,16 @@ export function TreppenhausCalculator() {
           Orientierung: {formatEuroFromCents(quote.monthlyNetCents)} netto / Monat
         </p>
         <div className="mt-8 flex flex-col gap-2">
-          <Button href={`tel:${siteConfig.contact.phone}`} variant="primary" size="lg">
-            {siteConfig.contact.phoneDisplay}
+          <Button href={buildWhatsAppUrl("Hallo, ich habe gerade eine Treppenhaus-Anfrage gesendet.")} variant="secondary" size="lg">
+            <WhatsAppIcon />
+            {siteConfig.messaging.ctaWhatsApp}
           </Button>
           <Link href={routes.treppenhausreinigung} className="text-sm text-muted hover:text-primary">
             Zur Leistungsseite
           </Link>
+          <a href={`tel:${siteConfig.contact.phone}`} className="text-sm text-muted hover:text-primary">
+            Telefon {siteConfig.contact.phoneDisplay}
+          </a>
         </div>
       </div>
     );
@@ -434,12 +439,15 @@ export function TreppenhausCalculator() {
             >
               {submitting ? "Wird gesendet…" : "Kalkulation verbindlich anfragen"}
             </button>
-            <a
-              href={`tel:${siteConfig.contact.phone}`}
-              className="block text-center text-sm text-muted hover:text-primary"
-            >
-              Oder anrufen: {siteConfig.contact.phoneDisplay}
-            </a>
+            <p className="text-center text-sm text-muted">
+              <a href={buildWhatsAppUrl()} className="hover:text-primary">
+                WhatsApp
+              </a>
+              {" · "}
+              <a href={`tel:${siteConfig.contact.phone}`} className="hover:text-primary">
+                {siteConfig.contact.phoneDisplay}
+              </a>
+            </p>
           </form>
         </div>
       </aside>

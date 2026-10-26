@@ -116,7 +116,7 @@ export function getPriceLabelFromContext(data: QuoteFormData, ctx: QuotePricingC
 
 export function getTerminLabel(data: QuoteFormData) {
   if (!data.scheduleOption) return "–";
-  let label = scheduleOptionLabels[data.scheduleOption];
+  let label = scheduleOptionLabels[data.scheduleOption] ?? String(data.scheduleOption);
   if (data.preferredDates.length > 0) {
     label += `: ${data.preferredDates.map(formatGermanDate).join(", ")}`;
   }
@@ -151,19 +151,19 @@ export function buildQuoteTableRows(
   };
 
   const rows: [string, string][] = [
-    ["Anfrage-Nr.", anfrageNr],
+    ["Anfrage-Nr.", anfrageNr || "–"],
     ["Leistungen", getServicesLabel(data)],
     ["Objektart", getObjectLabel(data)],
     ["Etage", getFloorLabel(data)],
-    ["Aufzug", data.elevator ? elevatorLabels[data.elevator] : "–"],
+    ["Aufzug", data.elevator ? elevatorLabels[data.elevator] ?? String(data.elevator) : "–"],
     ["Fensterflügel", String(data.windowCount)],
     ["Raumhöhe", `${data.roomHeight} m`],
-    ["Verschmutzung", dirtLevelLabels[data.dirtLevel]],
-    ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide]],
+    ["Verschmutzung", dirtLevelLabels[data.dirtLevel] ?? String(data.dirtLevel || "–")],
+    ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide] ?? String(data.cleaningSide || "–")],
     ["Reinigungswünsche", getReinigungswünscheLabel(data)],
     ["Wunschtermin", getTerminLabel(data)],
     [siteConfig.messaging.priceEstimateRowLabel, getPriceLabelFromContext(data, ctx)],
-  ];
+  ].map(([k, v]) => [k, v ?? "–"]);
 
   if (data.services.includes("wartung")) {
     rows.splice(2, 0, ["Wartungsplan", getWartungPlanLabel(data, ctx.wartungPackages)]);

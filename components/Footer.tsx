@@ -1,9 +1,10 @@
 import { BrandLogo } from "@/components/BrandLogo";
 import { siteConfig } from "@/lib/config";
+import { buildWhatsAppUrl, contactReachabilityLine } from "@/lib/contact-channels";
 import { companyServices } from "@/lib/company-services";
 import { routes } from "@/lib/routes";
 import Link from "next/link";
-import { PhoneIcon } from "@/components/ui/Button";
+import { PhoneIcon, WhatsAppIcon } from "@/components/ui/Button";
 
 export function Footer() {
   return (
@@ -31,16 +32,27 @@ export function Footer() {
 
         <div>
           <h2 className="text-sm font-medium text-white">Kontakt</h2>
+          <p className="mt-3 text-xs leading-relaxed text-white/60">{contactReachabilityLine()}</p>
           <ul className="mt-4 space-y-2 text-sm">
             <li>
-              <a href={`tel:${siteConfig.contact.phone}`} className="inline-flex items-center gap-2 hover:text-white">
-                <PhoneIcon className="h-4 w-4" />
-                {siteConfig.contact.phoneDisplay}
+              <a
+                href={buildWhatsAppUrl()}
+                className="inline-flex items-center gap-2 hover:text-white"
+                data-analytics-id="footer-whatsapp"
+              >
+                <WhatsAppIcon className="h-4 w-4" />
+                WhatsApp
               </a>
             </li>
             <li>
               <a href={`mailto:${siteConfig.contact.email}`} className="hover:text-white">
                 {siteConfig.contact.email}
+              </a>
+            </li>
+            <li>
+              <a href={`tel:${siteConfig.contact.phone}`} className="inline-flex items-center gap-2 hover:text-white">
+                <PhoneIcon className="h-4 w-4" />
+                {siteConfig.contact.phoneDisplay}
               </a>
             </li>
             <li>

@@ -8,6 +8,14 @@ import {
 } from "./lib/seo-config";
 
 const nextConfig: NextConfig = {
+  // pdfkit standard fonts must ship with the /api/contact serverless function
+  outputFileTracingIncludes: {
+    "/api/contact": [
+      "./node_modules/pdfkit/js/standard-fonts/**/*",
+      "./node_modules/@react-pdf/pdfkit/lib/font/data/**/*",
+    ],
+  },
+  serverExternalPackages: ["@react-pdf/renderer", "pdfkit"],
   async rewrites() {
     return [
       ...getLocationRewrites(),

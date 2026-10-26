@@ -2,6 +2,7 @@
  * Structured Fenster fields from AI → same estimate engine as classic concierge.
  */
 import { phoneAction } from "@/lib/concierge/knowledge";
+import { extractFloorLevel, extractWindowCount } from "@/lib/concierge/extract";
 import type { ConciergeAction, ConciergeSession } from "@/lib/concierge/types";
 import type { CleaningSide, DirtLevel, FloorLevel, QuoteServiceId } from "@/lib/quote-form";
 import { routes } from "@/lib/routes";
@@ -93,4 +94,27 @@ export function applyFensterStructuredFields(
     emittedEuro: false,
     complete: false,
   };
+}
+
+/** Deterministic turn: extract Flügel/Etage from free text, then same engine as tools. */
+export function advanceFensterDialog(
+  session: ConciergeSession,
+  message: string,
+  pricingCtx: QuotePricingContext = defaultQuotePricingContext()
+): FensterDialogResult {
+  const patch: FensterStructuredPatch = {};
+  const windows = extractWindowCount(message);
+  if (windows) patch.windowCount = windows;
+  const floor = extractFloorLevel(message);
+  if (floor) patch.floorLevel = floor;
+  return applyFensterStructuredFields(session, patch, pricingCtx);
+}
+
+export function shouldHandleFensterDialog(session: ConciergeSession, message: string): boolean {
+  if (session.assistantProduct === "fenster") return true;
+  if (session.quote.windowCount && session.quote.windowCount >= 1 && !session.quote.floorLevel) {
+    return true;
+  }
+  if (extractWindowCount(message) || extractFloorLevel(message)) return true;
+  return /fenster|flügel|fluegel|glasreinigung/i.test(message);
 }

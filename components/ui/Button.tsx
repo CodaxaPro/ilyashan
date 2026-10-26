@@ -1,5 +1,5 @@
 import { siteConfig } from "@/lib/config";
-import { routes } from "@/lib/routes";
+import { buildWhatsAppUrl } from "@/lib/contact-channels";
 import Link from "next/link";
 
 interface ButtonProps {
@@ -109,17 +109,17 @@ export function WhatsAppIcon({ className = "w-5 h-5" }: { className?: string }) 
 export function CTAButtons({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
-      <Button href={routes.angebot} variant="primary" size="lg" data-analytics-id="hero-cta-angebot">
-        {siteConfig.messaging.ctaPrimary}
+      <Button href="/de#kontakt" variant="primary" size="lg" data-analytics-id="hero-cta-anfrage">
+        {siteConfig.messaging.ctaAnfrage}
       </Button>
       <Button
-        href={`tel:${siteConfig.contact.phone}`}
-        variant="outline"
+        href={buildWhatsAppUrl()}
+        variant="secondary"
         size="lg"
-        data-analytics-id="hero-phone"
+        data-analytics-id="hero-whatsapp"
       >
-        <PhoneIcon />
-        {siteConfig.contact.phoneDisplay}
+        <WhatsAppIcon />
+        {siteConfig.messaging.ctaWhatsApp}
       </Button>
     </div>
   );

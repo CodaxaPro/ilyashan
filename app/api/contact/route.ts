@@ -8,7 +8,7 @@ import {
 } from "@/lib/email";
 import { buildQuoteAdminEmail, buildQuoteCustomerEmail } from "@/lib/quote-email";
 import { initialQuoteFormData, type QuoteFormData } from "@/lib/quote-form";
-import { generateQuotePdfBuffer, pdfBufferToBase64 } from "@/lib/pdf/generate-quote-pdf";
+import { tryGenerateQuotePdfAttachment } from "@/lib/pdf/try-generate-quote-pdf";
 import { generateAnfrageNr } from "@/lib/quote-summary";
 import { isQuoteSubmissionValid } from "@/lib/quote-validation";
 import {
@@ -84,12 +84,15 @@ export async function POST(request: Request) {
       const pricingConfig = await getFensterPricingConfig();
       const quotePricing = createQuotePricingContext(pricingConfig);
       const priceSnapshot = captureQuotePriceSnapshot(quote, quotePricing, pricingConfig.updatedAt);
-      const pdfBuffer = await generateQuotePdfBuffer(quote, anfrageNr, quotePricing);
-      const pdfAttachment = {
-        filename: `Eingangsbestätigung-${anfrageNr}.pdf`,
-        content: pdfBufferToBase64(pdfBuffer),
-      };
+
+      // PDF must never block lead capture (pdfkit fonts often missing in serverless).
+      const pdfAttachment = await tryGenerateQuotePdfAttachment(quote, anfrageNr, quotePricing);
+
       const photoAttachments = photosToResendAttachments(photos);
+      const adminAttachments = [
+        ...(pdfAttachment ? [pdfAttachment] : []),
+        ...photoAttachments,
+      ];
 
       const adminEmail = buildQuoteAdminEmail(quote, anfrageNr, photos.length, quotePricing);
       const { error: adminError } = await resend.emails.send({
@@ -99,7 +102,7 @@ export async function POST(request: Request) {
         subject: adminEmail.subject,
         text: adminEmail.text,
         html: adminEmail.html,
-        attachments: [pdfAttachment, ...photoAttachments],
+        attachments: adminAttachments,
       });
 
       if (adminError) {
@@ -122,7 +125,7 @@ export async function POST(request: Request) {
           subject: customerEmail.subject,
           text: customerEmail.text,
           html: customerEmail.html,
-          attachments: [pdfAttachment],
+          attachments: pdfAttachment ? [pdfAttachment] : undefined,
         });
 
         if (customerError) {

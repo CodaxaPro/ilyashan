@@ -1,10 +1,11 @@
 "use client";
 
 import { siteConfig } from "@/lib/config";
+import { buildWhatsAppUrl } from "@/lib/contact-channels";
 import { routes } from "@/lib/routes";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { trackAnalytics } from "@/lib/analytics/client";
-import { Button, PhoneIcon, WhatsAppIcon } from "@/components/ui/Button";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -259,7 +260,11 @@ export function ContactForm({ compact = false, defaultService }: ContactFormProp
           {error}
           <p className="mt-2">
             Alternativ:{" "}
-            <a href={`tel:${siteConfig.contact.phone}`} className="font-semibold underline">
+            <a href={buildWhatsAppUrl()} className="font-semibold underline">
+              WhatsApp
+            </a>
+            {" · "}
+            <a href={`tel:${siteConfig.contact.phone}`} className="underline">
               {siteConfig.contact.phoneDisplay}
             </a>
           </p>
@@ -271,27 +276,27 @@ export function ContactForm({ compact = false, defaultService }: ContactFormProp
       </Button>
 
       {!compact && (
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-2">
           <Button
-            href={`tel:${siteConfig.contact.phone}`}
-            data-analytics-id="contact-form-phone"
+            href={buildWhatsAppUrl()}
+            data-analytics-id="contact-form-whatsapp"
             variant="secondary"
             size="md"
-            className="flex-1"
-          >
-            <PhoneIcon />
-            Jetzt anrufen
-          </Button>
-          <Button
-            href={`https://wa.me/${siteConfig.contact.whatsapp}?text=${encodeURIComponent("Hallo, ich möchte eine Anfrage an Ilyashan senden.")}`}
-            data-analytics-id="contact-form-whatsapp"
-            variant="whatsapp"
-            size="md"
-            className="flex-1"
+            className="w-full"
           >
             <WhatsAppIcon />
-            WhatsApp
+            {siteConfig.messaging.ctaWhatsApp}
           </Button>
+          <p className="text-center text-sm text-muted">
+            Telefon:{" "}
+            <a
+              href={`tel:${siteConfig.contact.phone}`}
+              data-analytics-id="contact-form-phone"
+              className="font-medium text-foreground/80 underline-offset-2 hover:underline"
+            >
+              {siteConfig.contact.phoneDisplay}
+            </a>
+          </p>
         </div>
       )}
     </form>

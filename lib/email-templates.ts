@@ -1,7 +1,7 @@
 import { siteConfig } from "@/lib/config";
 
-export function escapeHtml(value: string) {
-  return value
+export function escapeHtml(value: string | null | undefined) {
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")

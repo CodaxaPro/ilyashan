@@ -19,6 +19,7 @@ import { routes } from "@/lib/routes";
 import { trackConciergeEvent } from "@/lib/concierge-analytics";
 import { PhotoUploader } from "@/components/PhotoUploader";
 import type { PhotoPayload } from "@/lib/photo-upload";
+import { resolvePhotoIntakeRequirement } from "@/lib/photo-intake";
 import { trackRequestQuoteConversion } from "@/lib/google-ads";
 import { siteConfig } from "@/lib/config";
 
@@ -494,6 +495,8 @@ export function ConciergeWidget() {
                 photos={leadPhotos}
                 onChange={setLeadPhotos}
                 testId="concierge-lead-photos"
+                required={resolvePhotoIntakeRequirement({ session }).required}
+                helperText={resolvePhotoIntakeRequirement({ session }).messageDe}
               />
               {leadError && <p className="text-xs text-red-600">{leadError}</p>}
               <button
@@ -529,23 +532,10 @@ export function ConciergeWidget() {
             data-testid="concierge-urgent-actions"
           >
             <a
-              href={`tel:${siteConfig.contact.phone}`}
-              className="flex-1 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold text-center hover:bg-primary/90"
-              data-testid="concierge-call-now"
-              onClick={() =>
-                trackConciergeEvent("concierge_call_tap", {
-                  session_id: session.id,
-                  page_path: pathname,
-                })
-              }
-            >
-              Anrufen
-            </a>
-            <a
               href={getConciergeWhatsAppUrl(session)}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 py-2.5 rounded-xl border border-emerald-600 text-emerald-700 text-xs font-semibold text-center hover:bg-emerald-50"
+              className="flex-1 py-2.5 rounded-xl bg-primary text-white text-xs font-semibold text-center hover:bg-primary/90"
               data-testid="concierge-whatsapp-tap"
               onClick={() =>
                 trackConciergeEvent("concierge_whatsapp_click", {
@@ -555,6 +545,19 @@ export function ConciergeWidget() {
               }
             >
               WhatsApp
+            </a>
+            <a
+              href={`tel:${siteConfig.contact.phone}`}
+              className="flex-1 py-2.5 rounded-xl border border-border text-foreground/80 text-xs font-semibold text-center hover:bg-white"
+              data-testid="concierge-call-now"
+              onClick={() =>
+                trackConciergeEvent("concierge_call_tap", {
+                  session_id: session.id,
+                  page_path: pathname,
+                })
+              }
+            >
+              Anrufen
             </a>
             {!showLeadForm && (
               <button

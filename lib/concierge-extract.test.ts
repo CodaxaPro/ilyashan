@@ -21,6 +21,10 @@ describe("concierge extract", () => {
     assert.equal(extractFloorLevel("Erdgeschoss"), "eg");
     assert.equal(extractFloorLevel("3. OG"), "og3");
     assert.equal(extractFloorLevel("Dachgeschoss"), "dg");
+    assert.equal(extractFloorLevel("1"), "og1");
+    assert.equal(extractFloorLevel("2"), "og2");
+    assert.equal(extractFloorLevel("0"), "eg");
+    assert.equal(extractFloorLevel("Etage 1"), "og1");
   });
 
   it("extracts PLZ", () => {

@@ -9,6 +9,10 @@ import { createOpenAiProviderFromEnv } from "./ai/openai-provider";
 import { runAssistantAi } from "./ai/run";
 import type { AiProvider, AiRunMeta } from "./ai/types";
 import {
+  advanceFensterDialog,
+  shouldHandleFensterDialog,
+} from "./dialog/fenster";
+import {
   advanceTreppenhausDialog,
   shouldHandleTreppenhausDialog,
 } from "./dialog/treppenhaus";
@@ -69,6 +73,29 @@ export async function processConciergeMessageAsync(
   const session = sessionInput ?? createSession();
   const treppenhausCtx =
     isAssistantToolsEnabled() && shouldHandleTreppenhausDialog(session, message);
+  const fensterMidCollect =
+    isAssistantToolsEnabled() &&
+    shouldHandleFensterDialog(session, message) &&
+    Boolean(session.quote.windowCount && session.quote.windowCount >= 1 && !session.quote.floorLevel);
+
+  // Waiting for Etage after Flügel — never let AI reset the thread
+  if (fensterMidCollect) {
+    const d = advanceFensterDialog(session, message, pricingCtx);
+    return {
+      reply: {
+        text: d.text,
+        intent: "price",
+        session: d.session,
+        actions: d.actions,
+        quickReplies: d.quickReplies,
+      },
+      meta: {
+        ...baseMeta(),
+        toolNames: ["advance_fenster_dialog"],
+        fallbackReason: d.complete ? "fenster_quote" : "fenster_collect",
+      },
+    };
+  }
 
   if (isAssistantAiEnabled()) {
     if (!isAssistantAiConfigured() && !providerOverride) {

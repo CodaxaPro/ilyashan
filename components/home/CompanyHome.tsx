@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/lib/config";
+import { buildWhatsAppUrl, contactReachabilityLine } from "@/lib/contact-channels";
 import { companyServices } from "@/lib/company-services";
 import { homeFaq } from "@/lib/service-pages";
 import { routes } from "@/lib/routes";
@@ -34,11 +35,15 @@ export function CompanyHome() {
               Fensterpreis sofort. Büro und Treppenhaus online kalkulieren. Die übrigen Leistungen zum
               Festpreis nach Besichtigung. Versichert.
             </p>
+            <p className="mt-6 text-sm text-muted">
+              {contactReachabilityLine()}
+            </p>
             <a
-              href={`tel:${siteConfig.contact.phone}`}
-              className="mt-6 inline-block font-medium text-foreground underline decoration-border underline-offset-4 hover:text-primary"
+              href={buildWhatsAppUrl()}
+              className="mt-3 inline-flex items-center gap-2 font-medium text-foreground underline decoration-border underline-offset-4 hover:text-primary"
+              data-analytics-id="home-hero-whatsapp"
             >
-              {siteConfig.contact.phoneDisplay}
+              {siteConfig.messaging.ctaWhatsApp}
             </a>
           </div>
           <figure className="lg:col-span-6">
@@ -151,19 +156,11 @@ export function CompanyHome() {
           <div>
             <h2 className="font-serif text-3xl font-medium sm:text-4xl">Anfrage</h2>
             <p className="mt-4 max-w-md text-sm leading-relaxed text-muted">
-              Nennen Sie die Leistung, den Ort und die Größe. Den Festpreis gibt es nach der Besichtigung.
-              Fenster und Büro können Sie vorher kalkulieren.
+              Am schnellsten: Online-Kalkulation oder WhatsApp. Schriftliche Anfragen beantworten wir
+              in der Regel innerhalb von {siteConfig.business.responseTime}. {siteConfig.contact.hoursLine}.
             </p>
           </div>
           <div className="grid gap-4 text-sm sm:grid-cols-2">
-            <a href={`tel:${siteConfig.contact.phone}`} className="border border-border bg-card p-5 hover:border-primary">
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Anrufen</span>
-              <span className="mt-2 block font-serif text-xl">{siteConfig.contact.phoneDisplay}</span>
-            </a>
-            <a href={`mailto:${siteConfig.contact.email}`} className="border border-border bg-card p-5 hover:border-primary">
-              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Schreiben</span>
-              <span className="mt-2 block font-serif text-xl">{siteConfig.contact.email}</span>
-            </a>
             <Link href={routes.angebot} className="border border-border bg-card p-5 hover:border-primary">
               <span className="block text-xs uppercase tracking-[0.16em] text-muted">Fensterreinigung</span>
               <span className="mt-2 block font-serif text-xl">Preis berechnen</span>
@@ -176,6 +173,22 @@ export function CompanyHome() {
               <span className="block text-xs uppercase tracking-[0.16em] text-muted">Treppenhaus</span>
               <span className="mt-2 block font-serif text-xl">Preis kalkulieren</span>
             </Link>
+            <a
+              href={buildWhatsAppUrl()}
+              className="border border-border bg-card p-5 hover:border-primary"
+              data-analytics-id="home-kontakt-whatsapp"
+            >
+              <span className="block text-xs uppercase tracking-[0.16em] text-muted">WhatsApp</span>
+              <span className="mt-2 block font-serif text-xl">Nachricht senden</span>
+            </a>
+            <a href={`mailto:${siteConfig.contact.email}`} className="border border-border bg-card p-5 hover:border-primary">
+              <span className="block text-xs uppercase tracking-[0.16em] text-muted">E-Mail</span>
+              <span className="mt-2 block font-serif text-xl break-all">{siteConfig.contact.email}</span>
+            </a>
+            <a href={`tel:${siteConfig.contact.phone}`} className="border border-border bg-card p-5 hover:border-primary">
+              <span className="block text-xs uppercase tracking-[0.16em] text-muted">Telefon</span>
+              <span className="mt-2 block font-serif text-xl">{siteConfig.contact.phoneDisplay}</span>
+            </a>
           </div>
         </div>
       </section>

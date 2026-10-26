@@ -1,16 +1,13 @@
 "use client";
 
-import { siteConfig } from "@/lib/config";
+import { buildWhatsAppUrl } from "@/lib/contact-channels";
 import { WhatsAppIcon } from "@/components/ui/Button";
 
+/** Floating WhatsApp — kanal tanınırlığı için marka-teal; header CTAs marka rengi kullanır. */
 export function WhatsAppButton() {
-  const message = encodeURIComponent(
-    "Hallo, ich möchte ein Angebot für eine Reinigung anfordern."
-  );
-
   return (
     <a
-      href={`https://wa.me/${siteConfig.contact.whatsapp}?text=${message}`}
+      href={buildWhatsAppUrl()}
       target="_blank"
       rel="noopener noreferrer"
       data-analytics-id="floating-whatsapp"

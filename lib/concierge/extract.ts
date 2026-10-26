@@ -20,7 +20,7 @@ export function extractWindowCount(text: string): number | null {
 }
 
 export function extractFloorLevel(text: string): FloorLevel | null {
-  const lower = text.toLowerCase();
+  const lower = text.toLowerCase().trim();
   if (/\b(eg|erdgeschoss|parterre|ground\s*floor)\b/i.test(lower)) return "eg";
   if (/dachgeschoss|\bdg\b|dach\s*geschoss/i.test(lower)) return "dg";
   if (/5\.?\s*(?:og|stock)|fünft|fünfte\s*etage/i.test(lower)) return "og5plus";
@@ -28,6 +28,20 @@ export function extractFloorLevel(text: string): FloorLevel | null {
   if (/3\.?\s*(?:og|stock)|dritt|dritte\s*etage/i.test(lower)) return "og3";
   if (/2\.?\s*(?:og|stock)|zweit|zweite\s*etage/i.test(lower)) return "og2";
   if (/1\.?\s*(?:og|stock)|erste\s*etage/i.test(lower)) return "og1";
+
+  // Short replies after „Welche Etage?“ — "1", "2.", "Etage 1", "Stock 3"
+  const lone = lower.match(
+    /^(?:etage|stockwerk|stock)?\s*([0-5])\s*\.?\s*(?:og|stock|etage|obergeschoss)?$/i
+  );
+  if (lone) {
+    const n = parseInt(lone[1], 10);
+    if (n === 0) return "eg";
+    if (n === 1) return "og1";
+    if (n === 2) return "og2";
+    if (n === 3) return "og3";
+    if (n === 4) return "og4";
+    return "og5plus";
+  }
   return null;
 }
 

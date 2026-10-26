@@ -19,6 +19,8 @@ export const siteConfig = {
     city: "Baesweiler",
     postalCode: "52499",
     region: "Baesweiler, Aachen & Umgebung",
+    /** Öffentliche Erreichbarkeit — Schriftkanal priorisiert */
+    hoursLine: "Mo–Fr 8–18 Uhr",
   },
 
   serviceArea: {
@@ -117,8 +119,12 @@ export const siteConfig = {
     legacyFormHint:
       "Für eine Sofort-Preisschätzung empfehlen wir unseren Angebots-Wizard. Mit diesem Formular senden Sie eine allgemeine Anfrage – Ihr verbindliches Festpreis-Angebot folgt innerhalb von 24 Stunden.",
     ctaSubmitSimple: "Anfrage absenden",
+    /** Nur Fenster-Wizard / Fenster-Kontexte */
     ctaPrimary: "Preis jetzt berechnen",
     ctaSecondary: "Kostenloses Angebot",
+    ctaWhatsApp: "Per WhatsApp schreiben",
+    /** Siteweit (Header, Hero-Banner): nicht nur Fenster */
+    ctaAnfrage: "Anfrage",
     trustLivePrice: "Sofort-Preisschätzung online",
   },
 

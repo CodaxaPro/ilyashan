@@ -6,7 +6,8 @@ import { PricingConfigProvider } from "@/components/quote/PricingConfigProvider"
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
-import { Button } from "@/components/ui/Button";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
+import { buildWhatsAppUrl } from "@/lib/contact-channels";
 
 export const metadata: Metadata = pageMetadata({
   title: `Preis berechnen – Fensterreinigung ${siteConfig.contact.region}`,
@@ -29,8 +30,9 @@ export default function AngebotPage() {
               {siteConfig.messaging.angebotIntro}
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button href={`tel:${siteConfig.contact.phone}`} variant="outline" size="lg">
-                {siteConfig.contact.phoneDisplay}
+              <Button href={buildWhatsAppUrl()} variant="onDark" size="lg" data-analytics-id="angebot-hero-whatsapp">
+                <WhatsAppIcon />
+                {siteConfig.messaging.ctaWhatsApp}
               </Button>
             </div>
           </div>

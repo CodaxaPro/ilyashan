@@ -1,6 +1,7 @@
 import { siteConfig } from "@/lib/config";
+import { buildWhatsAppUrl, contactReachabilityLine } from "@/lib/contact-channels";
 import { routes } from "@/lib/routes";
-import { Button } from "@/components/ui/Button";
+import { Button, WhatsAppIcon } from "@/components/ui/Button";
 
 const wizardSteps = [
   "Leistung wählen",
@@ -37,23 +38,42 @@ export function ContactSection() {
               ))}
             </div>
 
-            <Button href={routes.angebot} variant="primary" size="lg" className="w-full sm:w-auto">
-              {siteConfig.messaging.ctaPrimary}
-            </Button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button href="/de#kontakt" variant="primary" size="lg" className="w-full sm:w-auto">
+                {siteConfig.messaging.ctaAnfrage}
+              </Button>
+              <Button
+                href={buildWhatsAppUrl()}
+                variant="secondary"
+                size="lg"
+                className="w-full sm:w-auto"
+                data-analytics-id="contact-section-whatsapp"
+              >
+                <WhatsAppIcon />
+                {siteConfig.messaging.ctaWhatsApp}
+              </Button>
+            </div>
 
             <div className="mt-8 p-6 bg-white rounded-2xl border border-border">
-              <h3 className="font-bold mb-3">Direkt kontaktieren</h3>
+              <h3 className="font-bold mb-3">Schriftlich kontaktieren</h3>
+              <p className="mb-4 text-sm text-muted">{contactReachabilityLine()}</p>
               <div className="space-y-2 text-sm">
                 <p>
-                  <span className="text-muted">Telefon:</span>{" "}
-                  <a href={`tel:${siteConfig.contact.phone}`} className="text-primary font-semibold">
-                    {siteConfig.contact.phoneDisplay}
+                  <span className="text-muted">WhatsApp:</span>{" "}
+                  <a href={buildWhatsAppUrl()} className="text-primary font-semibold">
+                    Nachricht senden
                   </a>
                 </p>
                 <p>
                   <span className="text-muted">E-Mail:</span>{" "}
                   <a href={`mailto:${siteConfig.contact.email}`} className="text-primary font-semibold">
                     {siteConfig.contact.email}
+                  </a>
+                </p>
+                <p>
+                  <span className="text-muted">Telefon:</span>{" "}
+                  <a href={`tel:${siteConfig.contact.phone}`} className="font-semibold text-foreground/80">
+                    {siteConfig.contact.phoneDisplay}
                   </a>
                 </p>
                 <p>
