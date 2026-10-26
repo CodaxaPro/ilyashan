@@ -12,9 +12,18 @@ interface PhotoUploaderProps {
   photos: PhotoPayload[];
   onChange: (photos: PhotoPayload[]) => void;
   testId?: string;
+  /** P2 — mandatory intake (Bauend / starke Verschmutzung …) */
+  required?: boolean;
+  helperText?: string;
 }
 
-export function PhotoUploader({ photos, onChange, testId = "photo-uploader" }: PhotoUploaderProps) {
+export function PhotoUploader({
+  photos,
+  onChange,
+  testId = "photo-uploader",
+  required = false,
+  helperText,
+}: PhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -56,9 +65,12 @@ export function PhotoUploader({ photos, onChange, testId = "photo-uploader" }: P
     <div className="space-y-3" data-testid={testId}>
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-foreground">Fotos (optional)</p>
+          <p className="text-sm font-medium text-foreground">
+            Fotos{required ? " *" : " (optional)"}
+          </p>
           <p className="text-xs text-muted">
-            Bis zu {MAX_PHOTOS} Fotos · JPG/PNG/WebP · max. 2 MB je Foto
+            {helperText ??
+              `Bis zu ${MAX_PHOTOS} Fotos · JPG/PNG/WebP · max. 2 MB je Foto`}
           </p>
         </div>
         {photos.length < MAX_PHOTOS && (
