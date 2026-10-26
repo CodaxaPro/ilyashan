@@ -11,7 +11,7 @@ import { WhatsAppButton } from "@/components/WhatsAppButton";
 export const metadata: Metadata = {
   ...pageMetadata({
     title: "Impressum",
-    description: `Impressum und Kontakt — ${siteConfig.name}, ${siteConfig.contact.address}, ${siteConfig.contact.city}.`,
+    description: `Impressum — ${siteConfig.name}.`,
     path: "/impressum",
   }),
   robots: {

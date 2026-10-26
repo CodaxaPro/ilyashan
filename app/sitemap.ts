@@ -81,7 +81,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
-    { url: `${baseUrl}/impressum`, lastModified, changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/datenschutz`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    // Impressum / Datenschutz: legally required on-site, deliberately NOT in sitemap (noindex).
   ];
 }

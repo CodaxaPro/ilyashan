@@ -22,5 +22,16 @@ describe("sitemap coverage", () => {
         `gebaeudereinigung should stay out of sitemap: ${page.path}`
       );
     }
+
+    assert.equal(
+      urls.some((u) => u.includes("/impressum")),
+      false,
+      "Impressum must stay out of sitemap (owner privacy)"
+    );
+    assert.equal(
+      urls.some((u) => u.includes("/datenschutz")),
+      false,
+      "Datenschutz must stay out of sitemap (owner privacy)"
+    );
   });
 });
