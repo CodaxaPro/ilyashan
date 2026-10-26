@@ -27,18 +27,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  return {
-    ...pageMetadata({
-      title: page.seo.title,
-      description: page.seo.description,
-      path: page.path,
-    }),
-    robots: {
-      index: false,
-      follow: false,
-      googleBot: { index: false, follow: false },
-    },
-  };
+  return pageMetadata({
+    title: page.seo.title,
+    description: page.seo.description,
+    path: page.path,
+  });
 }
 
 export default async function IntentPage({ params }: Props) {

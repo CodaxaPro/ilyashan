@@ -3,6 +3,7 @@ import type { MetadataRoute } from "next";
 import {
   GIFT_SLUGS,
   GUIDE_SLUGS,
+  INTENT_SEO_LINKS,
   LOCATION_SLUGS,
   PACKAGE_SLUGS,
 } from "@/lib/landing-pages";
@@ -41,6 +42,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
+  // Soft-launch removed these; restore indexable intent URLs (exclude gebaeudereinigung hub).
+  const intentPages = INTENT_SEO_LINKS.filter((page) => page.type !== "gebaeudereinigung").map(
+    (page) => ({
+      url: `${baseUrl}${page.path}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.78,
+    })
+  );
+
   return [
     { url: baseUrl, lastModified, changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/fensterreinigung`, lastModified, changeFrequency: "weekly", priority: 0.9 },
@@ -50,6 +61,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...locationPages,
     { url: `${baseUrl}/ratgeber`, lastModified, changeFrequency: "monthly", priority: 0.75 },
     ...guidePages,
+    ...intentPages,
     { url: `${baseUrl}/angebot`, lastModified, changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/bueroreinigung`, lastModified, changeFrequency: "weekly", priority: 0.88 },
     { url: `${baseUrl}/treppenhausreinigung`, lastModified, changeFrequency: "weekly", priority: 0.88 },
@@ -69,5 +81,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    { url: `${baseUrl}/impressum`, lastModified, changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/datenschutz`, lastModified, changeFrequency: "yearly", priority: 0.3 },
   ];
 }
