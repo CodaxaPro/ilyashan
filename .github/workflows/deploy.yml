@@ -28,4 +28,10 @@ jobs:
         run: vercel build --prod --scope treuepays-projects --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy to Production
-        run: vercel deploy --prebuilt --prod --scope treuepays-projects --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt --prod --scope treuepays-projects --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          # Prebuilt --prod sometimes leaves custom domains on an older deployment.
+          vercel alias set "$url" ilyashan.de --scope treuepays-projects --token=${{ secrets.VERCEL_TOKEN }}
+          vercel alias set "$url" www.ilyashan.de --scope treuepays-projects --token=${{ secrets.VERCEL_TOKEN }}
