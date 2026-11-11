@@ -140,8 +140,8 @@ export const siteConfig = {
       id: "gewerbe",
       title: "Gewerbefenster",
       description:
-        "Büro, Praxis oder Laden – Preis nach Fensteranzahl und Fläche. Flexible Termine, auch außerhalb der Öffnungszeiten.",
-      priceFrom: "auf Anfrage",
+        "Büro, Praxis oder Laden – gleiche Live-Rechnung wie Privat (pro Flügel). Große Scheiben individuell. Flexible Termine.",
+      priceFrom: "ab 49 €",
       icon: "building",
     },
     {

@@ -60,7 +60,7 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
       if (floor === "eg") continue;
       const data = {
         ...initialQuoteFormData,
-        services: ["privat"] as const,
+        services: ["privat"] as import("./quote-form").QuoteServiceId[],
         objectType: "wohnung" as const,
         floorLevel: floor as typeof initialQuoteFormData.floorLevel,
         elevator: "nein" as const,

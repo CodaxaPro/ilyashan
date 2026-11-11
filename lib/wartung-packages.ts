@@ -182,8 +182,9 @@ export function getWartungPackageById(
 
 export type WartungAudience = "privat" | "gewerbe";
 
-export function getWartungAudience(services: string[]): WartungAudience {
-  return services.includes("gewerbe") ? "gewerbe" : "privat";
+export function getWartungAudience(_services: string[]): WartungAudience {
+  // Live-Preispolitik: Wartungspakete wie Privat anzeigen.
+  return "privat";
 }
 
 export function filterWartungPackagesForAudience(

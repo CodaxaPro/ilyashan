@@ -46,7 +46,11 @@ export async function POST(request: Request) {
 
     if (!result.ok) {
       const status =
-        result.code === "validation" || result.code === "photos" ? 400 : 503;
+        result.code === "validation" ||
+        result.code === "photos" ||
+        result.code === "photos_required"
+          ? 400
+          : 503;
       return NextResponse.json({ error: result.messageDe }, { status });
     }
 

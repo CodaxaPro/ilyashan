@@ -6,6 +6,7 @@ import {
   buildInfoBox,
   escapeHtml,
 } from "@/lib/email-templates";
+import { buildCustomerWhatsAppUrl, toTelHref } from "@/lib/phone-de";
 
 const serviceLabels: Record<string, string> = {
   privat: "Privatfenster",
@@ -29,9 +30,6 @@ function getServiceLabel(service: string) {
   return serviceLabels[service] ?? service;
 }
 
-function cleanPhone(phone: string) {
-  return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
-}
 
 function buildReplyBody(name: string, serviceLabel: string) {
   return [
@@ -55,10 +53,11 @@ function buildReplyBody(name: string, serviceLabel: string) {
 export function buildAdminNotificationEmail(data: ContactEmailData, photoCount = 0) {
   const serviceLabel = getServiceLabel(data.service);
   const timestamp = new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" });
-  const phoneClean = cleanPhone(data.phone);
   const replyBody = buildReplyBody(data.name, serviceLabel);
-  const whatsappText = encodeURIComponent(
-    `Guten Tag ${data.name}, vielen Dank für Ihre Anfrage (${serviceLabel}). Ihr Festpreis-Angebot: ___ €. Termin: ___. Freundliche Grüße – Ilyashan Fensterreinigung`
+  const callHref = toTelHref(data.phone);
+  const whatsappHref = buildCustomerWhatsAppUrl(
+    data.phone,
+    `Guten Tag ${data.name.split(/\s+/)[0] || data.name}, danke für Ihre Anfrage (${serviceLabel}). Ihr Festpreis-Angebot: ___ €. Termin: ___. Freundliche Grüße – Ilyashan`
   );
   const mailtoReply = data.email
     ? `mailto:${data.email}?subject=${encodeURIComponent("Ihr Angebot – Ilyashan Fensterreinigung")}&body=${encodeURIComponent(replyBody)}`
@@ -77,8 +76,8 @@ export function buildAdminNotificationEmail(data: ContactEmailData, photoCount =
     ])}
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Schnellantwort</p>
   <div>
-      ${buildButton(`tel:${data.phone}`, "Anrufen", "#0369a1")}
-      ${buildButton(`https://wa.me/${phoneClean}?text=${whatsappText}`, "WhatsApp", "#25D366")}
+      ${callHref ? buildButton(callHref, "Anrufen", "#0369a1") : ""}
+      ${whatsappHref ? buildButton(whatsappHref, "WhatsApp", "#25D366") : ""}
       ${mailtoReply ? buildButton(mailtoReply, "Angebot senden", "#059669") : ""}
     </div>`;
 

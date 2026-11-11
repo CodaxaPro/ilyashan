@@ -12,7 +12,9 @@ export interface PhotoPayload {
 
 export interface ResendPhotoAttachment {
   filename: string;
-  content: string;
+  /** Raw base64 (Resend) or Buffer — Buffer is more reliable for images. */
+  content: string | Buffer;
+  contentType: string;
 }
 
 export function normalizePhotoPayloads(raw: unknown): PhotoPayload[] {
@@ -62,24 +64,71 @@ export function validatePhotos(photos: PhotoPayload[]): string | null {
 
 export function photosToResendAttachments(photos: PhotoPayload[]): ResendPhotoAttachment[] {
   return photos.map((photo, index) => {
+    const contentType = ALLOWED_PHOTO_TYPES.has(photo.type) ? photo.type : "image/jpeg";
     const ext =
-      photo.type === "image/png" ? "png" : photo.type === "image/webp" ? "webp" : "jpg";
+      contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
     const safeName = photo.name.replace(/[^\w.\-äöüÄÖÜß ]/g, "_").slice(0, 60);
     const filename = safeName.includes(".") ? safeName : `fenster-foto-${index + 1}.${ext}`;
-    return { filename, content: photo.data };
+    // Buffer + contentType: Resend liefert Anhänge sonst oft ohne Bilddarstellung.
+    return {
+      filename,
+      content: Buffer.from(photo.data, "base64"),
+      contentType,
+    };
   });
 }
 
-export async function readFileAsPhotoPayload(file: File): Promise<PhotoPayload> {
-  const buffer = await file.arrayBuffer();
-  const bytes = new Uint8Array(buffer);
+function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
   for (let i = 0; i < bytes.length; i++) {
     binary += String.fromCharCode(bytes[i]);
   }
+  return btoa(binary);
+}
+
+/**
+ * Client-side: Bilder vor Upload verkleinern (Payload-/Mail-Limit).
+ * Max. Kantenlänge 1600px, JPEG ~0.72 — Ziel unter ~900 KB.
+ */
+export async function compressImageFileForUpload(file: File): Promise<File> {
+  if (typeof window === "undefined" || typeof document === "undefined") return file;
+  if (!file.type.startsWith("image/")) return file;
+
+  const maxEdge = 1600;
+  const quality = 0.72;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    bitmap.close();
+    return file;
+  }
+  ctx.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
+  );
+  if (!blob) return file;
+
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "fenster-foto";
+  return new File([blob], `${baseName}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
+}
+
+export async function readFileAsPhotoPayload(file: File): Promise<PhotoPayload> {
+  const prepared = await compressImageFileForUpload(file);
+  const buffer = await prepared.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
   return {
-    name: file.name,
-    type: file.type,
-    data: btoa(binary),
+    name: prepared.name,
+    type: prepared.type || "image/jpeg",
+    data: bytesToBase64(bytes),
   };
 }

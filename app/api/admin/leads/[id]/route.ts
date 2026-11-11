@@ -30,6 +30,18 @@ import {
 } from "@/lib/leads-store";
 import { parseFestpreisInput } from "@/lib/festpreis";
 import { getLeadDeletePolicy } from "@/lib/admin-lead-lifecycle";
+import { deleteLeadPhotos, getLeadPhotos } from "@/lib/lead-photos";
+import {
+  buildCsatInviteEmail,
+  buildCsatPageUrl,
+  shouldSendCsatInvite,
+} from "@/lib/csat/policy";
+import {
+  createDepositRequest,
+  markDepositPaid,
+  markDepositWaived,
+} from "@/lib/deposits/request-deposit";
+import type { LeadDeposit } from "@/lib/deposits/policy";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -155,8 +167,14 @@ export async function GET(request: Request, context: { params: Promise<{ id: str
 
   const origin = new URL(request.url).origin;
   const terminUrl = buildTerminPageUrl(origin, lead.id);
+  const photos = lead.photoCount > 0 ? await getLeadPhotos(lead.id) : [];
 
-  return NextResponse.json({ lead, storageConfigured: isLeadsStoreConfigured(), terminUrl });
+  return NextResponse.json({
+    lead,
+    photos,
+    storageConfigured: isLeadsStoreConfigured(),
+    terminUrl,
+  });
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
@@ -178,6 +196,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     emailAction?: LeadEmailActionInput;
     /** Soft-archive toggle — when set, only updates archivedAt. */
     archived?: boolean;
+    /** P2 — Anzahlung status */
+    depositAction?: "request" | "paid" | "waived";
+    depositAmountEur?: number;
   };
 
   if (typeof body.archived === "boolean") {
@@ -188,6 +209,23 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       return NextResponse.json({ error: "Lead konnte nicht aktualisiert werden." }, { status: 500 });
     }
     return NextResponse.json({ success: true, lead: updated });
+  }
+
+  if (body.depositAction) {
+    let deposit: LeadDeposit;
+    if (body.depositAction === "request") {
+      deposit = createDepositRequest(lead, body.depositAmountEur);
+    } else if (body.depositAction === "paid") {
+      const base = lead.deposit ?? createDepositRequest(lead, body.depositAmountEur);
+      deposit = markDepositPaid(base);
+    } else {
+      deposit = markDepositWaived(lead.deposit, lead.id);
+    }
+    const updated = await updateLead(id, { deposit });
+    if (!updated) {
+      return NextResponse.json({ error: "Lead konnte nicht aktualisiert werden." }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, lead: updated, deposit });
   }
 
   if (body.status && !VALID_STATUSES.includes(body.status)) {
@@ -236,6 +274,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
   }
 
   const previousConfirmedDate = lead.appointment?.confirmedDate;
+  const previousStatus = lead.status;
   const { status, appointment, festpreis } = resolveLeadUpdate(lead, patchInput);
   const emailAction = resolveEmailActionForSave(lead, patchInput);
 
@@ -282,11 +321,41 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
       }
     : appointment;
 
+  let csatInvite = lead.csatInvite;
+  let csatEmailSent = false;
+
+  const provisionalForCsat = { ...lead, status, email: lead.email };
+  if (shouldSendCsatInvite(provisionalForCsat, previousStatus) && resend) {
+    const origin = new URL(request.url).origin;
+    const feedbackUrl = buildCsatPageUrl(origin, lead.id);
+    if (feedbackUrl && lead.email?.trim()) {
+      const csatMail = buildCsatInviteEmail({
+        name: lead.name,
+        feedbackUrl,
+        anfrageNr: lead.anfrageNr,
+      });
+      const fromEmail =
+        process.env.FROM_EMAIL ?? "Ilyashan Fensterreinigung <info@ilyashan.de>";
+      const { error: csatErr } = await resend.emails.send({
+        from: fromEmail,
+        to: [lead.email.trim()],
+        subject: csatMail.subject,
+        text: csatMail.text,
+        html: csatMail.html,
+      });
+      if (!csatErr) {
+        csatInvite = { sentAt: new Date().toISOString(), forStatus: "abgeschlossen" };
+        csatEmailSent = true;
+      }
+    }
+  }
+
   const updated = await updateLead(id, {
     status,
     adminNotes: body.adminNotes ?? lead.adminNotes,
     appointment: finalAppointment,
     festpreis,
+    csatInvite,
   });
 
   if (!updated) {
@@ -301,6 +370,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
     emailSent,
     emailError,
     emailAction: emailActionUsed,
+    csatEmailSent,
   });
 }
 
@@ -344,6 +414,7 @@ export async function DELETE(
   if (!ok) {
     return NextResponse.json({ error: "Lead konnte nicht gelöscht werden." }, { status: 500 });
   }
+  await deleteLeadPhotos(id);
 
   return NextResponse.json({ success: true, deletedId: id });
 }

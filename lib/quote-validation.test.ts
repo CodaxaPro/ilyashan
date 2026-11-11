@@ -47,7 +47,7 @@ describe("quote-validation – Services", () => {
 describe("quote-validation – Schritte", () => {
   const valid = {
     ...initialQuoteFormData,
-    services: ["privat"] as const,
+    services: ["privat"] as import("./quote-form").QuoteServiceId[],
     objectType: "wohnung" as const,
     floorLevel: "eg" as const,
     elevator: "ja" as const,

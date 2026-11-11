@@ -201,12 +201,56 @@ test.describe("Angebot Wizard – Voller Durchlauf", () => {
     await expect(page.getByRole("button", { name: /Per E-Mail senden/ })).toBeEnabled();
   });
 
+  test("P2: starke Verschmutzung → Foto Pflicht blockiert Absenden", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await page.getByTestId("dirt-stark").click();
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: /In den nächsten 1–2 Wochen/ }).click();
+    await page.getByTestId("quote-next").click();
+
+    await page.getByTestId("contact-firstName").fill("Anna");
+    await page.getByTestId("contact-lastName").fill("Müller");
+    await page.getByTestId("contact-phone").fill("01733828354");
+    await page.getByTestId("contact-postalCode").fill("52499");
+    await page.getByTestId("contact-city").fill("Baesweiler");
+    await page.getByTestId("contact-privacy").check();
+
+    await expect(page.getByTestId("quote-photos")).toBeVisible();
+    await expect(page.getByTestId("quote-photos")).toContainText(/Foto/i);
+    await expect(page.getByTestId("quote-submit-email")).toBeDisabled();
+  });
+
   test("Gewerbe: Objektart wird synchronisiert", async ({ page }) => {
     await page.goto(ANGEBOT);
     await page.getByTestId("service-gewerbe").click();
     await page.getByTestId("quote-next").click();
 
     await expect(page.getByRole("button", { name: "Gewerbe", exact: true })).toHaveClass(/border-primary/);
+  });
+
+  test("Gewerbe: Live-Preis = Privat-Formel inkl. MwSt.", async ({ page }) => {
+    await page.goto(ANGEBOT);
+    await page.getByTestId("service-gewerbe").click();
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: "Gewerbe", exact: true }).click();
+    await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
+    await page.getByRole("button", { name: "Ja", exact: true }).click();
+    await page.getByTestId("quote-next").click();
+
+    await expect(page.getByTestId("step3-basis-description")).toContainText(/Flügel/i);
+    await expect(page.getByTestId("step3-basis-description")).not.toContainText(/m² Glas/i);
+    await expect(priceEstimateAmount(page)).toBeVisible();
+    await expect(page.getByTestId("price-estimate-range").first()).toContainText(/inkl\. MwSt/);
+    await expect(page.getByTestId("price-estimate-range").first()).not.toContainText(/Netto/);
+    await expect(page.getByTestId("price-breakdown").first()).toContainText("Fensterreinigung (Basis)");
+  });
+
+  test("Große Scheiben → individuelle Anfrage, kein Live-Preis", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await page.getByTestId("window-size-large").click();
+    await expect(page.getByTestId("window-size-large-hint")).toBeVisible();
+    await expect(page.getByTestId("price-estimate-individual").first()).toBeVisible();
+    await expect(page.getByTestId("price-estimate-amount")).toHaveCount(0);
   });
 });
 
@@ -221,6 +265,65 @@ test.describe("Angebot Wizard – API", () => {
       data: { website: "spam", quote: {} },
     });
     expect(honeypot.status()).toBe(200);
+  });
+
+  test("P2: stark dirt ohne Fotos → 400 photos_required", async ({ request }) => {
+    const res = await request.post("/api/contact", {
+      data: {
+        quote: {
+          services: ["privat"],
+          objectType: "wohnung",
+          floorLevel: "eg",
+          elevator: "ja",
+          windowCount: 8,
+          dirtLevel: "stark",
+          cleaningSide: "innen_aussen",
+          scheduleOption: "1-2_wochen",
+          firstName: "Anna",
+          lastName: "Müller",
+          phone: "01733828354",
+          postalCode: "52499",
+          city: "Baesweiler",
+          street: "Teststr.",
+          houseNumber: "1",
+          privacyAccepted: true,
+        },
+        photos: [],
+      },
+    });
+    expect(res.status()).toBe(400);
+    const body = await res.json();
+    expect(String(body.error)).toMatch(/Foto/i);
+  });
+
+  test("P2: große Scheiben ohne Fotos → 400 photos_required", async ({ request }) => {
+    const res = await request.post("/api/contact", {
+      data: {
+        quote: {
+          services: ["privat"],
+          objectType: "wohnung",
+          floorLevel: "eg",
+          elevator: "ja",
+          windowCount: 8,
+          windowSize: "large",
+          dirtLevel: "normal",
+          cleaningSide: "innen_aussen",
+          scheduleOption: "1-2_wochen",
+          firstName: "Anna",
+          lastName: "Müller",
+          phone: "01733828354",
+          postalCode: "52499",
+          city: "Baesweiler",
+          street: "Teststr.",
+          houseNumber: "1",
+          privacyAccepted: true,
+        },
+        photos: [],
+      },
+    });
+    expect(res.status()).toBe(400);
+    const body = await res.json();
+    expect(String(body.error)).toMatch(/Foto/i);
   });
 });
 

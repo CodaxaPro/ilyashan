@@ -13,6 +13,7 @@ import {
   type WartungPriceBreakdown,
 } from "@/lib/wartung-pricing";
 import { getWartungAudience } from "@/lib/wartung-packages";
+import { shouldCalculateLivePrice } from "@/lib/live-pricing-policy";
 
 export type PricingConstants = {
   -readonly [K in keyof typeof RECOMMENDED_PRICING]: typeof RECOMMENDED_PRICING[K] extends number
@@ -51,9 +52,7 @@ function roundTo5(value: number) {
 }
 
 function getMinimum(data: QuoteFormData, P: PricingConstants) {
-  if (data.services.includes("gewerbe") || data.objectType === "gewerbe") {
-    return P.minimumGewerbe;
-  }
+  // Live-Preis immer Privat: Mindestauftrag nach Objekt (Haus/Wohnung), nie Gewerbe-m²-Minimum.
   if (data.objectType === "haus") return P.minimumHaus;
   return P.minimumWohnung;
 }
@@ -73,10 +72,6 @@ function getAccessPercent(
   const base = P.floorAccessPercent[floorLevel] ?? 0;
   const factor = elevator === "unbekannt" ? P.elevatorUnbekanntFactor : 1;
   return base * factor;
-}
-
-function isGewerbePricing(data: QuoteFormData) {
-  return data.services.includes("gewerbe");
 }
 
 function isWartungJob(data: QuoteFormData) {
@@ -184,24 +179,13 @@ function calculateWindowLines(data: QuoteFormData, P: PricingConstants): PriceLi
   const accessPercent = getAccessPercent(data.floorLevel, data.elevator, P);
   const lines: PriceLineItem[] = [];
 
-  let base: number;
-
-  if (isGewerbePricing(data)) {
-    const glassSqm = data.windowCount * P.avgSqmPerFluegel;
-    base = glassSqm * P.gewerbePerSqm * sideMul * dirtMul;
-    lines.push({
-      label: "Gewerbefenster (Basis)",
-      amount: base,
-      detail: `${glassSqm.toFixed(1)} m² × ${P.gewerbePerSqm.toFixed(2)} € × ${sideMul} × ${dirtMul}`,
-    });
-  } else {
-    base = data.windowCount * P.basePerFluegel * sideMul * dirtMul;
-    lines.push({
-      label: "Fensterreinigung (Basis)",
-      amount: base,
-      detail: `${data.windowCount} Flügel × ${P.basePerFluegel.toFixed(2)} € × ${sideMul} × ${dirtMul}`,
-    });
-  }
+  // Live-Preis immer Privat (€/Flügel) – auch bei Leistung/Objekt Gewerbe.
+  const base = data.windowCount * P.basePerFluegel * sideMul * dirtMul;
+  lines.push({
+    label: "Fensterreinigung (Basis)",
+    amount: base,
+    detail: `${data.windowCount} Flügel × ${P.basePerFluegel.toFixed(2)} € × ${sideMul} × ${dirtMul}`,
+  });
 
   if (heightMul > 1) {
     lines.push({
@@ -258,6 +242,7 @@ export function calculatePriceEstimate(
   overrides?: PricingOverrides,
   wartungConfig?: WartungPricingConfig
 ): PriceEstimate | null {
+  if (!shouldCalculateLivePrice(data)) return null;
   if (!data.windowCount || data.windowCount < 1) return null;
   if (!data.services?.length) return null;
 

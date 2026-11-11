@@ -37,7 +37,7 @@ function floorAccessPercent(
 }
 
 function getMinimum(data: QuoteFormData, pricing: PricingConstants) {
-  if (data.services.includes("gewerbe") || data.objectType === "gewerbe") return pricing.minimumGewerbe;
+  // Align with live calculator: always Privat minimums (never Gewerbe m²-floor).
   if (data.objectType === "haus") return pricing.minimumHaus;
   return pricing.minimumWohnung;
 }
@@ -53,13 +53,8 @@ export function referencePriceBreakdown(
   const accessPct = floorAccessPercent(data.floorLevel, data.elevator, pricing);
   const n = data.windowCount;
 
-  let base: number;
-  if (data.services.includes("gewerbe")) {
-    const glassSqm = n * pricing.avgSqmPerFluegel;
-    base = glassSqm * pricing.gewerbePerSqm * sideMul * dirtMul;
-  } else {
-    base = n * pricing.basePerFluegel * sideMul * dirtMul;
-  }
+  // Live-Preis immer Privat (€/Flügel).
+  const base = n * pricing.basePerFluegel * sideMul * dirtMul;
 
   const heightSurcharge = heightMul > 1 ? base * (heightMul - 1) : 0;
   const baseWithHeight = base * heightMul;

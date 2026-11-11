@@ -113,8 +113,16 @@ export function buildDataTable(rows: [string, string][]) {
   </table>`;
 }
 
+/**
+ * CTA-Button für HTML-Mails.
+ * - href wird escaped (& → &amp;) sonst brechen mailto/WhatsApp-Links in Webmail
+ * - http(s)-Links öffnen in neuem Tab (IONOS/Gmail-Webmail: sonst oft „kein Klick“)
+ */
 export function buildButton(href: string, label: string, color: string) {
-  return `<a href="${href}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:600;margin:4px 8px 4px 0;">${escapeHtml(label)}</a>`;
+  const safeHref = escapeHtml(href);
+  const isWeb = /^https?:\/\//i.test(href);
+  const targetAttrs = isWeb ? ` target="_blank" rel="noopener noreferrer"` : "";
+  return `<a href="${safeHref}"${targetAttrs} style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;padding:13px 22px;border-radius:10px;font-size:14px;font-weight:600;margin:4px 8px 4px 0;">${escapeHtml(label)}</a>`;
 }
 
 export function buildInfoBox(text: string) {

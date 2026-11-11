@@ -23,6 +23,11 @@ import {
 } from "@/lib/quote-form";
 import { getWartungPackageById, type WartungPackage } from "@/lib/wartung-packages";
 import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
+import {
+  isLargeWindowQuote,
+  LARGE_WINDOW_PRICE_LABEL,
+  windowSizeLabels,
+} from "@/lib/live-pricing-policy";
 
 const reinigungsLabels: { key: keyof QuoteFormData; label: string }[] = [
   { key: "withFrame", label: "Mit Rahmen" },
@@ -99,6 +104,7 @@ export function getPriceLabel(
   pricingOverrides?: PricingOverrides,
   wartungConfig?: WartungPricingConfig
 ) {
+  if (isLargeWindowQuote(data)) return LARGE_WINDOW_PRICE_LABEL;
   const estimate = calculatePriceEstimate(data, pricingOverrides, wartungConfig);
   if (!estimate) return "–";
   const audience = resolvePriceAudience(data);
@@ -157,6 +163,7 @@ export function buildQuoteTableRows(
     ["Etage", getFloorLabel(data)],
     ["Aufzug", data.elevator ? elevatorLabels[data.elevator] ?? String(data.elevator) : "–"],
     ["Fensterflügel", String(data.windowCount)],
+    ["Fenstergröße", windowSizeLabels[data.windowSize] ?? "Standard"],
     ["Raumhöhe", `${data.roomHeight} m`],
     ["Verschmutzung", dirtLevelLabels[data.dirtLevel] ?? String(data.dirtLevel || "–")],
     ["Reinigungsumfang", cleaningSideLabels[data.cleaningSide] ?? String(data.cleaningSide || "–")],

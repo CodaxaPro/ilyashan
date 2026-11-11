@@ -12,6 +12,10 @@ import {
   vatFootnote,
   VAT_PERCENT_LABEL,
 } from "@/lib/vat-display";
+import {
+  isLargeWindowQuote,
+  LARGE_WINDOW_PRICE_NOTE,
+} from "@/lib/live-pricing-policy";
 
 interface PriceEstimateCardProps {
   data: QuoteFormData;
@@ -31,6 +35,39 @@ export function PriceEstimateCard({
   const estimate = useQuotePriceEstimate(data);
   const { config } = usePricingConfig();
   const audience = resolvePriceAudience(data);
+
+  if (isLargeWindowQuote(data)) {
+    const rootClass = sheet
+      ? className
+      : `rounded-2xl border-2 border-primary/20 bg-linear-to-br from-primary-light/40 to-white p-6 shadow-lg shadow-primary/5 ${className}`;
+    return (
+      <div className={rootClass} data-testid="price-estimate-individual">
+        {!sheet && (
+          <>
+            <p className="text-xs font-bold text-primary uppercase tracking-wider mb-2">
+              Individuelle Anfrage
+            </p>
+            <p className="text-xl font-bold text-foreground mb-2">Große / breite Scheiben</p>
+          </>
+        )}
+        <p className="text-sm text-muted leading-relaxed" data-testid="price-estimate-individual-note">
+          {LARGE_WINDOW_PRICE_NOTE}
+        </p>
+        {!compact && (
+          <ul className="mt-4 space-y-2">
+            <li className="flex items-center gap-2 text-sm text-foreground">
+              <span className="text-accent font-bold">✓</span>
+              Kein Live-Preis – wir kalkulieren nach Foto
+            </li>
+            <li className="flex items-center gap-2 text-sm text-foreground">
+              <span className="text-accent font-bold">✓</span>
+              Rückmeldung in 24 Std.
+            </li>
+          </ul>
+        )}
+      </div>
+    );
+  }
 
   if (!estimate) return null;
 

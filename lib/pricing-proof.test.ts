@@ -210,7 +210,12 @@ describe("Pricing proof – Referenzformel ≡ Engine", () => {
 
   it("Admin-Override basePerFluegel wirkt korrekt durch", () => {
     const data = base({ windowCount: 20 });
-    const override = { basePerFluegel: 7.5 };
+    const override = {
+      basePerFluegel: 7.5,
+      minimumWohnung: P.minimumWohnung,
+      minimumHaus: P.minimumHaus,
+      minimumGewerbe: P.minimumGewerbe,
+    };
     const ref = referencePriceBreakdown(data, { ...P, ...override } as typeof P);
     const est = calculatePriceEstimate(data, override, wartungConfig)!;
     assert.equal(est.calculatedSubtotal, ref.calculatedSubtotal);

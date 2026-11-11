@@ -34,6 +34,13 @@ describe("calculatePriceEstimate – Multiplikatoren", () => {
     assert.equal(calculatePriceEstimate({ windowCount: 8, services: [] }), null);
   });
 
+  it("liefert null bei großen / breiten Scheiben (individuelle Anfrage)", () => {
+    assert.equal(
+      calculatePriceEstimate(base({ windowSize: "large", windowCount: 12 })),
+      null
+    );
+  });
+
   it("Basis Privat: Flügel × 5 € × 1.0 × 1.0", () => {
     const est = breakdownTotal(base({ windowCount: 20 }));
     const core = est.breakdown.find((l) => l.label.includes("Basis"));
@@ -203,17 +210,18 @@ describe("calculatePriceEstimate – Mindest & Modelle", () => {
     assert.equal(est.amount, 70);
   });
 
-  it("Gewerbe m²-Modell nur bei Leistung Gewerbe", () => {
+  it("Gewerbe-Leistung nutzt dieselbe Privat-Flügel-Formel", () => {
     const gewerbe = breakdownTotal(
       base({ services: ["gewerbe"], objectType: "gewerbe", windowCount: 30 })
     );
-    assert.ok(gewerbe.breakdown.some((l) => l.label.includes("Gewerbefenster")));
+    assert.ok(gewerbe.breakdown.some((l) => l.label.includes("Fensterreinigung (Basis)")));
+    assert.equal(gewerbe.minimumAmount, P.minimumWohnung);
 
-    const privatObj = breakdownTotal(
-      base({ services: ["privat"], objectType: "gewerbe", windowCount: 30 })
+    const privat = breakdownTotal(
+      base({ services: ["privat"], objectType: "wohnung", windowCount: 30 })
     );
-    assert.ok(privatObj.breakdown.some((l) => l.label.includes("Fensterreinigung (Basis)")));
-    assert.equal(privatObj.minimumAmount, P.minimumGewerbe);
+    assert.equal(gewerbe.amount, privat.amount);
+    assert.equal(gewerbe.calculatedSubtotal, privat.calculatedSubtotal);
   });
 
   it("Wartung: Monatspreis mindestens 59 € (Vierteljährlich)", () => {

@@ -12,6 +12,7 @@ import { PhotoUploader } from "@/components/PhotoUploader";
 import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import { createQuotePricingContext } from "@/lib/quote-pricing-context";
 import type { PhotoPayload } from "@/lib/photo-upload";
+import { resolvePhotoIntakeRequirement } from "@/lib/photo-intake";
 import { useState } from "react";
 
 interface Step5ContactProps {
@@ -28,12 +29,14 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
   const [anfrageNr, setAnfrageNr] = useState<string | null>(null);
   const [photos, setPhotos] = useState<PhotoPayload[]>([]);
 
+  const photoPolicy = resolvePhotoIntakeRequirement({ quote: data });
   const canSubmit =
     data.firstName &&
     data.lastName &&
     data.phone &&
     data.postalCode &&
-    data.privacyAccepted;
+    data.privacyAccepted &&
+    (!photoPolicy.required || photos.length > 0);
 
   async function submitByEmail() {
     if (!canSubmit) return;
@@ -195,7 +198,13 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
       </div>
 
       <div className="mb-8">
-        <PhotoUploader photos={photos} onChange={setPhotos} testId="quote-photos" />
+        <PhotoUploader
+          photos={photos}
+          onChange={setPhotos}
+          testId="quote-photos"
+          required={photoPolicy.required}
+          helperText={photoPolicy.messageDe}
+        />
       </div>
 
       <label className="flex items-start gap-2 mb-8">
@@ -228,6 +237,8 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
           size="lg"
           className="w-full"
           onClick={submitByEmail}
+          disabled={!canSubmit || loading}
+          data-testid="quote-submit-email"
         >
           {loading ? "Wird gesendet..." : "Per E-Mail senden"}
         </Button>

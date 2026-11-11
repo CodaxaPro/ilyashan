@@ -18,6 +18,7 @@ import { createSession } from "./concierge/types";
 import { createConciergeStoredLead, createQuoteStoredLead } from "./lead-records";
 import { initialQuoteFormData } from "./quote-form";
 import { buildConciergeLeadAdminEmail } from "./concierge-email";
+import { defaultQuotePricingContext } from "./quote-pricing-context";
 
 describe("photo-upload", () => {
   const validPhoto: PhotoPayload = {
@@ -47,7 +48,12 @@ describe("photo-upload", () => {
     assert.equal(photos.length, 1);
     const attachments = photosToResendAttachments(photos);
     assert.equal(attachments[0].filename, "fenster.jpg");
-    assert.equal(attachments[0].content, validPhoto.data);
+    assert.equal(attachments[0].contentType, "image/jpeg");
+    assert.ok(Buffer.isBuffer(attachments[0].content));
+    assert.equal(
+      Buffer.from(validPhoto.data, "base64").equals(attachments[0].content as Buffer),
+      true
+    );
   });
 });
 
@@ -81,8 +87,9 @@ describe("concierge-analytics", () => {
     };
 
     assert.equal(trackConciergeEvent("concierge_open", { page_path: "/de" }), true);
-    assert.equal(calls[0]?.[0], "event");
-    assert.equal(calls[0]?.[1], "concierge_open");
+    const first = calls[0] as unknown[];
+    assert.equal(first[0], "event");
+    assert.equal(first[1], "concierge_open");
 
     delete (globalThis as { window?: unknown }).window;
   });
@@ -110,7 +117,7 @@ describe("concierge faz4 – lead records & email", () => {
       privacyAccepted: true,
     };
 
-    const lead = createQuoteStoredLead(quote, "ANG-2026-123456", 2);
+    const lead = createQuoteStoredLead(quote, "ANG-2026-123456", 2, defaultQuotePricingContext());
     assert.equal(lead.source, "quote");
     assert.equal(lead.photoCount, 2);
     assert.match(lead.summary, /Max Mustermann/);

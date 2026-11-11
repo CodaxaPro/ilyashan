@@ -7,6 +7,7 @@ import {
   canCustomerReschedule,
   LEAD_STATUS_LABELS_DE,
 } from "./termin-portal";
+import { DEFAULT_FENSTER_PRICING, toPricingOverrides, toWartungPricingConfig } from "./pricing-config";
 
 function lead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -18,7 +19,19 @@ function lead(overrides: Partial<StoredLead> = {}): StoredLead {
     summary: "x",
     photoCount: 0,
     quote: { windowCount: 10, services: ["privat"], postalCode: "40213", city: "Düsseldorf" },
-    priceSnapshot: { priceLabel: "ab 120 €", amount: 120, min: 120, max: 150, calculatedSubtotal: 120, minimumApplied: false, minimumAmount: 80, capturedAt: "2026-01-01", pricing: {}, wartungConfig: {}, wartungPackages: [] },
+    priceSnapshot: {
+      priceLabel: "ab 120 €",
+      amount: 120,
+      min: 120,
+      max: 150,
+      calculatedSubtotal: 120,
+      minimumApplied: false,
+      minimumAmount: 80,
+      capturedAt: "2026-01-01",
+      pricing: toPricingOverrides(DEFAULT_FENSTER_PRICING),
+      wartungConfig: toWartungPricingConfig(DEFAULT_FENSTER_PRICING),
+      wartungPackages: [],
+    },
     ...overrides,
   };
 }

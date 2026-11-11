@@ -5,6 +5,10 @@ import {
   parseFestpreisInput,
   formatFestpreisEmailLine,
 } from "./festpreis";
+import { DEFAULT_FENSTER_PRICING, toPricingOverrides, toWartungPricingConfig } from "./pricing-config";
+
+const snapshotPricing = toPricingOverrides(DEFAULT_FENSTER_PRICING);
+const snapshotWartung = toWartungPricingConfig(DEFAULT_FENSTER_PRICING);
 
 describe("festpreis helpers", () => {
   it("prefers saved festpreis over snapshot amount", () => {
@@ -20,8 +24,8 @@ describe("festpreis helpers", () => {
           minimumApplied: false,
           minimumAmount: 69,
           capturedAt: "2026-01-01",
-          pricing: {},
-          wartungConfig: { wartungPackages: [], wartungFirstVisitSurchargePercent: 0 },
+          pricing: snapshotPricing,
+          wartungConfig: snapshotWartung,
           wartungPackages: [],
         },
       }),
@@ -41,8 +45,8 @@ describe("festpreis helpers", () => {
           minimumApplied: false,
           minimumAmount: 69,
           capturedAt: "2026-01-01",
-          pricing: {},
-          wartungConfig: { wartungPackages: [], wartungFirstVisitSurchargePercent: 0 },
+          pricing: snapshotPricing,
+          wartungConfig: snapshotWartung,
           wartungPackages: [],
         },
       }),

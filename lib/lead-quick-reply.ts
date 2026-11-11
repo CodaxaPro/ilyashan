@@ -1,9 +1,11 @@
 import { siteConfig } from "@/lib/config";
 import { formatFestpreisDisplay } from "@/lib/vat-display";
 import type { PriceAudience } from "@/lib/vat-display";
+import { buildCustomerWhatsAppUrl, toTelHref, toWhatsAppIntlDigits } from "@/lib/phone-de";
 
+/** @deprecated use toWhatsAppIntlDigits — kept for existing imports/tests */
 export function cleanLeadPhone(phone: string): string {
-  return phone.replace(/\s+/g, "").replace(/^0/, "49").replace(/^\+/, "");
+  return toWhatsAppIntlDigits(phone) ?? phone.replace(/\D/g, "");
 }
 
 export interface LeadQuickReplyInput {
@@ -83,10 +85,11 @@ export function buildLeadOfferWhatsAppText(
   priceLabel: string,
   isFestpreis: boolean
 ): string {
+  const first = name.trim().split(/\s+/)[0] || name;
   if (isFestpreis) {
-    return `Guten Tag ${name}, vielen Dank für Ihre Anfrage (${services}). Ihr verbindlicher Festpreis: ${priceLabel}. Freundliche Grüße – Ilyashan Fensterreinigung`;
+    return `Guten Tag ${first}, danke für Ihre Anfrage (${services}). Ihr verbindlicher Festpreis: ${priceLabel}. Freundliche Grüße – Ilyashan`;
   }
-  return `Guten Tag ${name}, vielen Dank für Ihre Anfrage (${services}). Unverbindliche Preisschätzung: ${priceLabel || "folgt"}. Freundliche Grüße – Ilyashan Fensterreinigung`;
+  return `Guten Tag ${first}, danke für Ihre Anfrage (${services}). Unverbindliche Preisschätzung: ${priceLabel || "folgt"}. Freundliche Grüße – Ilyashan`;
 }
 
 /** Shared Schnellantwort links for admin email + admin panel. */
@@ -95,13 +98,12 @@ export function buildLeadQuickReplyLinks(input: LeadQuickReplyInput): LeadQuickR
   const phone = input.phone?.trim();
   const email = input.email?.trim();
 
-  const callHref = phone ? `tel:${phone}` : null;
+  const callHref = toTelHref(phone);
 
-  const whatsappHref = phone
-    ? `https://wa.me/${cleanLeadPhone(phone)}?text=${encodeURIComponent(
-        buildLeadOfferWhatsAppText(input.name, input.services, priceLabel, isFestpreis)
-      )}`
-    : null;
+  const whatsappHref = buildCustomerWhatsAppUrl(
+    phone,
+    buildLeadOfferWhatsAppText(input.name, input.services, priceLabel, isFestpreis)
+  );
 
   const mailtoHref = email
     ? `mailto:${email}?subject=${encodeURIComponent(

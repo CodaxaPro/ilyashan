@@ -29,6 +29,7 @@ import {
   validateCustomerInput,
   type CustomerInput,
 } from "./index";
+import { cents } from "./money";
 import { t } from "./i18n";
 
 function typical(area = 200): CustomerInput {
@@ -369,7 +370,7 @@ describe("cleaning/pricing + cost modes", () => {
     const cfg = {
       ...DEFAULT_CLEANING_CONFIG,
       overheadModel: "HOURLY_ALLOCATION" as const,
-      overheadPerHourCents: 800,
+      overheadPerHourCents: cents(800),
     };
     const cost = calculateJobCost(3, cfg);
     assert.equal(cost.overheadCents, 2400);
