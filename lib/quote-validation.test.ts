@@ -6,18 +6,21 @@ import {
   hasPrimaryService,
   isQuoteSubmissionValid,
   normalizeServices,
+  syncServicesWithObjectType,
   validateQuoteStep,
 } from "./quote-validation";
 
 describe("quote-validation – Services", () => {
-  it("verweigert nur Wartung ohne Hauptleistung", () => {
+  it("normalisiert reine Wartung zu Privat+Wartung", () => {
     assert.equal(hasPrimaryService(["wartung"]), false);
-    assert.equal(canProceedQuoteStep(1, { ...initialQuoteFormData, services: ["wartung"] }), false);
+    assert.deepEqual(normalizeServices(["wartung"]), ["privat", "wartung"]);
+    assert.equal(hasPrimaryService(normalizeServices(["wartung"])), true);
   });
 
   it("normalisiert Privat+Gewerbe Konflikt", () => {
     assert.deepEqual(normalizeServices(["privat", "gewerbe"]), ["gewerbe"]);
     assert.deepEqual(normalizeServices(["privat", "wartung"]), ["privat", "wartung"]);
+    assert.deepEqual(normalizeServices([]), ["privat"]);
   });
 
   it("Wartung ohne Paket blockiert Schritt 1", () => {
@@ -84,14 +87,19 @@ describe("quote-validation – Schritte", () => {
     );
   });
 
-  it("Schritt 2: Gewerbe-Leistung + Wohnung-Objekt blockiert", () => {
+  it("Objektart Gewerbe synchronisiert Service-Label", () => {
+    assert.deepEqual(syncServicesWithObjectType(["privat", "wartung"], "gewerbe"), [
+      "gewerbe",
+      "wartung",
+    ]);
+    assert.deepEqual(syncServicesWithObjectType(["gewerbe"], "wohnung"), ["privat"]);
     assert.equal(
       canProceedQuoteStep(2, {
         ...valid,
         services: ["gewerbe"],
-        objectType: "wohnung",
+        objectType: "gewerbe",
       }),
-      false
+      true
     );
   });
 

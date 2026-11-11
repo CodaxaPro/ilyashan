@@ -9,6 +9,7 @@ import {
 } from "@/lib/quote-form";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 import { formatNarrowStairsHint } from "@/lib/pricing-display";
+import { syncServicesWithObjectType } from "@/lib/quote-validation";
 
 interface Step2ObjectProps {
   data: QuoteFormData;
@@ -140,7 +141,12 @@ export function Step2Object({ data, onChange }: Step2ObjectProps) {
             required
             options={objectOptions}
             value={data.objectType}
-            onChange={(objectType) => onChange({ objectType })}
+            onChange={(objectType) =>
+              onChange({
+                objectType,
+                services: syncServicesWithObjectType(data.services, objectType),
+              })
+            }
             columnsClassName="grid-cols-2 sm:grid-cols-4"
             testIdPrefix="object-type"
           />
