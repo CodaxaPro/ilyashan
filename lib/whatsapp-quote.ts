@@ -18,9 +18,15 @@ import {
 import { formatEstimateRangeLabel, resolvePriceAudience } from "@/lib/vat-display";
 import { getReinigungswünscheLabel } from "@/lib/quote-summary";
 
+export type WhatsAppQuoteMeta = {
+  anfrageNr?: string | null;
+  photoCount?: number;
+};
+
 export function buildWhatsAppQuoteMessage(
   data: QuoteFormData,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  meta: WhatsAppQuoteMeta = {}
 ) {
   const services = data.services.map((s) => quoteServiceLabels[s]).join(", ") || "–";
   const addonParts: string[] = [];
@@ -44,7 +50,17 @@ export function buildWhatsAppQuoteMessage(
       : objectTypeLabels[data.objectType]
     : "";
 
+  const header: string[] = [];
+  if (meta.anfrageNr) header.push(`Anfrage-Nr.: ${meta.anfrageNr}`);
+  if (meta.photoCount && meta.photoCount > 0) {
+    header.push(
+      `Fotos: ${meta.photoCount} bereits an Ihr Team übermittelt (Admin/E-Mail) — hier nur Chat.`
+    );
+  }
+
   const lines = [
+    ...header,
+    header.length > 0 ? "" : null,
     "Guten Tag, ich möchte ein Angebot für Fensterreinigung anfragen:",
     "",
     `Leistung: ${serviceLine}`,
@@ -81,15 +97,17 @@ export function buildWhatsAppQuoteMessage(
     priceLine,
     "",
     "Freue mich auf Ihr Angebot!",
-  ].filter(Boolean);
+  ].filter((line): line is string => line !== null && line !== "");
 
   return lines.join("\n");
 }
 
 export function getWhatsAppQuoteUrl(
   data: QuoteFormData,
-  ctx: QuotePricingContext = defaultQuotePricingContext()
+  ctx: QuotePricingContext = defaultQuotePricingContext(),
+  meta: WhatsAppQuoteMeta = {}
 ) {
-  const text = encodeURIComponent(buildWhatsAppQuoteMessage(data, ctx));
-  return `https://wa.me/${siteConfig.contact.whatsapp}?text=${text}`;
+  const text = encodeURIComponent(buildWhatsAppQuoteMessage(data, ctx, meta));
+  // api.whatsapp.com: konsistent mit Admin-Schnellantwort / Webmail
+  return `https://api.whatsapp.com/send?phone=${siteConfig.contact.whatsapp}&text=${text}`;
 }

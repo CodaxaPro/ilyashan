@@ -165,6 +165,8 @@ describe("Live-Preispolitik – UI wiring proof", () => {
     assert.match(step3, /window-size-\$\{value\}/);
     assert.match(step3, /window-size-large-hint/);
     assert.match(step3, /formatBasePerFluegelDescription/);
+    assert.match(step3, /showLivePriceHints/);
+    assert.match(step3, /qualitativeExtraHints/);
     assert.doesNotMatch(step3, /formatGewerbeBaseDescription/);
     assert.match(card, /price-estimate-individual/);
     assert.match(dock, /isLargeWindowQuote/);

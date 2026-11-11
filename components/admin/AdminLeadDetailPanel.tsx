@@ -10,7 +10,6 @@ import {
   buildQuoteTableRowsFromContext,
   getPriceLabelFromContext,
   getServicesLabel,
-  getTerminLabel,
 } from "@/lib/quote-summary";
 import { useLeadQuotePricing } from "@/components/admin/useLeadQuotePricing";
 import {
@@ -500,6 +499,12 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
           <AdminPanel className="p-4 space-y-2 text-sm">
             {lead.phone && <p><strong>Telefon:</strong> {lead.phone}</p>}
             {lead.email && <p><strong>E-posta:</strong> {lead.email}</p>}
+            {quote && (quote.postalCode || quote.city) && (
+              <p>
+                <strong>PLZ / Ort:</strong>{" "}
+                {[quote.postalCode, quote.city].filter(Boolean).join(" ")}
+              </p>
+            )}
             <p><strong>Tarih:</strong> {new Date(lead.createdAt).toLocaleString("tr-TR")}</p>
             {lead.photoCount > 0 && (
               <div data-testid="admin-lead-photos">
@@ -622,18 +627,21 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
             <section className="space-y-3">
               <h3 className="font-bold text-foreground">Anfrage özeti</h3>
               <AdminPanel className="p-4">
-                <dl className="space-y-2 text-sm">
-                  {detailRows.slice(0, 10).map(([key, value]) => (
+                <dl className="space-y-2 text-sm" data-testid="admin-lead-detail-rows">
+                  {detailRows.map(([key, value]) => (
                     <div key={key} className="grid grid-cols-[1fr,1.2fr] gap-2">
                       <dt className="text-muted">{key}</dt>
                       <dd className="font-medium text-foreground">{value}</dd>
                     </div>
                   ))}
                 </dl>
-                <p className="mt-3 text-sm">
-                  <strong>Wunschtermin:</strong> {getTerminLabel(quote)}
-                </p>
-                <p className="text-sm text-primary font-semibold">{priceLabel}</p>
+                {lead.priceSnapshot?.priceLabel &&
+                  lead.priceSnapshot.priceLabel !== priceLabel && (
+                    <p className="mt-3 text-xs text-muted">
+                      Snapshot beim Eingang: {lead.priceSnapshot.priceLabel}
+                    </p>
+                  )}
+                <p className="mt-3 text-sm text-primary font-semibold">{priceLabel}</p>
               </AdminPanel>
             </section>
           )}

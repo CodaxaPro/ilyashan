@@ -18,6 +18,7 @@ import {
   formatSkylightsHint,
 } from "@/lib/pricing-display";
 import {
+  isLargeWindowQuote,
   windowSizeHints,
   windowSizeLabels,
   type WindowSizeOption,
@@ -29,6 +30,21 @@ interface Step3DetailsProps {
   data: QuoteFormData;
   onChange: (updates: Partial<QuoteFormData>) => void;
 }
+
+type ReinigungExtraKey =
+  | "withFrame"
+  | "withFalz"
+  | "windowSills"
+  | "muntinWindows"
+  | "oldBuildingWindows"
+  | "skylights"
+  | "shutters";
+
+/** Large-Scheiben: keine €-Hints — nur qualitative Hinweise wo nötig */
+const qualitativeExtraHints: Partial<Record<ReinigungExtraKey, string>> = {
+  shutters: "Ausschließlich Innenreinigung — außen nicht erreichbar",
+  skylights: "Stückzahl für die individuelle Einschätzung",
+};
 
 function Stepper({
   label,
@@ -107,19 +123,7 @@ function Stepper({
   );
 }
 
-const reinigungswünsche: {
-  key: keyof Pick<
-    QuoteFormData,
-    | "withFrame"
-    | "withFalz"
-    | "windowSills"
-    | "muntinWindows"
-    | "oldBuildingWindows"
-    | "skylights"
-    | "shutters"
-  >;
-  label: string;
-}[] = [
+const reinigungswünsche: { key: ReinigungExtraKey; label: string }[] = [
   { key: "withFrame", label: "Mit Rahmen" },
   { key: "withFalz", label: "Fugen & Falz" },
   { key: "windowSills", label: "Fensterbänke" },
@@ -132,6 +136,8 @@ const reinigungswünsche: {
 export function Step3Details({ data, onChange }: Step3DetailsProps) {
   const { config } = usePricingConfig();
   const selectedExtras = reinigungswünsche.filter((item) => data[item.key]).length;
+  const largeWindows = isLargeWindowQuote(data);
+  const showLivePriceHints = !largeWindows;
 
   // Wintergarten ist Anfrage-only — alte Live-Preis-Flags zurücksetzen
   useEffect(() => {
@@ -163,13 +169,24 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
 
       <h2 className="text-2xl font-bold text-foreground mb-2">Leistungsdetails</h2>
       <p className="text-muted mb-4" data-testid="step3-basis-description">
-        {formatBasePerFluegelDescription(config.basePerFluegel)}
+        {largeWindows
+          ? "Große / breite Scheiben: Angaben zur Einschätzung — Preis individuell nach Foto."
+          : formatBasePerFluegelDescription(config.basePerFluegel)}
       </p>
 
       <p className="lg:hidden text-sm text-foreground/90 mb-8 rounded-xl border border-primary/15 bg-primary-light/25 px-4 py-3 leading-relaxed">
-        <strong className="text-primary">Live-Preis unten fixiert:</strong> Die Schätzung bleibt beim
-        Scrollen sichtbar. Tippen Sie auf <strong>Details</strong> für Kalkulation, Wartung und
-        Hinweise.
+        {largeWindows ? (
+          <>
+            <strong className="text-primary">Individuelle Anfrage:</strong> Unten bleibt der Hinweis
+            sichtbar. Bitte Verschmutzung, Umfang und Fotos angeben — ohne Live-€.
+          </>
+        ) : (
+          <>
+            <strong className="text-primary">Live-Preis unten fixiert:</strong> Die Schätzung bleibt
+            beim Scrollen sichtbar. Tippen Sie auf <strong>Details</strong> für Kalkulation, Wartung
+            und Hinweise.
+          </>
+        )}
       </p>
 
       <div className="grid lg:grid-cols-3 gap-8 lg:gap-10">
@@ -202,7 +219,11 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               />
               <Stepper
                 label="Maximale Raumhöhe"
-                hint="Über 3 m: +12 % · über 4 m: +25 %"
+                hint={
+                  showLivePriceHints
+                    ? "Über 3 m: +12 % · über 4 m: +25 %"
+                    : "Für Zugang / Leiter bei der individuellen Kalkulation"
+                }
                 value={data.roomHeight}
                 min={2}
                 max={8}
@@ -245,8 +266,8 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                   className="mt-3 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 leading-relaxed"
                   data-testid="window-size-large-hint"
                 >
-                  Für große oder breite Scheiben gibt es keinen Live-Preis. Bitte Anfrage absenden —
-                  wir melden uns in 24 Std. mit individueller Kalkulation. Ein Foto hilft.
+                  Kein Live-Preis. Weiter ausfüllen (Verschmutzung, Umfang), dann am Ende Foto
+                  hochladen und Anfrage absenden — Rückmeldung in 24 Std.
                 </p>
               )}
             </div>
@@ -271,9 +292,11 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       }`}
                     >
                       <span className="block">{label}</span>
-                      <span className="block text-xs font-normal opacity-70 mt-0.5">
-                        {dirtLevelHints[value]}
-                      </span>
+                      {showLivePriceHints && (
+                        <span className="block text-xs font-normal opacity-70 mt-0.5">
+                          {dirtLevelHints[value]}
+                        </span>
+                      )}
                     </button>
                   )
                 )}
@@ -313,9 +336,11 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       }`}
                     >
                       {label}
-                      <span className="ml-1.5 text-xs font-normal opacity-70">
-                        {cleaningSideHints[value]}
-                      </span>
+                      {showLivePriceHints && (
+                        <span className="ml-1.5 text-xs font-normal opacity-70">
+                          {cleaningSideHints[value]}
+                        </span>
+                      )}
                     </button>
                   )
                 )}
@@ -363,9 +388,15 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       />
                       <span className="text-sm font-medium flex-1 min-w-0">
                         {label}
-                        <span className="block text-xs text-muted font-normal leading-snug">
-                          {extraPriceHints[key]}
-                        </span>
+                        {(showLivePriceHints
+                          ? extraPriceHints[key]
+                          : qualitativeExtraHints[key]) && (
+                          <span className="block text-xs text-muted font-normal leading-snug">
+                            {showLivePriceHints
+                              ? extraPriceHints[key]
+                              : qualitativeExtraHints[key]}
+                          </span>
+                        )}
                       </span>
                     </label>
 
@@ -375,7 +406,8 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                         data-testid="shutters-innen-notice"
                       >
                         <strong>Rollladen – nur innen:</strong> Reinigung ausschließlich von innen.
-                        Außenliegende Rollläden sind nicht erreichbar und nicht im Preis enthalten.
+                        Außenliegende Rollläden sind nicht erreichbar
+                        {showLivePriceHints ? " und nicht im Preis enthalten" : ""}.
                       </p>
                     )}
 
@@ -383,7 +415,11 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       <div className="w-full min-w-0">
                         <Stepper
                           label="Anzahl Dachfenster / Oberlichter"
-                          hint={formatSkylightsHint()}
+                          hint={
+                            showLivePriceHints
+                              ? formatSkylightsHint()
+                              : "Stückzahl für die individuelle Einschätzung"
+                          }
                           value={data.skylightsCount || 1}
                           min={1}
                           max={20}

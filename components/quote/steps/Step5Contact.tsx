@@ -38,22 +38,55 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
     data.privacyAccepted &&
     (!photoPolicy.required || photos.length > 0);
 
+  async function persistQuoteLead() {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ quote: data, photos }),
+    });
+    const result = (await response.json()) as {
+      error?: string;
+      anfrageNr?: string;
+    };
+    if (!response.ok) throw new Error(result.error ?? "Senden fehlgeschlagen");
+    return result;
+  }
+
   async function submitByEmail() {
     if (!canSubmit) return;
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quote: data, photos }),
-      });
-
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error ?? "Senden fehlgeschlagen");
+      const result = await persistQuoteLead();
       trackRequestQuoteConversion(result.anfrageNr ?? undefined);
-      trackAnalytics("wizard_submit", { payload: { anfrageNr: result.anfrageNr } });
+      trackAnalytics("wizard_submit", { payload: { anfrageNr: result.anfrageNr, channel: "email" } });
+      setAnfrageNr(result.anfrageNr ?? null);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ein Fehler ist aufgetreten.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /** Corporate: zuerst Lead+Fotos speichern/Mail, dann WhatsApp-Chat mit Text öffnen */
+  async function submitByWhatsApp() {
+    if (!canSubmit) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await persistQuoteLead();
+      trackRequestQuoteConversion(result.anfrageNr ?? undefined);
+      trackAnalytics("wizard_submit", {
+        payload: { anfrageNr: result.anfrageNr, channel: "whatsapp" },
+      });
+      const waUrl = getWhatsAppQuoteUrl(data, quotePricing, {
+        anfrageNr: result.anfrageNr,
+        photoCount: photos.length,
+      });
+      window.open(waUrl, "_blank", "noopener,noreferrer");
       setAnfrageNr(result.anfrageNr ?? null);
       setSubmitted(true);
     } catch (err) {
@@ -233,7 +266,7 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
       <div className="grid sm:grid-cols-2 gap-4">
         <Button
           type="button"
-          variant="secondary"
+          variant="primary"
           size="lg"
           className="w-full"
           onClick={submitByEmail}
@@ -243,21 +276,22 @@ export function Step5Contact({ data, onChange }: Step5ContactProps) {
           {loading ? "Wird gesendet..." : "Per E-Mail senden"}
         </Button>
         <Button
-          href={canSubmit ? getWhatsAppQuoteUrl(data, quotePricing) : undefined}
-          onClick={() => {
-            if (canSubmit) trackRequestQuoteConversion();
-          }}
-          variant="whatsapp"
+          type="button"
+          variant="secondary"
           size="lg"
-          className={`w-full ${!canSubmit ? "opacity-50 pointer-events-none" : ""}`}
+          className="w-full"
+          onClick={() => void submitByWhatsApp()}
+          disabled={!canSubmit || loading}
+          data-testid="quote-submit-whatsapp"
         >
           <WhatsAppIcon />
-          Per WhatsApp senden
+          {loading ? "Wird gesendet..." : "Per WhatsApp senden"}
         </Button>
       </div>
 
       <p className="text-xs text-muted text-center mt-4">
-        E-Mail: inkl. PDF-Eingangsbestätigung · WhatsApp: ohne PDF, sofort senden
+        Beide Kanäle speichern Anfrage + Fotos im Admin. E-Mail: PDF-Bestätigung · WhatsApp: Chat
+        öffnet sich danach (Bilder bereits übermittelt).
       </p>
     </div>
   );
