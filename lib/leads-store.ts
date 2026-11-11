@@ -4,6 +4,9 @@ import type { QuotePriceSnapshot } from "@/lib/quote-pricing-context";
 import type { CleaningQuoteSnapshot } from "@/lib/cleaning/snapshot";
 import type { TreppenhausQuoteSnapshot } from "@/lib/treppenhaus/snapshot";
 import type { LeadServiceLine } from "@/lib/lead-product";
+import type { LeadDeposit } from "@/lib/deposits/policy";
+import type { WartungRenewEmail } from "@/lib/wartung/renew";
+import type { CsatInvite, LeadCsat } from "@/lib/csat/policy";
 
 export type LeadSource = "quote" | "concierge" | "contact";
 
@@ -81,6 +84,14 @@ export interface StoredLead {
   cleaningSnapshot?: CleaningQuoteSnapshot;
   /** Immutable Treppenhausreinigung calculation snapshot */
   treppenhausSnapshot?: TreppenhausQuoteSnapshot;
+  /** P2 — Anzahlung */
+  deposit?: LeadDeposit;
+  /** P2 — Wartung renew outbound tracking */
+  wartungRenewEmail?: WartungRenewEmail;
+  /** P2 — customer CSAT */
+  csat?: LeadCsat;
+  /** P2 — CSAT invite sent after abgeschlossen */
+  csatInvite?: CsatInvite;
 }
 
 const LEADS_KEY = "ilyashan:leads";
@@ -96,18 +107,30 @@ export function isLeadsStoreConfigured(): boolean {
   return isKvConfigured();
 }
 
-export async function saveLead(lead: StoredLead): Promise<void> {
+export type SaveLeadResult =
+  | { ok: true; persisted: true }
+  | { ok: true; persisted: false; reason: "kv_not_configured" }
+  | { ok: false; persisted: false; reason: "kv_error"; message: string };
+
+/**
+ * Persist lead to KV. Returns explicit result — callers must not assume success.
+ * Silent skip previously caused “mail da, Admin leer”.
+ */
+export async function saveLead(lead: StoredLead): Promise<SaveLeadResult> {
   if (!isKvConfigured()) {
-    console.info("[leads-store] KV not configured, skipping persist:", lead.id);
-    return;
+    console.warn("[leads-store] KV not configured, lead NOT persisted:", lead.id, lead.anfrageNr);
+    return { ok: true, persisted: false, reason: "kv_not_configured" };
   }
 
   try {
     const { kv } = await import("@vercel/kv");
     await kv.lpush(LEADS_KEY, lead);
     await kv.ltrim(LEADS_KEY, 0, MAX_LEADS - 1);
+    return { ok: true, persisted: true };
   } catch (error) {
+    const message = error instanceof Error ? error.message : "KV save failed";
     console.error("[leads-store] save failed:", error);
+    return { ok: false, persisted: false, reason: "kv_error", message };
   }
 }
 

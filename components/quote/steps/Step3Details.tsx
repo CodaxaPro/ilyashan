@@ -16,10 +16,13 @@ import {
   formatBasePerFluegelDescription,
   formatCanopyHint,
   formatFlyScreensHint,
-  formatGewerbeBaseDescription,
   formatSkylightsHint,
-  resolvePriceBasisMode,
 } from "@/lib/pricing-display";
+import {
+  windowSizeHints,
+  windowSizeLabels,
+  type WindowSizeOption,
+} from "@/lib/live-pricing-policy";
 
 interface Step3DetailsProps {
   data: QuoteFormData;
@@ -150,9 +153,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
 
       <h2 className="text-2xl font-bold text-foreground mb-2">Leistungsdetails</h2>
       <p className="text-muted mb-4" data-testid="step3-basis-description">
-        {resolvePriceBasisMode(data) === "gewerbe"
-          ? formatGewerbeBaseDescription()
-          : formatBasePerFluegelDescription(config.basePerFluegel)}
+        {formatBasePerFluegelDescription(config.basePerFluegel)}
       </p>
 
       <p className="lg:hidden text-sm text-foreground/90 mb-8 rounded-xl border border-primary/15 bg-primary-light/25 px-4 py-3 leading-relaxed">
@@ -198,6 +199,45 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                 unit="m"
                 onChange={(roomHeight) => onChange({ roomHeight })}
               />
+            </div>
+
+            <div className="mt-8">
+              <label className="block text-xs font-bold text-muted uppercase tracking-wider mb-3">
+                Fenstergröße<span className="text-red-500 ml-0.5">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-2" role="group" aria-label="Fenstergröße">
+                {(Object.keys(windowSizeLabels) as WindowSizeOption[]).map((value) => {
+                  const active = data.windowSize === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      data-testid={`window-size-${value}`}
+                      onMouseDown={preventChoiceButtonScroll}
+                      onClick={() => onChange({ windowSize: value })}
+                      className={`px-4 py-3 rounded-xl text-sm font-semibold border-2 transition-all text-left ${
+                        active
+                          ? "border-primary bg-primary-light/50 text-primary"
+                          : "border-border bg-white hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="block">{windowSizeLabels[value]}</span>
+                      <span className="block text-xs font-normal opacity-70 mt-0.5">
+                        {windowSizeHints[value]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {data.windowSize === "large" && (
+                <p
+                  className="mt-3 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 leading-relaxed"
+                  data-testid="window-size-large-hint"
+                >
+                  Für große oder breite Scheiben gibt es keinen Live-Preis. Bitte Anfrage absenden —
+                  wir melden uns in 24 Std. mit individueller Kalkulation. Ein Foto hilft.
+                </p>
+              )}
             </div>
 
             <div className="mt-8">

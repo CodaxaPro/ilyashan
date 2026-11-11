@@ -22,7 +22,8 @@ describe("P1 speed-to-lead", () => {
   it("builds owner→customer WhatsApp with DE intl prefix", () => {
     const url = buildOwnerWhatsAppToCustomerUrl("01733828354", "Max Mustermann");
     assert.ok(url);
-    assert.match(url!, /wa\.me\/491733828354/);
+    assert.match(url!, /api\.whatsapp\.com\/send/);
+    assert.match(url!, /phone=491733828354/);
     assert.match(url!, /text=/);
   });
 

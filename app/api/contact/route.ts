@@ -28,6 +28,8 @@ import {
   captureQuotePriceSnapshot,
   createQuotePricingContext,
 } from "@/lib/quote-pricing-context";
+import { enforcePhotoIntake } from "@/lib/photo-intake";
+import { saveLeadPhotos } from "@/lib/lead-photos";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -57,6 +59,7 @@ export async function POST(request: Request) {
       const quote = mergeQuote(body.quote);
       const photos = normalizePhotoPayloads((body as { photos?: PhotoPayload[] }).photos);
       const photoError = validatePhotos(photos);
+      const photoIntake = enforcePhotoIntake({ quote, photoCount: photos.length });
 
       if (!validateQuote(quote)) {
         return NextResponse.json(
@@ -67,6 +70,13 @@ export async function POST(request: Request) {
 
       if (photoError) {
         return NextResponse.json({ error: photoError }, { status: 400 });
+      }
+
+      if (!photoIntake.ok) {
+        return NextResponse.json(
+          { error: photoIntake.messageDe, code: photoIntake.code },
+          { status: 400 }
+        );
       }
 
       if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
@@ -84,6 +94,23 @@ export async function POST(request: Request) {
       const pricingConfig = await getFensterPricingConfig();
       const quotePricing = createQuotePricingContext(pricingConfig);
       const priceSnapshot = captureQuotePriceSnapshot(quote, quotePricing, pricingConfig.updatedAt);
+      const storedLead = createQuoteStoredLead(quote, anfrageNr, photos.length, quotePricing, priceSnapshot);
+
+      // 1) Lead zuerst speichern — sonst Mail ohne Admin-Eintrag (lokales Dev ohne KV).
+      const saveResult = await saveLead(storedLead);
+      if (!saveResult.ok) {
+        return NextResponse.json(
+          {
+            error:
+              "Anfrage konnte nicht gespeichert werden. Bitte erneut versuchen oder uns anrufen.",
+            code: "lead_persist_failed",
+          },
+          { status: 500 }
+        );
+      }
+      if (photos.length > 0 && saveResult.persisted) {
+        await saveLeadPhotos(storedLead.id, photos);
+      }
 
       // PDF must never block lead capture (pdfkit fonts often missing in serverless).
       const pdfAttachment = await tryGenerateQuotePdfAttachment(quote, anfrageNr, quotePricing);
@@ -108,12 +135,18 @@ export async function POST(request: Request) {
       if (adminError) {
         console.error("Resend admin error:", adminError);
         return NextResponse.json(
-          { error: "E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder rufen Sie uns an." },
+          {
+            error:
+              "Lead wurde gespeichert, E-Mail konnte nicht gesendet werden. Bitte im Admin prüfen oder anrufen.",
+            code: "email_failed_lead_saved",
+            anfrageNr,
+            leadId: storedLead.id,
+            storagePersisted: saveResult.persisted,
+          },
           { status: 500 }
         );
       }
 
-      const storedLead = createQuoteStoredLead(quote, anfrageNr, photos.length, quotePricing, priceSnapshot);
       const origin = new URL(request.url).origin;
       const terminUrl = buildTerminPageUrl(origin, storedLead.id);
 
@@ -133,10 +166,22 @@ export async function POST(request: Request) {
         }
       }
 
-      await saveLead(storedLead);
-      await syncLeadToCalendar(storedLead);
+      if (saveResult.persisted) {
+        await syncLeadToCalendar(storedLead);
+      }
 
-      return NextResponse.json({ success: true, anfrageNr });
+      return NextResponse.json({
+        success: true,
+        anfrageNr,
+        leadId: storedLead.id,
+        storagePersisted: saveResult.persisted,
+        ...(saveResult.persisted
+          ? {}
+          : {
+              warning:
+                "E-Mail gesendet, aber Admin-Speicher (KV) ist nicht konfiguriert — Lead erscheint nicht im Admin.",
+            }),
+      });
     }
 
     if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
@@ -184,6 +229,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: photoError }, { status: 400 });
     }
 
+    const contactLead = createContactStoredLead(
+      { name, phone, email, plz, service, message },
+      photos.length
+    );
+    const saveResult = await saveLead(contactLead);
+    if (!saveResult.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "Anfrage konnte nicht gespeichert werden. Bitte erneut versuchen oder uns anrufen.",
+          code: "lead_persist_failed",
+        },
+        { status: 500 }
+      );
+    }
+    if (photos.length > 0 && saveResult.persisted) {
+      await saveLeadPhotos(contactLead.id, photos);
+    }
+
     const adminEmail = buildAdminNotificationEmail(contactData, photos.length);
 
     const { error: adminError } = await resend.emails.send({
@@ -201,8 +265,16 @@ export async function POST(request: Request) {
       const errorMessage =
         adminError.message?.includes("not verified")
           ? "E-Mail-Versand wartet auf Domain-Verifizierung. Bitte rufen Sie uns direkt an."
-          : "E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder rufen Sie uns an.";
-      return NextResponse.json({ error: errorMessage }, { status: 500 });
+          : "Lead wurde gespeichert, E-Mail konnte nicht gesendet werden. Bitte im Admin prüfen.";
+      return NextResponse.json(
+        {
+          error: errorMessage,
+          code: "email_failed_lead_saved",
+          leadId: contactLead.id,
+          storagePersisted: saveResult.persisted,
+        },
+        { status: 500 }
+      );
     }
 
     if (email) {
@@ -220,14 +292,17 @@ export async function POST(request: Request) {
       }
     }
 
-    await saveLead(
-      createContactStoredLead(
-        { name, phone, email, plz, service, message },
-        photos.length
-      )
-    );
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      leadId: contactLead.id,
+      storagePersisted: saveResult.persisted,
+      ...(saveResult.persisted
+        ? {}
+        : {
+            warning:
+              "E-Mail gesendet, aber Admin-Speicher (KV) ist nicht konfiguriert — Lead erscheint nicht im Admin.",
+          }),
+    });
   } catch (error) {
     console.error("Contact API error:", error);
     return NextResponse.json(

@@ -46,10 +46,10 @@ describe("vat-display – economics unchanged", () => {
     assert.match(label, new RegExp(String(before.min)));
   });
 
-  it("resolves audience from services/objectType", () => {
+  it("resolves live audience always as privat (Gewerbe-Label ändert MwSt-Ausweis nicht)", () => {
     assert.equal(resolvePriceAudience({ services: ["privat"] }), "privat");
-    assert.equal(resolvePriceAudience({ services: ["gewerbe"] }), "gewerbe");
-    assert.equal(resolvePriceAudience({ services: ["privat"], objectType: "gewerbe" }), "gewerbe");
+    assert.equal(resolvePriceAudience({ services: ["gewerbe"] }), "privat");
+    assert.equal(resolvePriceAudience({ services: ["privat"], objectType: "gewerbe" }), "privat");
   });
 
   it("formats gewerbe with netto + brutto without changing brutto", () => {

@@ -56,14 +56,15 @@ describe("Quote sync – wizard ≡ email ≡ PDF ≡ snapshot", () => {
     assert.match(label, /inkl\. MwSt/);
   });
 
-  it("gewerbe price label shows Netto zzgl. MwSt. and Brutto without changing amounts", () => {
+  it("gewerbe price label uses Privat inkl. MwSt. (gleiche Live-Formel)", () => {
     const data = sampleQuote({ services: ["gewerbe"], objectType: "gewerbe" });
+    const privat = sampleQuote({ services: ["privat"], objectType: "wohnung" });
     const estimate = calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig)!;
+    const privatEstimate = calculatePriceEstimate(privat, ctx.pricingOverrides, ctx.wartungConfig)!;
     const label = getPriceLabelFromContext(data, ctx);
-    assert.match(label, /Netto/);
-    assert.match(label, /zzgl\./);
-    assert.match(label, /Brutto/);
-    assert.equal(estimate.amount, calculatePriceEstimate(data, ctx.pricingOverrides, ctx.wartungConfig)!.amount);
+    assert.match(label, /inkl\. MwSt/);
+    assert.doesNotMatch(label, /Netto/);
+    assert.equal(estimate.amount, privatEstimate.amount);
   });
 
   it("email admin/customer price row equals table row", () => {

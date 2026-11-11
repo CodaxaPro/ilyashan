@@ -37,9 +37,10 @@ export function formatPriceEstimateBasisLine(options: {
 }
 
 export function resolvePriceBasisMode(
-  data: { services?: readonly string[] } | null | undefined
+  _data?: { services?: readonly string[] } | null
 ): PriceBasisMode {
-  return data?.services?.includes("gewerbe") ? "gewerbe" : "privat";
+  // Live-Kalkulation immer Privat (€/Flügel).
+  return "privat";
 }
 
 export function formatNarrowStairsHint(): string {

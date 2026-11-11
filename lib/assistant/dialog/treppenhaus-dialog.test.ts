@@ -115,12 +115,16 @@ describe("assistant/treppenhaus dialog — human Q&A + engine", () => {
       r = advanceTreppenhausDialog(r.session, steps[i]!);
     }
     assert.equal(r.complete, true);
-    const firstGross = calculateTreppenhausQuote(r.session.treppenhausDraft!).monthlyGrossCents;
+    const firstGross = calculateTreppenhausQuote(
+      r.session.treppenhausDraft as import("@/lib/treppenhaus/pricing").TreppenhausInput
+    ).monthlyGrossCents;
 
     r = advanceTreppenhausDialog(r.session, "5 Stockwerke");
     assert.equal(r.complete, true);
     assert.equal(r.session.treppenhausDraft?.stockwerke, 5);
-    const secondGross = calculateTreppenhausQuote(r.session.treppenhausDraft!).monthlyGrossCents;
+    const secondGross = calculateTreppenhausQuote(
+      r.session.treppenhausDraft as import("@/lib/treppenhaus/pricing").TreppenhausInput
+    ).monthlyGrossCents;
     assert.notEqual(firstGross, secondGross);
     assert.match(r.text, /5 Stockwerke/);
   });

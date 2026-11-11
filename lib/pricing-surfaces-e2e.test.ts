@@ -316,22 +316,23 @@ describe("E2E – quote summary / PDF rows / snapshot", () => {
     assert.match(label, /Dachfenster \/ Oberlichter \(2 Stück\)/);
   });
 
-  it("price label privat vs gewerbe on same brutto numbers", () => {
-    const privat = base();
+  it("price label privat vs gewerbe: gleiche Formel, inkl. MwSt.", () => {
+    const privat = base({ objectType: "wohnung" });
     const gewerbe = base({ services: ["gewerbe"], objectType: "gewerbe" });
     const estP = calculatePriceEstimate(privat)!;
     const estG = calculatePriceEstimate(gewerbe)!;
-    // Amounts may differ by model; labels must use correct VAT wording
     assert.match(getPriceLabel(privat), /inkl\. MwSt/);
     assert.doesNotMatch(getPriceLabel(privat), /Netto/);
-    assert.match(getPriceLabel(gewerbe), /Netto/);
-    assert.match(getPriceLabel(gewerbe), /zzgl\. 19 % MwSt/);
-    assert.match(getPriceLabel(gewerbe), /Brutto/);
+    assert.match(getPriceLabel(gewerbe), /inkl\. MwSt/);
+    assert.doesNotMatch(getPriceLabel(gewerbe), /Netto/);
+    // Gleiche Flügel-Formel; Mindestauftrag Wohnung für beide (Objekt Gewerbe ≠ Haus-Minimum).
+    assert.equal(estP.amount, estG.amount);
+    assert.equal(estP.calculatedSubtotal, estG.calculatedSubtotal);
 
     const snapP = captureQuotePriceSnapshot(privat, ctx)!;
     const snapG = captureQuotePriceSnapshot(gewerbe, ctx)!;
     assert.match(snapP.priceLabel, /inkl\. MwSt/);
-    assert.match(snapG.priceLabel, /Netto/);
+    assert.match(snapG.priceLabel, /inkl\. MwSt/);
     assert.equal(estP.amount, snapP.amount);
     assert.equal(estG.amount, snapG.amount);
   });
@@ -349,7 +350,7 @@ describe("E2E – quote summary / PDF rows / snapshot", () => {
 });
 
 describe("E2E – WhatsApp + concierge + termin portal", () => {
-  it("WhatsApp privat: inkl. MwSt; gewerbe: Netto/Brutto", () => {
+  it("WhatsApp privat und gewerbe: inkl. MwSt. (Live-Privat-Politik)", () => {
     const privatMsg = buildWhatsAppQuoteMessage(base({ windowCount: 12 }));
     assert.match(privatMsg, /inkl\. MwSt/);
     assert.doesNotMatch(privatMsg, /Netto ca\./);
@@ -357,9 +358,8 @@ describe("E2E – WhatsApp + concierge + termin portal", () => {
     const gewerbeMsg = buildWhatsAppQuoteMessage(
       base({ services: ["gewerbe"], objectType: "gewerbe", windowCount: 20 })
     );
-    assert.match(gewerbeMsg, /Netto/);
-    assert.match(gewerbeMsg, /Brutto/);
-    assert.match(gewerbeMsg, /zzgl\. 19 % MwSt/);
+    assert.match(gewerbeMsg, /inkl\. MwSt/);
+    assert.doesNotMatch(gewerbeMsg, /Netto/);
   });
 
   it("WhatsApp includes Stück extras with counts in price path", () => {
@@ -404,9 +404,9 @@ describe("E2E – WhatsApp + concierge + termin portal", () => {
       floorLevel: "eg",
       objectType: "gewerbe",
     })!;
-    assert.match(gewerbe, /Netto/);
-    assert.match(gewerbe, /zzgl\. 19 % MwSt/);
-    assert.match(gewerbe, /Gewerbe:/);
+    assert.match(gewerbe, /inkl\. MwSt/);
+    assert.doesNotMatch(gewerbe, /Netto/);
+    assert.match(gewerbe, /Privat: Alle Preise inkl\. MwSt/);
   });
 
   it("termin portal prefers Festpreis label with audience VAT", () => {
@@ -420,8 +420,8 @@ describe("E2E – WhatsApp + concierge + termin portal", () => {
     );
     const gewerbeSummary = buildTerminPortalSummary(gewerbeLead)!;
     assert.match(gewerbeSummary.priceLabel ?? "", /Festpreis:/);
-    assert.match(gewerbeSummary.priceLabel ?? "", /Netto/);
-    assert.match(gewerbeSummary.priceLabel ?? "", /Brutto 125/);
+    assert.match(gewerbeSummary.priceLabel ?? "", /inkl\. MwSt/);
+    assert.doesNotMatch(gewerbeSummary.priceLabel ?? "", /Netto/);
   });
 
   it("termin portal live estimate label when no Festpreis", () => {
@@ -482,7 +482,7 @@ describe("E2E – appointment emails all channels", () => {
   const quote = base();
   const gewerbeQuote = base({ services: ["gewerbe"], objectType: "gewerbe" });
 
-  it("confirmation / reminder / preview – privat inkl, gewerbe Netto", () => {
+  it("confirmation / reminder / preview – privat und gewerbe inkl. MwSt.", () => {
     const confirm = buildAppointmentConfirmationEmail(
       quote,
       "ANG-E2E",
@@ -504,9 +504,8 @@ describe("E2E – appointment emails all channels", () => {
       { plannedStartTime: "11:00", estimatedDurationHours: 2 },
       125
     );
-    assert.match(confirmG.text, /Netto/);
-    assert.match(confirmG.text, /Brutto 125/);
-    assert.match(confirmG.html, /Brutto \/ Endpreis/);
+    assert.match(confirmG.text, /inkl\. MwSt/);
+    assert.doesNotMatch(confirmG.text, /Netto/);
 
     const reminder = buildAppointmentReminderEmail(
       quote,
@@ -518,6 +517,7 @@ describe("E2E – appointment emails all channels", () => {
     );
     assert.match(reminder.text, /inkl\. MwSt/);
 
+    // Explizite audience=gewerbe (z. B. Büroreinigung) behält Netto-Ausweis.
     const previewG = getCustomerEmailPreviewDe("confirm", {
       confirmedDate: "2026-09-01",
       festpreis: 125,
@@ -602,7 +602,7 @@ describe("E2E – Step3 wizard UX source of truth", () => {
   });
 });
 
-describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
+describe("E2E – kitchen-sink + Privat-only basis line", () => {
   const kitchenSink = base({
     services: ["gewerbe"],
     objectType: "gewerbe",
@@ -624,19 +624,20 @@ describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
     wintergardenSqm: 20,
   });
 
-  it("kitchen-sink amounts ≡ engine ≡ VAT split (customer example)", () => {
+  it("kitchen-sink amounts ≡ engine ≡ VAT split (Privat-Flügel auch bei Gewerbe)", () => {
     const est = calculatePriceEstimate(kitchenSink)!;
     const ref = referencePriceBreakdown(kitchenSink);
-    assert.equal(est.calculatedSubtotal, 611.28);
-    assert.equal(ref.calculatedSubtotal, 611.28);
-    assert.equal(est.amount, 610);
-    assert.equal(est.min, 579);
-    assert.equal(est.max, 641);
+    // Basis: 8 × 5,00 € = 40 (statt früher m²-Modell 36,48)
+    assert.equal(est.calculatedSubtotal, 614.8);
+    assert.equal(ref.calculatedSubtotal, 614.8);
+    assert.equal(est.amount, 615);
+    assert.equal(est.min, 584);
+    assert.equal(est.max, 646);
 
     const byLabel = Object.fromEntries(
       est.breakdown.map((l) => [l.label, l.amount])
     );
-    assert.equal(byLabel["Gewerbefenster (Basis)"], 36.48);
+    assert.equal(byLabel["Fensterreinigung (Basis)"], 40);
     assert.equal(byLabel["Rahmenreinigung"], 16.8);
     assert.equal(byLabel["Fugen & Falz"], 12);
     assert.equal(byLabel["Fensterbänke"], 12);
@@ -650,32 +651,32 @@ describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
     assert.equal(byLabel["Wintergarten-Reinigung"], 160);
 
     const split = splitBrutto(est.amount);
-    assert.equal(split.netto, 512.61);
-    assert.equal(split.mwst, 97.39);
-    assert.equal(split.brutto, 610);
+    assert.equal(split.netto, 516.81);
+    assert.equal(split.mwst, 98.19);
+    assert.equal(split.brutto, 615);
   });
 
-  it("basis footer uses Gewerbe €/m² not Privat €/Flügel", () => {
-    assert.equal(resolvePriceBasisMode(kitchenSink), "gewerbe");
+  it("basis footer immer Privat €/Flügel (auch bei Gewerbe-Label)", () => {
+    assert.equal(resolvePriceBasisMode(kitchenSink), "privat");
     assert.equal(resolvePriceBasisMode(base()), "privat");
 
-    const gewerbeLine = formatPriceEstimateBasisLine({
-      mode: "gewerbe",
-      region: "Baesweiler, Aachen & Umgebung",
-    });
     const privatLine = formatPriceEstimateBasisLine({
       mode: "privat",
       region: "Baesweiler, Aachen & Umgebung",
       basePerFluegel: P.basePerFluegel,
     });
+    // Helper für Gewerbe-Text bleibt verfügbar (Admin/Doku), Live-Mode nutzt ihn nicht.
+    const gewerbeLine = formatPriceEstimateBasisLine({
+      mode: "gewerbe",
+      region: "Baesweiler, Aachen & Umgebung",
+    });
 
-    assert.match(gewerbeLine, /3,80 €\/m² Glas \(Gewerbe, normal\)/);
-    assert.doesNotMatch(gewerbeLine, /5,00 €\/Flügel/);
     assert.match(privatLine, /5,00 €\/Flügel \(i\+a, normal\)/);
     assert.doesNotMatch(privatLine, /€\/m²/);
+    assert.match(gewerbeLine, /3,80 €\/m² Glas \(Gewerbe, normal\)/);
   });
 
-  it("PriceEstimateCard + Step3 wire model-aware basis copy", () => {
+  it("PriceEstimateCard + Step3 wire Privat basis + Fenstergröße", () => {
     const card = readFileSync(
       join(process.cwd(), "components/quote/PriceEstimateCard.tsx"),
       "utf8"
@@ -686,8 +687,10 @@ describe("E2E – Gewerbe kitchen-sink + basis line model match", () => {
     );
     assert.match(card, /resolvePriceBasisMode/);
     assert.match(card, /price-basis-line/);
-    assert.match(step3, /formatGewerbeBaseDescription/);
-    assert.match(step3, /resolvePriceBasisMode/);
+    assert.match(card, /price-estimate-individual/);
+    assert.match(step3, /formatBasePerFluegelDescription/);
+    assert.match(step3, /window-size-large/);
+    assert.doesNotMatch(step3, /formatGewerbeBaseDescription/);
   });
 });
 

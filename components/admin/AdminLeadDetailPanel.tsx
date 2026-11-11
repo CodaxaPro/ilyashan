@@ -44,6 +44,7 @@ import {
   treppenhausEstimateLabel,
 } from "@/lib/treppenhaus/admin-summary";
 import { formatEuroFromCents } from "@/lib/treppenhaus/pricing";
+import type { PhotoPayload } from "@/lib/photo-upload";
 
 export const STATUS_LABELS = LEAD_STATUS_LABELS_TR;
 
@@ -104,6 +105,8 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
   const [festpreis, setFestpreis] = useState<number | "">(getDefaultFestpreis(lead) ?? "");
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [terminUrl, setTerminUrl] = useState<string | null>(null);
+  const [leadPhotos, setLeadPhotos] = useState<PhotoPayload[]>([]);
+  const [photosLoaded, setPhotosLoaded] = useState(false);
   const [capacityHint, setCapacityHint] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -175,10 +178,16 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
       .then((data) => setStaffMembers(data?.config?.members ?? []))
       .catch(() => undefined);
 
+    setPhotosLoaded(false);
+    setLeadPhotos([]);
     void fetch(`/api/admin/leads/${lead.id}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setTerminUrl(data?.terminUrl ?? null))
-      .catch(() => undefined);
+      .then((data) => {
+        setTerminUrl(data?.terminUrl ?? null);
+        setLeadPhotos(Array.isArray(data?.photos) ? data.photos : []);
+      })
+      .catch(() => undefined)
+      .finally(() => setPhotosLoaded(true));
   }, [lead.id]);
 
   useEffect(() => {
@@ -247,6 +256,36 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
     requestAnimationFrame(() => {
       feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     });
+  }
+
+  async function patchDeposit(depositAction: "request" | "paid" | "waived") {
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          depositAction,
+          depositAmountEur: festpreis === "" ? undefined : festpreis,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Anzahlung fehlgeschlagen");
+      onUpdated(data.lead as StoredLead);
+      showFeedback(
+        depositAction === "paid"
+          ? "Anzahlung als bezahlt markiert."
+          : depositAction === "waived"
+            ? "Anzahlung erlassen."
+            : "Anzahlung angefordert.",
+        "success"
+      );
+    } catch (e) {
+      showFeedback(e instanceof Error ? e.message : "Fehler", "error");
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function saveLead(emailAction: LeadEmailAction | "none" = "none") {
@@ -462,7 +501,75 @@ export function AdminLeadDetailPanel({ lead, onClose, onUpdated, onDeleted }: Ad
             {lead.phone && <p><strong>Telefon:</strong> {lead.phone}</p>}
             {lead.email && <p><strong>E-posta:</strong> {lead.email}</p>}
             <p><strong>Tarih:</strong> {new Date(lead.createdAt).toLocaleString("tr-TR")}</p>
-            {lead.photoCount > 0 && <p><strong>Foto:</strong> {lead.photoCount}</p>}
+            {lead.photoCount > 0 && (
+              <div data-testid="admin-lead-photos">
+                <p>
+                  <strong>Foto:</strong> {lead.photoCount}
+                  {!photosLoaded
+                    ? " (wird geladen…)"
+                    : leadPhotos.length === 0
+                      ? " — Dateien nicht verfügbar (ältere Anfrage)"
+                      : ""}
+                </p>
+                {leadPhotos.length > 0 && (
+                  <ul className="mt-2 grid grid-cols-3 gap-2">
+                    {leadPhotos.map((photo, index) => (
+                      <li key={`${photo.name}-${index}`} className="rounded-lg border border-border overflow-hidden bg-white">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <a
+                          href={`data:${photo.type};base64,${photo.data}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={photo.name}
+                        >
+                          <img
+                            src={`data:${photo.type};base64,${photo.data}`}
+                            alt={photo.name}
+                            className="h-24 w-full object-cover"
+                            data-testid={`admin-lead-photo-${index}`}
+                          />
+                        </a>
+                        <p className="px-1.5 py-1 text-[10px] text-muted truncate">{photo.name}</p>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+            {lead.deposit && (
+              <p data-testid="admin-deposit-status">
+                <strong>Anzahlung:</strong> {lead.deposit.amountEur} € · {lead.deposit.status} ·{" "}
+                {lead.deposit.reference}
+              </p>
+            )}
+            {lead.csat && (
+              <p data-testid="admin-csat-score">
+                <strong>CSAT:</strong> {lead.csat.score}/5
+                {lead.csat.comment ? ` — ${lead.csat.comment}` : ""}
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                data-testid="admin-deposit-request"
+                className="text-xs px-2.5 py-1 rounded-lg border border-amber-300 text-amber-900 bg-amber-50 hover:bg-amber-100"
+                disabled={saving}
+                onClick={() => void patchDeposit("request")}
+              >
+                Anzahlung anfordern
+              </button>
+              {lead.deposit?.status === "requested" && (
+                <button
+                  type="button"
+                  data-testid="admin-deposit-paid"
+                  className="text-xs px-2.5 py-1 rounded-lg border border-emerald-300 text-emerald-900 bg-emerald-50"
+                  disabled={saving}
+                  onClick={() => void patchDeposit("paid")}
+                >
+                  Als bezahlt
+                </button>
+              )}
+            </div>
           </AdminPanel>
 
           {quickReply && (

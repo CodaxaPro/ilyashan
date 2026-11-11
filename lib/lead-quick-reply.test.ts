@@ -11,6 +11,7 @@ describe("lead-quick-reply", () => {
   it("normalizes DE phone for WhatsApp", () => {
     assert.equal(cleanLeadPhone("0241 123456"), "49241123456");
     assert.equal(cleanLeadPhone("+49 241 123456"), "49241123456");
+    assert.equal(cleanLeadPhone("0173-382-8354"), "491733828354");
   });
 
   it("uses admin Festpreis with MwSt for privat in all offer channels", () => {
@@ -27,7 +28,8 @@ describe("lead-quick-reply", () => {
     assert.equal(links.isFestpreis, true);
     assert.match(links.priceLabel, /125\s*€ inkl\. MwSt/);
     assert.ok(links.callHref?.startsWith("tel:"));
-    assert.ok(links.whatsappHref?.includes("wa.me/"));
+    assert.ok(links.whatsappHref?.includes("api.whatsapp.com/send"));
+    assert.ok(links.whatsappHref?.includes("phone=49241123456"));
     assert.ok(links.mailtoHref?.startsWith("mailto:anna@test.de"));
 
     const wa = decodeURIComponent(links.whatsappHref!);
@@ -43,7 +45,7 @@ describe("lead-quick-reply", () => {
   it("uses Netto/Brutto Festpreis for gewerbe", () => {
     const links = buildLeadQuickReplyLinks({
       name: "Firma GmbH",
-      phone: "0241 999",
+      phone: "0241 1234567",
       email: "b@firma.de",
       anfrageNr: "ANG-G",
       services: "Gewerbe",
@@ -52,6 +54,7 @@ describe("lead-quick-reply", () => {
     });
     assert.match(links.priceLabel, /Netto/);
     assert.match(links.priceLabel, /Brutto 125/);
+    assert.ok(links.whatsappHref);
     const wa = decodeURIComponent(links.whatsappHref!);
     assert.match(wa, /Netto|Brutto/);
   });
@@ -59,7 +62,7 @@ describe("lead-quick-reply", () => {
   it("falls back to Schätzung when Festpreis missing", () => {
     const links = buildLeadQuickReplyLinks({
       name: "Anna",
-      phone: "0241 1",
+      phone: "0173 3828354",
       email: "a@test.de",
       anfrageNr: "ANG-2",
       services: "Privat",
@@ -68,9 +71,21 @@ describe("lead-quick-reply", () => {
     });
     assert.equal(links.isFestpreis, false);
     assert.match(links.priceLabel, /100/);
+    assert.ok(links.whatsappHref);
     const wa = decodeURIComponent(links.whatsappHref!);
     assert.match(wa, /unverbindliche Preisschätzung/i);
     assert.doesNotMatch(wa, /verbindlicher Festpreis/);
+  });
+
+  it("returns null WhatsApp for unusable phone (fail-closed)", () => {
+    const links = buildLeadQuickReplyLinks({
+      name: "X",
+      phone: "12",
+      anfrageNr: "ANG-X",
+      services: "Privat",
+      audience: "privat",
+    });
+    assert.equal(links.whatsappHref, null);
   });
 
   it("mailto / WhatsApp helpers mark binding vs estimate", () => {

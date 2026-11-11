@@ -55,7 +55,7 @@ describe("admin-lead-filters", () => {
       "a"
     );
     assert.equal(
-      filterLeads(leads, { query: "cara", status: "all", source: "all" }).map((l) => l.id).join(),
+      filterLeads(leads, { query: "cara", status: "all", source: "all", includeArchived: false }).map((l) => l.id).join(),
       "c"
     );
   });

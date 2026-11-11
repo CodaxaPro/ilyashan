@@ -4,6 +4,7 @@
  */
 import { siteConfig } from "@/lib/config";
 import { buildButton, buildInfoBox, escapeHtml } from "@/lib/email-templates";
+import { buildCustomerWhatsAppUrl, toTelHref } from "@/lib/phone-de";
 
 export type SpeedToLeadPriority = "normal" | "hot" | "handoff" | "booked";
 
@@ -24,13 +25,6 @@ export function buildOwnerWhatsAppToCustomerUrl(
   customerName: string,
   contextLine?: string
 ): string | null {
-  const digits = customerPhone.replace(/\D/g, "");
-  if (digits.length < 8) return null;
-  // DE mobiles often stored as 0173… → 49173…
-  let intl = digits;
-  if (intl.startsWith("0")) intl = `49${intl.slice(1)}`;
-  if (!intl.startsWith("49") && intl.length <= 11) intl = `49${intl}`;
-
   const text = [
     `Guten Tag ${customerName.split(/\s+/)[0] ?? customerName},`,
     "",
@@ -38,7 +32,7 @@ export function buildOwnerWhatsAppToCustomerUrl(
     contextLine?.trim() || "Wann passt ein kurzes Gespräch für Festpreis und Termin?",
   ].join("\n");
 
-  return `https://wa.me/${intl}?text=${encodeURIComponent(text)}`;
+  return buildCustomerWhatsAppUrl(customerPhone, text);
 }
 
 export function buildSpeedToLeadAdminBlock(args: {
@@ -46,14 +40,18 @@ export function buildSpeedToLeadAdminBlock(args: {
   phone: string;
   priority: SpeedToLeadPriority;
 }): { html: string; text: string; subjectPrefix: string } {
-  const tel = normalizePhoneForTel(args.phone);
+  const callHref = toTelHref(args.phone);
   const wa = buildOwnerWhatsAppToCustomerUrl(args.phone, args.name);
   const label = PRIORITY_DE[args.priority];
 
   const html = `
     ${buildInfoBox(`<strong>${escapeHtml(label)}</strong><br/>Ziel: Erstkontakt so schnell wie möglich.`)}
     <p style="margin:12px 0;display:flex;flex-wrap:wrap;gap:8px;">
-      ${buildButton(`tel:${escapeHtml(tel)}`, `Anrufen ${escapeHtml(args.phone)}`, "#0369a1")}
+      ${
+        callHref
+          ? buildButton(callHref, `Anrufen ${escapeHtml(args.phone)}`, "#0369a1")
+          : ""
+      }
       ${
         wa
           ? buildButton(wa, "WhatsApp an Kunden", "#059669")

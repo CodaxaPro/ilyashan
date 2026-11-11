@@ -28,6 +28,7 @@ export type CleaningSide = "innen_aussen" | "nur_aussen" | "nur_innen";
 export type DirtLevel = "leicht" | "normal" | "stark" | "extrem";
 export type ScheduleOption = "1-2_wochen" | "wunschtermine" | "unsicher";
 export type SubmitMethod = "email" | "whatsapp";
+export type WindowSizeOption = "standard" | "large";
 
 export interface QuoteFormData {
   services: QuoteServiceId[];
@@ -44,6 +45,8 @@ export interface QuoteFormData {
   specialFeatures: boolean;
   specialNotes: string;
   windowCount: number;
+  /** Standard = Live-Privatpreis; large = individuelle Anfrage ohne Live-Zahl */
+  windowSize: WindowSizeOption;
   roomHeight: number;
   dirtLevel: DirtLevel;
   cleaningSide: CleaningSide;
@@ -97,6 +100,7 @@ export const initialQuoteFormData: QuoteFormData = {
   specialFeatures: false,
   specialNotes: "",
   windowCount: 8,
+  windowSize: "standard",
   roomHeight: 2.5,
   dirtLevel: "normal",
   cleaningSide: "innen_aussen",
@@ -150,8 +154,8 @@ export const quoteServices: {
   {
     id: "gewerbe",
     title: "Gewerbe & Büro",
-    description: "Büro, Praxis, Laden – flexible Termine",
-    priceHint: "Live berechnet · ab 120 €",
+    description: "Büro, Praxis, Laden – gleiche Live-Rechnung wie Privat",
+    priceHint: formatMinimumWohnungHint(RECOMMENDED_PRICING.minimumWohnung),
     icon: "building",
   },
   {

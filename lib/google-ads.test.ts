@@ -4,7 +4,7 @@ import {
   trackPhoneClickConversion,
   trackRequestQuoteConversion,
   trackWhatsAppClickConversion,
-} from "./google-ads.ts";
+} from "./google-ads";
 
 describe("google-ads conversions", () => {
   afterEach(() => {

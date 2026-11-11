@@ -9,14 +9,12 @@ export type PriceAudience = "privat" | "gewerbe";
 
 /**
  * Calculator amounts are always BRUTTO (Endpreis).
- * Privat: show inkl. MwSt.
- * Gewerbe: show Netto + zzgl. MwSt. + Brutto (same total).
+ * Live-Wizard: immer Privat-Anzeige (inkl. MwSt.) – auch bei Gewerbe-Label.
+ * Netto-Ausweis bleibt nur für andere Service-Lines (z. B. Büroreinigung via Festpreis-Audience).
  */
 export function resolvePriceAudience(
-  data: Pick<Partial<QuoteFormData>, "services" | "objectType"> | null | undefined
+  _data?: Pick<Partial<QuoteFormData>, "services" | "objectType"> | null
 ): PriceAudience {
-  if (!data) return "privat";
-  if (data.services?.includes("gewerbe") || data.objectType === "gewerbe") return "gewerbe";
   return "privat";
 }
 

@@ -1,10 +1,11 @@
 import type { QuoteFormData } from "@/lib/quote-form";
 import type { QuotePricingContext } from "@/lib/quote-pricing-context";
-import { generateQuotePdfBuffer, pdfBufferToBase64 } from "@/lib/pdf/generate-quote-pdf";
+import { generateQuotePdfBuffer } from "@/lib/pdf/generate-quote-pdf";
 
 export type QuotePdfAttachment = {
   filename: string;
-  content: string;
+  content: string | Buffer;
+  contentType?: string;
 };
 
 /**
@@ -20,7 +21,8 @@ export async function tryGenerateQuotePdfAttachment(
     const pdfBuffer = await generateQuotePdfBuffer(data, anfrageNr, ctx);
     return {
       filename: `Eingangsbestätigung-${anfrageNr}.pdf`,
-      content: pdfBufferToBase64(pdfBuffer),
+      content: pdfBuffer,
+      contentType: "application/pdf",
     };
   } catch (error) {
     console.error("Quote PDF generation failed (continuing without PDF):", error);

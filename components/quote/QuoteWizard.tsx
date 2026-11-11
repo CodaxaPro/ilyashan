@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/Button";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 import { PriceEstimateMobileDock } from "@/components/quote/PriceEstimateMobileDock";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
+import { isLargeWindowQuote } from "@/lib/live-pricing-policy";
 
 const TOTAL_STEPS = 5;
 
@@ -65,7 +66,8 @@ export function QuoteWizard() {
 
   const stepIssues = canProceed() ? [] : validateQuoteStep(step, data);
   const priceEstimate = useQuotePriceEstimate(data);
-  const showMobilePriceDock = step >= 3 && Boolean(priceEstimate);
+  const showMobilePriceDock =
+    step >= 3 && (Boolean(priceEstimate) || isLargeWindowQuote(data));
 
   return (
     <div

@@ -7,6 +7,7 @@ import { siteConfig } from "@/lib/config";
 import { PriceEstimateCard } from "@/components/quote/PriceEstimateCard";
 import { useQuotePriceEstimate } from "@/components/quote/useQuotePriceEstimate";
 import { resolvePriceAudience, splitBrutto, VAT_PERCENT_LABEL } from "@/lib/vat-display";
+import { isLargeWindowQuote, LARGE_WINDOW_PRICE_NOTE } from "@/lib/live-pricing-policy";
 
 interface PriceEstimateMobileDockProps {
   data: QuoteFormData;
@@ -14,6 +15,7 @@ interface PriceEstimateMobileDockProps {
 
 export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) {
   const estimate = useQuotePriceEstimate(data);
+  const largeWindows = isLargeWindowQuote(data);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -25,16 +27,16 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
     };
   }, [open]);
 
-  const priceSignature = `${data.windowCount}:${data.services.join(",")}:${data.wartungPackageId}`;
+  const priceSignature = `${data.windowCount}:${data.windowSize}:${data.services.join(",")}:${data.wartungPackageId}`;
 
   useEffect(() => {
     setOpen(false);
   }, [priceSignature]);
 
-  if (!estimate) return null;
+  if (!estimate && !largeWindows) return null;
 
   const audience = resolvePriceAudience(data);
-  const split = splitBrutto(estimate.amount);
+  const split = estimate ? splitBrutto(estimate.amount) : null;
 
   return (
     <>
@@ -45,34 +47,55 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
         <div className="max-w-5xl mx-auto px-4 pt-3 pr-20">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                  {estimate.label}
-                </span>
-                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-accent/15 text-accent uppercase">
-                  Live
-                </span>
-              </div>
-              <p
-                className="text-2xl font-extrabold text-foreground leading-tight"
-                data-testid="price-estimate-amount"
-              >
-                ca. {formatEuro(estimate.amount)}
-              </p>
-              <p className="text-xs text-muted truncate" data-testid="price-estimate-range">
-                {audience === "privat"
-                  ? `Spanne ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} · inkl. MwSt.`
-                  : `Brutto ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} · Netto ca. ${formatEuroExact(split.netto)} zzgl. ${VAT_PERCENT_LABEL} MwSt.`}
-              </p>
-              {estimate.wartung && (
-                <p
-                  className="text-[11px] text-emerald-700 font-medium mt-1 truncate"
-                  data-testid="wartung-summary"
-                >
-                  Wartung {estimate.wartung.packageLabel} · Ersparnis ca.{" "}
-                  {formatEuro(estimate.wartung.yearlySavings)}/Jahr
-                </p>
-              )}
+              {largeWindows ? (
+                <>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                      Individuelle Anfrage
+                    </span>
+                  </div>
+                  <p
+                    className="text-lg font-extrabold text-foreground leading-tight"
+                    data-testid="price-estimate-individual-title"
+                  >
+                    Große / breite Scheiben
+                  </p>
+                  <p className="text-xs text-muted truncate" data-testid="price-estimate-individual-note">
+                    {LARGE_WINDOW_PRICE_NOTE}
+                  </p>
+                </>
+              ) : estimate ? (
+                <>
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                      {estimate.label}
+                    </span>
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-accent/15 text-accent uppercase">
+                      Live
+                    </span>
+                  </div>
+                  <p
+                    className="text-2xl font-extrabold text-foreground leading-tight"
+                    data-testid="price-estimate-amount"
+                  >
+                    ca. {formatEuro(estimate.amount)}
+                  </p>
+                  <p className="text-xs text-muted truncate" data-testid="price-estimate-range">
+                    {audience === "privat"
+                      ? `Spanne ${formatEuro(estimate.min)} – ${formatEuro(estimate.max)} · inkl. MwSt.`
+                      : `Brutto ${formatEuro(estimate.min)}–${formatEuro(estimate.max)} · Netto ca. ${formatEuroExact(split!.netto)} zzgl. ${VAT_PERCENT_LABEL} MwSt.`}
+                  </p>
+                  {estimate.wartung && (
+                    <p
+                      className="text-[11px] text-emerald-700 font-medium mt-1 truncate"
+                      data-testid="wartung-summary"
+                    >
+                      Wartung {estimate.wartung.packageLabel} · Ersparnis ca.{" "}
+                      {formatEuro(estimate.wartung.yearlySavings)}/Jahr
+                    </p>
+                  )}
+                </>
+              ) : null}
             </div>
             <button
               type="button"
@@ -84,7 +107,9 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
             </button>
           </div>
           <p className="text-[10px] text-muted mt-2 leading-snug">
-            Verbindliches Festpreis-Angebot in {siteConfig.business.responseTime}
+            {largeWindows
+              ? `Individuelle Rückmeldung in ${siteConfig.business.responseTime}`
+              : `Verbindliches Festpreis-Angebot in ${siteConfig.business.responseTime}`}
           </p>
         </div>
       </div>
@@ -94,7 +119,7 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
           <button
             type="button"
             aria-label="Schließen"
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
+            className="absolute inset-x-0 inset-y-0 bg-slate-900/40 backdrop-blur-[2px]"
             onClick={() => setOpen(false)}
           />
           <div
@@ -108,7 +133,7 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
               <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border" aria-hidden />
               <div className="flex items-center justify-between gap-3">
                 <h3 id="price-estimate-sheet-title" className="text-base font-bold text-foreground">
-                  Live-Preisschätzung
+                  {largeWindows ? "Individuelle Anfrage" : "Live-Preisschätzung"}
                 </h3>
                 <button
                   type="button"
@@ -120,7 +145,9 @@ export function PriceEstimateMobileDock({ data }: PriceEstimateMobileDockProps) 
                 </button>
               </div>
               <p className="text-xs text-muted mt-1">
-                Transparente Kalkulation – Ihr Festpreis-Angebot folgt per E-Mail.
+                {largeWindows
+                  ? "Keine Live-Zahl – wir kalkulieren nach Ihrer Anfrage und Fotos."
+                  : "Transparente Kalkulation – Ihr Festpreis-Angebot folgt per E-Mail."}
               </p>
             </div>
             <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">

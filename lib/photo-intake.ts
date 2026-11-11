@@ -5,6 +5,7 @@
 import type { AssistantProduct } from "@/lib/concierge/types";
 import type { ConciergeSession } from "@/lib/concierge/types";
 import type { DirtLevel, QuoteFormData } from "@/lib/quote-form";
+import { isLargeWindowQuote } from "@/lib/live-pricing-policy";
 
 export const PHOTO_INTAKE_MIN = 1;
 
@@ -22,6 +23,7 @@ export const PHOTO_REQUIRED_DIRT: ReadonlySet<DirtLevel> = new Set(["stark", "ex
 export type PhotoIntakeReason =
   | "product"
   | "dirt"
+  | "window_size"
   | "optional";
 
 export function photoRequiredForProduct(product: AssistantProduct | null | undefined): boolean {
@@ -39,6 +41,7 @@ export function resolvePhotoIntakeRequirement(input: {
   quote?: Partial<QuoteFormData> | null;
 }): { required: boolean; reason: PhotoIntakeReason; messageDe: string } {
   const product = input.session?.assistantProduct ?? null;
+  const quote = input.quote ?? input.session?.quote;
   if (photoRequiredForProduct(product)) {
     return {
       required: true,
@@ -47,7 +50,15 @@ export function resolvePhotoIntakeRequirement(input: {
         "Für ein präzises Festpreis-Angebot brauchen wir mindestens 1 Foto vom Objekt (Zustand, Räume, Verschmutzung). Bitte fügen Sie Fotos hinzu.",
     };
   }
-  if (photoRequiredForQuote(input.quote ?? input.session?.quote)) {
+  if (isLargeWindowQuote(quote)) {
+    return {
+      required: true,
+      reason: "window_size",
+      messageDe:
+        "Bei großen oder breiten Scheiben brauchen wir mindestens 1 Foto — sonst können wir nicht individuell kalkulieren.",
+    };
+  }
+  if (photoRequiredForQuote(quote)) {
     return {
       required: true,
       reason: "dirt",

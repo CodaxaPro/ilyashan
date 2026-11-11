@@ -14,6 +14,8 @@ import {
   validatePhotos,
   type PhotoPayload,
 } from "@/lib/photo-upload";
+import { enforcePhotoIntake } from "@/lib/photo-intake";
+import { saveLeadPhotos } from "@/lib/lead-photos";
 import { getFensterPricingConfig } from "@/lib/pricing-config";
 import { createQuotePricingContext } from "@/lib/quote-pricing-context";
 
@@ -59,6 +61,15 @@ export async function submitSalesLead(
     return { ok: false, code: "photos", messageDe: photoError };
   }
 
+  const intake = enforcePhotoIntake({
+    photoCount: photos.length,
+    session,
+    quote: session.quote,
+  });
+  if (!intake.ok) {
+    return { ok: false, code: intake.code, messageDe: intake.messageDe };
+  }
+
   const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
   if (!resend || process.env.RESEND_API_KEY?.includes("HIER_IHREN")) {
     return {
@@ -82,6 +93,20 @@ export async function submitSalesLead(
     const fromEmail =
       process.env.FROM_EMAIL ?? `Ilyashan Fensterreinigung <${siteConfig.contact.email}>`;
 
+    const storedLead = createConciergeStoredLead(session, name, phone, photos.length, pricingCtx);
+
+    const saveResult = await saveLead(storedLead);
+    if (!saveResult.ok) {
+      return {
+        ok: false,
+        code: "lead_persist_failed",
+        messageDe: `Anfrage konnte nicht gespeichert werden. Bitte rufen Sie uns an: ${siteConfig.contact.phoneDisplay}.`,
+      };
+    }
+    if (photos.length > 0 && saveResult.persisted) {
+      await saveLeadPhotos(storedLead.id, photos);
+    }
+
     await resend.emails.send({
       from: fromEmail,
       to: contactEmail,
@@ -92,11 +117,11 @@ export async function submitSalesLead(
       attachments: photosToResendAttachments(photos),
     });
 
-    await saveLead(createConciergeStoredLead(session, name, phone, photos.length, pricingCtx));
-
     return {
       ok: true,
-      messageDe: `Vielen Dank, ${name.split(" ")[0]}! Wir melden uns innerhalb von ${siteConfig.business.responseTime} mit Festpreis und Terminvorschlag. Bei Eile: ${siteConfig.contact.phoneDisplay}.`,
+      messageDe: saveResult.persisted
+        ? `Vielen Dank, ${name.split(" ")[0]}! Wir melden uns innerhalb von ${siteConfig.business.responseTime} mit Festpreis und Terminvorschlag. Bei Eile: ${siteConfig.contact.phoneDisplay}.`
+        : `Vielen Dank, ${name.split(" ")[0]}! E-Mail ist raus — Admin-Speicher (KV) fehlt lokal, daher kein Lead im Panel. Bei Eile: ${siteConfig.contact.phoneDisplay}.`,
     };
   } catch (error) {
     console.error("[submit-sales-lead]", error);

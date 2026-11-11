@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/config";
 
 const lines: Record<string, string> = {
   privat: "Wohnung und Haus. Der Preis steht im Rechner.",
-  gewerbe: "Büro, Praxis oder Laden. Preis nach Anzahl und Fläche.",
+  gewerbe: "Büro, Praxis oder Laden. Gleicher Live-Preis wie Privat. Große Scheiben individuell.",
   rahmen: "Beidseitig, mit Rahmen, Falz und Fensterbank.",
   solar: "Kleine Anlage, bis etwa 15 Module.",
   fassade: "Glasfassade. Preis nach Aufmaß.",

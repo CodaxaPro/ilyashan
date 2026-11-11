@@ -8,9 +8,9 @@ import {
   buildLeadRejectionEmail,
   getCustomerEmailPreviewDe,
 } from "./appointment-email";
-import { initialQuoteFormData } from "./quote-form";
+import { initialQuoteFormData, type QuoteFormData } from "./quote-form";
 
-const quote = {
+const quote: QuoteFormData = {
   ...initialQuoteFormData,
   services: ["privat"],
   windowCount: 12,
@@ -36,7 +36,7 @@ describe("appointment emails", () => {
     assert.match(email.html, /inkl\. MwSt/);
   });
 
-  it("builds confirmation email with Netto/MwSt/Brutto for gewerbe", () => {
+  it("builds confirmation email with inkl. MwSt. for gewerbe (Live-Privat-Politik)", () => {
     const gewerbeQuote = { ...quote, services: ["gewerbe" as const], objectType: "gewerbe" as const };
     const email = buildAppointmentConfirmationEmail(
       gewerbeQuote,
@@ -47,9 +47,8 @@ describe("appointment emails", () => {
       { plannedStartTime: "11:00", estimatedDurationHours: 2 },
       125
     );
-    assert.match(email.text, /Netto/);
-    assert.match(email.text, /zzgl\. 19 % MwSt/);
-    assert.match(email.text, /Brutto 125\s*€/);
+    assert.match(email.text, /125\s*€ inkl\. MwSt/);
+    assert.doesNotMatch(email.text, /Netto/);
   });
 
   it("builds update email with previous date and Festpreis", () => {
