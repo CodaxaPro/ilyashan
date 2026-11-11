@@ -89,7 +89,7 @@ export function Step1Services({ data, onUpdate }: Step1ServicesProps) {
           const priceHint =
             service.id === "wartung" && wartungHint
               ? `Live berechnet · ${wartungHint}`
-              : service.id === "privat"
+              : service.id === "privat" || service.id === "gewerbe"
                 ? formatMinimumWohnungHint(config.minimumWohnung)
                 : service.priceHint;
 
