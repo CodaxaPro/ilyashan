@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, type ReactNode } from "react";
 import type { CleaningSide, DirtLevel, QuoteFormData } from "@/lib/quote-form";
 import {
   cleaningSideHints,
@@ -14,8 +15,6 @@ import { usePricingConfig } from "@/components/quote/PricingConfigProvider";
 import { preventChoiceButtonScroll } from "@/components/quote/quote-wizard-scroll";
 import {
   formatBasePerFluegelDescription,
-  formatCanopyHint,
-  formatFlyScreensHint,
   formatSkylightsHint,
 } from "@/lib/pricing-display";
 import {
@@ -23,6 +22,8 @@ import {
   windowSizeLabels,
   type WindowSizeOption,
 } from "@/lib/live-pricing-policy";
+import { WintergartenInquiryForm } from "@/components/quote/WintergartenInquiryForm";
+import { FluegelInfoButton } from "@/components/quote/FluegelExplainer";
 
 interface Step3DetailsProps {
   data: QuoteFormData;
@@ -32,6 +33,7 @@ interface Step3DetailsProps {
 function Stepper({
   label,
   hint,
+  hintAction,
   value,
   min,
   max,
@@ -42,6 +44,7 @@ function Stepper({
 }: {
   label: string;
   hint?: string;
+  hintAction?: ReactNode;
   value: number;
   min: number;
   max: number;
@@ -64,7 +67,12 @@ function Stepper({
         {label}
         <span className="text-red-500 ml-0.5">*</span>
       </label>
-      {hint && <p className="text-xs text-muted mb-3">{hint}</p>}
+      {hint && (
+        <div className="text-xs text-muted mb-3 flex items-center gap-2">
+          <span className="min-w-0 flex-1 leading-snug">{hint}</span>
+          {hintAction}
+        </div>
+      )}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button
           type="button"
@@ -109,9 +117,6 @@ const reinigungswünsche: {
     | "oldBuildingWindows"
     | "skylights"
     | "shutters"
-    | "blinds"
-    | "canopy"
-    | "flyScreens"
   >;
   label: string;
 }[] = [
@@ -122,14 +127,19 @@ const reinigungswünsche: {
   { key: "oldBuildingWindows", label: "Altbaufenster" },
   { key: "skylights", label: "Dachfenster / Oberlichter" },
   { key: "shutters", label: "Rollladen (nur innen)" },
-  { key: "blinds", label: "Jalousien (innenliegend)" },
-  { key: "canopy", label: "Vordach / Glasdach (nur Glas)" },
-  { key: "flyScreens", label: "Fliegengitter" },
 ];
 
 export function Step3Details({ data, onChange }: Step3DetailsProps) {
   const { config } = usePricingConfig();
   const selectedExtras = reinigungswünsche.filter((item) => data[item.key]).length;
+
+  // Wintergarten ist Anfrage-only — alte Live-Preis-Flags zurücksetzen
+  useEffect(() => {
+    if (data.includeWintergarden || data.wintergardenSqm > 0) {
+      onChange({ includeWintergarden: false, wintergardenSqm: 0 });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only clear legacy wintergarden pricing flags
+  }, [data.includeWintergarden, data.wintergardenSqm]);
 
   return (
     <div>
@@ -181,7 +191,8 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
             <div className="grid sm:grid-cols-2 gap-8">
               <Stepper
                 label="Anzahl Fensterflügel"
-                hint="Ein Flügel = ein beweglicher Fensterteil"
+                hint="Jedes öffenbare Teil = 1 Flügel"
+                hintAction={<FluegelInfoButton />}
                 testIdPrefix="window-count"
                 value={data.windowCount}
                 min={1}
@@ -314,12 +325,7 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {reinigungswünsche.map(({ key, label }) => {
                 const selected = data[key];
-                const expands =
-                  key === "skylights" ||
-                  key === "flyScreens" ||
-                  key === "canopy" ||
-                  key === "shutters" ||
-                  key === "blinds";
+                const expands = key === "skylights" || key === "shutters";
 
                 return (
                   <div
@@ -351,20 +357,6 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                             });
                             return;
                           }
-                          if (key === "flyScreens") {
-                            onChange({
-                              flyScreens: checked,
-                              flyScreensCount: checked ? Math.max(data.flyScreensCount, 1) : 0,
-                            });
-                            return;
-                          }
-                          if (key === "canopy") {
-                            onChange({
-                              canopy: checked,
-                              canopySqm: checked ? Math.max(data.canopySqm, 5) : 0,
-                            });
-                            return;
-                          }
                           onChange({ [key]: checked });
                         }}
                         className="mt-0.5 sm:mt-0 h-5 w-5 shrink-0 rounded border-border text-primary focus:ring-primary/30"
@@ -387,16 +379,6 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       </p>
                     )}
 
-                    {key === "blinds" && selected && (
-                      <p
-                        className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
-                        data-testid="blinds-innen-notice"
-                      >
-                        <strong>Jalousien:</strong> Preis gilt für innenliegende Lamellenjalousien.
-                        Außenjalousien / Raffstores nur nach Absprache.
-                      </p>
-                    )}
-
                     {key === "skylights" && selected && (
                       <div className="w-full min-w-0">
                         <Stepper
@@ -412,48 +394,6 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
                       </div>
                     )}
 
-                    {key === "flyScreens" && selected && (
-                      <div className="w-full min-w-0 space-y-2">
-                        <Stepper
-                          label="Anzahl Fliegengitter"
-                          hint={formatFlyScreensHint()}
-                          value={data.flyScreensCount || 1}
-                          min={1}
-                          max={40}
-                          step={1}
-                          unit="Stück"
-                          onChange={(flyScreensCount) => onChange({ flyScreensCount })}
-                        />
-                        <p
-                          className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
-                          data-testid="flyscreens-notice"
-                        >
-                          <strong>Fliegengitter:</strong> Preis gilt für ausbaubare / innen zugängliche
-                          Gitter. Fest verbaute oder außen nicht erreichbare Gitter nur nach Absprache.
-                        </p>
-                      </div>
-                    )}
-
-                    {key === "canopy" && selected && (
-                      <div className="w-full min-w-0 space-y-2">
-                        <Stepper
-                          label="Vordach-Fläche (Glas)"
-                          hint={formatCanopyHint()}
-                          value={data.canopySqm || 5}
-                          min={1}
-                          max={50}
-                          step={1}
-                          unit="m²"
-                          onChange={(canopySqm) => onChange({ canopySqm })}
-                        />
-                        <p
-                          className="text-xs leading-relaxed rounded-lg border border-border bg-card text-foreground px-3 py-2"
-                          data-testid="canopy-glas-notice"
-                        >
-                          <strong>Nur Glas:</strong> Stoffmarkisen / textile Vordächer sind nicht enthalten.
-                        </p>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -465,73 +405,10 @@ export function Step3Details({ data, onChange }: Step3DetailsProps) {
               <span className="w-8 h-8 rounded-lg bg-primary text-white text-sm flex items-center justify-center font-bold">
                 3
               </span>
-              Zusatzleistungen
+              Zusatzanfrage
               <span className="text-xs font-normal text-muted ml-1">(optional)</span>
             </h3>
-
-            <div className="space-y-4">
-              <label className="flex items-start gap-3 p-4 rounded-xl border-2 border-border cursor-pointer hover:border-primary/20">
-                <input
-                  type="checkbox"
-                  checked={data.includeSolar}
-                  onChange={(e) =>
-                    onChange({
-                      includeSolar: e.target.checked,
-                      solarSqm: e.target.checked ? Math.max(data.solarSqm, 5) : 0,
-                    })
-                  }
-                  className="mt-1 rounded border-border text-primary"
-                />
-                <div className="flex-1">
-                  <span className="font-semibold text-sm">Solaranlagen-Reinigung</span>
-                  <span className="block text-xs text-muted mt-0.5">2,20 €/m² · ab 99 €</span>
-                </div>
-              </label>
-              {data.includeSolar && (
-                <div className="w-full min-w-0 rounded-xl border border-primary/20 bg-primary-light/15 p-3">
-                  <Stepper
-                    label="Modulfläche"
-                    value={data.solarSqm || 5}
-                    min={5}
-                    max={500}
-                    step={5}
-                    unit="m²"
-                    onChange={(solarSqm) => onChange({ solarSqm })}
-                  />
-                </div>
-              )}
-
-              <label className="flex items-start gap-3 p-4 rounded-xl border-2 border-border cursor-pointer hover:border-primary/20">
-                <input
-                  type="checkbox"
-                  checked={data.includeWintergarden}
-                  onChange={(e) =>
-                    onChange({
-                      includeWintergarden: e.target.checked,
-                      wintergardenSqm: e.target.checked ? Math.max(data.wintergardenSqm, 5) : 0,
-                    })
-                  }
-                  className="mt-1 rounded border-border text-primary"
-                />
-                <div className="flex-1">
-                  <span className="font-semibold text-sm">Wintergarten-Reinigung</span>
-                  <span className="block text-xs text-muted mt-0.5">8,00 €/m² · ab 129 €</span>
-                </div>
-              </label>
-              {data.includeWintergarden && (
-                <div className="w-full min-w-0 rounded-xl border border-primary/20 bg-primary-light/15 p-3">
-                  <Stepper
-                    label="Glasfläche Wintergarten"
-                    value={data.wintergardenSqm || 5}
-                    min={5}
-                    max={200}
-                    step={5}
-                    unit="m²"
-                    onChange={(wintergardenSqm) => onChange({ wintergardenSqm })}
-                  />
-                </div>
-              )}
-            </div>
+            <WintergartenInquiryForm />
           </section>
 
           <section className="rounded-2xl border border-border p-4 sm:p-6 bg-card/50">
