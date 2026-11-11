@@ -1,4 +1,5 @@
 import type { ConciergeSession } from "@/lib/concierge/types";
+import { extractFloorLevel } from "@/lib/concierge/extract";
 import type { QuoteFormData } from "@/lib/quote-form";
 import type { QuotePricingContext } from "@/lib/quote-pricing-context";
 import {
@@ -30,6 +31,8 @@ import type { FloorLevel, DirtLevel, CleaningSide, QuoteServiceId } from "@/lib/
 import type { AssistantProduct, BueroChatDraft } from "@/lib/concierge/types";
 import type { BookableTimeSlot } from "@/lib/scheduling/slot-engine";
 import { getConciergeWhatsAppUrl } from "@/lib/concierge/whatsapp-handoff";
+import { requestPhotoIntake } from "../sales/request-photo-intake";
+import { requestDepositFromChat } from "../sales/request-deposit";
 
 export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
   {
@@ -259,6 +262,34 @@ export const ASSISTANT_TOOL_DEFINITIONS: AiToolDefinition[] = [
     },
   },
   {
+    name: "request_photo_intake",
+    description:
+      "Fordert Fotos an (Pflicht bei Bauend/Renovierung/Entrümpelung/Praxis oder starker Verschmutzung). Öffnet das Lead-Formular mit Foto-Upload.",
+    parameters: {
+      type: "object",
+      properties: {},
+    },
+  },
+  {
+    name: "request_deposit",
+    description:
+      "Anzahlung anfordern (Bauend/Renovierung/Entrümpelung oder großer Auftrag). Name+Telefon nötig; E-Mail empfohlen für Überweisungsdaten.",
+    parameters: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        phone: { type: "string" },
+        email: { type: "string" },
+        amountEur: { type: "number", description: "Optionaler Betrag in €" },
+        festpreisHint: {
+          type: "number",
+          description: "Bekannter/geschätzter Festpreis zur Berechnung der Anzahlung",
+        },
+      },
+      required: ["name", "phone"],
+    },
+  },
+  {
     name: "submit_customer_lead",
     description:
       "ABSCHLUSS ohne festen Slot: Speichert Name+Telefon (+Notiz) in CRM und mailt an Ilyashan. Für Festpreis/Rückruf wenn kein book_appointment möglich.",
@@ -466,6 +497,49 @@ export async function executeAllowlistedTool(
     };
   }
 
+  if (name === "request_photo_intake") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = requestPhotoIntake(session);
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      actionsJson: JSON.stringify([{ type: "link", label: "Fotos & Anfrage", href: "#lead" }]),
+      quickReplies: result.required
+        ? ["Fotos hochladen", "Rückruf", "Anrufen"]
+        : ["Weiter ohne Foto", "Fotos hochladen", "Anrufen"],
+      session: { ...session, stage: "price_ready", turns: session.turns + 1 },
+    };
+  }
+
+  if (name === "request_deposit") {
+    const session = ctx.session;
+    if (!session) {
+      return { content: JSON.stringify({ ok: false, error: "missing_session" }) };
+    }
+    const result = await requestDepositFromChat({
+      name: String(args.name ?? ""),
+      phone: String(args.phone ?? ""),
+      email: args.email ? String(args.email) : undefined,
+      amountEur: args.amountEur !== undefined ? Number(args.amountEur) : undefined,
+      festpreisHint:
+        args.festpreisHint !== undefined ? Number(args.festpreisHint) : undefined,
+      session,
+    });
+    return {
+      content: JSON.stringify(result),
+      customerText: result.messageDe,
+      session: result.ok
+        ? { ...session, turns: session.turns + 1, stage: "idle" }
+        : session,
+      quickReplies: result.ok
+        ? ["Überweisung erledigt", "Frage zur Anzahlung", "Anrufen"]
+        : ["Ohne Anzahlung fortfahren", "Anrufen"],
+    };
+  }
+
   if (name === "submit_customer_lead") {
     const session = ctx.session;
     if (!session) {
@@ -548,7 +622,10 @@ export async function executeAllowlistedTool(
     }
     const patch: FensterStructuredPatch = {};
     if (args.windowCount !== undefined) patch.windowCount = Number(args.windowCount);
-    if (typeof args.floorLevel === "string") patch.floorLevel = args.floorLevel as FloorLevel;
+    if (typeof args.floorLevel === "string") {
+      patch.floorLevel =
+        extractFloorLevel(args.floorLevel) ?? (args.floorLevel as FloorLevel);
+    }
     if (typeof args.dirtLevel === "string") patch.dirtLevel = args.dirtLevel as DirtLevel;
     if (typeof args.cleaningSide === "string") {
       patch.cleaningSide = args.cleaningSide as CleaningSide;

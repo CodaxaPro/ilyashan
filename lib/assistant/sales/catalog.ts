@@ -97,7 +97,7 @@ export function openServiceCase(
     };
   }
 
-  // Manual Festpreis products — never invent €; close via lead
+  // Manual Festpreis products — never invent €; close via lead; photos required (P2)
   const ask: Record<
     Exclude<AssistantProduct, "fenster" | "buero" | "treppenhaus" | "gutschein">,
     string
@@ -110,9 +110,9 @@ export function openServiceCase(
 
   return {
     session: { ...next, stage: "price_ready" }, // allow lead form immediately for Festpreis path
-    text: `${ask[product]}\n\nWenn Sie möchten: **Name und Telefon** — ich leite alles an unser Team weiter.`,
+    text: `${ask[product]}\n\n**Wichtig:** Bitte laden Sie mindestens **1 Foto** vom Objekt hoch — ohne Foto kein verlässliches Festpreis-Angebot.\n\nDann: **Name und Telefon** — ich leite alles an unser Team weiter.`,
     actions,
-    quickReplies: ["Rückruf / Festpreis", "Mehr Details nennen", "Andere Leistung"],
+    quickReplies: ["Rückruf / Festpreis", "Fotos hochladen", "Andere Leistung"],
   };
 }
 
