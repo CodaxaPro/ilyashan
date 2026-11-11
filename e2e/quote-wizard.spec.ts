@@ -86,10 +86,10 @@ test.describe("Angebot Wizard – Validierung", () => {
     await expect(page.getByTestId("quote-next")).toBeDisabled();
   });
 
-  test("Solar aktiviert → Preiszeile in Kalkulation", async ({ page }) => {
+  test("Rahmen aktiviert → Preiszeile in Kalkulation", async ({ page }) => {
     await selectPrivatFlow(page);
-    await page.getByText("Solaranlagen-Reinigung").click();
-    await expect(page.getByTestId("price-breakdown")).toContainText("Solaranlagen");
+    await page.getByText("Mit Rahmen").click();
+    await expect(page.getByTestId("price-breakdown")).toContainText("Rahmen");
   });
 });
 
@@ -134,6 +134,33 @@ test.describe("Angebot Wizard – Live-Preis", () => {
 
     await page.getByLabel("Mit Rahmen").check();
     await expect(page.getByTestId("price-breakdown")).toContainText("Rahmenreinigung");
+  });
+
+  test("Flügel-Info-Modal öffnet und schließt", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await page.getByTestId("fluegel-info-open").click();
+    await expect(page.getByTestId("fluegel-info-modal")).toBeVisible();
+    await expect(page.getByTestId("fluegel-info-modal")).toContainText(/Fensterflügel/i);
+    await page.getByTestId("fluegel-info-close").click();
+    await expect(page.getByTestId("fluegel-info-modal")).toHaveCount(0);
+  });
+
+  test("Wintergarten-Anfrageformular: E-Mail-Kanal sichtbar", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await page.getByTestId("wintergarten-toggle").click();
+    await expect(page.getByTestId("wintergarten-channel-email")).toBeVisible();
+    await page.getByTestId("wintergarten-channel-whatsapp").click();
+    await expect(page.getByTestId("wintergarten-submit-whatsapp")).toBeVisible();
+    await page.getByTestId("wintergarten-channel-email").click();
+    await expect(page.getByTestId("wintergarten-submit-email")).toBeVisible();
+  });
+
+  test("Entfernte Extras (Jalousien/Vordach/Solar/Fliegengitter) fehlen", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await expect(page.getByText("Jalousien (innenliegend)")).toHaveCount(0);
+    await expect(page.getByText("Vordach / Glasdach")).toHaveCount(0);
+    await expect(page.getByText("Solaranlagen-Reinigung")).toHaveCount(0);
+    await expect(page.getByText("Fliegengitter")).toHaveCount(0);
   });
 
   test("3. OG ohne Aufzug → Etagen-Zuschlag", async ({ page }) => {

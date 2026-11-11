@@ -536,20 +536,18 @@ describe("E2E – Step3 wizard UX source of truth", () => {
 
   it("checkbox labels include UX constraints", () => {
     assert.match(step3, /Rollladen \(nur innen\)/);
-    assert.match(step3, /Jalousien \(innenliegend\)/);
-    assert.match(step3, /Vordach \/ Glasdach \(nur Glas\)/);
-    assert.match(step3, /Fliegengitter/);
-    assert.doesNotMatch(step3, /Fliegengitter \(pauschal\)/);
+    assert.doesNotMatch(step3, /Jalousien \(innenliegend\)/);
+    assert.doesNotMatch(step3, /Vordach \/ Glasdach \(nur Glas\)/);
+    assert.doesNotMatch(step3, /Fliegengitter/);
     assert.match(step3, /Dachfenster \/ Oberlichter/);
   });
 
-  it("skylights + flyScreens use Anzahl steppers", () => {
-    assert.match(step3, /Anzahl Fliegengitter/);
+  it("skylights use Anzahl stepper", () => {
     assert.match(step3, /Anzahl Dachfenster \/ Oberlichter/);
-    assert.match(step3, /flyScreensCount/);
     assert.match(step3, /skylightsCount/);
-    assert.match(step3, /formatFlyScreensHint/);
     assert.match(step3, /formatSkylightsHint/);
+    assert.doesNotMatch(step3, /Anzahl Fliegengitter/);
+    assert.doesNotMatch(step3, /flyScreensCount/);
   });
 
   it("quantity panels expand inline under their checkbox (not dumped at section bottom)", () => {
@@ -557,8 +555,8 @@ describe("E2E – Step3 wizard UX source of truth", () => {
     assert.match(step3, /grid-cols-1 sm:grid-cols-2/);
     assert.match(step3, /touch-manipulation/);
     assert.match(step3, /key === "skylights" && selected/);
-    assert.match(step3, /key === "flyScreens" && selected/);
-    assert.match(step3, /key === "canopy" && selected/);
+    assert.doesNotMatch(step3, /key === "flyScreens" && selected/);
+    assert.doesNotMatch(step3, /key === "canopy" && selected/);
     assert.match(step3, /key === "shutters" && selected/);
   });
 
@@ -573,15 +571,12 @@ describe("E2E – Step3 wizard UX source of truth", () => {
     assert.match(bridge, /q\.flyScreensCount && q\.flyScreensCount > 0 \? q\.flyScreensCount : 1/);
   });
 
-  it("notice blocks exist for shutters, blinds, flyScreens, canopy", () => {
+  it("notice blocks exist for shutters", () => {
     assert.match(step3, /data-testid="shutters-innen-notice"/);
-    assert.match(step3, /data-testid="blinds-innen-notice"/);
-    assert.match(step3, /data-testid="flyscreens-notice"/);
-    assert.match(step3, /data-testid="canopy-glas-notice"/);
+    assert.doesNotMatch(step3, /data-testid="blinds-innen-notice"/);
+    assert.doesNotMatch(step3, /data-testid="flyscreens-notice"/);
+    assert.doesNotMatch(step3, /data-testid="canopy-glas-notice"/);
     assert.match(step3, /außenliegende Rollläden sind nicht erreichbar/i);
-    assert.match(step3, /Außenjalousien \/ Raffstores nur nach Absprache/);
-    assert.match(step3, /Stoffmarkisen \/ textile Vordächer sind nicht enthalten/);
-    assert.match(step3, /ausbaubare \/ innen zugängliche/);
   });
 
   it("wizard renders hints from extraPriceHints keys used in Step3", () => {
@@ -593,9 +588,6 @@ describe("E2E – Step3 wizard UX source of truth", () => {
       "oldBuildingWindows",
       "skylights",
       "shutters",
-      "blinds",
-      "canopy",
-      "flyScreens",
     ]) {
       assert.ok(extraPriceHints[key], `Step3 key ${key} needs hint`);
     }
