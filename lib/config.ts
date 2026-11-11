@@ -98,7 +98,7 @@ export const siteConfig = {
       "Alternativ per WhatsApp absenden",
     ],
     wizardStep1Hint:
-      "Wählen Sie Ihre Hauptleistung. Wartungsvertrag optional zusätzlich buchbar – der Preis wird live nach NRW-Marktpreisen berechnet.",
+      "Gleicher Live-Preis für Privat und Gewerbe (pro Flügel). Wartungsvertrag optional – nach NRW-Marktpreisen berechnet.",
     wizardStep5Hint:
       "Prüfen Sie Ihre Live-Preisschätzung und senden Sie die Anfrage – per E-Mail mit PDF oder direkt per WhatsApp. Wir melden uns mit Ihrem verbindlichen Festpreis-Angebot.",
     priceEstimateLabel: "Live-Preisschätzung",

@@ -86,7 +86,8 @@ export interface QuoteFormData {
 }
 
 export const initialQuoteFormData: QuoteFormData = {
-  services: [],
+  /** Immer Privat-Live-Preis; Gewerbe nur noch als Objektart (Schritt 2) */
+  services: ["privat"],
   wartungPackageId: "",
   wartungPreferredWeekday: "",
   wartungPreferredTimeSlot: "",

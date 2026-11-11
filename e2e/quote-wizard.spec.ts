@@ -4,7 +4,6 @@ const ANGEBOT = "/de/angebot";
 
 async function selectPrivatFlow(page: Page) {
   await page.goto(ANGEBOT);
-  await page.getByTestId("service-privat").click();
   await expect(page.getByTestId("quote-next")).toBeEnabled();
   await page.getByTestId("quote-next").click();
 
@@ -34,21 +33,14 @@ function wartungSummary(page: Page) {
 }
 
 test.describe("Angebot Wizard – Validierung", () => {
-  test("Schritt 1: Weiter blockiert ohne Leistung", async ({ page }) => {
+  test("Schritt 1: Weiter ohne Extra-Auswahl freigegeben (Privat-Default)", async ({ page }) => {
     await page.goto(ANGEBOT);
-    const next = page.getByTestId("quote-next");
-    await expect(next).toBeDisabled();
+    await expect(page.getByTestId("quote-next")).toBeEnabled();
+    await expect(page.getByTestId("service-wartung")).toBeVisible();
   });
 
-  test("Schritt 1: nur Wartung ohne Hauptleistung blockiert", async ({ page }) => {
+  test("Schritt 1: Wartung erfordert Paketwahl", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-wartung").click();
-    await expect(page.getByTestId("quote-next")).toBeDisabled();
-  });
-
-  test("Schritt 1: Wartung + Privat erfordert Paketwahl", async ({ page }) => {
-    await page.goto(ANGEBOT);
-    await page.getByTestId("service-privat").click();
     await page.getByTestId("service-wartung").click();
     await expect(page.getByTestId("wartung-plan-selector")).toBeVisible();
     await expect(page.getByTestId("quote-next")).toBeEnabled();
@@ -63,7 +55,6 @@ test.describe("Angebot Wizard – Validierung", () => {
 
   test("Wartung: häufigeres Intervall → höherer Monatspreis", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-privat").click();
     await page.getByTestId("service-wartung").click();
     await page.getByTestId("wartung-package-quarterly").click();
     await page.getByTestId("quote-next").click();
@@ -90,20 +81,8 @@ test.describe("Angebot Wizard – Validierung", () => {
 
   test("Schritt 2: Etage fehlt → Fehlermeldung", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-privat").click();
     await page.getByTestId("quote-next").click();
     await page.getByRole("button", { name: "Wohnung", exact: true }).click();
-    await expect(page.getByTestId("quote-next")).toBeDisabled();
-  });
-
-  test("Schritt 2: Gewerbe-Leistung + Wohnung-Objekt blockiert", async ({ page }) => {
-    await page.goto(ANGEBOT);
-    await page.getByTestId("service-gewerbe").click();
-    await page.getByTestId("quote-next").click();
-    await page.getByRole("button", { name: "Wohnung", exact: true }).click();
-    await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
-    await page.getByRole("button", { name: "Ja", exact: true }).click();
-    await expect(page.getByTestId("quote-step-error")).toContainText("Gewerbe");
     await expect(page.getByTestId("quote-next")).toBeDisabled();
   });
 
@@ -159,7 +138,6 @@ test.describe("Angebot Wizard – Live-Preis", () => {
 
   test("3. OG ohne Aufzug → Etagen-Zuschlag", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-privat").click();
     await expect(page.getByTestId("quote-next")).toBeEnabled();
     await page.getByTestId("quote-next").click();
 
@@ -220,19 +198,11 @@ test.describe("Angebot Wizard – Voller Durchlauf", () => {
     await expect(page.getByTestId("quote-submit-email")).toBeDisabled();
   });
 
-  test("Gewerbe: Objektart wird synchronisiert", async ({ page }) => {
+  test("Gewerbe: Objektart wählbar, Live-Preis = Privat-Formel inkl. MwSt.", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-gewerbe").click();
-    await page.getByTestId("quote-next").click();
-
-    await expect(page.getByRole("button", { name: "Gewerbe", exact: true })).toHaveClass(/border-primary/);
-  });
-
-  test("Gewerbe: Live-Preis = Privat-Formel inkl. MwSt.", async ({ page }) => {
-    await page.goto(ANGEBOT);
-    await page.getByTestId("service-gewerbe").click();
     await page.getByTestId("quote-next").click();
     await page.getByRole("button", { name: "Gewerbe", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Gewerbe", exact: true })).toHaveClass(/border-primary/);
     await page.getByRole("button", { name: "Erdgeschoss (EG)", exact: true }).click();
     await page.getByRole("button", { name: "Ja", exact: true }).click();
     await page.getByTestId("quote-next").click();
@@ -332,7 +302,6 @@ test.describe("Angebot Wizard – Scroll hygiene", () => {
 
   test("step changes keep wizard below header, not in footer", async ({ page }) => {
     await page.goto(ANGEBOT);
-    await page.getByTestId("service-privat").click();
     await page.getByTestId("quote-next").click();
 
     await page.waitForFunction(() => {

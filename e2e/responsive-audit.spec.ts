@@ -50,7 +50,7 @@ for (const viewport of VIEWPORTS) {
     test("angebot: wizard step 1 visible", async ({ page: p }) => {
       await p.goto("/de/angebot");
       await expect(p.getByText("Schritt 1 von 5")).toBeVisible();
-      await expect(p.getByTestId("service-privat")).toBeVisible();
+      await expect(p.getByTestId("service-wartung")).toBeVisible();
     });
   });
 }

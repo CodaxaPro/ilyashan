@@ -9,16 +9,25 @@ export function hasPrimaryService(services: QuoteServiceId[]) {
   return services.includes("privat") || services.includes("gewerbe");
 }
 
-/** Schritt 1: Privat und Gewerbe schließen sich gegenseitig aus */
+/** Primary service for CRM labels – defaults to privat (same live price). */
+export function ensurePrimaryService(services: QuoteServiceId[]): "privat" | "gewerbe" {
+  return services.includes("gewerbe") ? "gewerbe" : "privat";
+}
+
+/** Schritt 1: immer eine Hauptleistung (Privat-Default); Wartung optional */
 export function normalizeServices(services: QuoteServiceId[]): QuoteServiceId[] {
   const wartung = services.includes("wartung");
-  const primary = services.includes("gewerbe")
-    ? "gewerbe"
-    : services.includes("privat")
-      ? "privat"
-      : null;
+  const primary = ensurePrimaryService(services);
+  return wartung ? [primary, "wartung"] : [primary];
+}
 
-  if (!primary) return wartung ? ["wartung"] : [];
+/** Objektart steuert CRM-Label (Gewerbe); Preis bleibt Privat-Live. */
+export function syncServicesWithObjectType(
+  services: QuoteServiceId[],
+  objectType: QuoteFormData["objectType"]
+): QuoteServiceId[] {
+  const wartung = services.includes("wartung");
+  const primary = objectType === "gewerbe" ? "gewerbe" : "privat";
   return wartung ? [primary, "wartung"] : [primary];
 }
 
@@ -26,10 +35,10 @@ export function validateQuoteStep(step: number, data: QuoteFormData): QuoteValid
   const issues: QuoteValidationIssue[] = [];
 
   if (step >= 1) {
-    if (!hasPrimaryService(data.services)) {
+    if (!hasPrimaryService(normalizeServices(data.services))) {
       issues.push({
         field: "services",
-        message: "Bitte Privathaushalt oder Gewerbe wählen.",
+        message: "Leistung konnte nicht geladen werden. Bitte Seite neu laden.",
       });
     }
     if (
@@ -75,12 +84,6 @@ export function validateQuoteStep(step: number, data: QuoteFormData): QuoteValid
     }
     if (!data.elevator) {
       issues.push({ field: "elevator", message: "Aufzug-Angabe fehlt." });
-    }
-    if (data.services.includes("gewerbe") && data.objectType && data.objectType !== "gewerbe") {
-      issues.push({
-        field: "objectType",
-        message: "Bei Gewerbe-Leistung bitte Objektart „Gewerbe“ wählen.",
-      });
     }
   }
 
@@ -134,12 +137,10 @@ export function isQuoteSubmissionValid(data: QuoteFormData) {
   return validateQuoteSubmission(data).length === 0;
 }
 
-/** Objektart an Leistung anpassen */
+/** @deprecated Leistung wird nicht mehr in Schritt 1 gewählt – Objektart steuert Label. */
 export function syncObjectTypeWithService(
-  services: QuoteServiceId[],
+  _services: QuoteServiceId[],
   objectType: QuoteFormData["objectType"]
 ): QuoteFormData["objectType"] {
-  if (services.includes("gewerbe")) return "gewerbe";
-  if (objectType === "gewerbe" && services.includes("privat")) return "";
   return objectType;
 }
