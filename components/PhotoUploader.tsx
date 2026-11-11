@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import {
   MAX_PHOTOS,
+  photoLimitHelperTextDe,
   type PhotoPayload,
   readFileAsPhotoPayload,
   validatePhotos,
@@ -69,8 +70,8 @@ export function PhotoUploader({
             Fotos{required ? " *" : " (optional)"}
           </p>
           <p className="text-xs text-muted">
-            {helperText ??
-              `Bis zu ${MAX_PHOTOS} Fotos · JPG/PNG/WebP · max. 2 MB je Foto`}
+            {helperText ?? photoLimitHelperTextDe()}
+            {photos.length > 0 ? ` · ${photos.length}/${MAX_PHOTOS}` : ""}
           </p>
         </div>
         {photos.length < MAX_PHOTOS && (
@@ -81,7 +82,7 @@ export function PhotoUploader({
             className="shrink-0 px-3 py-2 rounded-xl border border-primary/30 text-primary text-xs font-semibold hover:bg-primary-light/40 disabled:opacity-50"
             data-testid={`${testId}-add`}
           >
-            {loading ? "Lädt…" : "Foto hinzufügen"}
+            {loading ? "Lädt…" : photos.length === 0 ? "Fotos hinzufügen" : "Weitere Fotos"}
           </button>
         )}
       </div>

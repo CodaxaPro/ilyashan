@@ -3,7 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  MAX_EMAIL_PHOTO_ATTACHMENTS,
+  MAX_PHOTOS,
   normalizePhotoPayloads,
+  photoLimitHelperTextDe,
   photosToResendAttachments,
   validatePhotos,
   type PhotoPayload,
@@ -25,6 +28,19 @@ describe("photo-upload – Resend attachments", () => {
     assert.equal(attachments[0].contentType, "image/jpeg");
     assert.ok(Buffer.isBuffer(attachments[0].content));
     assert.match(attachments[0].filename, /fenster|\.jpg/i);
+  });
+
+  it("allows up to 20 photos; email attaches only first 10", () => {
+    assert.equal(MAX_PHOTOS, 20);
+    assert.equal(MAX_EMAIL_PHOTO_ATTACHMENTS, 10);
+    assert.match(photoLimitHelperTextDe(), /20/);
+    assert.match(photoLimitHelperTextDe(), /verkleinert/i);
+    const many = Array.from({ length: 15 }, (_, i) =>
+      samplePhoto({ name: `f-${i}.jpg` })
+    );
+    assert.equal(validatePhotos(many), null);
+    assert.equal(photosToResendAttachments(many).length, 10);
+    assert.equal(normalizePhotoPayloads(many.concat(samplePhoto())).length, 16);
   });
 
   it("rejects empty / invalid payloads", () => {

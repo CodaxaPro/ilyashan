@@ -248,6 +248,127 @@ test.describe("Angebot Wizard – Voller Durchlauf", () => {
     await expect(page.getByTestId("window-size-large-hint")).toBeVisible();
     await expect(page.getByTestId("price-estimate-individual").first()).toBeVisible();
     await expect(page.getByTestId("price-estimate-amount")).toHaveCount(0);
+    await expect(page.getByTestId("step3-basis-description")).toContainText(/individuell|Foto/i);
+    await expect(page.getByTestId("dirt-normal")).not.toContainText(/×/);
+    await expect(page.getByText("Innen & Außen")).not.toContainText(/×/);
+    await expect(page.getByText("Mit Rahmen")).not.toContainText(/€/);
+    await expect(page.getByTestId("dirt-normal")).toBeVisible();
+    await expect(page.getByText("Mit Rahmen")).toBeVisible();
+  });
+});
+
+test.describe("Angebot Wizard – Corporate Kanäle (E-Mail / WhatsApp / Foto)", () => {
+  async function goToStep5(page: Page) {
+    await selectPrivatFlow(page);
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: /In den nächsten 1–2 Wochen/ }).click();
+    await page.getByTestId("quote-next").click();
+    await expect(page.getByTestId("contact-firstName")).toBeVisible();
+  }
+
+  async function fillContact(page: Page) {
+    await page.getByTestId("contact-firstName").fill("Kanal");
+    await page.getByTestId("contact-lastName").fill("Test");
+    await page.getByTestId("contact-phone").fill("01733828354");
+    await page.getByTestId("contact-postalCode").fill("52062");
+    await page.getByTestId("contact-city").fill("Aachen");
+    await page.getByTestId("contact-privacy").check();
+  }
+
+  test("beide Submit-Buttons brandfarben; WA speichert zuerst via API", async ({ page }) => {
+    await goToStep5(page);
+    await fillContact(page);
+
+    const emailBtn = page.getByTestId("quote-submit-email");
+    const waBtn = page.getByTestId("quote-submit-whatsapp");
+    await expect(emailBtn).toBeEnabled();
+    await expect(waBtn).toBeEnabled();
+    await expect(waBtn).toHaveAttribute("type", "button");
+
+    let contactPosts = 0;
+    await page.route("**/api/contact", async (route) => {
+      contactPosts += 1;
+      const body = route.request().postDataJSON() as { photos?: unknown[] };
+      expect(Array.isArray(body.photos)).toBeTruthy();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          anfrageNr: "ANG-E2E-WA",
+          leadId: "lead_e2e_wa",
+          storagePersisted: true,
+        }),
+      });
+    });
+
+    const popupPromise = page.waitForEvent("popup");
+    await waBtn.click();
+    const popup = await popupPromise;
+    // wa.me redirects to api.whatsapp.com/send in Chromium
+    await expect(popup).toHaveURL(/whatsapp\.com.*(491733828354|phone=491733828354)/);
+    expect(decodeURIComponent(popup.url())).toContain("ANG-E2E-WA");
+    expect(contactPosts).toBe(1);
+    await expect(page.getByText(/Vielen Dank/i)).toBeVisible();
+    await expect(page.getByText(/ANG-E2E-WA/)).toBeVisible();
+  });
+
+  test("E-Mail-Kanal: Foto hochladen → POST enthält photos + Success", async ({ page }) => {
+    await goToStep5(page);
+    await fillContact(page);
+
+    await page.getByTestId("quote-photos-input").setInputFiles("e2e/fixtures/fenster-foto.jpg");
+    await expect(page.getByTestId("quote-photos-item-0")).toBeVisible({ timeout: 15_000 });
+
+    let sawPhoto = false;
+    await page.route("**/api/contact", async (route) => {
+      const body = route.request().postDataJSON() as {
+        photos?: { data?: string; type?: string }[];
+      };
+      sawPhoto = Array.isArray(body.photos) && (body.photos?.length ?? 0) >= 1;
+      expect(sawPhoto).toBeTruthy();
+      expect(body.photos![0].type).toMatch(/image\//);
+      expect(body.photos![0].data!.length).toBeGreaterThan(10);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          success: true,
+          anfrageNr: "ANG-E2E-MAIL",
+          leadId: "lead_e2e_mail",
+          storagePersisted: true,
+        }),
+      });
+    });
+
+    await page.getByTestId("quote-submit-email").click();
+    await expect(page.getByText(/Vielen Dank/i)).toBeVisible();
+    await expect(page.getByText(/ANG-E2E-MAIL/)).toBeVisible();
+    expect(sawPhoto).toBeTruthy();
+  });
+
+  test("große Scheiben: Foto Pflicht, dann E-Mail-Kanal ok", async ({ page }) => {
+    await selectPrivatFlow(page);
+    await page.getByTestId("window-size-large").click();
+    await page.getByTestId("quote-next").click();
+    await page.getByRole("button", { name: /In den nächsten 1–2 Wochen/ }).click();
+    await page.getByTestId("quote-next").click();
+    await fillContact(page);
+
+    await expect(page.getByTestId("quote-submit-email")).toBeDisabled();
+    await page.getByTestId("quote-photos-input").setInputFiles("e2e/fixtures/fenster-foto.jpg");
+    await expect(page.getByTestId("quote-photos-item-0")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId("quote-submit-email")).toBeEnabled();
+
+    await page.route("**/api/contact", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, anfrageNr: "ANG-E2E-LARGE", storagePersisted: true }),
+      });
+    });
+    await page.getByTestId("quote-submit-email").click();
+    await expect(page.getByText(/ANG-E2E-LARGE/)).toBeVisible();
   });
 });
 

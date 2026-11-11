@@ -218,6 +218,14 @@ describe("Corporate – remaining extras: engine ≡ surfaces", () => {
     assert.ok(withBlinds.breakdown.some((l) => /Jalousien/i.test(l.label)));
   });
 
+  it("large windows hide live €/× hints but keep dirt/extras selectable", () => {
+    const step3 = read("components/quote/steps/Step3Details.tsx");
+    assert.match(step3, /const showLivePriceHints = !largeWindows/);
+    assert.match(step3, /showLivePriceHints && \(/);
+    assert.match(step3, /qualitativeExtraHints/);
+    assert.match(step3, /individuell nach Foto/i);
+  });
+
   it("wizard ≡ email admin/customer ≡ WhatsApp ≡ snapshot for full remaining-extra quote", () => {
     const data = quote({
       withFrame: true,
@@ -255,8 +263,9 @@ describe("Corporate – remaining extras: engine ≡ surfaces", () => {
     assert.match(wa, new RegExp(String(est.min)));
 
     const snap = captureQuotePriceSnapshot(data, ctx);
-    assert.equal(snap.amount, est.amount);
-    assert.equal(snap.calculatedSubtotal, est.calculatedSubtotal);
+    assert.ok(snap);
+    assert.equal(snap!.amount, est.amount);
+    assert.equal(snap!.calculatedSubtotal, est.calculatedSubtotal);
   });
 
   it("large windows: no live price; label + table mark individuelle Anfrage", () => {
@@ -347,6 +356,14 @@ describe("Corporate – admin / mail ops surfaces", () => {
     assert.match(panel, /leadPhotos|Foto/i);
     assert.match(route, /getLeadPhotos/);
     assert.match(route, /deleteLeadPhotos/);
+  });
+
+  it("admin Anfrage özeti renders all detail rows (no slice truncation)", () => {
+    const panel = read("components/admin/AdminLeadDetailPanel.tsx");
+    assert.match(panel, /detailRows\.map\(/);
+    assert.doesNotMatch(panel, /detailRows\.slice\(/);
+    assert.match(panel, /PLZ \/ Ort/);
+    assert.match(panel, /admin-lead-detail-rows/);
   });
 });
 

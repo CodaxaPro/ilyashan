@@ -1,5 +1,8 @@
-export const MAX_PHOTOS = 3;
-export const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
+export const MAX_PHOTOS = 20;
+/** Nach Client-Kompression – Original-Handyfotos dürfen größer sein */
+export const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+/** Resend-/Mail-Limit: Rest der Fotos nur im Admin (KV) */
+export const MAX_EMAIL_PHOTO_ATTACHMENTS = 10;
 
 export const ALLOWED_PHOTO_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
@@ -15,6 +18,10 @@ export interface ResendPhotoAttachment {
   /** Raw base64 (Resend) or Buffer — Buffer is more reliable for images. */
   content: string | Buffer;
   contentType: string;
+}
+
+export function photoLimitHelperTextDe(): string {
+  return `Bis zu ${MAX_PHOTOS} Fotos · JPG/PNG/WebP · große Handyfotos werden automatisch verkleinert`;
 }
 
 export function normalizePhotoPayloads(raw: unknown): PhotoPayload[] {
@@ -55,15 +62,18 @@ export function validatePhotos(photos: PhotoPayload[]): string | null {
     }
 
     if (bytes.length > MAX_PHOTO_BYTES) {
-      return `Jedes Foto darf maximal ${MAX_PHOTO_BYTES / (1024 * 1024)} MB groß sein.`;
+      return `Jedes Foto darf maximal ${Math.round(MAX_PHOTO_BYTES / (1024 * 1024))} MB groß sein (nach Verkleinerung).`;
     }
   }
 
   return null;
 }
 
-export function photosToResendAttachments(photos: PhotoPayload[]): ResendPhotoAttachment[] {
-  return photos.map((photo, index) => {
+export function photosToResendAttachments(
+  photos: PhotoPayload[],
+  limit = MAX_EMAIL_PHOTO_ATTACHMENTS
+): ResendPhotoAttachment[] {
+  return photos.slice(0, Math.max(0, limit)).map((photo, index) => {
     const contentType = ALLOWED_PHOTO_TYPES.has(photo.type) ? photo.type : "image/jpeg";
     const ext =
       contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
@@ -86,40 +96,62 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary);
 }
 
+async function canvasToJpegFile(
+  source: CanvasImageSource,
+  width: number,
+  height: number,
+  quality: number,
+  fileName: string
+): Promise<File | null> {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(source, 0, 0, width, height);
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
+  );
+  if (!blob) return null;
+  return new File([blob], fileName, { type: "image/jpeg", lastModified: Date.now() });
+}
+
 /**
  * Client-side: Bilder vor Upload verkleinern (Payload-/Mail-Limit).
- * Max. Kantenlänge 1600px, JPEG ~0.72 — Ziel unter ~900 KB.
+ * Handy-Originale (oft 5–12 MB) → handliche JPEGs, Nutzer muss nichts einstellen.
  */
 export async function compressImageFileForUpload(file: File): Promise<File> {
   if (typeof window === "undefined" || typeof document === "undefined") return file;
   if (!file.type.startsWith("image/")) return file;
 
-  const maxEdge = 1600;
-  const quality = 0.72;
+  const targetName = `${(file.name.replace(/\.[^.]+$/, "") || "fenster-foto").slice(0, 40)}.jpg`;
+  /** Aggressiver als früher: 20 Fotos müssen unter typ. Server-Body-Limits bleiben */
+  const passes: { maxEdge: number; quality: number }[] = [
+    { maxEdge: 1400, quality: 0.7 },
+    { maxEdge: 1200, quality: 0.62 },
+    { maxEdge: 1024, quality: 0.55 },
+  ];
+  const targetBytes = 350 * 1024;
 
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
+  try {
+    const bitmap = await createImageBitmap(file);
+    let best: File | null = null;
 
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
+    for (const pass of passes) {
+      const scale = Math.min(1, pass.maxEdge / Math.max(bitmap.width, bitmap.height));
+      const width = Math.max(1, Math.round(bitmap.width * scale));
+      const height = Math.max(1, Math.round(bitmap.height * scale));
+      const next = await canvasToJpegFile(bitmap, width, height, pass.quality, targetName);
+      if (!next) continue;
+      best = next;
+      if (next.size <= targetBytes) break;
+    }
+
     bitmap.close();
+    return best ?? file;
+  } catch {
     return file;
   }
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob((b) => resolve(b), "image/jpeg", quality)
-  );
-  if (!blob) return file;
-
-  const baseName = file.name.replace(/\.[^.]+$/, "") || "fenster-foto";
-  return new File([blob], `${baseName}.jpg`, { type: "image/jpeg", lastModified: Date.now() });
 }
 
 export async function readFileAsPhotoPayload(file: File): Promise<PhotoPayload> {

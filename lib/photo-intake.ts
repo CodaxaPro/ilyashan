@@ -70,7 +70,7 @@ export function resolvePhotoIntakeRequirement(input: {
     required: false,
     reason: "optional",
     messageDe:
-      "Fotos helfen bei der Einschätzung (optional). Bis zu 3 Fotos · JPG/PNG/WebP · max. 2 MB.",
+      "Fotos helfen bei der Einschätzung (optional). Bis zu 20 Fotos · große Handyfotos werden automatisch verkleinert.",
   };
 }
 

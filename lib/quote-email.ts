@@ -20,6 +20,7 @@ import {
 } from "@/lib/quote-pricing-context";
 import { buildLeadQuickReplyLinks } from "@/lib/lead-quick-reply";
 import { resolvePriceAudience } from "@/lib/vat-display";
+import { MAX_EMAIL_PHOTO_ATTACHMENTS } from "@/lib/photo-upload";
 
 export function buildQuoteAdminEmail(
   data: QuoteFormData,
@@ -49,7 +50,13 @@ export function buildQuoteAdminEmail(
     ${buildDataTable(buildQuoteContactRows(data))}
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Anfragedetails</p>
     ${buildDataTable(detailRows)}
-    <p style="margin:12px 0 0;font-size:12px;color:#64748b;">PDF-Eingangsbestätigung ist als Anhang beigefügt.${photoCount > 0 ? ` ${photoCount} Foto(s) im Anhang.` : ""}</p>
+    <p style="margin:12px 0 0;font-size:12px;color:#64748b;">PDF-Eingangsbestätigung ist als Anhang beigefügt.${
+      photoCount > 0
+        ? photoCount > MAX_EMAIL_PHOTO_ATTACHMENTS
+          ? ` ${MAX_EMAIL_PHOTO_ATTACHMENTS} von ${photoCount} Foto(s) im Anhang — alle im Admin-Panel.`
+          : ` ${photoCount} Foto(s) im Anhang.`
+        : ""
+    }</p>
     <p style="margin:24px 0 12px;font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Schnellantwort</p>
     <p style="margin:0 0 10px;font-size:12px;color:#64748b;">Preis in WA/Mail = Live-Schätzung. Verbindlichen Festpreis im Admin-Panel setzen.</p>
     <div>

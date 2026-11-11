@@ -41,4 +41,4 @@ export const LARGE_WINDOW_PRICE_LABEL =
   "Individuell auf Anfrage (große / breite Scheiben)";
 
 export const LARGE_WINDOW_PRICE_NOTE =
-  "Für große oder breite Scheiben rechnen wir individuell. Kurze Anfrage senden — Rückmeldung in 24 Std.";
+  "Kein Live-Preis. Unten Angaben machen, am Ende Foto hochladen und Anfrage absenden — Rückmeldung in 24 Std.";
