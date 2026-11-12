@@ -70,46 +70,64 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   return Math.min(max, Math.max(min, value));
 }
 
+/** Launch-Preise (5 € / 49 / 69) → Nov 2026, wenn KV noch Altwerte speichert */
+function migrateLegacyLaunchPrices(
+  raw: Partial<FensterPricingConfig> | null | undefined
+): Partial<FensterPricingConfig> | null | undefined {
+  if (!raw) return raw;
+  const legacyBase = raw.basePerFluegel === 5 || raw.basePerFluegel === 5.0;
+  const legacyWohnung = raw.minimumWohnung === 49;
+  const legacyHaus = raw.minimumHaus === 69;
+  if (!legacyBase && !legacyWohnung && !legacyHaus) return raw;
+  return {
+    ...raw,
+    ...(legacyBase ? { basePerFluegel: DEFAULT_FENSTER_PRICING.basePerFluegel } : {}),
+    ...(legacyWohnung ? { minimumWohnung: DEFAULT_FENSTER_PRICING.minimumWohnung } : {}),
+    ...(legacyHaus ? { minimumHaus: DEFAULT_FENSTER_PRICING.minimumHaus } : {}),
+  };
+}
+
 export function sanitizeFensterPricingConfig(
   raw: Partial<FensterPricingConfig> | null | undefined
 ): FensterPricingConfig {
   const d = DEFAULT_FENSTER_PRICING;
-  const packages = sanitizeWartungPackages(raw?.wartungPackages);
+  const input = migrateLegacyLaunchPrices(raw);
+  const packages = sanitizeWartungPackages(input?.wartungPackages);
 
   // Migrate legacy single-tier config into quarterly package when packages missing in KV
-  if (raw?.wartungPackages === undefined && raw?.wartungDiscount !== undefined) {
+  if (input?.wartungPackages === undefined && input?.wartungDiscount !== undefined) {
     const quarterly = packages.find((pkg) => pkg.id === "quarterly");
     if (quarterly) {
-      quarterly.discountPercent = clampNumber(raw.wartungDiscount, 0, 0.5, quarterly.discountPercent);
+      quarterly.discountPercent = clampNumber(input.wartungDiscount, 0, 0.5, quarterly.discountPercent);
       quarterly.visitsPerYear = clampNumber(
-        raw.wartungVisitsPerYear,
+        input.wartungVisitsPerYear,
         1,
         52,
         quarterly.visitsPerYear
       );
-      quarterly.minMonthly = clampNumber(raw.wartungMinMonthly, 20, 500, quarterly.minMonthly);
+      quarterly.minMonthly = clampNumber(input.wartungMinMonthly, 20, 500, quarterly.minMonthly);
     }
   }
 
   return {
-    basePerFluegel: clampNumber(raw?.basePerFluegel, 2, 25, d.basePerFluegel),
-    minimumWohnung: clampNumber(raw?.minimumWohnung, 20, 200, d.minimumWohnung),
-    minimumHaus: clampNumber(raw?.minimumHaus, 30, 300, d.minimumHaus),
-    minimumGewerbe: clampNumber(raw?.minimumGewerbe, 50, 500, d.minimumGewerbe),
-    wartungDiscount: clampNumber(raw?.wartungDiscount, 0, 0.5, d.wartungDiscount),
-    wartungVisitsPerYear: clampNumber(raw?.wartungVisitsPerYear, 1, 52, d.wartungVisitsPerYear),
-    wartungMinMonthly: clampNumber(raw?.wartungMinMonthly, 20, 300, d.wartungMinMonthly),
+    basePerFluegel: clampNumber(input?.basePerFluegel, 2, 25, d.basePerFluegel),
+    minimumWohnung: clampNumber(input?.minimumWohnung, 20, 200, d.minimumWohnung),
+    minimumHaus: clampNumber(input?.minimumHaus, 30, 300, d.minimumHaus),
+    minimumGewerbe: clampNumber(input?.minimumGewerbe, 50, 500, d.minimumGewerbe),
+    wartungDiscount: clampNumber(input?.wartungDiscount, 0, 0.5, d.wartungDiscount),
+    wartungVisitsPerYear: clampNumber(input?.wartungVisitsPerYear, 1, 52, d.wartungVisitsPerYear),
+    wartungMinMonthly: clampNumber(input?.wartungMinMonthly, 20, 300, d.wartungMinMonthly),
     wartungPackages: packages,
     wartungFirstVisitSurchargePercent: clampNumber(
-      raw?.wartungFirstVisitSurchargePercent,
+      input?.wartungFirstVisitSurchargePercent,
       0,
       1,
       d.wartungFirstVisitSurchargePercent
     ),
-    wartungMinContractMonths: clampNumber(raw?.wartungMinContractMonths, 1, 36, d.wartungMinContractMonths),
-    scheduleMinLeadDays: clampNumber(raw?.scheduleMinLeadDays, 0, 14, d.scheduleMinLeadDays),
-    scheduleWeekdaysOnly: raw?.scheduleWeekdaysOnly === true,
-    updatedAt: raw?.updatedAt,
+    wartungMinContractMonths: clampNumber(input?.wartungMinContractMonths, 1, 36, d.wartungMinContractMonths),
+    scheduleMinLeadDays: clampNumber(input?.scheduleMinLeadDays, 0, 14, d.scheduleMinLeadDays),
+    scheduleWeekdaysOnly: input?.scheduleWeekdaysOnly === true,
+    updatedAt: input?.updatedAt,
   };
 }
 

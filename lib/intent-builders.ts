@@ -19,7 +19,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
     seo: {
       title: `Fensterputzer ${loc.city} | Streifenfrei · Festpreis`,
       description: home
-        ? `Fensterputzer Baesweiler: Ansaessig am Kueckstr. 29, ab 49 €, kein Anfahrtszuschlag. Der kommt wirklich — ${siteConfig.business.rating}★.`
+        ? `Fensterputzer Baesweiler: Ansaessig am Kueckstr. 29, ab 69 €, kein Anfahrtszuschlag. Der kommt wirklich — ${siteConfig.business.rating}★.`
         : `Fensterputzer nahe ${loc.city}: ${travelFrom(loc)}. Streifenfrei, versichert, Festpreis in 24h. Ilyashan Baesweiler.`,
     },
     hero: {
@@ -37,7 +37,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
         `„Fensterputzer ${loc.city}" bedeutet für viele: unzuverlässig, teuer, Streifen. Wir machen es anders — ansässig in Baesweiler, ${siteConfig.business.rating}★ bei Google.`,
         "Im Wizard sehen Sie sofort eine Live-Preisschätzung. Nach Ihrer Anfrage: verbindliches Festpreis-Angebot in 24 Stunden — kein Anfahrtszuschlag.",
         home
-          ? `Privat ab 49 €, Rahmen & Falz ab 79 €. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
+          ? `Privat ab 69 €, Rahmen & Falz ab 79 €. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
           : `Kunden aus ${loc.city} schätzen: pünktlich, freundlich, streifenfrei — ${travelFrom(loc)}.`,
       ],
     },
@@ -66,7 +66,7 @@ function buildFensterputzer(_type: IntentType, loc: LocationContext): BuiltInten
     },
     faq: [
       { q: `Fensterputzer ${loc.city} — Anfahrt?`, a: `${travelFrom(loc)}. Kein Anfahrtszuschlag.` },
-      { q: "Was kostet ein Fensterputzer?", a: "Privat ab 49 €. Live-Schätzung im Wizard." },
+      { q: "Was kostet ein Fensterputzer?", a: "Privat ab 69 €. Live-Schätzung im Wizard." },
       { q: "Versichert?", a: "Ja. Die Arbeit ist versichert." },
       { q: "Kommt wirklich jemand?", a: "Ja — festes Team aus Baesweiler, keine Vermittler." },
     ],
@@ -82,7 +82,7 @@ function buildGlasreinigung(_type: IntentType, loc: LocationContext): BuiltInten
   return assembleIntentPage("glasreinigung", loc, {
     seo: {
       title: `Glasreinigung ${loc.city} | Streifenfrei & sicher`,
-      description: `Glasreinigung in ${loc.city}: Fenster, Vitrinen, Solar — streifenfrei, versichert. ${travelFrom(loc)}. Ab 49 € · Festpreis in 24h.`,
+      description: `Glasreinigung in ${loc.city}: Fenster, Vitrinen, Solar — streifenfrei, versichert. ${travelFrom(loc)}. Ab 69 € · Festpreis in 24h.`,
     },
     hero: {
       eyebrow: `Glasreinigung · ${loc.city}`,
@@ -95,7 +95,7 @@ function buildGlasreinigung(_type: IntentType, loc: LocationContext): BuiltInten
       headline: "Mehr als Fenster putzen — Glas braucht Profis.",
       paragraphs: [
         `Glasreinigung in ${loc.city}: Ob Wohnfenster, Vitrine oder PV-Module — wir reinigen streifenfrei und materialschonend.`,
-        "Solar ab 99 €, Privat ab 49 €. Live-Preisschätzung online — Festpreis in 24 Stunden.",
+        "Solar ab 99 €, Privat ab 69 €. Live-Preisschätzung online — Festpreis in 24 Stunden.",
         `Kein Anfahrtszuschlag für ${loc.city}. ${siteConfig.business.rating}★ · versichert.`,
       ],
     },
@@ -141,7 +141,7 @@ function buildFensterreiniger(_type: IntentType, loc: LocationContext): BuiltInt
   return assembleIntentPage("fensterreiniger", loc, {
     seo: {
       title: `Fensterreiniger ${loc.city} | Lokal aus Baesweiler`,
-      description: `Fensterreiniger nahe ${loc.city}: Ansässig in Baesweiler, ${travelFrom(loc)}. Streifenfrei, ab 49 €, kein Anfahrtszuschlag.`,
+      description: `Fensterreiniger nahe ${loc.city}: Ansässig in Baesweiler, ${travelFrom(loc)}. Streifenfrei, ab 69 €, kein Anfahrtszuschlag.`,
     },
     hero: {
       eyebrow: `Fensterreiniger · ${loc.city}`,
@@ -317,7 +317,7 @@ function buildGeschenk(_type: IntentType, loc: LocationContext): BuiltIntentPage
   return assembleIntentPage("geschenk", loc, {
     seo: {
       title: `Fensterreinigung Geschenk ${loc.city} | Gutschein`,
-      description: `Fensterreinigung verschenken in ${loc.city}: Gutschein für streifenfreie Fenster — Zeit statt Zeug. Sofort online · ab 49 €.`,
+      description: `Fensterreinigung verschenken in ${loc.city}: Gutschein für streifenfreie Fenster — Zeit statt Zeug. Sofort online · ab 69 €.`,
     },
     hero: {
       eyebrow: `Geschenk · ${loc.city}`,
@@ -360,7 +360,7 @@ function buildGeschenk(_type: IntentType, loc: LocationContext): BuiltIntentPage
     faq: [
       { q: `Gutschein für ${loc.city}?`, a: `Ja — einlösbar in Baesweiler und Region, kein Anfahrtszuschlag für ${loc.city}.` },
       { q: "Sofort verfügbar?", a: "Ja — ideal auch last minute." },
-      { q: "Ab welchem Betrag?", a: "Ab 49 € (Privat) — oder Wunschbetrag im Shop." },
+      { q: "Ab welchem Betrag?", a: "Ab 69 € (Privat) — oder Wunschbetrag im Shop." },
       { q: "Persönliche Nachricht?", a: "Ja — beim Bestellen im Shop." },
     ],
     closing: {

@@ -133,7 +133,7 @@ export const siteConfig = {
       id: "privat",
       title: "Privatfenster",
       description: formatPrivatHomeServiceDescription(),
-      priceFrom: "ab 49 €",
+      priceFrom: "ab 69 €",
       icon: "home",
     },
     {
@@ -141,7 +141,7 @@ export const siteConfig = {
       title: "Gewerbefenster",
       description:
         "Büro, Praxis oder Laden – gleiche Live-Rechnung wie Privat (pro Flügel). Große Scheiben individuell. Flexible Termine.",
-      priceFrom: "ab 49 €",
+      priceFrom: "ab 69 €",
       icon: "building",
     },
     {
@@ -325,7 +325,7 @@ export const siteConfig = {
         "preise fensterreinigung",
       ],
       answer:
-        "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine transparente Preisschätzung – basierend auf Fensterflügeln, Reinigungsumfang, Etage und Extras. Die Kalkulation orientiert sich an NRW-Marktpreisen (ab 49 € Mindestauftrag Wohnung). Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot – ohne versteckte Kosten und ohne Anfahrtszuschlag in unserem Einsatzgebiet.",
+        "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine transparente Preisschätzung – basierend auf Fensterflügeln, Reinigungsumfang, Etage und Extras. Die Kalkulation orientiert sich an NRW-Marktpreisen (ab 69 € Mindestauftrag Wohnung). Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot – ohne versteckte Kosten und ohne Anfahrtszuschlag in unserem Einsatzgebiet.",
     },
     {
       id: "festpreis-vs-schaetzung",

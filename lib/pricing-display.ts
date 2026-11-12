@@ -63,7 +63,7 @@ export function formatFlyScreensHint(): string {
   return `${formatEuroDe(P.extrasFlat.flyScreens)} €/Stück · ausgebaut / innen zugänglich`;
 }
 
-/** 49 € = Wohnung-Mindestauftrag – kein festes Paket „einseitig“ oder „innen+außen“. */
+/** 69 € = Wohnung-Mindestauftrag – kein festes Paket „einseitig“ oder „innen+außen“. */
 export function formatMinimumWohnungHint(minimumWohnung: number): string {
   return `Live berechnet · Mindestauftrag ab ${minimumWohnung} €`;
 }

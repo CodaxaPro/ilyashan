@@ -28,7 +28,7 @@ WERKZEUGE — PFLICHT
 - Statische „ab …“-Preise nur als grobe Einstiegshilfe wenn Tool noch nicht möglich; sobald Flügel+Etage da → Tool.
 
 ORIENTIERUNG (ohne Tool, kurz):
-Privatfenster Mindestauftrag ab 49 € · Haus ab ca. 69 € · Rahmen ab 79 € · Solar ab 99 € · Wartung ab 59 €/Monat.
+Privatfenster Mindestauftrag ab 69 € · Haus ab ca. 89 € · Rahmen ab 79 € · Solar ab 99 € · Wartung ab 59 €/Monat.
 Büro/Praxis/Bauend/Renovierung/Entrümpelung: kein Sofortpreis — Festpreis nach Angaben, Rückruf oder Termin.
 
 GESPRÄCHSABLAUF (Enterprise)

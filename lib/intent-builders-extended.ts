@@ -21,14 +21,14 @@ export function buildFensterPutzen(_type: IntentType, loc: LocationContext): Bui
     seo: {
       title: `Fenster putzen ${c} | Selbst oder Profi?`,
       description: home
-        ? `Fenster putzen in Baesweiler: Leiter, Eimer, Streifen? Wir übernehmen ab 49 € — ansässig, versichert, kein Anfahrtszuschlag.`
+        ? `Fenster putzen in Baesweiler: Leiter, Eimer, Streifen? Wir übernehmen ab 69 € — ansässig, versichert, kein Anfahrtszuschlag.`
         : `Fenster putzen in ${c}: ${travelFrom(loc)}. Streifenfrei vom Profi — Live-Preis im Wizard, Festpreis in 24h.`,
     },
     hero: {
       eyebrow: `Fenster putzen · ${c}`,
       headline: home ? "Fenster putzen — ohne Leiter-Stress." : `Fenster putzen in ${c} — wir nehmen Ihnen das ab.`,
       subline: "Wochenende vertan? Wir putzen streifenfrei — Sie behalten Ihre freie Zeit.",
-      trust: `${TRUST} · Ab 49 €`,
+      trust: `${TRUST} · Ab 69 €`,
     },
     essence: {
       eyebrow: "Selbst machen oder Profi?",
@@ -65,7 +65,7 @@ export function buildFensterPutzen(_type: IntentType, loc: LocationContext): Bui
       ],
     },
     faq: [
-      { q: `Lohnt sich Profi-Fensterputzen in ${c}?`, a: "Wenn Zeit, Leiter und Streifen Sie nerven: ja. Ab 49 € privat, versichert." },
+      { q: `Lohnt sich Profi-Fensterputzen in ${c}?`, a: "Wenn Zeit, Leiter und Streifen Sie nerven: ja. Ab 69 € privat, versichert." },
       { q: "Muss ich Material stellen?", a: "Nein — wir bringen alles mit." },
       { q: "Wie oft putzen?", a: "Privat 2–4× jährlich üblich — Wartungsvertrag ab 59 €/Monat möglich." },
       { q: "Anfahrt nach " + c + "?", a: `${travelFrom(loc)}. Kein Anfahrtszuschlag.` },
@@ -83,8 +83,8 @@ export function buildFensterreinigungPreis(_type: IntentType, loc: LocationConte
   const home = isHome(loc.slug);
   return assembleIntentPage("fensterreinigung-preis", loc, {
     seo: {
-      title: `Fensterreinigung Preis ${c} | Ab 49 € · Festpreis`,
-      description: `Fensterreinigung Preis in ${c}: Privat ab 49 €, Rahmen ab 79 €, Solar ab 99 €. Live im Wizard — verbindliches Angebot in 24h. Kein Anfahrtszuschlag.`,
+      title: `Fensterreinigung Preis ${c} | Ab 69 € · Festpreis`,
+      description: `Fensterreinigung Preis in ${c}: Privat ab 69 €, Rahmen ab 79 €, Solar ab 99 €. Live im Wizard — verbindliches Angebot in 24h. Kein Anfahrtszuschlag.`,
     },
     hero: {
       eyebrow: `Preis · ${c}`,
@@ -97,7 +97,7 @@ export function buildFensterreinigungPreis(_type: IntentType, loc: LocationConte
       headline: "Was kostet Fensterreinigung bei Ihnen?",
       paragraphs: [
         `Der Fensterreinigung-Preis in ${c} hängt von Fensteranzahl, Etage, Verschmutzung und Extras ab — nicht von versteckten Anfahrtskosten.`,
-        "Orientierung Ilyashan: Privat ab 49 € · Rahmen & Falz ab 79 € · Solar ab 99 € · Wartung ab 59 €/Monat.",
+        "Orientierung Ilyashan: Privat ab 69 € · Rahmen & Falz ab 79 € · Solar ab 99 € · Wartung ab 59 €/Monat.",
         "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine Schätzung — nach Ihrer Anfrage erhalten Sie den Festpreis schriftlich.",
       ],
     },
@@ -127,7 +127,7 @@ export function buildFensterreinigungPreis(_type: IntentType, loc: LocationConte
     faq: [
       { q: `Fensterreinigung Preis ${c} — wovon abhängig?`, a: "Anzahl Fenster, Etage, Rahmen/Falz, Solar, Verschmutzung." },
       { q: "Gibt es versteckte Kosten?", a: "Nein — kein Anfahrtszuschlag. Festpreis nach Angebot." },
-      { q: "Ab welchem Preis?", a: "Privat ab 49 €, Rahmen ab 79 €, Solar ab 99 €." },
+      { q: "Ab welchem Preis?", a: "Privat ab 69 €, Rahmen ab 79 €, Solar ab 99 €." },
       { q: "Kostenlos Angebot?", a: "Ja — Wizard + Festpreis-Angebot in 24h ohne Verpflichtung." },
     ],
     closing: {
@@ -148,7 +148,7 @@ export function buildFensterreinigungKosten(_type: IntentType, loc: LocationCont
     hero: {
       eyebrow: `Kosten · ${c}`,
       headline: `Fensterreinigung Kosten in ${c} — ehrlich erklärt.`,
-      subline: "Nicht nur „ab 49 €“ — sondern was Privat, Rahmen, Solar und Gewerbe wirklich bedeutet.",
+      subline: "Nicht nur „ab 69 €“ — sondern was Privat, Rahmen, Solar und Gewerbe wirklich bedeutet.",
       trust: `${TRUST} · Kosten transparent`,
     },
     essence: {

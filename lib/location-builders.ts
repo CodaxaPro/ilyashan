@@ -88,8 +88,8 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
         ? `Fensterreinigung Baesweiler | Streifenfrei · Festpreis in 24h`
         : `Fensterreinigung ${meta.city} | Streifenfrei · Kein Anfahrtszuschlag`,
       description: home
-        ? `Fensterreinigung in Baesweiler, Kückstr. 29. Ab 49 €, kein Anfahrtszuschlag. Live-Preisschätzung online, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
-        : `Fensterreinigung in ${meta.city}: ${travel}. Ab 49 €, kein Anfahrtszuschlag, Live-Preisschätzung im Rechner, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
+        ? `Fensterreinigung in Baesweiler, Kückstr. 29. Ab 69 €, kein Anfahrtszuschlag. Live-Preisschätzung online, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`
+        : `Fensterreinigung in ${meta.city}: ${travel}. Ab 69 €, kein Anfahrtszuschlag, Live-Preisschätzung im Rechner, Festpreis in 24 Stunden. ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
     },
     city: meta.city,
     region: meta.region,
@@ -116,12 +116,12 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
       paragraphs: home
         ? [
             "Sie suchen Fensterreinigung in Baesweiler und wollen wissen, wer wirklich kommt — und was es kostet, bevor der Termin steht.",
-            "Ilyashan ist hier ansässig: Privatfenster ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Im Wizard sehen Sie sofort eine Live-Preisschätzung — danach erhalten Sie Ihr verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
+            "Ilyashan ist hier ansässig: Privatfenster ab 69 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Im Wizard sehen Sie sofort eine Live-Preisschätzung — danach erhalten Sie Ihr verbindliches Festpreis-Angebot innerhalb von 24 Stunden.",
             `${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen. Versichert, ohne Anfahrtszuschlag in Baesweiler und Umgebung.`,
           ]
         : [
             `Sie suchen Fensterreinigung in ${meta.city} und wollen keine Überraschungen: Wer kommt? Was kostet es? Wann ist es fertig?`,
-            `Ilyashan ist in Baesweiler ansässig — ${travel}. Privat ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis-Angebot in 24 Stunden — kein Anfahrtszuschlag für ${meta.city}.`,
+            `Ilyashan ist in Baesweiler ansässig — ${travel}. Privat ab 69 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis-Angebot in 24 Stunden — kein Anfahrtszuschlag für ${meta.city}.`,
             `Ob Einfamilienhaus, Wohnung oder Gewerbe: Wir reinigen streifenfrei, pünktlich und versichert — ${String(siteConfig.business.rating).replace(".", ",")} aus ${siteConfig.business.reviews} Google-Bewertungen.`,
           ],
     },
@@ -172,7 +172,7 @@ export function buildLocationPage(slug: LocationSlug): BuiltLocationPage {
       },
       {
         q: "Was kostet Fensterreinigung?",
-        a: "Privat ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard — Festpreis-Angebot in 24 Stunden.",
+        a: "Privat ab 69 €, Rahmen & Falz ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard — Festpreis-Angebot in 24 Stunden.",
       },
       {
         q: "Fallen Anfahrtskosten an?",

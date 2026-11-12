@@ -57,7 +57,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Danke sagen — mit Klarheit statt Blumen.",
     paragraphs: [
       "Blumen welken. Klare Fenster bleiben — und Mama muss nicht selbst putzen.",
-      "Ab 49 € — sofort online, Print@Home.",
+      "Ab 69 € — sofort online, Print@Home.",
       "Einlösbar in Baesweiler und gesamter Region Aachen.",
     ],
   },
@@ -71,7 +71,7 @@ const OCCASIONS: OccasionDef[] = [
     paragraphs: [
       "Während andere Staub sammeln, schenken Sie Klarheit.",
       "Sofort per E-Mail — ideal auch last minute.",
-      `${siteConfig.business.rating}★ · versichert · ab 49 €.`,
+      `${siteConfig.business.rating}★ · versichert · ab 69 €.`,
     ],
   },
   {
@@ -83,7 +83,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Romantisch? Praktisch? Beides.",
     paragraphs: [
       "Schenken Sie gemeinsame Zeit — ohne Fenster putzen.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       "Auch für Singles: Selbstfürsorge als Geschenk.",
     ],
   },
@@ -109,7 +109,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Originell und nützlich.",
     paragraphs: [
       "Kein weiteres Ding — echte Entlastung.",
-      "Ab 49 € — sofort per E-Mail.",
+      "Ab 69 € — sofort per E-Mail.",
       "Überraschend und unvergesslich.",
     ],
   },
@@ -122,7 +122,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Wertschätzung, die ankommt.",
     paragraphs: [
       "Die Freundin, die immer für alle da ist — verdient Pause.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       `${siteConfig.business.rating}★ bei Google.`,
     ],
   },
@@ -135,7 +135,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Keine weitere Krawatte.",
     paragraphs: [
       "Papa freut sich über echte Entlastung.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       "Praktisch, seriös, originell.",
     ],
   },
@@ -149,7 +149,7 @@ const OCCASIONS: OccasionDef[] = [
     paragraphs: [
       "Frühlingsputz? Wir übernehmen.",
       "Sofort per E-Mail — ideal als Osterüberraschung.",
-      "Ab 49 €.",
+      "Ab 69 €.",
     ],
   },
   {
@@ -162,7 +162,7 @@ const OCCASIONS: OccasionDef[] = [
     paragraphs: [
       "Gutschein sofort nach Bestellung per E-Mail.",
       "Ausdrucken, weiterleiten, fertig.",
-      "Ab 49 € — jederzeit bestellbar.",
+      "Ab 69 € — jederzeit bestellbar.",
     ],
   },
   {
@@ -174,7 +174,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Mehr als Worte.",
     paragraphs: [
       "Für Nachbarn, Helfer, Freunde — praktisch und herzlich.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       "Ein Geschenk, das ankommt.",
     ],
   },
@@ -213,7 +213,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Ein Abschied, der bleibt.",
     paragraphs: [
       "Für Kolleginnen, Nachbarn, Freunde — praktisch und persönlich.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       "Originell statt Standard.",
     ],
   },
@@ -227,7 +227,7 @@ const OCCASIONS: OccasionDef[] = [
     paragraphs: [
       "Mehrere Gutscheine bestellbar — für Mitarbeiter und Kunden.",
       "Gewerbe und Privat — flexibel einlösbar.",
-      "Ab 49 € pro Gutschein.",
+      "Ab 69 € pro Gutschein.",
     ],
   },
   {
@@ -239,7 +239,7 @@ const OCCASIONS: OccasionDef[] = [
     essenceHeadline: "Genießen statt putzen.",
     paragraphs: [
       "Im Ruhestand keine Leiter mehr — wir übernehmen.",
-      "Ab 49 € — sofort online.",
+      "Ab 69 € — sofort online.",
       "Herzliches Geschenk von der Familie.",
     ],
   },
@@ -253,7 +253,7 @@ const OCCASIONS: OccasionDef[] = [
     paragraphs: [
       "Mehrere Gutscheine auf einmal bestellbar.",
       "Praktisch, originell, fair.",
-      "Ab 49 € — sofort per E-Mail.",
+      "Ab 69 € — sofort per E-Mail.",
     ],
   },
 ];
@@ -264,7 +264,7 @@ function toGiftPage(o: OccasionDef): BuiltGiftPage {
     ...base,
     slug: o.slug,
     path: `/gutschein/${o.slug}`,
-    seo: { title: o.title, description: o.subline + ` Ab 49 € · ${siteConfig.business.rating}★ · Ilyashan.` },
+    seo: { title: o.title, description: o.subline + ` Ab 69 € · ${siteConfig.business.rating}★ · Ilyashan.` },
     hero: { eyebrow: o.eyebrow, headline: o.headline, subline: o.subline, trust: base.hero.trust },
     essence: { eyebrow: "Was Sie schenken", headline: o.essenceHeadline, paragraphs: o.paragraphs },
     closing: { headline: o.headline, text: o.subline, cta: "Gutschein bestellen" },

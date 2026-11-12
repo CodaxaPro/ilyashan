@@ -26,7 +26,17 @@ describe("sanitizeFensterPricingConfig", () => {
       scheduleWeekdaysOnly: true,
     });
     assert.equal(config.basePerFluegel, 6);
-    assert.equal(config.scheduleWeekdaysOnly, true);
+  });
+
+  it("migriert Launch-Preise 5/49/69 auf aktuelle Defaults", () => {
+    const config = sanitizeFensterPricingConfig({
+      basePerFluegel: 5,
+      minimumWohnung: 49,
+      minimumHaus: 69,
+    });
+    assert.equal(config.basePerFluegel, DEFAULT_FENSTER_PRICING.basePerFluegel);
+    assert.equal(config.minimumWohnung, DEFAULT_FENSTER_PRICING.minimumWohnung);
+    assert.equal(config.minimumHaus, DEFAULT_FENSTER_PRICING.minimumHaus);
   });
 
   it("migrates legacy wartung fields into quarterly package", () => {

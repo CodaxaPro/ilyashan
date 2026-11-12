@@ -35,9 +35,9 @@ const DEFAULT_JOURNEY: JourneyStep[] = [
 
 const DEFAULT_FAQ = [
   { q: "Sofort verfügbar?", a: "Ja — Gutschein sofort per E-Mail. Print@Home oder digital." },
-  { q: "Preise?", a: "Privat ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 € — oder Wunschbetrag." },
+  { q: "Preise?", a: "Privat ab 69 €, Rahmen & Falz ab 79 €, Solar ab 99 € — oder Wunschbetrag." },
   { q: "Wo einlösbar?", a: "Baesweiler, Aachen und gesamtes Einsatzgebiet — kein Anfahrtszuschlag." },
-  { q: "Welcher Betrag?", a: "Ab 49 € — der sichere Einstieg für die meisten Geschenke." },
+  { q: "Welcher Betrag?", a: "Ab 69 € — der sichere Einstieg für die meisten Geschenke." },
 ];
 
 function page(
@@ -84,7 +84,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "online",
       {
         title: "Gutschein online kaufen | E-Gutschein sofort",
-        description: "Gutschein online kaufen: Fensterreinigung E-Gutschein sofort per E-Mail. Digital bestellen, sofort verschenken. Ab 49 €.",
+        description: "Gutschein online kaufen: Fensterreinigung E-Gutschein sofort per E-Mail. Digital bestellen, sofort verschenken. Ab 69 €.",
       },
       {
         eyebrow: "Gutschein online",
@@ -108,20 +108,20 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "fensterreinigung",
       {
         title: "Fensterreinigung Gutschein | Geschenk",
-        description: "Fensterreinigung Gutschein verschenken: streifenfrei, ab 49 €, sofort online. Region Aachen & Baesweiler.",
+        description: "Fensterreinigung Gutschein verschenken: streifenfrei, ab 69 €, sofort online. Region Aachen & Baesweiler.",
       },
       {
         eyebrow: "Fensterreinigung · Gutschein",
         headline: "Fensterreinigung schenken — Klarheit statt Chaos.",
         subline: "Der Gutschein für streifenfreie Fenster — sofort online.",
-        trust: `${siteConfig.business.rating}★ · Ab 49 €`,
+        trust: `${siteConfig.business.rating}★ · Ab 69 €`,
       },
       {
         eyebrow: "Das Original",
         headline: "Fensterreinigung Gutschein — der Klassiker.",
         paragraphs: [
           "Schenken Sie Entlastung: klare Fenster ohne eigene Arbeit.",
-          "Privat ab 49 €, Rahmen ab 79 €, Solar ab 99 €.",
+          "Privat ab 69 €, Rahmen ab 79 €, Solar ab 99 €.",
           "Einlösbar in Baesweiler und gesamter Region.",
         ],
       },
@@ -132,7 +132,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "reinigung",
       {
         title: "Reinigungsgutschein | Putzservice Geschenk",
-        description: "Reinigungsgutschein für Fensterreinigung: streifenfrei, ab 49 €, sofort online.",
+        description: "Reinigungsgutschein für Fensterreinigung: streifenfrei, ab 69 €, sofort online.",
       },
       {
         eyebrow: "Reinigung · Geschenk",
@@ -146,7 +146,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
         paragraphs: [
           "Reinigungsgutscheine gibt es viele — Fenster brauchen Profis.",
           "Streifenfrei, versichert, fair kalkuliert.",
-          "Ab 49 € — sofort digital oder Print@Home.",
+          "Ab 69 € — sofort digital oder Print@Home.",
         ],
       },
       { recipients: REGION_RECIPIENTS },
@@ -156,7 +156,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "geschenkidee",
       {
         title: "Geschenkidee Fensterreinigung | Originell",
-        description: "Geschenkidee gesucht? Fensterreinigung Gutschein — überraschend und nützlich. Ab 49 €, sofort online.",
+        description: "Geschenkidee gesucht? Fensterreinigung Gutschein — überraschend und nützlich. Ab 69 €, sofort online.",
       },
       {
         eyebrow: "Geschenkidee",
@@ -179,7 +179,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "zeit-schenken",
       {
         title: "Zeit schenken | Fensterreinigung Gutschein",
-        description: "Zeit schenken statt Dinge: Fensterreinigung Gutschein. Ab 49 €, sofort online.",
+        description: "Zeit schenken statt Dinge: Fensterreinigung Gutschein. Ab 69 €, sofort online.",
       },
       {
         eyebrow: "Zeit schenken",
@@ -202,7 +202,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "selbstfuersorge",
       {
         title: "Selbstfürsorge Geschenk | Fensterreinigung",
-        description: "Selbstfürsorge Geschenk: Fensterreinigung Gutschein für sich selbst. Ab 49 €.",
+        description: "Selbstfürsorge Geschenk: Fensterreinigung Gutschein für sich selbst. Ab 69 €.",
       },
       {
         eyebrow: "Selbstfürsorge",
@@ -248,7 +248,7 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       "fensterreinigung-nrw",
       {
         title: "Fensterreinigung Gutschein NRW | Region Aachen",
-        description: "Fensterreinigung Gutschein NRW: Städteregion Aachen & Kreis Heinsberg. Ab 49 € · Sofort online.",
+        description: "Fensterreinigung Gutschein NRW: Städteregion Aachen & Kreis Heinsberg. Ab 69 € · Sofort online.",
       },
       {
         eyebrow: "Gutschein · NRW",
@@ -268,23 +268,23 @@ const BUILDERS: Record<string, () => BuiltGiftPage> = {
       { recipients: REGION_RECIPIENTS },
     ),
   "fuer-mama": () =>
-    page("fuer-mama", { title: "Geschenk für Mama | Fensterreinigung", description: "Geschenk für Mama: Fensterreinigung Gutschein — Entlastung statt Staub. Ab 49 €." }, { eyebrow: "Geschenk · Mama", headline: "Mama gibt immer. Diesmal: empfangen.", subline: "Fensterreinigung Gutschein — Zeit nur für sie.", trust: `${siteConfig.business.rating}★ · Für Mama` }, { eyebrow: "Danke, Mama", headline: "Blumen welken. Klarheit bleibt.", paragraphs: ["Mama verdient Entlastung — klare Fenster statt Standard-Geschenk.", "Auch /gutschein/muttertag — ab 49 €.", "Region Aachen — gut erreichbar."] }),
+    page("fuer-mama", { title: "Geschenk für Mama | Fensterreinigung", description: "Geschenk für Mama: Fensterreinigung Gutschein — Entlastung statt Staub. Ab 69 €." }, { eyebrow: "Geschenk · Mama", headline: "Mama gibt immer. Diesmal: empfangen.", subline: "Fensterreinigung Gutschein — Zeit nur für sie.", trust: `${siteConfig.business.rating}★ · Für Mama` }, { eyebrow: "Danke, Mama", headline: "Blumen welken. Klarheit bleibt.", paragraphs: ["Mama verdient Entlastung — klare Fenster statt Standard-Geschenk.", "Auch /gutschein/muttertag — ab 69 €.", "Region Aachen — gut erreichbar."] }),
   "fuer-papa": () =>
-    page("fuer-papa", { title: "Geschenk für Papa | Fensterreinigung", description: "Geschenk für Papa: Fensterreinigung — Entlastung statt Werkzeug. Ab 49 €." }, { eyebrow: "Geschenk · Papa", headline: "Papa trägt viel. Schenken Sie Klarheit.", subline: "Fensterreinigung Gutschein — praktisch und überraschend.", trust: `${siteConfig.business.rating}★ · Für Papa` }, { eyebrow: "Ruhe statt Werkzeug", headline: "Kein weiteres Gadget.", paragraphs: ["Entlastung statt Krawatte — Papa wird überrascht sein.", "Auch /gutschein/vatertag.", "Ab 49 € — sofort online."] }),
+    page("fuer-papa", { title: "Geschenk für Papa | Fensterreinigung", description: "Geschenk für Papa: Fensterreinigung — Entlastung statt Werkzeug. Ab 69 €." }, { eyebrow: "Geschenk · Papa", headline: "Papa trägt viel. Schenken Sie Klarheit.", subline: "Fensterreinigung Gutschein — praktisch und überraschend.", trust: `${siteConfig.business.rating}★ · Für Papa` }, { eyebrow: "Ruhe statt Werkzeug", headline: "Kein weiteres Gadget.", paragraphs: ["Entlastung statt Krawatte — Papa wird überrascht sein.", "Auch /gutschein/vatertag.", "Ab 69 € — sofort online."] }),
   "fuer-oma": () =>
-    page("fuer-oma", { title: "Geschenk für Oma | Fensterreinigung", description: "Geschenk für Oma: Fensterreinigung Gutschein — Wertschätzung spürbar. Ab 49 €." }, { eyebrow: "Geschenk · Oma", headline: "Oma hat so viel gegeben. Jetzt: empfangen.", subline: "Sanfte Entlastung — klare Fenster ohne eigene Arbeit.", trust: `${siteConfig.business.rating}★ · Für Oma` }, { eyebrow: "Generationen", headline: "Von der ganzen Familie.", paragraphs: ["Wertschätzung spürbar — praktisches Oma-Geschenk.", "Ab 49 €.", "Herzlicher Service in Baesweiler."] }),
+    page("fuer-oma", { title: "Geschenk für Oma | Fensterreinigung", description: "Geschenk für Oma: Fensterreinigung Gutschein — Wertschätzung spürbar. Ab 69 €." }, { eyebrow: "Geschenk · Oma", headline: "Oma hat so viel gegeben. Jetzt: empfangen.", subline: "Sanfte Entlastung — klare Fenster ohne eigene Arbeit.", trust: `${siteConfig.business.rating}★ · Für Oma` }, { eyebrow: "Generationen", headline: "Von der ganzen Familie.", paragraphs: ["Wertschätzung spürbar — praktisches Oma-Geschenk.", "Ab 69 €.", "Herzlicher Service in Baesweiler."] }),
   "fuer-opa": () =>
-    page("fuer-opa", { title: "Geschenk für Opa | Fensterreinigung", description: "Geschenk für Opa: Fensterreinigung — praktisch und seriös. Ab 49 €." }, { eyebrow: "Geschenk · Opa", headline: "Opa verdient Entlastung.", subline: "Fensterreinigung Gutschein — kein Schnickschnack.", trust: `${siteConfig.business.rating}★ · Für Opa` }, { eyebrow: "Respekt", headline: "Wertschätzung — spürbar.", paragraphs: ["Opa freut sich über echte Aufmerksamkeit.", "Ab 49 € — 45 Minuten Überraschung.", "Region Aachen."] }),
+    page("fuer-opa", { title: "Geschenk für Opa | Fensterreinigung", description: "Geschenk für Opa: Fensterreinigung — praktisch und seriös. Ab 69 €." }, { eyebrow: "Geschenk · Opa", headline: "Opa verdient Entlastung.", subline: "Fensterreinigung Gutschein — kein Schnickschnack.", trust: `${siteConfig.business.rating}★ · Für Opa` }, { eyebrow: "Respekt", headline: "Wertschätzung — spürbar.", paragraphs: ["Opa freut sich über echte Aufmerksamkeit.", "Ab 69 € — 45 Minuten Überraschung.", "Region Aachen."] }),
   "fuer-freund": () =>
-    page("fuer-freund", { title: "Geschenk für Freund | Fensterreinigung", description: "Geschenk für Freund: Fensterreinigung Gutschein — praktisch & überraschend. Ab 49 €." }, { eyebrow: "Geschenk · Freund", headline: "Für den Freund, der alles mitträgt.", subline: "Entlastung schenken — praktisch und unerwartet.", trust: `${siteConfig.business.rating}★ · Neutral` }, { eyebrow: "Freundschaft", headline: "Sie kennen ihn. Er braucht Zeit.", paragraphs: ["Geburtstag, Danke, Überraschung — passt immer.", "Ab 49 €.", "Praktisch und originell."] }),
+    page("fuer-freund", { title: "Geschenk für Freund | Fensterreinigung", description: "Geschenk für Freund: Fensterreinigung Gutschein — praktisch & überraschend. Ab 69 €." }, { eyebrow: "Geschenk · Freund", headline: "Für den Freund, der alles mitträgt.", subline: "Entlastung schenken — praktisch und unerwartet.", trust: `${siteConfig.business.rating}★ · Neutral` }, { eyebrow: "Freundschaft", headline: "Sie kennen ihn. Er braucht Zeit.", paragraphs: ["Geburtstag, Danke, Überraschung — passt immer.", "Ab 69 €.", "Praktisch und originell."] }),
   silberhochzeit: () =>
     page("silberhochzeit", { title: "Silberhochzeit Geschenk | Fensterreinigung", description: "Geschenk zur Silberhochzeit: Fensterreinigung Gutschein — Entlastung zu zweit. Ab 79 €." }, { eyebrow: "Silberhochzeit", headline: "25 Jahre — schenken Sie Klarheit.", subline: "Gemeinsam entspannen — wir putzen die Fenster.", trust: `${siteConfig.business.rating}★ · Ab 79 €` }, { eyebrow: "Silberne Hochzeit", headline: "Nicht Porzellan. Ein Gefühl.", paragraphs: ["Rahmen & Falz ab 79 € — beliebt für Paare.", "Entlastung statt Staub.", "Siehe /gutschein/jubilaeum."] }),
   nikolaus: () =>
-    page("nikolaus", { title: "Nikolaus Geschenk | Fensterreinigung", description: "Nikolaus Geschenk: Fensterreinigung Gutschein — originell statt Süßigkeiten. Sofort online." }, { eyebrow: "Nikolaus", headline: "Nikolaus bringt Klarheit.", subline: "Originell, sofort per E-Mail — ideal am 5. Dezember.", trust: `${siteConfig.business.rating}★ · Last Minute` }, { eyebrow: "Anders als Süßes", headline: "Schokolade schmilzt. Klarheit bleibt.", paragraphs: ["Für Mama, Papa, Partner — ab 49 €.", "Sofort bestellbar.", "Region Aachen."] }),
+    page("nikolaus", { title: "Nikolaus Geschenk | Fensterreinigung", description: "Nikolaus Geschenk: Fensterreinigung Gutschein — originell statt Süßigkeiten. Sofort online." }, { eyebrow: "Nikolaus", headline: "Nikolaus bringt Klarheit.", subline: "Originell, sofort per E-Mail — ideal am 5. Dezember.", trust: `${siteConfig.business.rating}★ · Last Minute` }, { eyebrow: "Anders als Süßes", headline: "Schokolade schmilzt. Klarheit bleibt.", paragraphs: ["Für Mama, Papa, Partner — ab 69 €.", "Sofort bestellbar.", "Region Aachen."] }),
   verlobung: () =>
     page("verlobung", { title: "Verlobung Geschenk | Fensterreinigung", description: "Geschenk zur Verlobung: Fensterreinigung Gutschein — Entlastung vor dem Trubel. Ab 79 €." }, { eyebrow: "Verlobung", headline: "Vor dem Trubel — Klarheit zu zweit.", subline: "Entlastung schenken — bevor die Planung beginnt.", trust: `${siteConfig.business.rating}★ · Ab 79 €` }, { eyebrow: "Glückwunsch", headline: "Ihr Ja verdient Ruhe.", paragraphs: ["Rahmen & Falz ab 79 € — für das neue Zuhause.", "Zeit zu zweit schenken.", "Siehe /gutschein/hochzeit."] }),
   ueberraschung: () =>
-    page("ueberraschung", { title: "Überraschungsgeschenk | Fensterreinigung", description: "Überraschungsgeschenk: Fensterreinigung Gutschein — unerwartet und nützlich. Ab 49 €." }, { eyebrow: "Überraschung", headline: "Nicht erwartet. Nicht vergessen.", subline: "Fensterreinigung statt Standard — praktisch.", trust: `${siteConfig.business.rating}★ · Einzigartig` }, { eyebrow: "Das unerwartete Geschenk", headline: "Sie erwartet Blumen. Sie bekommt Klarheit.", paragraphs: ["Digital in 2 Minuten — sofort da.", "Praktisch und originell.", "Siehe /gutschein/last-minute."] }),
+    page("ueberraschung", { title: "Überraschungsgeschenk | Fensterreinigung", description: "Überraschungsgeschenk: Fensterreinigung Gutschein — unerwartet und nützlich. Ab 69 €." }, { eyebrow: "Überraschung", headline: "Nicht erwartet. Nicht vergessen.", subline: "Fensterreinigung statt Standard — praktisch.", trust: `${siteConfig.business.rating}★ · Einzigartig` }, { eyebrow: "Das unerwartete Geschenk", headline: "Sie erwartet Blumen. Sie bekommt Klarheit.", paragraphs: ["Digital in 2 Minuten — sofort da.", "Praktisch und originell.", "Siehe /gutschein/last-minute."] }),
 };
 
 export const BUILT_GIFT_SLUGS = [

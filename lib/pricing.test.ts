@@ -41,12 +41,12 @@ describe("calculatePriceEstimate – Multiplikatoren", () => {
     );
   });
 
-  it("Basis Privat: Flügel × 5 € × 1.0 × 1.0", () => {
+  it("Basis Privat: Flügel × basePerFluegel × 1.0 × 1.0", () => {
     const est = breakdownTotal(base({ windowCount: 20 }));
     const core = est.breakdown.find((l) => l.label.includes("Basis"));
     assert.ok(core);
     assert.equal(core!.amount, 20 * P.basePerFluegel);
-    assert.equal(est.amount, 100);
+    assert.equal(est.amount, 140);
   });
 
   for (const [side, mul] of Object.entries(P.sideMultipliers)) {
@@ -198,16 +198,17 @@ describe("calculatePriceEstimate – Extras & Zusatzleistungen", () => {
 });
 
 describe("calculatePriceEstimate – Mindest & Modelle", () => {
-  it("Mindest Wohnung 49 €", () => {
+  it("Mindest Wohnung 69 €", () => {
     const est = breakdownTotal(base({ windowCount: 4, objectType: "wohnung" }));
     assert.equal(est.minimumApplied, true);
-    assert.equal(est.amount, 50);
+    assert.equal(est.minimumAmount, P.minimumWohnung);
+    assert.equal(est.amount, 70);
   });
 
-  it("Mindest Haus 69 €", () => {
+  it("Mindest Haus 89 €", () => {
     const est = breakdownTotal(base({ windowCount: 8, objectType: "haus" }));
     assert.equal(est.minimumAmount, P.minimumHaus);
-    assert.equal(est.amount, 70);
+    assert.equal(est.amount, 90);
   });
 
   it("Gewerbe-Leistung nutzt dieselbe Privat-Flügel-Formel", () => {

@@ -58,18 +58,18 @@ const ARTICLE_DEFS: Record<
 > = {
   "was-kostet-fensterreinigung": {
     title: "Was kostet Fensterreinigung? | Preise NRW 2026",
-    description: "Fensterreinigung Kosten: ab 49 € Privat, Rahmen ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis in 24h. Kein Anfahrtszuschlag.",
+    description: "Fensterreinigung Kosten: ab 69 € Privat, Rahmen ab 79 €, Solar ab 99 €. Live-Preisschätzung im Wizard, Festpreis in 24h. Kein Anfahrtszuschlag.",
     headline: "Was kostet Fensterreinigung wirklich?",
     subline: "Transparente Preise für Baesweiler, Aachen und Umgebung — ohne versteckte Kosten.",
     sections: [
       {
         title: "Preisübersicht Ilyashan",
         paragraphs: [
-          "Die Kosten hängen von Fensteranzahl, Reinigungsumfang (innen/außen), Etage, Verschmutzung und Extras ab. Als Orientierung: Privatfenster Mindestauftrag ab 49 €, Rahmen & Falz ab 79 €, Solar ab 99 €, Wartungsvertrag ab 59 €/Monat.",
+          "Die Kosten hängen von Fensteranzahl, Reinigungsumfang (innen/außen), Etage, Verschmutzung und Extras ab. Als Orientierung: Privatfenster Mindestauftrag ab 69 €, Rahmen & Falz ab 79 €, Solar ab 99 €, Wartungsvertrag ab 59 €/Monat.",
           "Im Angebots-Wizard auf ilyashan.de sehen Sie sofort eine Live-Preisschätzung. Nach Ihrer Anfrage erhalten Sie innerhalb von 24 Stunden ein verbindliches Festpreis-Angebot.",
         ],
         bullets: [
-          "Privatfenster: Mindestauftrag ab 49 € (Umfang innen/außen im Wizard)",
+          "Privatfenster: Mindestauftrag ab 69 € (Umfang innen/außen im Wizard)",
           "Rahmen & Falz: ab 79 € (beidseitig inkl. Rahmen)",
           "Solaranlagen: ab 99 € (bis ca. 15 Module)",
           "Gewerbe & Fassade: auf Anfrage nach Aufmaß",
@@ -84,14 +84,14 @@ const ARTICLE_DEFS: Record<
     ],
     faq: [
       { q: "Ist die Wizard-Schätzung verbindlich?", a: "Nein — sie ist unverbindlich. Das Festpreis-Angebot per E-Mail innerhalb von 24h ist verbindlich." },
-      { q: "Gibt es Mindestauftrag?", a: "Ja — Wohnungen ab ca. 49 € Mindestauftrag nach NRW-Marktpreisen." },
+      { q: "Gibt es Mindestauftrag?", a: "Ja — Wohnungen ab ca. 69 € Mindestauftrag nach NRW-Marktpreisen." },
     ],
     related: [
-      { href: "/fensterreinigung/privat", label: "Privatfenster", hint: "ab 49 €" },
+      { href: "/fensterreinigung/privat", label: "Privatfenster", hint: "ab 69 €" },
       { href: "/de/angebot", label: "Preis berechnen", hint: "Live-Wizard" },
       { href: "/fensterreinigung-baesweiler", label: "Baesweiler", hint: "Lokal" },
     ],
-    takeaways: ["Live-Schätzung im Wizard", "Festpreis in 24h", "Kein Anfahrtszuschlag", "Ab 49 € Privat"],
+    takeaways: ["Live-Schätzung im Wizard", "Festpreis in 24h", "Kein Anfahrtszuschlag", "Ab 69 € Privat"],
   },
   "fensterreinigung-selber-machen-vs-profi": {
     title: "Fenster selber putzen vs. Profi | Ratgeber",
@@ -113,7 +113,7 @@ const ARTICLE_DEFS: Record<
         ],
       },
     ],
-    faq: [{ q: "Lohnt sich der Profi?", a: "Wenn Zeit, Streifenfreiheit und Sicherheit zählen — ja. Ab 49 € oft günstiger als erwartet." }],
+    faq: [{ q: "Lohnt sich der Profi?", a: "Wenn Zeit, Streifenfreiheit und Sicherheit zählen — ja. Ab 69 € oft günstiger als erwartet." }],
     related: [
       { href: "/ratgeber/was-kostet-fensterreinigung", label: "Preise", hint: "Kosten" },
       { href: "/ratgeber/streifenfreie-fenster-tipps", label: "Streifenfrei", hint: "Tipps" },
@@ -232,7 +232,7 @@ const ARTICLE_DEFS: Record<
       },
     ],
     faq: [{ q: "Kurzfristig möglich?", a: "Ja — nach Verfügbarkeit. Wizard-Anfrage oder anrufen." }],
-    related: [{ href: "/fensterreinigung/privat", label: "Privat", hint: "ab 49 €" }],
+    related: [{ href: "/fensterreinigung/privat", label: "Privat", hint: "ab 69 €" }],
   },
   "erste-beauftragung-fensterprofi": {
     title: "Erste Beauftragung Fensterprofi | Ratgeber",
@@ -259,7 +259,7 @@ const ARTICLE_DEFS: Record<
       {
         title: "So schenken Sie richtig",
         paragraphs: [
-          "Ab 49 € Privat, sofort per E-Mail, Print@Home. Beliebte Anlässe: Muttertag, Einzug, Geburtstag, Danke.",
+          "Ab 69 € Privat, sofort per E-Mail, Print@Home. Beliebte Anlässe: Muttertag, Einzug, Geburtstag, Danke.",
         ],
       },
     ],
