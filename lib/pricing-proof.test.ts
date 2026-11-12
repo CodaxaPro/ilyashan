@@ -224,10 +224,10 @@ describe("Pricing proof – Referenzformel ≡ Engine", () => {
 });
 
 describe("Pricing proof – Formel-Schritte einzeln", () => {
-  it("Schritt 1: Basis = Flügel × 5 € × Seite × Schmutz", () => {
+  it("Schritt 1: Basis = Flügel × basePerFluegel × Seite × Schmutz", () => {
     const data = base({ windowCount: 10, cleaningSide: "nur_aussen", dirtLevel: "stark" });
     const ref = referencePriceBreakdown(data);
-    assert.equal(ref.base, 10 * 5 * 0.65 * 1.25);
+    assert.equal(ref.base, 10 * P.basePerFluegel * 0.65 * 1.25);
     assert.equal(ref.heightSurcharge, 0);
     assert.equal(ref.floorSurcharge, 0);
   });
@@ -239,8 +239,8 @@ describe("Pricing proof – Formel-Schritte einzeln", () => {
       withFrame: true,
     });
     const ref = referencePriceBreakdown(data);
-    assert.equal(ref.base, 50);
-    assertEuro(ref.heightSurcharge, 50 * 0.12);
+    assert.equal(ref.base, 10 * P.basePerFluegel);
+    assertEuro(ref.heightSurcharge, 10 * P.basePerFluegel * 0.12);
     assert.equal(ref.extrasTotal, 10 * P.extrasPerFluegel.withFrame);
   });
 
@@ -261,8 +261,8 @@ describe("Pricing proof – Formel-Schritte einzeln", () => {
     const est = calculatePriceEstimate(data, undefined, wartungConfig)!;
     const ref = referencePriceBreakdown(data);
     assert.equal(ref.minimumApplied, true);
-    assert.equal(ref.subtotalAfterMinimum, 49);
-    assert.equal(est.amount, 50);
+    assert.equal(ref.subtotalAfterMinimum, P.minimumWohnung);
+    assert.equal(est.amount, 70);
     const minLine = est.breakdown.find((l) => l.label === "Mindestauftragswert");
     assert.ok(minLine);
     assert.equal(

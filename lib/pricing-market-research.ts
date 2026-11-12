@@ -79,9 +79,9 @@ export const SERVICE_RESEARCH = {
     label: "Privatfenster",
     unit: "€/Flügel (i+a, normal)",
     marketRange: { min: 4.0, max: 12.0 },
-    recommended: 5.0,
-    minJobWohnung: 49,
-    minJobHaus: 69,
+    recommended: 7.0,
+    minJobWohnung: 69,
+    minJobHaus: 89,
     sourceCount: 24,
     sources: [
       "kirchberger",
@@ -501,21 +501,21 @@ export const ROOM_HEIGHT_RESEARCH = {
 // ─── Empfohlene Pricing-Konstanten (für lib/pricing.ts) ─────────────────
 //
 // FORMEL (keine Doppelzählung):
-//   1. Basis     = Flügel × 5,00 € × Seite × Verschmutzung   (Glas i+a, ohne Rahmen)
+//   1. Basis     = Flügel × 7,00 € × Seite × Verschmutzung   (Glas i+a, ohne Rahmen)
 //   2. + Höhe    = Basis × (Höhenfaktor − 1)                  nur wenn > 3 m
 //   3. + Etage   = (Basis × Höhe) × Etagen-%                  nur ohne Aufzug, nicht EG
 //   4. + Extras  = €/Flügel additiv (Rahmen, Falz, …)         nicht multipliziert
 //   5. + Solar/Wintergarten = m²-Pauschale                      separater Posten
-//   6. Mindest   = max(Summe, 49/69/120 €)
+//   6. Mindest   = max(Summe, 69/89/120 €)
 //   7. Wartung   = Monatspreis aus Jahresvertrag −25 %
 //
 // Seite × Verschmutzung multiplizieren ist Marktstandard (GM, D'Amato, Simon).
 
 export const RECOMMENDED_PRICING = {
   /** Glas innen+außen, normal – ohne Rahmen-/Falz-Tiefenreinigung */
-  basePerFluegel: 5.0,
-  minimumWohnung: 49,
-  minimumHaus: 69,
+  basePerFluegel: 7.0,
+  minimumWohnung: 69,
+  minimumHaus: 89,
   minimumGewerbe: 120,
   sideMultipliers: {
     innen_aussen: 1.0,

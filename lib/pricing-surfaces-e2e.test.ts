@@ -278,7 +278,7 @@ describe("E2E – calculation amounts", () => {
     const ref = referencePriceBreakdown(data);
     assert.equal(ref.extrasTotal, 365);
     assert.equal(est.calculatedSubtotal, ref.calculatedSubtotal);
-    assert.equal(est.calculatedSubtotal, 50 + 365);
+    assert.equal(est.calculatedSubtotal, 10 * P.basePerFluegel + 365);
 
     const shutterLine = est.breakdown.find((l) => l.label.includes("Rollläden"));
     assert.ok(shutterLine);
@@ -619,17 +619,17 @@ describe("E2E – kitchen-sink + Privat-only basis line", () => {
   it("kitchen-sink amounts ≡ engine ≡ VAT split (Privat-Flügel auch bei Gewerbe)", () => {
     const est = calculatePriceEstimate(kitchenSink)!;
     const ref = referencePriceBreakdown(kitchenSink);
-    // Basis: 8 × 5,00 € = 40 (statt früher m²-Modell 36,48)
-    assert.equal(est.calculatedSubtotal, 614.8);
-    assert.equal(ref.calculatedSubtotal, 614.8);
-    assert.equal(est.amount, 615);
-    assert.equal(est.min, 584);
-    assert.equal(est.max, 646);
+    // Basis: 8 × 7,00 € = 56
+    assert.equal(est.calculatedSubtotal, 630.8);
+    assert.equal(ref.calculatedSubtotal, 630.8);
+    assert.equal(est.amount, 630);
+    assert.equal(est.min, 598);
+    assert.equal(est.max, 662);
 
     const byLabel = Object.fromEntries(
       est.breakdown.map((l) => [l.label, l.amount])
     );
-    assert.equal(byLabel["Fensterreinigung (Basis)"], 40);
+    assert.equal(byLabel["Fensterreinigung (Basis)"], 56);
     assert.equal(byLabel["Rahmenreinigung"], 16.8);
     assert.equal(byLabel["Fugen & Falz"], 12);
     assert.equal(byLabel["Fensterbänke"], 12);
@@ -643,9 +643,9 @@ describe("E2E – kitchen-sink + Privat-only basis line", () => {
     assert.equal(byLabel["Wintergarten-Reinigung"], 160);
 
     const split = splitBrutto(est.amount);
-    assert.equal(split.netto, 516.81);
-    assert.equal(split.mwst, 98.19);
-    assert.equal(split.brutto, 615);
+    assert.equal(split.netto, 529.41);
+    assert.equal(split.mwst, 100.59);
+    assert.equal(split.brutto, 630);
   });
 
   it("basis footer immer Privat €/Flügel (auch bei Gewerbe-Label)", () => {
@@ -663,7 +663,7 @@ describe("E2E – kitchen-sink + Privat-only basis line", () => {
       region: "Baesweiler, Aachen & Umgebung",
     });
 
-    assert.match(privatLine, /5,00 €\/Flügel \(i\+a, normal\)/);
+    assert.match(privatLine, /7,00 €\/Flügel \(i\+a, normal\)/);
     assert.doesNotMatch(privatLine, /€\/m²/);
     assert.match(gewerbeLine, /3,80 €\/m² Glas \(Gewerbe, normal\)/);
   });

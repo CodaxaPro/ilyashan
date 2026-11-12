@@ -71,7 +71,7 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
     }
   });
 
-  it("49 € Scope: Homepage ≡ Wizard ≡ Paket (Mindestauftrag, kein falsches einseitig/innen+außen)", () => {
+  it("69 € Scope: Homepage ≡ Wizard ≡ Paket (Mindestauftrag, kein falsches einseitig/innen+außen)", () => {
     const privatHome = siteConfig.services.find((s) => s.id === "privat")!;
     const privatQuote = quoteServices.find((s) => s.id === "privat")!;
     const privatPkg = JSON.parse(
@@ -99,7 +99,7 @@ describe("Pricing-Konsistenz UI ↔ Engine ↔ Research", () => {
     assert.match(privatQuote.description, /[Uu]mfang/);
     assert.match(privatQuote.priceHint, /Mindestauftrag/);
     assert.ok(
-      privatPkg.includes.items.some((i) => /Mindestauftrag Wohnung ab 49/.test(i))
+      privatPkg.includes.items.some((i) => /Mindestauftrag Wohnung ab 69/.test(i))
     );
     assert.ok(
       privatPkg.includes.items.some((i) => /[Uu]mfang.*Wizard/i.test(i))
